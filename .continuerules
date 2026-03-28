@@ -1,0 +1,292 @@
+# 🌿⚡ CANHÕES FE — MASTER SYSTEM PROMPT
+> Versão 1.0 · Stack: Next.js · Design: Cyber-Orgânico
+
+---
+
+## 🎯 CONTEXTO DO PROJECTO
+
+**Canhões** é uma plataforma privada para um grupo de amigos — um sistema social de posts anónimos onde os utilizadores submetem "canhões" (mensagens/piadas/revelações), outros votam e aprovam, e existe um ranking gamificado baseado em score. Tem painel de administração e um sistema de categorias e stickers.
+
+**Frontend repo:** `https://github.com/joaopachecowork1/CanhoesFE`
+**Backend repo associado:** `https://github.com/joaopachecowork1/CanhoesBE`
+
+**Stack deste repositório:**
+- Frontend: `Next.js` (App Router) + `TypeScript` + `Tailwind CSS`
+
+---
+
+## 🏗️ ESTRUTURA DO PROJECTO
+
+### Frontend
+```
+/app              ← App Router pages e layouts (Next.js 14+)
+/components
+  /ui             ← Componentes genéricos reutilizáveis (Button, Input, Card, Badge, Toast)
+  /features       ← Componentes de feature (/features/ranking, /features/feed, /features/admin)
+  /layouts        ← Layouts de página (MainLayout, AdminLayout)
+/hooks            ← Custom hooks globais (useUserSession, useFeed, useRanking)
+/lib              ← Utilitários, api client, auth helpers
+/types            ← Tipos TypeScript partilhados
+/constants        ← Constantes globais (MAX_SCORE, PAGE_SIZE, etc.)
+/styles           ← CSS variables, globals.css, keyframes
+```
+
+---
+
+## 🎨 DESIGN SYSTEM — CYBER-ORGÂNICO
+
+> Este design system é **obrigatório** para toda a UI. Não uses cores, espaçamentos ou componentes fora deste sistema sem justificação explícita.
+
+### Filosofia Visual: "Natureza Hackeada"
+
+O mundo de Canhões é um ecossistema digital vivo — como se a floresta tivesse sido corrompida por sinais de rádio e circuitos. Não é o cyberpunk escuro de néon no asfalto; é **néon que cresce a partir da terra**. Verde musgo que pulsa. Bege orgânico com bordas de circuito. Texturas de papel com glitches subtis.
+
+**A regra de ouro:** 50% orgânico (warmth, textura, formas suaves, tipografia com carácter) + 50% cyber (brilhos néon, bordas técnicas, animações de glitch, monoespaçado). Nem um domina — eles colidem e criam tensão visual interessante.
+
+---
+
+### Paleta de Cores (CSS Variables — obrigatório)
+
+```css
+:root {
+  --bg-void:        #0f1209;
+  --bg-deep:        #161c0e;
+  --bg-surface:     #1e2614;
+  --bg-paper:       #f5ede0;
+  --bg-paper-alt:   #ede3cc;
+
+  --text-primary:   #e8dfc8;
+  --text-dark:      #1a1f14;
+  --text-muted:     #6b7c55;
+  --text-ghost:     #3d4a2e;
+
+  --moss:           #4a5c2f;
+  --moss-light:     #6b7c45;
+  --moss-glow:      #7aad3a;
+  --bark:           #6b4c2a;
+  --bark-dark:      #3d2b18;
+  --beige:          #d4b896;
+  --sand:           #b89b7a;
+
+  --neon-green:     #00ff88;
+  --neon-amber:     #ffb800;
+  --neon-cyan:      #00d4aa;
+  --neon-red:       #ff3a3a;
+
+  --glow-green:     0 0 6px #00ff88, 0 0 20px #00ff8840, 0 0 40px #00ff8820;
+  --glow-green-sm:  0 0 4px #00ff88, 0 0 10px #00ff8830;
+  --glow-amber:     0 0 6px #ffb800, 0 0 20px #ffb80040;
+  --glow-moss:      0 4px 20px rgba(74, 92, 47, 0.4);
+  --glow-paper:     0 8px 32px rgba(212, 184, 150, 0.15);
+
+  --success:        #4caf50;
+  --danger:         #e05a3a;
+  --fire:           #ff6b35;
+
+  --psycho-1:       #ff6b9d;
+  --psycho-2:       #ffd93d;
+  --psycho-3:       #6bcb77;
+  --psycho-4:       #4d96ff;
+  --psycho-5:       #c77dff;
+  --gradient-psycho: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4d96ff, #c77dff);
+
+  --border-subtle:  rgba(74, 92, 47, 0.2);
+  --border-moss:    rgba(74, 92, 47, 0.5);
+  --border-neon:    rgba(0, 255, 136, 0.4);
+  --border-paper:   rgba(212, 184, 150, 0.5);
+}
+```
+
+### Tipografia
+
+**Font stack obrigatório:**
+
+| Uso | Font |
+|-----|------|
+| Headings | `'Orbitron'` |
+| Body/UI | `'DM Sans'` |
+| Código/Labels mono | `'JetBrains Mono'` |
+| Accent orgânico | `'Fraunces'` |
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@300;400;600&family=Fraunces:ital,wght@0,600;0,700;1,600;1,700&display=swap');
+
+.type-display  { font-family: 'Orbitron', monospace; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.type-heading  { font-family: 'Orbitron', monospace; font-size: clamp(1.25rem, 3vw, 1.75rem); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.type-subhead  { font-family: 'Fraunces', serif; font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600; font-style: italic; }
+.type-body     { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 400; line-height: 1.6; }
+.type-label    { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
+.type-code     { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+```
+
+### Texturas e Efeitos Globais
+
+```css
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+.bg-circuit {
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.chamfer {
+  clip-path: polygon(
+    0 8px, 8px 0,
+    calc(100% - 8px) 0, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 0 calc(100% - 8px)
+  );
+}
+
+.chamfer-lg {
+  clip-path: polygon(
+    0 14px, 14px 0,
+    calc(100% - 14px) 0, 100% 14px,
+    100% calc(100% - 14px), calc(100% - 14px) 100%,
+    14px 100%, 0 calc(100% - 14px)
+  );
+}
+
+@keyframes glitch {
+  0%, 90%, 100% { transform: translate(0); clip-path: none; }
+  91% { transform: translate(-2px, 1px); clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); }
+  93% { transform: translate(2px, -1px); clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); }
+  95% { transform: translate(-1px, 2px); clip-path: none; }
+}
+
+@keyframes blink-cursor {
+  50% { opacity: 0; }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: var(--glow-green-sm); }
+  50%       { box-shadow: var(--glow-green); }
+}
+
+@keyframes rank-halo {
+  0%, 100% { opacity: 0.4; transform: scale(1.1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes psycho-glow {
+  0%   { box-shadow: 0 0 8px var(--psycho-1); }
+  25%  { box-shadow: 0 0 8px var(--psycho-2); }
+  50%  { box-shadow: 0 0 8px var(--psycho-3); }
+  75%  { box-shadow: 0 0 8px var(--psycho-4); }
+  100% { box-shadow: 0 0 8px var(--psycho-5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+```
+
+---
+
+## ⚙️ PRINCÍPIOS DE CÓDIGO — FRONTEND
+
+### Simplificação — Regras Absolutas
+
+1. **Simplifica primeiro** — Menos código é melhor código. Se algo pode ser feito com metade das linhas sem perder clareza, fá-lo.
+2. **Sem estados redundantes.** Se um valor pode ser derivado, deriva-o — não uses `useState`.
+3. **Remove `useEffect` desnecessários.** Efeitos para sincronizar estado com estado são quase sempre erros.
+4. **Early returns sempre.** Guards no topo, sem `else` aninhados.
+5. **Sem prop drilling além de 2 níveis.** Usa Context ou Zustand.
+6. **Consolida lógica repetida** em custom hooks (`use<NomeFuncional>`) ou utilitários.
+7. **Achata componentes.** Mais de 3 níveis de JSX antes do conteúdo real? Divide.
+
+### Nomes de Variáveis (Frontend)
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| Componentes | PascalCase substantivo | `UserProfileCard`, `RankingPodium` |
+| Event handlers | `handle` + acção | `handleFormSubmit`, `handleModalClose` |
+| Booleans | `is/has/can/should` | `isMenuOpen`, `hasUnsavedChanges` |
+| Custom hooks | `use` + recurso | `useUserSession`, `useFeed` |
+| Utilitários | verbo + substantivo | `formatScore`, `buildQueryString` |
+| Constantes globais | SCREAMING_SNAKE_CASE | `MAX_SCORE`, `DEFAULT_PAGE_SIZE` |
+
+**Evita sempre:** `data`, `info`, `temp`, `stuff`, `handleClick` sem contexto, `item` em listas tipadas.
+
+### Mobile-First — Obrigatório
+
+- Todos os estilos base são mobile (320px+). Desktop é uma extensão.
+- Ordem de breakpoints Tailwind: `base → sm → md → lg → xl`
+- Touch targets mínimos: **44×44px**
+- Texto mínimo em mobile: `text-base` (16px)
+- Grids: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`
+- Modals em mobile: **bottom sheets** (slide from bottom)
+
+### TypeScript
+
+- Sem `any`. Usa `unknown` + narrowing.
+- `interface` para formas de dados; `type` para unions.
+- Exporta sempre os tipos dos props.
+- Sem asserções `as Type` desnecessárias.
+
+---
+
+## 📋 CHECKLIST DE REVISÃO OBRIGATÓRIA
+
+### 🔴 Crítico
+- [ ] Há lógica duplicada que pode ser extraída?
+- [ ] Há estados ou variáveis não utilizados?
+- [ ] Há nomes sem significado (`x`, `temp`, `data2`, `handleClick` sem contexto)?
+- [ ] O layout quebra em 375px (iPhone SE)?
+- [ ] Há texto ou botões inacessíveis em mobile?
+- [ ] Há cores hardcoded em vez de CSS variables do design system?
+- [ ] Há componentes que ignoram o design system?
+
+### 🟡 Importante
+- [ ] Componentes com mais de 200 linhas para dividir?
+- [ ] Funções com mais de 3 parâmetros (usa objeto de configuração)?
+- [ ] `useEffect` com dependências suspeitas?
+- [ ] TypeScript a usar `any` ou asserções desnecessárias?
+- [ ] Animações que ignoram `prefers-reduced-motion`?
+
+### 🟢 Melhoria
+- [ ] Comentário explicativo para lógica verdadeiramente não óbvia?
+- [ ] Feature mais moderna de React disponível?
+- [ ] Nome de componente que poderia ser mais descritivo?
+- [ ] Componente genérico que podia ir para `/components/ui` e ser reutilizado?
+
+---
+
+## 🚫 O QUE NUNCA FAZER
+
+- **Não usar cores, tamanhos ou espaçamentos fora do design system** sem justificação explícita.
+- **Não sugerir over-engineering.**
+- **Não adicionar dependências** sem justificação clara e alternativas consideradas.
+- **Não mudar comportamento durante refactoring.**
+- **Não usar comentários para explicar código mau.**
+- **Não ignorar mobile** em nenhuma sugestão de UI.
+- **Não criar animações** que ignoram `prefers-reduced-motion`.
+
+---
+
+## 🌿⚡ RESUMO DO ESPÍRITO DO PROJECTO
+
+Canhões é um projecto de amigos, feito com amor e com intenção técnica séria. O código deve ser **limpo, legível e orgulhoso**. O design deve ser **memorável** — verde musgo que pulsa com néon, bege que resiste à corrupção digital. Cada componente deve ser funcional em mobile antes de ser bonito em desktop.
+
+> "Simplifica primeiro. Mobile-first sempre. Nomes honestos. Design consistente."
