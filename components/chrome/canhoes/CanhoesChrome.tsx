@@ -63,39 +63,39 @@ export function CanhoesChrome({
   return (
     <div
       data-theme="canhoes"
-      className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--color-bg-primary)]"
+      className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(85,107,79,0.14),transparent_70%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.18),transparent_65%)]"
       />
 
-      <header className="sticky top-0 z-40 border-b border-[var(--border-default)]/70 bg-[rgba(247,242,232,0.9)] backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-[var(--border-subtle)] bg-[rgba(15,18,9,0.82)] backdrop-blur-xl">
         <div className="page-shell-wide pb-3 pt-3">
           <div className="page-hero px-4 py-4 sm:px-5 sm:py-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0 space-y-3">
-                <div className="flex items-center gap-2 text-[var(--color-title)]">
+                <div className="flex items-center gap-2 text-[var(--neon-green)]">
                   <ScrollText className="h-4 w-4" />
-                  <span className="label">Canhoes</span>
+                  <span className="label text-[var(--beige)]">Canhoes</span>
                 </div>
 
                 <div className="space-y-1">
-                  <h1 className="heading-2 truncate text-[var(--color-title-dark)]">
+                  <h1 className="heading-2 truncate text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
                     Canhoes do Ano
                   </h1>
-                  <p className="body-small text-[var(--color-text-muted)]">
+                  <p className="type-subhead text-[var(--beige)]/78">
                     {pageTitle}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-2 sm:justify-end">
-                <div className="rounded-full border border-[var(--color-beige-dark)]/25 bg-[rgba(251,247,239,0.8)] px-3 py-2 text-right shadow-[var(--shadow-paper)]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                <div className="canhoes-glass rounded-full px-3 py-2 text-right">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--beige)]/70">
                     Perfil
                   </p>
-                  <p className="max-w-[11rem] truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                  <p className="max-w-[11rem] truncate text-sm font-semibold text-[var(--text-primary)]">
                     {userLabel}
                   </p>
                 </div>

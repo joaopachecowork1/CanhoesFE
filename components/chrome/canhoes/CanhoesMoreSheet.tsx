@@ -58,9 +58,9 @@ export function CanhoesMoreSheet({
               key={link.href}
               type="button"
               onClick={() => onNavigate(link.href)}
-              className="canhoes-tap flex min-h-12 items-center gap-3 rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)]/75 px-4 py-3 text-left text-[var(--color-text-dark)] shadow-[var(--shadow-paper)]"
+              className="canhoes-tap flex min-h-12 items-center gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[rgba(245,237,224,0.94)] px-4 py-3 text-left text-[var(--text-dark)] shadow-[var(--shadow-paper)]"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--color-bg-card)]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-deep)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
                 {link.icon}
               </span>
               <span className="font-semibold">{link.label}</span>

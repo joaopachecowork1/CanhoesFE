@@ -4,18 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex min-h-8 items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.05em] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-psycho-4)] focus:ring-offset-0",
+  "inline-flex min-h-8 items-center justify-center border px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--neon-green)] focus:ring-offset-0 font-[var(--font-mono)]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-[var(--color-moss)] text-[var(--color-bg-card)] shadow-[var(--shadow-paper)]",
+          "rounded-full border-transparent bg-[var(--moss)] text-[var(--text-primary)] shadow-[var(--glow-moss)]",
         secondary:
-          "border-transparent bg-[var(--color-beige-dark)] text-[var(--color-text-dark)] shadow-[var(--shadow-paper)]",
+          "rounded-full border-transparent bg-[var(--bark)] text-[var(--text-primary)] shadow-[0_10px_24px_rgba(61,43,24,0.2)]",
         destructive:
-          "border-transparent bg-[var(--color-danger)] text-white shadow-sm hover:opacity-90",
+          "rounded-full border-transparent bg-[var(--danger)] text-white shadow-sm hover:opacity-90",
         outline:
-          "border-[var(--color-beige-dark)]/30 bg-[rgba(251,247,239,0.74)] text-[var(--color-text-secondary)]",
+          "chamfer border-[var(--neon-green)] bg-transparent text-[var(--neon-green)]",
       },
     },
     defaultVariants: {

@@ -8,15 +8,12 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
-
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme="dark"
       position="top-center"
       richColors
       expand={false}
@@ -25,24 +22,24 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           actionButton:
-            "!bg-[var(--color-moss)] !text-[var(--color-bg-card)]",
+            "!bg-[var(--moss)] !text-[var(--text-primary)] !font-[var(--font-mono)] !uppercase !tracking-[0.14em]",
           cancelButton:
-            "!bg-[var(--color-bg-surface-alt)] !text-[var(--color-text-dark)]",
+            "!bg-[var(--bg-paper-alt)] !text-[var(--text-dark)] !font-[var(--font-mono)] !uppercase !tracking-[0.12em]",
           closeButton:
-            "!border-[var(--color-beige-dark)]/25 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
-          description: "!text-[var(--color-text-muted)]",
+            "!border-[var(--border-paper)] !bg-[var(--bg-paper)] !text-[var(--text-dark)]",
+          description: "!text-[var(--text-muted)]",
           error:
-            "!border-[var(--color-danger)]/25 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
+            "!border-[var(--danger)]/25 !bg-[var(--bg-deep)] !text-[var(--text-primary)]",
           info:
-            "!border-[var(--color-beige-dark)]/25 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
+            "!border-[var(--border-moss)] !bg-[var(--bg-deep)] !text-[var(--text-primary)]",
           loading:
-            "!border-[var(--color-beige-dark)]/25 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
+            "!border-[var(--border-moss)] !bg-[var(--bg-deep)] !text-[var(--text-primary)]",
           success:
-            "!border-[var(--color-moss)]/22 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
+            "!border-[var(--border-neon)] !bg-[var(--bg-deep)] !text-[var(--text-primary)]",
           toast:
-            "!rounded-[var(--radius-md-token)] !border !shadow-[var(--shadow-layered)]",
+            "!rounded-[var(--radius-md-token)] !border !shadow-[var(--shadow-panel)]",
           warning:
-            "!border-[var(--color-fire)]/20 !bg-[var(--color-bg-card)] !text-[var(--color-text-dark)]",
+            "!border-[var(--neon-amber)]/25 !bg-[var(--bg-deep)] !text-[var(--text-primary)]",
         },
       }}
       icons={{
@@ -54,9 +51,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--color-bg-card)",
-          "--normal-text": "var(--color-text-dark)",
-          "--normal-border": "rgba(90, 62, 43, 0.16)",
+          "--normal-bg": "var(--bg-deep)",
+          "--normal-text": "var(--text-primary)",
+          "--normal-border": "var(--border-moss)",
           "--border-radius": "var(--radius-md-token)",
         } as CSSProperties
       }

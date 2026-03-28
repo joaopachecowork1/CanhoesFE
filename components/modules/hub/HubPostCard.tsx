@@ -77,7 +77,7 @@ export function HubPostCard({
           />
 
           {post.text ? (
-            <p className="body-base whitespace-pre-wrap break-words text-[var(--color-text-dark)]">
+            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-dark)]">
               {post.text}
             </p>
           ) : null}
@@ -142,11 +142,11 @@ export function HubPostCard({
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-              <span className="rounded-full bg-[var(--color-bg-surface)] px-2.5 py-1">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
+              <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
                 {post.commentCount ?? 0} comentarios
               </span>
-              <span className="rounded-full bg-[var(--color-bg-surface)] px-2.5 py-1">
+              <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
                 {reactionCountTotal} reacoes
               </span>
               {post.isPinned ? (

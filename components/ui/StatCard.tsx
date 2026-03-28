@@ -23,7 +23,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "editorial-shell flex min-w-[148px] flex-col gap-3 rounded-[var(--radius-md-token)] px-4 py-4",
+        "canhoes-glass flex min-w-[148px] flex-col gap-3 rounded-[var(--radius-md-token)] px-4 py-4 text-[var(--text-primary)]",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
@@ -43,10 +43,10 @@ export function StatCard({
       </div>
 
       <div className="space-y-1">
-        <div className="text-3xl font-semibold leading-none text-[var(--color-text-primary)]">
+        <div className="text-3xl font-semibold leading-none text-[var(--text-primary)]">
           {value}
         </div>
-        <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--beige)]/70">
           {label}
         </div>
       </div>

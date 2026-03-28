@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, Lightbulb, PlusCircle } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { AwardCategoryDto, CanhoesPhase, CanhoesStateDto } from "@/lib/api/types";
-import { toast } from "sonner";
 
 type EventStateCardProps = {
   state: CanhoesStateDto | null;
@@ -105,14 +105,14 @@ export function EventStateCard({
 
   return (
     <div className="space-y-4">
-      <Card className="border-[var(--color-moss)]/20">
+      <Card className="border-[var(--border-neon)]">
         <CardHeader className="pb-0">
-          <div className="flex items-center gap-2 text-[var(--color-title)]">
+          <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <PlusCircle className="h-4 w-4" />
             <span className="label">Categorias</span>
           </div>
           <CardTitle className="text-base">Criar categoria</CardTitle>
-          <p className="body-small text-[var(--color-text-muted)]">
+          <p className="body-small text-[var(--beige)]/72">
             Mantem o formulario solto e legivel em mobile. Primeiro o nome,
             depois o tipo, por fim a acao.
           </p>
@@ -121,7 +121,7 @@ export function EventStateCard({
           <div className="space-y-2">
             <label
               htmlFor="admin-category-name"
-              className="label text-[var(--color-text-muted)]"
+              className="label text-[var(--beige)]/72"
             >
               Nome da categoria
             </label>
@@ -140,7 +140,7 @@ export function EventStateCard({
 
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto]">
             <div className="space-y-2">
-              <label className="label text-[var(--color-text-muted)]">
+              <label className="label text-[var(--beige)]/72">
                 Tipo de voto
               </label>
               <Select
@@ -170,17 +170,17 @@ export function EventStateCard({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-moss)]/20">
+      <Card className="border-[var(--border-moss)]">
         <CardHeader className="pb-0">
           <CardTitle className="text-base">Estado do evento</CardTitle>
-          <p className="body-small text-[var(--color-text-muted)]">
+          <p className="body-small text-[var(--beige)]/72">
             Cada controlo fica no seu proprio bloco para evitar uma fila apertada
             de inputs e botoes.
           </p>
         </CardHeader>
         <CardContent className="grid gap-3 pt-4 md:grid-cols-3">
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">Fase atual</p>
+          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] p-3">
+            <p className="label text-[var(--beige)]/72">Fase atual</p>
             <Select
               value={state?.phase ?? "nominations"}
               onValueChange={(value) =>
@@ -201,8 +201,8 @@ export function EventStateCard({
             </Select>
           </div>
 
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">
+          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] p-3">
+            <p className="label text-[var(--beige)]/72">
               Nomeacoes visiveis
             </p>
             <Button
@@ -220,8 +220,8 @@ export function EventStateCard({
             </Button>
           </div>
 
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">
+          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] p-3">
+            <p className="label text-[var(--beige)]/72">
               Resultados visiveis
             </p>
             <Button
@@ -239,9 +239,9 @@ export function EventStateCard({
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/30 bg-[var(--color-bg-surface)]/85 p-4">
-        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-fire)]" />
-        <p className="body-small text-[var(--color-text-primary)]">
+      <div className="canhoes-glass flex gap-3 rounded-[var(--radius-md-token)] p-4">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[var(--neon-amber)]" />
+        <p className="body-small text-[var(--text-primary)]">
           A votacao so funciona em <strong>voting</strong>. Os resultados aparecem
           quando <strong>resultsVisible</strong> esta ativo ou quando a fase entra
           em <strong>gala</strong>.

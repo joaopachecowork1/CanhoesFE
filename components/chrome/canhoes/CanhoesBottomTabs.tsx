@@ -58,7 +58,7 @@ export function CanhoesBottomTabs({
   const [feedTab, rankingTab, votingTab, adminTab] = TABS;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-moss)]/18 bg-[rgba(36,25,20,0.92)] backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-subtle)] bg-[rgba(15,18,9,0.9)] backdrop-blur-xl">
       <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-2 pb-safe">
         <div className="grid min-h-[4.4rem] grid-cols-5 items-end gap-1 py-2">
           <BottomTab
@@ -107,11 +107,11 @@ function BottomTab({
   onClick: () => void;
 }>) {
   const activeClasses = isAdmin
-    ? "text-[var(--color-beige-light)]"
-    : "text-[var(--color-bg-card)]";
+    ? "text-[var(--neon-amber)]"
+    : "text-[var(--neon-green)]";
   const indicatorClasses = isAdmin
-    ? "bg-[var(--color-beige)]"
-    : "bg-[var(--color-moss-light)]";
+    ? "bg-[var(--neon-amber)]"
+    : "bg-[var(--neon-green)]";
 
   return (
     <button
@@ -121,7 +121,7 @@ function BottomTab({
         "canhoes-tap flex min-h-11 flex-col items-center justify-center gap-1 rounded-[1rem] px-2 pb-1 pt-2 text-[11px] font-semibold",
         isActive
           ? activeClasses
-          : "text-[rgba(245,239,224,0.62)] hover:text-[var(--color-bg-card)]"
+          : "text-[var(--beige)]/60 hover:text-[var(--text-primary)]"
       )}
       aria-current={isActive ? "page" : undefined}
     >
@@ -145,7 +145,7 @@ function ComposeButton({ onClick }: Readonly<{ onClick: () => void }>) {
     <button
       type="button"
       onClick={onClick}
-      className="canhoes-tap mx-auto -mt-5 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-beige)]/40 bg-[var(--color-moss)] text-[var(--color-bg-card)] shadow-[var(--shadow-layered)]"
+      className="canhoes-tap mx-auto -mt-5 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--border-neon)] bg-[var(--neon-green)] text-[var(--bg-void)] shadow-[var(--glow-green)]"
       aria-label="Criar post"
       title="Criar post"
     >

@@ -8,7 +8,7 @@ import type { HubCommentDto } from "@/lib/api/types";
 
 import { formatDateTime } from "./hubUtils";
 
-const COMMENT_EMOJIS = ["â¤ï¸", "ðŸ”¥", "ðŸ˜‚"] as const;
+const COMMENT_EMOJIS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02"] as const;
 const COMMENT_EMOJI_LABELS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02"] as const;
 
 export function CommentsSection({
@@ -25,19 +25,19 @@ export function CommentsSection({
   onToggleReaction: (commentId: string, emoji: string) => void;
 }>) {
   return (
-    <section className="rounded-[var(--radius-lg-token)] border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]/92 p-3 sm:p-4">
+    <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-alt)]/82 p-3 sm:p-4">
       <div className="space-y-3">
         {(comments ?? []).length > 0 ? (
           (comments ?? []).map((comment) => (
             <article
               key={comment.id}
-              className="rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--color-bg-card)] px-3 py-3 shadow-[var(--shadow-paper)]"
+              className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                <p className="text-sm font-semibold text-[var(--text-dark)]">
                   {comment.userName}
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)]">
+                <p className="text-xs text-[var(--text-muted)]">
                   {formatDateTime(comment.createdAtUtc)}
                 </p>
               </div>
@@ -71,18 +71,18 @@ export function CommentsSection({
             </article>
           ))
         ) : (
-          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-beige-dark)]/30 px-4 py-6 text-center">
-            <p className="body-small text-[var(--color-text-muted)]">
+          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--border-paper)] px-4 py-6 text-center">
+            <p className="body-small text-[var(--text-muted)]">
               Ainda nao ha comentarios neste post.
             </p>
           </div>
         )}
 
-        <div className="rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-card)] p-3">
+        <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] p-3">
           <div className="space-y-3">
             <label
               htmlFor="hub-comment-draft"
-              className="editorial-kicker text-[var(--color-text-muted)]"
+              className="editorial-kicker text-[var(--text-muted)]"
             >
               Responder
             </label>
@@ -93,7 +93,7 @@ export function CommentsSection({
                 value={draft}
                 onChange={(event) => onDraftChange(event.target.value)}
                 placeholder="Escreve um comentario..."
-                className="min-h-[96px] flex-1 resize-none bg-[var(--color-bg-surface)]"
+                className="min-h-[96px] flex-1 resize-none bg-[var(--bg-paper-alt)]"
               />
 
               <Button

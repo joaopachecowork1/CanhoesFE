@@ -80,7 +80,7 @@ export function MediaCarousel({
       <div className={cn("w-full", className)}>
         <div
           className={cn(
-            "overflow-hidden rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]",
+            "overflow-hidden rounded-2xl border border-[var(--border-paper)] bg-[var(--bg-paper-alt)]",
             aspectClassName
           )}
         >
@@ -101,7 +101,7 @@ export function MediaCarousel({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="group relative overflow-hidden rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]">
+      <div className="group relative overflow-hidden rounded-2xl border border-[var(--border-paper)] bg-[var(--bg-paper-alt)]">
         <div
           className={cn("relative w-full", aspectClassName)}
           style={{ touchAction: "pan-y" }}
@@ -121,7 +121,7 @@ export function MediaCarousel({
               <div
                 key={url}
                 aria-hidden={index !== currentIndex}
-                className="h-full min-w-full flex-shrink-0 bg-[var(--color-bg-surface)]"
+                className="h-full min-w-full flex-shrink-0 bg-[var(--bg-paper-alt)]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -141,7 +141,7 @@ export function MediaCarousel({
             type="button"
             onClick={() => setCurrentIndex((previousIndex) => Math.max(0, previousIndex - 1))}
             aria-label="Imagem anterior"
-            className="canhoes-tap absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--color-beige-dark)]/30 bg-[rgba(251,247,239,0.92)] p-1 text-[var(--color-text-dark)] opacity-95 shadow-sm transition-all sm:left-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+            className="canhoes-tap absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-moss)] bg-[rgba(15,18,9,0.82)] p-1 text-[var(--text-primary)] opacity-95 shadow-[var(--glow-green-sm)] transition-all sm:left-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={currentIndex === 0}
           >
             <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -155,20 +155,20 @@ export function MediaCarousel({
               )
             }
             aria-label="Proxima imagem"
-            className="canhoes-tap absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--color-beige-dark)]/30 bg-[rgba(251,247,239,0.92)] p-1 text-[var(--color-text-dark)] opacity-95 shadow-sm transition-all sm:right-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+            className="canhoes-tap absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-moss)] bg-[rgba(15,18,9,0.82)] p-1 text-[var(--text-primary)] opacity-95 shadow-[var(--glow-green-sm)] transition-all sm:right-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={currentIndex === media.length - 1}
           >
             <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
 
           <span
-            className="pointer-events-none absolute bottom-2 right-2.5 z-10 rounded-full bg-[rgba(36,25,20,0.72)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-bg-card)]"
+            className="pointer-events-none absolute bottom-2 right-2.5 z-10 rounded-full bg-[rgba(15,18,9,0.82)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)" }}
           >
             {currentIndex + 1} / {media.length}
           </span>
 
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[rgba(36,25,20,0.24)] to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[rgba(15,18,9,0.24)] to-transparent" />
         </div>
       </div>
 
@@ -181,8 +181,8 @@ export function MediaCarousel({
             className={cn(
               "canhoes-tap h-1.5 rounded-full transition-all",
               index === currentIndex
-                ? "w-4 bg-[var(--color-moss)] sm:w-5"
-                : "w-1.5 bg-[var(--color-brown)]/30"
+                ? "w-4 bg-[var(--neon-green)] sm:w-5"
+                : "w-1.5 bg-[var(--bark)]/30"
             )}
             onClick={() => setCurrentIndex(index)}
           />

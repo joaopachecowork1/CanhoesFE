@@ -118,19 +118,19 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
   };
 
   return (
-    <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+    <section className="editorial-shell bg-circuit rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-[var(--color-title)]">
+            <div className="flex items-center gap-2 text-[var(--neon-green)]">
               <ScrollText className="h-4 w-4" />
               <span className="editorial-kicker">Novo registo</span>
             </div>
             <div className="space-y-1">
-              <h3 className="heading-3 text-[var(--color-text-primary)]">
+              <h3 className="heading-3 text-[var(--text-dark)]">
                 Publicar no arquivo do grupo
               </h3>
-              <p className="body-small text-[var(--color-text-muted)]">
+              <p className="body-small text-[var(--text-muted)]">
                 Texto, imagens e votacoes no mesmo bloco, com prioridades claras
                 para mobile.
               </p>
@@ -177,7 +177,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="Escreve uma nota, um teaser da gala ou uma atualizacao para o grupo."
-            className="min-h-[132px] resize-none bg-[var(--color-bg-surface)]"
+            className="min-h-[132px] resize-none bg-[var(--bg-paper)]"
           />
         </div>
 
@@ -196,7 +196,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
               {files.map((file, fileIndex) => (
                 <div
                   key={`${file.name}-${file.size}-${fileIndex}`}
-                  className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]"
+                  className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)]"
                 >
                   <div className="aspect-square">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -210,7 +210,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                   <button
                     type="button"
                     onClick={() => removeFile(fileIndex)}
-                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(36,25,20,0.78)] text-[var(--color-bg-card)] shadow-sm transition-transform active:scale-95"
+                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(15,18,9,0.82)] text-[var(--text-primary)] shadow-sm transition-transform active:scale-95"
                     aria-label="Remover imagem"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -222,11 +222,11 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
         ) : null}
 
         {pollOn ? (
-          <section className="rounded-[var(--radius-lg-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)] p-4 sm:p-5">
+          <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[rgba(245,237,224,0.75)] p-4 sm:p-5">
             <div className="space-y-4">
               <div className="space-y-1">
                 <p className="editorial-kicker">Votacao</p>
-                <h4 className="heading-3 text-[var(--color-text-primary)]">
+                <h4 className="heading-3 text-[var(--text-dark)]">
                   Adicionar pergunta e opcoes
                 </h4>
               </div>
@@ -243,7 +243,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                   value={pollQuestion}
                   onChange={(event) => setPollQuestion(event.target.value)}
                   placeholder="Ex: Qual foi o momento mais caotico deste mes?"
-                  className="min-h-[88px] resize-none bg-[var(--color-bg-card)]"
+                  className="min-h-[88px] resize-none bg-[var(--bg-paper)]"
                 />
               </div>
 
@@ -263,7 +263,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                           updatePollOption(optionIndex, event.target.value)
                         }
                         placeholder={`Opcao ${optionIndex + 1}`}
-                        className="bg-[var(--color-bg-card)]"
+                        className="bg-[var(--bg-paper)]"
                       />
 
                       {pollOptions.length > 2 ? (
@@ -287,7 +287,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="justify-start gap-2 px-0 text-[var(--color-brown)]"
+                    className="justify-start gap-2 px-0 text-[var(--moss)]"
                     onClick={addPollOption}
                   >
                     <PlusCircle className="h-4 w-4" />
@@ -302,7 +302,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
         <div className="editorial-divider" />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="body-small text-[var(--color-text-muted)]">
+          <p className="body-small text-[var(--text-muted)]">
             Mantem o texto curto e visual. O feed funciona melhor com blocos
             claros e media bem enquadrada.
           </p>

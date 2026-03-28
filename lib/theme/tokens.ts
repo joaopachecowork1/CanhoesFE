@@ -1,33 +1,33 @@
 export const colors = {
-  bgPrimary: "#f7f2e8",
-  bgCard: "#fbf7ef",
-  bgSurface: "#f3ebdc",
-  bgSurfaceAlt: "#eadfcf",
+  bgPrimary: "#0f1209",
+  bgCard: "#f5ede0",
+  bgSurface: "#1e2614",
+  bgSurfaceAlt: "#ede3cc",
 
-  moss: "#556b4f",
-  mossLight: "#708668",
-  mossDark: "#314235",
-  beige: "#d1bda0",
-  beigeDark: "#ad9578",
-  beigeLight: "#fbf7ef",
-  brown: "#8b6b4a",
-  brownDark: "#5a3e2b",
+  moss: "#4a5c2f",
+  mossLight: "#6b7c45",
+  mossDark: "#161c0e",
+  beige: "#d4b896",
+  beigeDark: "#b89b7a",
+  beigeLight: "#f5ede0",
+  brown: "#6b4c2a",
+  brownDark: "#3d2b18",
 
-  success: "#5f7a57",
-  warning: "#c57a52",
-  danger: "#bb6a54",
-  fire: "#c57a52",
-  psycho: "#8a6ac7",
-  psycho1: "#bb7aa8",
-  psycho2: "#d8b55a",
-  psycho3: "#7a9367",
-  psycho4: "#6d8fa8",
-  psycho5: "#9a7db8",
+  success: "#4caf50",
+  warning: "#ffb800",
+  danger: "#e05a3a",
+  fire: "#ff6b35",
+  psycho: "#c77dff",
+  psycho1: "#ff6b9d",
+  psycho2: "#ffd93d",
+  psycho3: "#6bcb77",
+  psycho4: "#4d96ff",
+  psycho5: "#c77dff",
 
-  textPrimary: "#31251d",
-  textSecondary: "#5d4a3b",
-  textMuted: "#8a7767",
-  textDark: "#241914",
+  textPrimary: "#e8dfc8",
+  textSecondary: "#c7bba1",
+  textMuted: "#6b7c55",
+  textDark: "#1a1f14",
 };
 
 export const spacing = {
@@ -48,17 +48,17 @@ export const radius = {
 };
 
 export const font = {
-  display: 'var(--font-display, "Iowan Old Style", Georgia, serif)',
-  body: 'var(--font-body, var(--font-app), "Inter", system-ui, sans-serif)',
-  mono: 'var(--font-mono)',
+  display: 'var(--font-display, "Orbitron", monospace)',
+  body: 'var(--font-body, "DM Sans", system-ui, sans-serif)',
+  mono: 'var(--font-mono, "JetBrains Mono", monospace)',
 };
 
 export const shadows = {
-  sm: "0 4px 12px rgba(74, 55, 40, 0.06)",
-  md: "0 10px 28px rgba(74, 55, 40, 0.08)",
-  lg: "0 18px 46px rgba(49, 38, 30, 0.1)",
-  glow: "0 0 20px rgba(85, 107, 79, 0.12)",
-  psycho: "0 0 20px rgba(138, 106, 199, 0.18)",
+  sm: "0 8px 18px rgba(10, 12, 8, 0.16)",
+  md: "0 18px 36px rgba(10, 12, 8, 0.22)",
+  lg: "0 28px 64px rgba(0, 0, 0, 0.42)",
+  glow: "0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.18)",
+  psycho: "0 0 18px rgba(199, 125, 255, 0.22)",
 };
 
 export const transitions = {

@@ -35,14 +35,14 @@ function FeedInsightCard({
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
             <p className="editorial-kicker">{label}</p>
-            <p className="heading-2 text-[var(--color-text-primary)]">{value}</p>
+            <p className="heading-2 text-[var(--text-dark)]">{value}</p>
           </div>
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)] text-[var(--color-title)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[var(--bg-deep)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
             {icon}
           </span>
         </div>
 
-        <p className="body-small text-[var(--color-text-muted)]">{description}</p>
+        <p className="body-small text-[var(--text-muted)]">{description}</p>
       </div>
     </section>
   );
@@ -131,15 +131,15 @@ export function HubFeedModule({
         <section className="page-hero px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-[var(--color-title)]">
+              <div className="flex items-center gap-2 text-[var(--neon-green)]">
                 <ScrollText className="h-4 w-4" />
                 <span className="editorial-kicker">Feed</span>
               </div>
               <div className="space-y-1">
-                <h2 className="heading-2 text-[var(--color-title-dark)]">
+                <h2 className="heading-2 text-[var(--text-primary)]">
                   Cronica do evento
                 </h2>
-                <p className="body-small max-w-2xl text-[var(--color-text-muted)]">
+                <p className="type-subhead max-w-2xl text-[var(--beige)]/78">
                   O feed mistura tom editorial e ritmo de produto: cards
                   respiraveis, media consistente e interacoes com area de toque
                   real para funcionar bem em telemovel.
@@ -190,10 +190,10 @@ export function HubFeedModule({
             {posts.length === 0 ? (
               <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-10 text-center sm:px-5">
                 <p className="editorial-kicker">Ainda vazio</p>
-                <h3 className="heading-3 mt-2 text-[var(--color-text-primary)]">
+                <h3 className="heading-3 mt-2 text-[var(--text-dark)]">
                   O arquivo deste ano ainda nao tem publicacoes
                 </h3>
-                <p className="body-small mt-2 text-[var(--color-text-muted)]">
+                <p className="body-small mt-2 text-[var(--text-muted)]">
                   Publica o primeiro post para abrir o feed do grupo.
                 </p>
               </section>

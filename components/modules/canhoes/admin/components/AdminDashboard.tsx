@@ -27,7 +27,7 @@ type AdminDashboardProps = {
 
 function MetricSkeleton() {
   return (
-    <div className="min-w-[148px] rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--color-bg-card)] p-4">
+    <div className="canhoes-glass min-w-[148px] rounded-[var(--radius-md-token)] p-4">
       <Skeleton className="mb-3 h-10 w-10 rounded-full" />
       <Skeleton className="mb-2 h-7 w-16 rounded" />
       <Skeleton className="h-4 w-24 rounded" />
@@ -126,15 +126,15 @@ export function AdminDashboard({
       </div>
 
       {!loading && pendingReviews > 0 ? (
-        <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+        <section className="canhoes-glass rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[var(--color-brown)]">
+            <div className="flex items-center gap-2 text-[var(--neon-amber)]">
               <AlertTriangle className="h-4 w-4" />
               <span className="editorial-kicker">Atencao</span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="heading-3 text-[var(--color-text-primary)]">
+              <h3 className="heading-3 text-[var(--text-primary)]">
                 Existem blocos a precisar de moderacao
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -163,7 +163,7 @@ export function AdminDashboard({
         <section className="space-y-3">
           <div className="space-y-1">
             <p className="editorial-kicker">Atividade recente</p>
-            <h3 className="heading-3 text-[var(--color-text-primary)]">
+            <h3 className="heading-3 text-[var(--text-primary)]">
               Ultimas nomeacoes recebidas
             </h3>
           </div>
@@ -176,10 +176,10 @@ export function AdminDashboard({
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 space-y-1">
-                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
+                    <p className="truncate font-semibold text-[var(--text-dark)]">
                       {nominee.title}
                     </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">
+                    <p className="text-xs text-[var(--text-muted)]">
                       {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
                         day: "numeric",
                         hour: "2-digit",
