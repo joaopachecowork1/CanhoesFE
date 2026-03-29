@@ -1,27 +1,14 @@
 "use client";
 
-import {
-  CalendarRange,
-  FolderTree,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-  TicketCheck,
-  Users,
-} from "lucide-react";
+import { CalendarRange, RefreshCw, ShieldCheck, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export type AdminSectionId =
-  | "dashboard"
-  | "pending"
-  | "state"
-  | "categories"
-  | "nominees"
-  | "secret-santa"
-  | "users"
-  | "audit";
+import {
+  ADMIN_QUICK_ACTIONS,
+  type AdminSectionId,
+} from "../adminSections";
 
 type AdminControlStripProps = {
   activeEventName: string | null;
@@ -34,38 +21,6 @@ type AdminControlStripProps = {
   onRefresh: () => void;
   onSelectSection: (section: AdminSectionId) => void;
 };
-
-const QUICK_ACTIONS: Array<{
-  description: string;
-  icon: typeof TicketCheck;
-  id: AdminSectionId;
-  label: string;
-}> = [
-  {
-    id: "pending",
-    label: "Fila de revisao",
-    description: "Propostas e nomeacoes por decidir.",
-    icon: TicketCheck,
-  },
-  {
-    id: "state",
-    label: "Estado da edicao",
-    description: "Evento ativo, fase e visibilidade.",
-    icon: CalendarRange,
-  },
-  {
-    id: "categories",
-    label: "Categorias",
-    description: "Criar, editar e limpar categorias.",
-    icon: FolderTree,
-  },
-  {
-    id: "secret-santa",
-    label: "Sorteio",
-    description: "Gerar ou rever o Amigo Secreto.",
-    icon: Sparkles,
-  },
-];
 
 export function AdminControlStrip({
   activeEventName,
@@ -129,7 +84,7 @@ export function AdminControlStrip({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {QUICK_ACTIONS.map((action) => {
+          {ADMIN_QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
               <button

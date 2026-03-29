@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +11,11 @@ import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import {
-  AdminControlStrip,
   type AdminSectionId,
-} from "./components/AdminControlStrip";
+  buildAdminSectionItems,
+  getDefaultAdminSection,
+} from "./adminSections";
+import { AdminControlStrip } from "./components/AdminControlStrip";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminSectionNav } from "./components/AdminSectionNav";
 import { CategoriesAdmin } from "./components/CategoriesAdmin";
@@ -76,9 +78,19 @@ export default function CanhoesAdminModule() {
     pendingCategoryProposals.length +
     pendingMeasureProposals.length;
 
+  const initialSectionResolved = useRef(false);
   const [activeTab, setActiveTab] = useState<AdminSectionId>(
-    pendingReviewCount > 0 ? "pending" : "state"
+    getDefaultAdminSection({ pendingReviewCount })
   );
+
+  useEffect(() => {
+    if (loading || initialSectionResolved.current) return;
+
+    // The admin should land on the most urgent queue once the first real
+    // counts arrive, but should stop auto-switching after that initial load.
+    setActiveTab(getDefaultAdminSection({ pendingReviewCount }));
+    initialSectionResolved.current = true;
+  }, [loading, pendingReviewCount]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -107,20 +119,15 @@ export default function CanhoesAdminModule() {
 
   const dashboardError = error instanceof Error ? error.message : null;
 
-  const adminTabs = [
-    { value: "pending", label: "Fila", count: pendingReviewCount },
-    { value: "state", label: "Edicao", count: 0 },
-    { value: "categories", label: "Categorias", count: 0 },
-    { value: "nominees", label: "Nomeacoes", count: pendingNominees.length },
-    { value: "secret-santa", label: "Amigo", count: 0 },
-    { value: "users", label: "Membros", count: 0 },
-    { value: "audit", label: "Auditoria", count: votes.length },
-    { value: "dashboard", label: "Hoje", count: 0 },
-  ] as const satisfies ReadonlyArray<{
-    count: number;
-    label: string;
-    value: AdminSectionId;
-  }>;
+  const adminTabs = useMemo(
+    () =>
+      buildAdminSectionItems({
+        nomineePendingCount: pendingNominees.length,
+        pendingReviewCount,
+        voteCount: votes.length,
+      }),
+    [pendingNominees.length, pendingReviewCount, votes.length]
+  );
 
   const activeCategories = useMemo(
     () => categories.filter((category) => category.isActive).length,
