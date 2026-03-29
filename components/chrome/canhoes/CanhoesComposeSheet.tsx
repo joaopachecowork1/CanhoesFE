@@ -446,7 +446,7 @@ export function CanhoesComposeSheet({
 
             {isSubmitting && selectedFiles.length > 0 ? (
               <div className="space-y-2 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
-                <div className="flex items-center justify-between text-xs font-medium text-[var(--color-text-dark)]">
+                <div className="flex items-center justify-between text-xs font-medium text-[var(--text-primary)]">
                   <span>{uploadLabel || "A enviar..."}</span>
                   <span>{uploadProgress}%</span>
                 </div>
@@ -456,7 +456,7 @@ export function CanhoesComposeSheet({
 
             {isPollEnabled ? (
               <div className="space-y-3 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-dark)]">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
                   <BarChart3 className="h-4 w-4 text-[var(--color-fire)]" />
                   Votação
                 </div>

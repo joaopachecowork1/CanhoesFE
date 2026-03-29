@@ -72,7 +72,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetClose className="absolute right-4 top-4 rounded-full border border-[var(--color-beige-dark)]/30 p-2 text-[var(--color-text-dark)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--color-psycho-4)] disabled:pointer-events-none">
+        <SheetClose className="absolute right-4 top-4 rounded-full border border-[var(--color-beige-dark)]/30 p-2 text-[var(--text-primary)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--color-psycho-4)] disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetClose>
@@ -108,7 +108,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("heading-2 text-[var(--color-text-dark)]", className)}
+      className={cn("heading-2 text-[var(--text-primary)]", className)}
       {...props}
     />
   )

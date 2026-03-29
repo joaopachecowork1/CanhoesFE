@@ -20,12 +20,12 @@ function AdminStateCard({
 }>) {
   return (
     <section className="page-hero mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-moss)]/22 bg-[rgba(85,107,79,0.14)] text-[var(--color-title-dark)] shadow-[var(--shadow-paper)]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(0,255,136,0.18)] bg-[rgba(38,54,26,0.72)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
         <Shield className="h-7 w-7" />
       </div>
       <div className="mt-5 space-y-2">
-        <h2 className="heading-2 text-[var(--color-title-dark)]">{title}</h2>
-        <p className="body-small text-[var(--color-text-muted)]">{description}</p>
+        <h2 className="heading-2 text-[var(--bg-paper)]">{title}</h2>
+        <p className="body-small text-[rgba(245,237,224,0.74)]">{description}</p>
       </div>
       {action ? <div className="mt-6">{action}</div> : null}
     </section>
