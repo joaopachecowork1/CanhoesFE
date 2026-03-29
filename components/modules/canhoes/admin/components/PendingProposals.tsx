@@ -54,7 +54,7 @@ function ProposalShell({
   subtitle: string;
 }>) {
   return (
-    <Card className="border-[var(--color-moss)]/20">
+    <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
       <CardHeader className="space-y-1">
         <p className="editorial-kicker">{subtitle}</p>
         <CardTitle>{title}</CardTitle>
@@ -214,12 +214,12 @@ export function PendingProposals({
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <ProposalShell
-        title={`Propostas de categorias (${categoryProposals.length})`}
-        subtitle="Curadoria"
+        title={`Categorias em revisão (${categoryProposals.length})`}
+        subtitle="Moderação"
       >
         <p className="body-small text-[var(--color-text-muted)]">
-          O admin pode rever, editar, aprovar, rejeitar ou limpar propostas
-          repetidas sem sair deste bloco.
+          Revê, corrige e fecha propostas de categoria sem sair da fila de
+          moderação.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -238,7 +238,7 @@ export function PendingProposals({
 
         {!loading && controlsDisabled ? (
           <AdminStateMessage>
-            O evento ativo ainda nao ficou disponivel para moderacao.
+            Falta uma edicao ativa para abrir a moderacao.
           </AdminStateMessage>
         ) : null}
 
@@ -257,7 +257,7 @@ export function PendingProposals({
             return (
               <article
                 key={proposal.id}
-                className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
               >
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -354,8 +354,8 @@ export function PendingProposals({
       </ProposalShell>
 
       <ProposalShell
-        title={`Propostas de medidas (${measureProposalsAll.length})`}
-        subtitle="Curadoria"
+        title={`Medidas em revisão (${measureProposalsAll.length})`}
+        subtitle="Moderação"
       >
         <div className="flex flex-wrap gap-2">
           <AdminStatusFilters
@@ -373,7 +373,7 @@ export function PendingProposals({
 
         {!loading && !controlsDisabled && filteredMeasureProposals.length === 0 ? (
           <AdminStateMessage variant="panel">
-            Sem propostas neste estado.
+            Sem medidas neste estado.
           </AdminStateMessage>
         ) : null}
 
@@ -386,7 +386,7 @@ export function PendingProposals({
             return (
               <article
                 key={proposal.id}
-                className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
               >
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">

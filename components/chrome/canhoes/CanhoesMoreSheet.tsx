@@ -52,13 +52,13 @@ export function CanhoesMoreSheet({
       >
         <SheetHeader className="space-y-2 border-b border-[var(--border-subtle)] pb-4">
           <div className="mx-auto h-1.5 w-16 rounded-full bg-[var(--border-moss)]" />
-          <p className="label text-left text-[var(--beige)]/72">Acoes secundarias</p>
+          <p className="label text-left text-[var(--beige)]/72">Mapa da edição</p>
           <SheetTitle className="text-left text-[var(--text-primary)]">
-            Explorar outras areas do evento
+            Outras áreas da edição
           </SheetTitle>
           <SheetDescription className="body-small text-left text-[var(--beige)]/72">
-            A navegacao principal fica focada na fase atual, no sorteio e na votacao.
-            Este painel guarda as areas secundarias e o acesso ao admin quando existe.
+            Atalhos para áreas menos usadas nesta fase, incluindo o acesso ao
+            painel de administração quando estiver disponível.
           </SheetDescription>
         </SheetHeader>
 
@@ -66,12 +66,13 @@ export function CanhoesMoreSheet({
           <section className="canhoes-glass rounded-[var(--radius-lg-token)] px-4 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <p className="label text-[var(--beige)]/70">Mapa rapido</p>
+                <p className="label text-[var(--beige)]/70">Atalhos</p>
                 <h3 className="heading-3 text-[var(--text-primary)]">
-                  Secoes menos frequentes
+                  Áreas fora da navegação principal
                 </h3>
                 <p className="body-small text-[var(--beige)]/68">
-                  A nav principal fica focada no evento, no feed, no modulo prioritario da fase e no botao de criar post.
+                  Usa este painel para entrar em áreas secundárias sem perder o
+                  foco da navegação principal.
                 </p>
               </div>
 
@@ -105,7 +106,7 @@ export function CanhoesMoreSheet({
               </div>
             ) : (
               <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--beige)]/74">
-                Nao existem outras areas ativas para este momento do evento.
+                Não há outras áreas abertas nesta fase da edição.
               </div>
             )}
           </section>
@@ -130,14 +131,6 @@ export function CanhoesMoreSheet({
                 />
               </section>
             </>
-          ) : null}
-
-          {isLocalMode ? (
-            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] px-3 py-3">
-              <p className="body-small text-[var(--beige)]/78">
-                Em modo local, areas dependentes do evento real ficam ocultas para evitar navegacao sem contexto.
-              </p>
-            </div>
           ) : null}
         </div>
       </SheetContent>

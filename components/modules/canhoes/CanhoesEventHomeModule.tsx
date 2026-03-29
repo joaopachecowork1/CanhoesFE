@@ -74,11 +74,11 @@ function buildHomeActions({
         if (overview.permissions.canManage && !secretSanta.hasDraw) {
           return { href: "/canhoes/admin", label: "Abrir sorteio" };
         }
-        return { href: "/canhoes/wishlist", label: "Ver wishlists" };
+        return { href: "/canhoes/wishlist", label: "Abrir wishlists" };
       case "PROPOSALS":
         return {
           href: "/canhoes/categorias",
-          label: overview.permissions.canSubmitProposal ? "Enviar proposta" : "Ver categorias",
+          label: overview.permissions.canSubmitProposal ? "Propor categoria" : "Ver categorias",
         };
       case "VOTING":
         return {
@@ -91,14 +91,14 @@ function buildHomeActions({
           label: IS_LOCAL_MODE ? "Ver ranking" : "Abrir gala",
         };
       default:
-        return { href: "/canhoes/categorias", label: "Explorar evento" };
+        return { href: "/canhoes/categorias", label: "Entrar nas categorias" };
     }
   })();
 
   const secondaryAction: ActionLink =
     phaseType === "DRAW"
       ? { href: "/canhoes/wishlist", label: "Abrir wishlist", tone: "outline" }
-      : { label: "Criar post", onClick: openComposeSheet, tone: "outline" };
+      : { label: "Publicar no feed", onClick: openComposeSheet, tone: "outline" };
 
   return { primaryAction, secondaryAction };
 }
@@ -114,19 +114,19 @@ function buildHomeAlerts({
 }>) {
   return [
     !secretSanta.hasDraw
-      ? "O sorteio ainda nao foi gerado para este ciclo."
+      ? "O sorteio desta edição ainda não foi gerado."
       : null,
     secretSanta.hasDraw && !secretSanta.hasAssignment
-      ? "Ja existe sorteio, mas ainda nao tens atribuicao disponivel."
+      ? "O sorteio já existe, mas a tua atribuição ainda não ficou disponível."
       : null,
     overview.permissions.canSubmitProposal && overview.myProposalCount === 0
-      ? "Ainda nao submeteste nenhuma proposta nesta fase."
+      ? "Ainda não submeteste nenhuma proposta nesta fase."
       : null,
     voting.remainingVoteCount > 0
       ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
       : null,
     secretSanta.myWishlistItemCount === 0
-      ? "A tua wishlist ainda esta vazia. Da pistas antes do sorteio fechar."
+      ? "A tua wishlist ainda está vazia. Deixa pistas antes de o sorteio fechar."
       : null,
   ].filter(Boolean) as string[];
 }
@@ -206,7 +206,7 @@ export function CanhoesEventHomeModule() {
             <div className="flex items-center gap-3 text-[var(--beige)]/76">
               <Loader2 className="h-5 w-5 animate-spin text-[var(--neon-green)]" />
               <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
-                A preparar contexto do evento
+                A preparar a edição
               </span>
             </div>
           </CardContent>
@@ -219,9 +219,10 @@ export function CanhoesEventHomeModule() {
     return (
       <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <CardContent className="space-y-3 py-8 text-center">
-          <p className="heading-3 text-[var(--text-primary)]">Nao foi possivel montar a home do evento.</p>
+          <p className="heading-3 text-[var(--text-primary)]">Não foi possível abrir esta edição.</p>
           <p className="body-small text-[var(--beige)]/76">
-            O feed continua disponivel, mas falta contexto para perceber a fase atual.
+            Falta contexto para perceber a fase atual e o que já está aberto
+            para o grupo.
           </p>
           <div className="flex justify-center">
             <Button onClick={() => window.location.reload()}>Tentar outra vez</Button>
@@ -259,35 +260,35 @@ export function CanhoesEventHomeModule() {
               {event.name}
             </p>
             <h1 className="heading-1 text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
-              O que deves fazer agora?
+              O que está aberto nesta fase
             </h1>
             <p className="body-base max-w-3xl text-[var(--beige)]/82">{phaseSummary}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Votos fechados"
+              label="Votação"
               value={`${voting.submittedVoteCount}/${voting.categoryCount}`}
               hint={
                 voting.categoryCount > 0
                   ? `${voting.remainingVoteCount} por fechar`
-                  : "Sem categorias abertas"
+                  : "Sem categorias abertas nesta fase"
               }
             />
             <MetricCard
-              label="A tua wishlist"
+              label="Wishlist"
               value={String(secretSanta.myWishlistItemCount)}
-              hint={secretSanta.hasAssignment ? "Ligada ao amigo secreto" : "Prepara antes do draw"}
+              hint={secretSanta.hasAssignment ? "Ligada ao teu amigo secreto" : "Prepara antes do sorteio"}
             />
             <MetricCard
-              label="Feed recente"
+              label="Feed"
               value={String(overview.counts.feedPostCount)}
-              hint="Posts ja publicados neste ciclo"
+              hint="Posts já publicados nesta edição"
             />
             <MetricCard
               label="Membros"
               value={String(overview.counts.memberCount)}
-              hint={`${overview.counts.pendingProposalCount} pendentes`}
+              hint={`${overview.counts.pendingProposalCount} itens em revisão`}
             />
           </div>
 
@@ -299,31 +300,31 @@ export function CanhoesEventHomeModule() {
           <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border-subtle)] pt-4 text-sm text-[var(--beige)]/76">
             <span className="inline-flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-[var(--neon-cyan)]" />
-              {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem prazo definido"}
+              {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
             </span>
             <span className="inline-flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
               {overview.permissions.canManage
-                ? "Tens permissoes de gestao."
-                : "Fluxo principal de membro."}
+                ? "Tens acesso à gestão desta edição."
+                : "Visão de membro desta edição."}
             </span>
           </div>
         </div>
       </section>
 
       {homeCopy.alerts.length > 0 ? (
-        <Card className="border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <Card className="canhoes-paper-panel border-[rgba(107,76,42,0.12)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-              <Clock3 className="h-4 w-4 text-[var(--neon-amber)]" />
-              Alertas do momento
+            <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+              <Clock3 className="h-4 w-4 text-[var(--bark)]" />
+              Atenção desta fase
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {homeCopy.alerts.map((alert) => (
               <div
                 key={alert}
-                className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-void)] px-3 py-3 text-sm text-[var(--beige)]/82"
+                className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(248,240,226,0.78)] px-3 py-3 text-sm text-[var(--bark)]/82"
               >
                 {alert}
               </div>
@@ -337,13 +338,13 @@ export function CanhoesEventHomeModule() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-[var(--fire)]" />
-              Feed recente
+              Feed da edição
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentPosts.length === 0 ? (
               <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-4 text-sm text-[var(--text-muted)]">
-                Ainda nao existem posts neste evento.
+                Ainda não há posts publicados nesta edição.
               </div>
             ) : (
               recentPosts.map((post) => (
@@ -386,14 +387,14 @@ export function CanhoesEventHomeModule() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-[var(--fire)]" />
-                Amigo secreto
+                O teu Amigo Secreto
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {secretSanta.hasAssignment && secretSanta.assignedUser ? (
                 <div className="canhoes-list-item space-y-2 px-3 py-3">
                   <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                    Pessoa atribuida
+                    Pessoa atribuída
                   </p>
                   <p className="text-base font-semibold text-[var(--text-primary)]">
                     {secretSanta.assignedUser.name}
@@ -409,15 +410,15 @@ export function CanhoesEventHomeModule() {
                   </p>
                   <p className="text-sm text-[var(--text-primary)]">
                     {secretSanta.hasDraw
-                      ? "O sorteio existe mas ainda nao tens atribuicao disponivel."
-                      : "Ainda nao existe sorteio gerado."}
+                      ? "O sorteio já existe, mas a tua atribuição ainda não ficou disponível."
+                      : "O sorteio desta edição ainda não foi gerado."}
                   </p>
                 </div>
               )}
 
               <div className="grid gap-2 sm:grid-cols-2">
                 <Button variant="outline" asChild>
-                  <Link href="/canhoes/amigo-secreto">Abrir sorteio</Link>
+                  <Link href="/canhoes/amigo-secreto">Abrir área do sorteio</Link>
                 </Button>
                 <Button variant="secondary" asChild>
                   <Link href="/canhoes/wishlist">Gerir wishlist</Link>
@@ -430,7 +431,7 @@ export function CanhoesEventHomeModule() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Vote className="h-4 w-4 text-[var(--fire)]" />
-                Checklist desta fase
+                O que falta tratar
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -474,12 +475,12 @@ function MetricCard({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--beige)]/62">
+    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</p>
-      <p className="mt-1 text-xs text-[var(--beige)]/72">{hint}</p>
+      <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">{value}</p>
+      <p className="mt-1 text-xs text-[var(--bark)]/72">{hint}</p>
     </div>
   );
 }
@@ -514,22 +515,22 @@ function ChecklistItem({
   label: string;
 }>) {
   return (
-    <div className="flex items-start gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+    <div className="canhoes-paper-card flex items-start gap-3 rounded-[var(--radius-md-token)] px-3 py-3">
       <span
         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
           done
-            ? "border-[var(--border-neon)]/40 bg-[var(--accent)] text-[var(--success)]"
-            : "border-[var(--border-moss)] bg-[var(--bg-void)] text-[var(--neon-amber)]"
+            ? "border-[rgba(74,92,47,0.24)] bg-[rgba(74,92,47,0.12)] text-[var(--success)]"
+            : "border-[rgba(107,76,42,0.14)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
         }`}
       >
         <CheckCircle2 className="h-4 w-4" />
       </span>
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--text-primary)]">
+        <span className="block text-sm font-semibold text-[var(--text-ink)]">
           {label}
         </span>
         {hint ? (
-          <span className="mt-1 block text-xs text-[var(--text-muted)]">{hint}</span>
+          <span className="mt-1 block text-xs text-[var(--bark)]/72">{hint}</span>
         ) : null}
       </span>
     </div>

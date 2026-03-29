@@ -109,13 +109,8 @@ export function CanhoesChrome({
                 <div className="flex flex-wrap items-center gap-2 text-[var(--beige)]">
                   <span className="inline-flex items-center gap-2">
                     <ScrollText className="h-4 w-4 text-[var(--neon-green)]" />
-                    <span className="label">Canhoes do ano</span>
+                    <span className="label">Canhões do Ano</span>
                   </span>
-                  {isLocalMode ? (
-                    <span className="inline-flex min-h-8 items-center rounded-full border border-[var(--border-subtle)] px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--neon-amber)]">
-                      Local
-                    </span>
-                  ) : null}
                 </div>
 
                 <div className="space-y-1">
@@ -153,8 +148,8 @@ export function CanhoesChrome({
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)]"
                   )}
                   onClick={() => setIsMoreSheetOpen(true)}
-                  aria-label="Abrir menu de mais opcoes"
-                  title="Mais opcoes"
+                  aria-label="Abrir menu da edição"
+                  title="Menu da edição"
                 >
                   <Menu className="h-4 w-4" strokeWidth={2.1} />
                   <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">

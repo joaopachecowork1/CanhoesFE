@@ -78,10 +78,10 @@ export function SecretSantaAdmin({
             <Gift className="h-4 w-4" />
             <span className="label">Amigo secreto</span>
           </div>
-          <CardTitle>Gerir sorteio do evento</CardTitle>
+          <CardTitle>Sorteio desta edição</CardTitle>
           <p className="body-small text-[var(--beige)]/72">
-            O draw usa apenas os membros do evento ativo. Cada pessoa ve apenas o
-            seu emparelhamento e a wishlist do respetivo amigo secreto.
+            O draw usa apenas os membros desta edição. Cada pessoa vê apenas a
+            sua atribuição e a wishlist correspondente.
           </p>
         </CardHeader>
 
@@ -118,9 +118,9 @@ export function SecretSantaAdmin({
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <StatusMetric
-              label="Evento"
+              label="Edição"
               value={activeEventName ?? "Sem evento"}
-              hint="Contexto atual do painel admin"
+              hint="Contexto atual do sorteio"
             />
             <StatusMetric
               label="Draw"
@@ -138,7 +138,7 @@ export function SecretSantaAdmin({
               hint={
                 state?.createdAtUtc
                   ? `Criado a ${new Date(state.createdAtUtc).toLocaleString("pt-PT")}`
-                  : "Sem draw criado"
+                  : "Sem sorteio criado"
               }
             />
           </div>
@@ -167,12 +167,12 @@ function StatusMetric({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--beige)]/62">
+    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{value}</p>
-      <p className="mt-1 text-xs text-[var(--beige)]/72">{hint}</p>
+      <p className="mt-2 text-lg font-semibold text-[var(--text-ink)]">{value}</p>
+      <p className="mt-1 text-xs text-[var(--bark)]/72">{hint}</p>
     </div>
   );
 }

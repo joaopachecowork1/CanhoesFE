@@ -186,10 +186,14 @@ export function CategoriesAdmin({
       <Card className="border-[var(--color-moss)]/20">
         <CardHeader className="space-y-1">
           <p className="editorial-kicker">Curadoria</p>
-          <CardTitle>Criar categoria</CardTitle>
+          <CardTitle>Nova categoria</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-3">
+          <p className="body-small text-[var(--color-text-muted)]">
+            Abre novas categorias para esta edição sem sair do painel de
+            controlo.
+          </p>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto]">
             <Input
               value={newCategoryName}
@@ -228,8 +232,8 @@ export function CategoriesAdmin({
         <CardHeader className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <p className="editorial-kicker">Gestao</p>
-              <CardTitle>Categorias existentes</CardTitle>
+              <p className="editorial-kicker">Gestão</p>
+              <CardTitle>Categorias da edição</CardTitle>
             </div>
             <Badge variant="outline">{categories.length}</Badge>
           </div>
@@ -238,14 +242,14 @@ export function CategoriesAdmin({
         <CardContent className="space-y-3">
           {!loading && rows.length === 0 ? (
             <AdminStateMessage variant="panel">
-              Ainda nao existem categorias neste evento.
+              Esta edicao ainda nao tem categorias criadas.
             </AdminStateMessage>
           ) : null}
 
           {rows.map((row) => (
             <article
               key={row.id}
-              className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+              className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
             >
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_110px_220px_auto]">
                 <div className="space-y-2">
@@ -327,8 +331,8 @@ export function CategoriesAdmin({
 
       <Card className="border-[var(--color-moss)]/20">
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Historico</p>
-          <CardTitle>Propostas recebidas</CardTitle>
+          <p className="editorial-kicker">Arquivo</p>
+          <CardTitle>Histórico de propostas</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -357,7 +361,7 @@ export function CategoriesAdmin({
             {categoryProposals.slice(0, 30).map((proposal) => (
               <article
                 key={proposal.id}
-                className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -388,7 +392,7 @@ export function CategoriesAdmin({
 
             {!loading && categoryProposals.length === 0 ? (
               <AdminStateMessage variant="panel">
-                Ainda nao existem propostas de categoria para este evento.
+                Ainda nao chegaram propostas de categoria para esta edicao.
               </AdminStateMessage>
             ) : null}
           </div>

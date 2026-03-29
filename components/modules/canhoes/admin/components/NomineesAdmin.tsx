@@ -110,11 +110,11 @@ export function NomineesAdmin({
     <Card className="border-[var(--color-moss)]/20">
       <CardHeader className="space-y-3">
         <div className="space-y-1">
-          <p className="editorial-kicker">Moderacao</p>
-          <CardTitle>Nomeacoes</CardTitle>
+          <p className="editorial-kicker">Moderação</p>
+          <CardTitle>Nomeações em revisão</CardTitle>
           <p className="body-small text-[var(--color-text-muted)]">
-            A lista deixa de parecer tabela apertada e passa a mostrar cada
-            registo com contexto, categoria e accoes claras.
+            Atribui categoria, aprova ou rejeita cada nomeação sem sair da fila
+            de revisão.
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export function NomineesAdmin({
 
         {!loading && controlsDisabled ? (
           <AdminStateMessage>
-            O evento ativo ainda nao ficou disponivel para moderacao.
+            Falta uma edicao ativa para abrir a moderacao.
           </AdminStateMessage>
         ) : null}
 
@@ -157,7 +157,7 @@ export function NomineesAdmin({
             return (
               <article
                 key={nominee.id}
-                className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 space-y-2">

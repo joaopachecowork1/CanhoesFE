@@ -170,7 +170,7 @@ export function EventStateCard({
     return (
       <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <CardContent className="py-6 text-sm text-[var(--beige)]/76">
-          Falta contexto do evento para abrir os controlos globais.
+          Falta uma edicao ativa para abrir os controlos globais.
         </CardContent>
       </Card>
     );
@@ -182,12 +182,12 @@ export function EventStateCard({
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <TimerReset className="h-4 w-4" />
-            <span className="label">Fluxo do evento</span>
+            <span className="label">Edição</span>
           </div>
-          <CardTitle>Fase atual e janelas do ciclo</CardTitle>
+          <CardTitle>Evento ativo, fase e calendário</CardTitle>
           <p className="body-small text-[var(--beige)]/72">
-            Este bloco muda a fase ativa e mostra o que os membros devem ver
-            neste momento do ritual.
+            É aqui que decides que edição está aberta, em que fase vai o ciclo
+            e quando cada janela termina.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -212,13 +212,13 @@ export function EventStateCard({
               </Select>
             </div>
 
-            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
-              <p className="label text-[var(--beige)]/62">Contexto carregado</p>
-              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
+            <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+              <p className="label text-[var(--bark)]/62">Edição em curso</p>
+              <p className="mt-2 text-lg font-semibold text-[var(--text-ink)]">
                 {activeEventName ?? "Sem evento"}
               </p>
-              <p className="mt-1 text-xs text-[var(--beige)]/72">
-                Mudar o evento ativo atualiza a shell e o painel inteiro.
+              <p className="mt-1 text-xs text-[var(--bark)]/72">
+                Trocar a edição atualiza a shell, os módulos e a moderação.
               </p>
             </div>
           </div>
@@ -245,36 +245,33 @@ export function EventStateCard({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
-                <p className="label text-[var(--beige)]/62">Modulos visiveis</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
+              <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+                <p className="label text-[var(--bark)]/62">Módulos visíveis</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                   {visibleModulesCount}
                 </p>
-                <p className="mt-1 text-xs text-[var(--beige)]/72">Estado real para membros</p>
+                <p className="mt-1 text-xs text-[var(--bark)]/72">O que os membros veem agora</p>
               </div>
-              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
-                <p className="label text-[var(--beige)]/62">Pendentes</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
+              <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+                <p className="label text-[var(--bark)]/62">Pendentes</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                   {state.counts.pendingProposalCount}
                 </p>
-                <p className="mt-1 text-xs text-[var(--beige)]/72">Propostas a moderar</p>
+                <p className="mt-1 text-xs text-[var(--bark)]/72">Itens por rever</p>
               </div>
             </div>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
             {state.phases.map((phase) => (
-              <div
-                key={phase.id}
-                className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3"
-              >
+              <div key={phase.id} className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-primary)]">
+                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-ink)]">
                     {getPhaseLabel(phase.type)}
                   </p>
                   {phase.isActive ? <Badge variant="secondary">Ativa</Badge> : null}
                 </div>
-                <p className="mt-2 text-xs text-[var(--beige)]/72">
+                <p className="mt-2 text-xs text-[var(--bark)]/72">
                   Fecha a {formatPhaseWindow(phase)}
                 </p>
               </div>
@@ -287,13 +284,12 @@ export function EventStateCard({
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-cyan)]">
             <Eye className="h-4 w-4" />
-            <span className="label">Visibilidade</span>
+            <span className="label">Acesso</span>
           </div>
-          <CardTitle>O que os membros podem ver</CardTitle>
+          <CardTitle>O que fica aberto para o grupo</CardTitle>
           <p className="body-small text-[var(--beige)]/72">
-            Os toggles abaixo afinam a visibilidade final dos modulos. A fase
-            continua a mandar, mas o admin pode esconder areas que ainda nao
-            fazem sentido.
+            A fase continua a mandar, mas a mesa da edição pode esconder áreas
+            que ainda não devem entrar em jogo.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -339,16 +335,16 @@ export function EventStateCard({
             ))}
           </div>
 
-          <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3">
-            <div className="flex items-center gap-2 text-[var(--text-primary)]">
+          <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-3">
+            <div className="flex items-center gap-2 text-[var(--text-ink)]">
               <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
               <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
-                Leitura rapida
+                Regra de visibilidade
               </p>
             </div>
-            <p className="mt-2 text-sm text-[var(--beige)]/76">
-              A fase continua a bloquear o que nao faz sentido. Estes toggles
-              servem para esconder modulos mesmo quando a fase os permitir.
+            <p className="mt-2 text-sm text-[var(--bark)]/76">
+              Estes toggles escondem módulos mesmo quando a fase já os permitir.
+              São o ajuste fino da edição, não substituem a fase ativa.
             </p>
           </div>
         </CardContent>
@@ -373,15 +369,15 @@ function VisibilityToggle({
   pending: boolean;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-primary)]">
+          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-ink)]">
             {label}
           </p>
-          <p className="text-sm text-[var(--beige)]/76">{description}</p>
+          <p className="text-sm text-[var(--bark)]/76">{description}</p>
           {hint ? (
-            <p className="text-xs text-[var(--text-muted)]">{hint}</p>
+            <p className="text-xs text-[var(--bark)]/62">{hint}</p>
           ) : null}
         </div>
         <Switch checked={checked} disabled={pending} onCheckedChange={onChange} />

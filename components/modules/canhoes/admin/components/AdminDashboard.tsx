@@ -27,7 +27,7 @@ type AdminDashboardProps = {
 
 function MetricSkeleton() {
   return (
-    <div className="canhoes-glass min-w-[148px] rounded-[var(--radius-md-token)] p-4">
+    <div className="canhoes-paper-card min-w-[148px] rounded-[var(--radius-md-token)] p-4">
       <Skeleton className="mb-3 h-10 w-10 rounded-full" />
       <Skeleton className="mb-2 h-7 w-16 rounded" />
       <Skeleton className="h-4 w-24 rounded" />
@@ -72,8 +72,8 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <p className="editorial-kicker">Resumo rapido</p>
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <p className="editorial-kicker">Pulso da edição</p>
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
           {loading ? (
             Array.from({ length: 5 }).map((_, index) => (
               <MetricSkeleton key={index} />
@@ -86,7 +86,7 @@ export function AdminDashboard({
                 value={activeCategories}
                 color={colors.mossLight}
                 delay={0}
-                className="shrink-0"
+                eyebrow="Estado"
               />
               <StatCard
                 icon={<CheckCircle className="h-5 w-5" />}
@@ -94,7 +94,7 @@ export function AdminDashboard({
                 value={approvedNominees}
                 color={colors.success}
                 delay={80}
-                className="shrink-0"
+                eyebrow="Moderacao"
               />
               <StatCard
                 icon={<AlertTriangle className="h-5 w-5" />}
@@ -102,7 +102,7 @@ export function AdminDashboard({
                 value={pendingReviews}
                 color={pendingReviews > 0 ? colors.warning : colors.success}
                 delay={160}
-                className="shrink-0"
+                eyebrow="Fila"
               />
               <StatCard
                 icon={<Vote className="h-5 w-5" />}
@@ -110,7 +110,7 @@ export function AdminDashboard({
                 value={totalVotes}
                 color={colors.psycho4}
                 delay={240}
-                className="shrink-0"
+                eyebrow="Participacao"
               />
               <StatCard
                 icon={<Users className="h-5 w-5" />}
@@ -118,7 +118,7 @@ export function AdminDashboard({
                 value={safeMembers.length}
                 color={colors.beige}
                 delay={320}
-                className="shrink-0"
+                eyebrow="Grupo"
               />
             </>
           )}
@@ -126,16 +126,16 @@ export function AdminDashboard({
       </div>
 
       {!loading && pendingReviews > 0 ? (
-        <section className="canhoes-glass rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+        <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[var(--neon-amber)]">
+            <div className="flex items-center gap-2 text-[var(--bark)]">
               <AlertTriangle className="h-4 w-4" />
-              <span className="editorial-kicker">Atencao</span>
+              <span className="editorial-kicker text-[var(--bark)]">Fila aberta</span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="heading-3 text-[var(--text-primary)]">
-                Existem blocos a precisar de moderacao
+              <h3 className="heading-3 text-[var(--text-ink)]">
+                Há decisões por fechar nesta edição
               </h3>
               <div className="flex flex-wrap gap-2">
                 {safePendingNominees.length > 0 ? (
@@ -162,9 +162,9 @@ export function AdminDashboard({
       {!loading && recentNominees.length > 0 ? (
         <section className="space-y-3">
           <div className="space-y-1">
-            <p className="editorial-kicker">Atividade recente</p>
+            <p className="editorial-kicker">Últimas entradas</p>
             <h3 className="heading-3 text-[var(--text-primary)]">
-              Ultimas nomeacoes recebidas
+              Nomeações recebidas mais recentemente
             </h3>
           </div>
 

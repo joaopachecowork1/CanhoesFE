@@ -387,11 +387,14 @@
   --bg-surface: #1e2614;
   --bg-paper: #f5ede0;
   --bg-paper-alt: #ede3cc;
+  --bg-paper-soft: #f8f0e2;
+  --bg-paper-olive: #ece4d4;
 
   --text-primary: #e8dfc8;
   --text-dark: #1a1f14;
   --text-muted: #6b7c55;
   --text-ghost: #3d4a2e;
+  --text-ink: #2a2118;
 
   --moss: #4a5c2f;
   --moss-light: #6b7c45;
@@ -435,6 +438,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.68);
   --shadow-paper: 0 12px 30px rgba(12, 14, 9, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --shadow-paper-soft: 0 14px 32px rgba(13, 15, 10, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
   --shadow-layered: 0 22px 52px rgba(10, 12, 8, 0.22),
     0 0 0 1px rgba(255, 255, 255, 0.08);
   --shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.42);
@@ -522,7 +527,7 @@ body::after {
   );
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.12;
+  opacity: 0.035;
 }
 
 h1,
@@ -562,6 +567,42 @@ h3,
   color: var(--text-primary);
 }
 
+.canhoes-paper-panel {
+  border: 1px solid rgba(107, 76, 42, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(122, 173, 58, 0.1), transparent 28%),
+    linear-gradient(180deg, var(--bg-paper-soft), var(--bg-paper-alt));
+  color: var(--text-ink);
+  box-shadow: var(--shadow-paper-soft);
+}
+
+.canhoes-paper-card {
+  border: 1px solid rgba(107, 76, 42, 0.14);
+  background: linear-gradient(180deg, rgba(248, 240, 226, 0.98), rgba(236, 228, 212, 0.98));
+  color: var(--text-ink);
+  box-shadow: var(--shadow-paper-soft);
+}
+
+.canhoes-admin-nav {
+  border: 1px solid rgba(212, 184, 150, 0.16);
+  background: rgba(16, 20, 11, 0.9);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.canhoes-admin-tab {
+  border: 1px solid transparent;
+  background: rgba(245, 237, 224, 0.05);
+  color: var(--text-primary);
+}
+
+.canhoes-admin-tab[data-state="active"] {
+  border-color: rgba(212, 184, 150, 0.28);
+  background: linear-gradient(180deg, rgba(245, 237, 224, 0.14), rgba(212, 184, 150, 0.1));
+  color: var(--bg-paper);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
 .editorial-shell {
   position: relative;
   overflow: hidden;
@@ -593,9 +634,9 @@ h3,
 
 .bg-circuit {
   background-image:
-    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(122, 173, 58, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 173, 58, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 .chamfer {

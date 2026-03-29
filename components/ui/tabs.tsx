@@ -26,12 +26,12 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "flex w-full items-center justify-start gap-2 rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] p-2 text-[var(--text-muted)] overflow-x-auto scrollbar-hide whitespace-nowrap shadow-[var(--shadow-paper)]",
+  "flex w-full items-center justify-start gap-2 rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[rgba(15,18,9,0.86)] p-2 text-[var(--text-muted)] overflow-x-auto scrollbar-hide whitespace-nowrap shadow-[var(--shadow-panel)]",
   {
     variants: {
       variant: {
         default: "",
-        line: "rounded-none border-x-0 border-t-0 border-b border-[var(--border-paper)] bg-transparent px-0 shadow-none",
+        line: "rounded-none border-x-0 border-t-0 border-b border-[var(--border-subtle)] bg-transparent px-0 shadow-none",
       },
     },
     defaultVariants: {
@@ -65,8 +65,8 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md-token)] border border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-green)] disabled:pointer-events-none disabled:opacity-50 flex-shrink-0 font-[var(--font-mono)] uppercase tracking-[0.12em]",
-        "data-[state=active]:bg-[var(--moss)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-[var(--glow-moss)]",
-        "hover:bg-[rgba(74,92,47,0.12)] hover:text-[var(--text-dark)]",
+        "data-[state=active]:border-[rgba(212,184,150,0.18)] data-[state=active]:bg-[rgba(245,237,224,0.14)] data-[state=active]:text-[var(--bg-paper)] data-[state=active]:shadow-[0_10px_22px_rgba(0,0,0,0.18)]",
+        "hover:border-[rgba(212,184,150,0.18)] hover:bg-[rgba(245,237,224,0.08)] hover:text-[var(--bg-paper)]",
         className
       )}
       {...props}

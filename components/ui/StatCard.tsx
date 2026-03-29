@@ -10,6 +10,7 @@ interface StatCardProps {
   color?: string;
   className?: string;
   delay?: number;
+  eyebrow?: string;
 }
 
 export function StatCard({
@@ -19,11 +20,12 @@ export function StatCard({
   color = colors.moss,
   className,
   delay = 0,
+  eyebrow = "Pulso",
 }: Readonly<StatCardProps>) {
   return (
     <div
       className={cn(
-        "canhoes-glass flex min-w-[148px] flex-col gap-3 rounded-[var(--radius-md-token)] px-4 py-4 text-[var(--text-primary)]",
+        "canhoes-paper-card flex min-w-[148px] flex-col gap-3 rounded-[var(--radius-md-token)] px-4 py-4 text-[var(--text-ink)]",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
@@ -39,14 +41,16 @@ export function StatCard({
         >
           {icon}
         </div>
-        <span className="editorial-kicker">Resumo</span>
+        <span className="font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--bark)]/68">
+          {eyebrow}
+        </span>
       </div>
 
       <div className="space-y-1">
-        <div className="text-3xl font-semibold leading-none text-[var(--text-primary)]">
+        <div className="text-3xl font-semibold leading-none text-[var(--text-ink)]">
           {value}
         </div>
-        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--beige)]/70">
+        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--bark)]/72">
           {label}
         </div>
       </div>
