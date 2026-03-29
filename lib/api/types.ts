@@ -140,8 +140,31 @@ export type PendingAdminDto = {
   measureProposals: MeasureProposalDto[];
 };
 
+export type ProposalsByStatusDto<T> = {
+  pending: T[];
+  approved: T[];
+  rejected: T[];
+};
+
+export type AdminProposalsHistoryDto = {
+  categoryProposals: ProposalsByStatusDto<CategoryProposalDto>;
+  measureProposals: ProposalsByStatusDto<MeasureProposalDto>;
+};
+
 export type SetNomineeCategoryRequest = {
   categoryId?: string | null;
+};
+
+export type AdminVoteAuditRowDto = {
+  categoryId: string;
+  nomineeId: string;
+  userId: string;
+  updatedAtUtc: string;
+};
+
+export type AdminVotesDto = {
+  total: number;
+  votes: AdminVoteAuditRowDto[];
 };
 
 export type CanhoesResultNomineeDto = {

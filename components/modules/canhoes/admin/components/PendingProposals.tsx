@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { CategoryProposalDto, MeasureProposalDto } from "@/lib/api/types";
 
 type PendingProposalsProps = {
+  eventId: string | null;
   categoryProposals: CategoryProposalDto[];
   measureProposalsAll: MeasureProposalDto[];
   loading: boolean;
@@ -47,6 +48,7 @@ function ProposalShell({
 }
 
 export function PendingProposals({
+  eventId,
   categoryProposals,
   measureProposalsAll,
   loading,
@@ -55,6 +57,7 @@ export function PendingProposals({
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [measureFilter, setMeasureFilter] = useState<MeasureFilter>("pending");
   const [measureDrafts, setMeasureDrafts] = useState<Record<string, string>>({});
+  const controlsDisabled = !eventId;
 
   const filteredMeasureProposals = useMemo(
     () =>
@@ -113,13 +116,20 @@ export function PendingProposals({
           </div>
         ) : null}
 
-        {!loading && categoryProposals.length === 0 ? (
+        {!loading && controlsDisabled ? (
+          <div className="body-small text-[var(--color-text-muted)]">
+            O evento ativo ainda nao ficou disponivel para moderacao.
+          </div>
+        ) : null}
+
+        {!loading && !controlsDisabled && categoryProposals.length === 0 ? (
           <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
             Sem propostas de categoria pendentes.
           </div>
         ) : null}
 
         {!loading &&
+          !controlsDisabled &&
           categoryProposals.map((proposal) => {
             const isBusy = processingIds.has(proposal.id);
 
@@ -149,12 +159,12 @@ export function PendingProposals({
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button
-                    disabled={isBusy}
+                    disabled={isBusy || controlsDisabled}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
-                        await canhoesRepo.adminApproveCategoryProposal(
-                          proposal.id
-                        );
+                        await canhoesEventsRepo.updateProposal(eventId!, proposal.id, {
+                          status: "approved",
+                        });
                       })
                     }
                   >
@@ -162,12 +172,12 @@ export function PendingProposals({
                   </Button>
                   <Button
                     variant="destructive"
-                    disabled={isBusy}
+                    disabled={isBusy || controlsDisabled}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
-                        await canhoesRepo.adminRejectCategoryProposal(
-                          proposal.id
-                        );
+                        await canhoesEventsRepo.updateProposal(eventId!, proposal.id, {
+                          status: "rejected",
+                        });
                       })
                     }
                   >
@@ -213,13 +223,14 @@ export function PendingProposals({
           </div>
         ) : null}
 
-        {!loading && filteredMeasureProposals.length === 0 ? (
+        {!loading && !controlsDisabled && filteredMeasureProposals.length === 0 ? (
           <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
             Sem propostas neste estado.
           </div>
         ) : null}
 
         {!loading &&
+          !controlsDisabled &&
           filteredMeasureProposals.map((proposal) => {
             const isBusy = processingIds.has(proposal.id);
             const draftText = getMeasureDraft(proposal);
@@ -274,10 +285,11 @@ export function PendingProposals({
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button
                     variant="outline"
-                    disabled={isBusy || !draftText.trim()}
+                    disabled={isBusy || controlsDisabled || !draftText.trim()}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
-                        await canhoesRepo.adminUpdateMeasureProposal(
+                        await canhoesEventsRepo.adminUpdateMeasureProposal(
+                          eventId!,
                           proposal.id,
                           { text: draftText.trim() }
                         );
@@ -287,19 +299,23 @@ export function PendingProposals({
                     Guardar texto
                   </Button>
                   <Button
-                    disabled={isBusy}
+                    disabled={isBusy || controlsDisabled}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
                         const normalizedText = draftText.trim();
 
                         if (normalizedText && normalizedText !== proposal.text) {
-                          await canhoesRepo.adminUpdateMeasureProposal(
+                          await canhoesEventsRepo.adminUpdateMeasureProposal(
+                            eventId!,
                             proposal.id,
                             { text: normalizedText }
                           );
                         }
 
-                        await canhoesRepo.adminApproveMeasureProposal(proposal.id);
+                        await canhoesEventsRepo.adminApproveMeasureProposal(
+                          eventId!,
+                          proposal.id
+                        );
                       })
                     }
                   >
@@ -307,10 +323,13 @@ export function PendingProposals({
                   </Button>
                   <Button
                     variant="destructive"
-                    disabled={isBusy}
+                    disabled={isBusy || controlsDisabled}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
-                        await canhoesRepo.adminRejectMeasureProposal(proposal.id);
+                        await canhoesEventsRepo.adminRejectMeasureProposal(
+                          eventId!,
+                          proposal.id
+                        );
                       })
                     }
                   >
@@ -318,10 +337,13 @@ export function PendingProposals({
                   </Button>
                   <Button
                     variant="outline"
-                    disabled={isBusy}
+                    disabled={isBusy || controlsDisabled}
                     onClick={() =>
                       withProcessing(proposal.id, async () => {
-                        await canhoesRepo.adminDeleteMeasureProposal(proposal.id);
+                        await canhoesEventsRepo.adminDeleteMeasureProposal(
+                          eventId!,
+                          proposal.id
+                        );
                       })
                     }
                   >

@@ -13,10 +13,14 @@ import type {
   EventAdminModuleVisibilityDto,
   EventAdminStateDto,
   EventPhaseDto,
+  EventSummaryDto,
 } from "@/lib/api/types";
 
 type EventStateCardProps = {
+  activeEventName: string | null;
   eventId: string | null;
+  events: EventSummaryDto[];
+  onActivateEvent: (eventId: string) => Promise<void>;
   onUpdate: () => Promise<void>;
   state: EventAdminStateDto | null;
 };
@@ -96,7 +100,10 @@ function formatPhaseWindow(phase: EventPhaseDto) {
 }
 
 export function EventStateCard({
+  activeEventName,
   eventId,
+  events,
+  onActivateEvent,
   onUpdate,
   state,
 }: Readonly<EventStateCardProps>) {
@@ -146,6 +153,19 @@ export function EventStateCard({
     }
   };
 
+  const activateEvent = async (nextEventId: string) => {
+    if (!nextEventId || nextEventId === eventId) {
+      return;
+    }
+
+    setBusyKey("event");
+    try {
+      await onActivateEvent(nextEventId);
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
   if (!state) {
     return (
       <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
@@ -171,6 +191,38 @@ export function EventStateCard({
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="space-y-2">
+              <p className="label text-[var(--beige)]/68">Evento ativo</p>
+              <Select
+                value={eventId ?? ""}
+                onValueChange={(value) => void activateEvent(value)}
+                disabled={busyKey === "event" || events.length === 0}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Escolher evento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {events.map((event) => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {event.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+              <p className="label text-[var(--beige)]/62">Contexto carregado</p>
+              <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
+                {activeEventName ?? "Sem evento"}
+              </p>
+              <p className="mt-1 text-xs text-[var(--beige)]/72">
+                Mudar o evento ativo atualiza a shell e o painel inteiro.
+              </p>
+            </div>
+          </div>
+
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="space-y-2">
               <p className="label text-[var(--beige)]/68">Fase ativa</p>

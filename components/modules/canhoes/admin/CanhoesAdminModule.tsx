@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import type {
+  AdminVoteAuditRowDto,
   AwardCategoryDto,
   CategoryProposalDto,
   EventAdminStateDto,
+  EventSummaryDto,
   MeasureProposalDto,
   NomineeDto,
   PublicUserDto,
@@ -29,79 +30,40 @@ import { PendingProposals } from "./components/PendingProposals";
 import { UsersAdmin } from "./components/UsersAdmin";
 import { VotesAudit } from "./components/VotesAudit";
 
-type VoteAuditRow = {
-  categoryId: string;
-  nomineeId: string;
-  userId: string;
-  updatedAtUtc: string;
-};
-
-type ProposalsPayload<T> =
-  | T[]
-  | {
-      pending?: T[];
-      approved?: T[];
-      rejected?: T[];
-    }
-  | null
-  | undefined;
-
-function normalizeProposals<T>(payload: ProposalsPayload<T>): T[] {
-  if (Array.isArray(payload)) return payload;
-  if (!payload || typeof payload !== "object") return [];
-
-  const grouped = payload as { pending?: T[]; approved?: T[]; rejected?: T[] };
-  return [
-    ...(Array.isArray(grouped.pending) ? grouped.pending : []),
-    ...(Array.isArray(grouped.approved) ? grouped.approved : []),
-    ...(Array.isArray(grouped.rejected) ? grouped.rejected : []),
-  ];
+function flattenByStatus<T>(items: {
+  approved: T[];
+  pending: T[];
+  rejected: T[];
+}) {
+  return [...items.pending, ...items.approved, ...items.rejected];
 }
-
-const EMPTY_PENDING = {
-  nominees: [],
-  categoryProposals: [],
-  measureProposals: [],
-};
-const EMPTY_HISTORY = { categoryProposals: [], measureProposals: [] };
-const EMPTY_VOTES = { votes: [] };
-const EMPTY_MEASURES: MeasureProposalDto[] = [];
-
-const safe = async <T,>(promise: Promise<T>, fallback: T): Promise<T> => {
-  try {
-    return await promise;
-  } catch {
-    return fallback;
-  }
-};
 
 export default function CanhoesAdminModule() {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
 
   const [state, setState] = useState<EventAdminStateDto | null>(null);
+  const [events, setEvents] = useState<EventSummaryDto[]>([]);
   const [categories, setCategories] = useState<AwardCategoryDto[]>([]);
   const [allNominees, setAllNominees] = useState<NomineeDto[]>([]);
-  const [pendingNominees, setPendingNominees] = useState<NomineeDto[]>([]);
-  const [pendingCategoryProposals, setPendingCategoryProposals] = useState<
-    CategoryProposalDto[]
-  >([]);
-  const [pendingMeasureProposals, setPendingMeasureProposals] = useState<
-    MeasureProposalDto[]
-  >([]);
-  const [votes, setVotes] = useState<VoteAuditRow[]>([]);
-  const [allCategoryProposals, setAllCategoryProposals] = useState<
-    CategoryProposalDto[]
-  >([]);
-  const [allMeasureProposals, setAllMeasureProposals] = useState<
-    MeasureProposalDto[]
-  >([]);
+  const [allCategoryProposals, setAllCategoryProposals] = useState<CategoryProposalDto[]>([]);
+  const [allMeasureProposals, setAllMeasureProposals] = useState<MeasureProposalDto[]>([]);
+  const [votes, setVotes] = useState<AdminVoteAuditRowDto[]>([]);
   const [members, setMembers] = useState<PublicUserDto[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Keep the control center on the event-scoped API so module visibility,
+  // moderation queues and active-event changes all come from the same source.
   const loadData = useCallback(async () => {
     if (!activeEvent?.id) {
       setLoading(false);
       setState(null);
+      setEvents([]);
+      setCategories([]);
+      setAllNominees([]);
+      setAllCategoryProposals([]);
+      setAllMeasureProposals([]);
+      setVotes([]);
+      setMembers([]);
       return;
     }
 
@@ -109,57 +71,30 @@ export default function CanhoesAdminModule() {
     try {
       const [
         nextState,
+        nextEvents,
         nextCategories,
-        pendingPayload,
         nextNominees,
-        votesPayload,
         historyPayload,
-        measuresPayload,
+        votesPayload,
         membersPayload,
       ] = await Promise.all([
         canhoesEventsRepo.getAdminState(activeEvent.id),
+        canhoesEventsRepo.listEvents(),
         canhoesEventsRepo.adminGetCategories(activeEvent.id),
-        safe<{
-          nominees: NomineeDto[];
-          categoryProposals: CategoryProposalDto[];
-          measureProposals: MeasureProposalDto[];
-        }>(canhoesRepo.adminPending(), EMPTY_PENDING),
-        safe<NomineeDto[]>(canhoesRepo.adminGetAllNominees(), []),
-        safe<{ votes: VoteAuditRow[] }>(canhoesRepo.adminVotes(), EMPTY_VOTES),
-        safe<{
-          categoryProposals: ProposalsPayload<CategoryProposalDto>;
-          measureProposals: ProposalsPayload<MeasureProposalDto>;
-        }>(canhoesRepo.adminProposalsHistory(), EMPTY_HISTORY),
-        safe<MeasureProposalDto[]>(
-          canhoesRepo.adminListMeasureProposals(),
-          EMPTY_MEASURES
-        ),
-        safe<PublicUserDto[]>(canhoesRepo.getMembers(), []),
+        canhoesEventsRepo.adminGetNominees(activeEvent.id),
+        canhoesEventsRepo.adminProposalsHistory(activeEvent.id),
+        canhoesEventsRepo.adminVotes(activeEvent.id),
+        canhoesEventsRepo.adminGetMembers(activeEvent.id),
       ]);
 
       setState(nextState);
+      setEvents(nextEvents);
       setCategories(nextCategories);
       setAllNominees(nextNominees);
-      setPendingNominees(pendingPayload.nominees ?? []);
-      setPendingCategoryProposals(pendingPayload.categoryProposals ?? []);
-      setPendingMeasureProposals(
-        (pendingPayload.measureProposals ?? []).filter(
-          (proposal) => proposal.status === "pending"
-        )
-      );
       setVotes(votesPayload.votes ?? []);
-      setAllCategoryProposals(
-        normalizeProposals(historyPayload.categoryProposals)
-      );
+      setAllCategoryProposals(flattenByStatus(historyPayload.categoryProposals));
+      setAllMeasureProposals(flattenByStatus(historyPayload.measureProposals));
       setMembers(membersPayload ?? []);
-
-      const fallbackMeasures = Array.isArray(historyPayload.measureProposals)
-        ? (historyPayload.measureProposals as MeasureProposalDto[])
-        : normalizeProposals(historyPayload.measureProposals);
-
-      setAllMeasureProposals(
-        (measuresPayload?.length ?? 0) > 0 ? measuresPayload : fallbackMeasures
-      );
     } catch (error) {
       console.error("Admin load error:", error);
       toast.error("Erro ao carregar dados do admin");
@@ -177,6 +112,40 @@ export default function CanhoesAdminModule() {
     refreshEventOverview();
     void refreshOverview();
   }, [loadData, refreshOverview]);
+
+  const handleActivateEvent = useCallback(
+    async (eventId: string) => {
+      if (!eventId || eventId === activeEvent?.id) {
+        return;
+      }
+
+      try {
+        await canhoesEventsRepo.adminActivateEvent(eventId);
+        await refreshOverview();
+        refreshEventOverview();
+        toast.success("Evento ativo atualizado");
+      } catch (error) {
+        console.error("Admin activate event error:", error);
+        toast.error("Nao foi possivel mudar o evento ativo");
+      }
+    },
+    [activeEvent?.id, refreshOverview]
+  );
+
+  const pendingNominees = useMemo(
+    () => allNominees.filter((nominee) => nominee.status === "pending"),
+    [allNominees]
+  );
+  const pendingCategoryProposals = useMemo(
+    () =>
+      allCategoryProposals.filter((proposal) => proposal.status === "pending"),
+    [allCategoryProposals]
+  );
+  const pendingMeasureProposals = useMemo(
+    () =>
+      allMeasureProposals.filter((proposal) => proposal.status === "pending"),
+    [allMeasureProposals]
+  );
 
   const pendingReviewCount =
     pendingNominees.length +
@@ -303,6 +272,7 @@ export default function CanhoesAdminModule() {
 
         <TabsContent value="nominees" className="space-y-4">
           <NomineesAdmin
+            eventId={activeEvent?.id ?? null}
             nominees={allNominees}
             categories={categories}
             loading={loading}
@@ -312,6 +282,7 @@ export default function CanhoesAdminModule() {
 
         <TabsContent value="pending" className="space-y-4">
           <PendingProposals
+            eventId={activeEvent?.id ?? null}
             categoryProposals={pendingCategoryProposals}
             measureProposalsAll={allMeasureProposals}
             loading={loading}
@@ -321,8 +292,11 @@ export default function CanhoesAdminModule() {
 
         <TabsContent value="state" className="space-y-4">
           <EventStateCard
+            activeEventName={activeEvent?.name ?? null}
             state={state}
             eventId={activeEvent?.id ?? null}
+            events={events}
+            onActivateEvent={handleActivateEvent}
             onUpdate={handleRefresh}
           />
         </TabsContent>

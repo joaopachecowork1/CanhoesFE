@@ -73,6 +73,83 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  adminActivateEvent: (eventId: string) =>
+    canhoesFetch<T.EventSummaryDto>(`/v1/events/${eventId}/admin/activate`, {
+      method: "PUT",
+    }),
+
+  adminGetMembers: (eventId: string) =>
+    canhoesFetch<T.PublicUserDto[]>(`/v1/events/${eventId}/admin/members`),
+
+  adminVotes: (eventId: string) =>
+    canhoesFetch<T.AdminVotesDto>(`/v1/events/${eventId}/admin/votes`),
+
+  adminGetCategoryProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
+    canhoesFetch<T.CategoryProposalDto[]>(
+      `/v1/events/${eventId}/admin/category-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+    ),
+
+  adminProposalsHistory: (eventId: string) =>
+    canhoesFetch<T.AdminProposalsHistoryDto>(`/v1/events/${eventId}/admin/proposals`),
+
+  adminGetMeasureProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
+    canhoesFetch<T.MeasureProposalDto[]>(
+      `/v1/events/${eventId}/admin/measure-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+    ),
+
+  adminUpdateMeasureProposal: (
+    eventId: string,
+    proposalId: string,
+    payload: T.UpdateMeasureProposalRequest
+  ) =>
+    canhoesFetch<T.MeasureProposalDto>(
+      `/v1/events/${eventId}/admin/measure-proposals/${proposalId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  adminDeleteMeasureProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}`, {
+      method: "DELETE",
+    }),
+
+  adminApproveMeasureProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<T.GalaMeasureDto>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}/approve`, {
+      method: "POST",
+    }),
+
+  adminRejectMeasureProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}/reject`, {
+      method: "POST",
+    }),
+
+  adminGetNominees: (eventId: string, status?: "pending" | "approved" | "rejected") =>
+    canhoesFetch<T.NomineeDto[]>(
+      `/v1/events/${eventId}/admin/nominees${status ? `?status=${encodeURIComponent(status)}` : ""}`
+    ),
+
+  adminSetNomineeCategory: (
+    eventId: string,
+    nomineeId: string,
+    payload: T.SetNomineeCategoryRequest
+  ) =>
+    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/set-category`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  adminApproveNominee: (eventId: string, nomineeId: string) =>
+    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/approve`, {
+      method: "POST",
+    }),
+
+  adminRejectNominee: (eventId: string, nomineeId: string) =>
+    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/reject`, {
+      method: "POST",
+    }),
+
   getVotingBoard: (eventId: string) =>
     canhoesFetch<T.EventVotingBoardDto>(`/v1/events/${eventId}/voting`),
 

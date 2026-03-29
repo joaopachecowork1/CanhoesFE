@@ -14,12 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { AwardCategoryDto, NomineeDto } from "@/lib/api/types";
 
 type StatusFilter = "all" | "pending" | "approved";
 
 type NomineesAdminProps = {
+  eventId: string | null;
   nominees: NomineeDto[];
   categories: AwardCategoryDto[];
   loading: boolean;
@@ -39,6 +40,7 @@ function statusVariant(status: NomineeDto["status"]) {
 }
 
 export function NomineesAdmin({
+  eventId,
   nominees,
   categories,
   loading,
@@ -46,6 +48,7 @@ export function NomineesAdmin({
 }: Readonly<NomineesAdminProps>) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const controlsDisabled = !eventId;
 
   const categoryNameById = useMemo(
     () => new Map(categories.map((category) => [category.id, category.name])),
@@ -90,17 +93,21 @@ export function NomineesAdmin({
 
   const setNomineeCategory = (nomineeId: string, categoryId: string) =>
     withProcessing(nomineeId, () =>
-      canhoesRepo.adminSetNomineeCategory(nomineeId, {
+      canhoesEventsRepo.adminSetNomineeCategory(eventId!, nomineeId, {
         categoryId:
           categoryId && categoryId !== "__none__" ? categoryId : null,
       })
     );
 
   const approveNominee = (nomineeId: string) =>
-    withProcessing(nomineeId, () => canhoesRepo.approveNominee(nomineeId));
+    withProcessing(nomineeId, () =>
+      canhoesEventsRepo.adminApproveNominee(eventId!, nomineeId)
+    );
 
   const rejectNominee = (nomineeId: string) =>
-    withProcessing(nomineeId, () => canhoesRepo.rejectNominee(nomineeId));
+    withProcessing(nomineeId, () =>
+      canhoesEventsRepo.adminRejectNominee(eventId!, nomineeId)
+    );
 
   return (
     <Card className="border-[var(--color-moss)]/20">
@@ -142,13 +149,20 @@ export function NomineesAdmin({
           </div>
         ) : null}
 
-        {!loading && filteredNominees.length === 0 ? (
+        {!loading && controlsDisabled ? (
+          <div className="body-small text-[var(--color-text-muted)]">
+            O evento ativo ainda nao ficou disponivel para moderacao.
+          </div>
+        ) : null}
+
+        {!loading && !controlsDisabled && filteredNominees.length === 0 ? (
           <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
             Nao ha nomeacoes neste estado.
           </div>
         ) : null}
 
         {!loading &&
+          !controlsDisabled &&
           filteredNominees.map((nominee) => {
             const isBusy = processingIds.has(nominee.id);
             const categoryName = nominee.categoryId
@@ -184,7 +198,7 @@ export function NomineesAdmin({
                   <div className="flex flex-wrap gap-2 sm:justify-end">
                     {nominee.status === "pending" ? (
                       <Button
-                        disabled={isBusy || !nominee.categoryId}
+                        disabled={isBusy || controlsDisabled || !nominee.categoryId}
                         onClick={() => approveNominee(nominee.id)}
                         className="gap-2"
                         title={
@@ -202,7 +216,7 @@ export function NomineesAdmin({
                       nominee.status === "approved") && (
                       <Button
                         variant="destructive"
-                        disabled={isBusy}
+                        disabled={isBusy || controlsDisabled}
                         onClick={() => rejectNominee(nominee.id)}
                         className="gap-2"
                       >
@@ -225,7 +239,7 @@ export function NomineesAdmin({
                         onValueChange={(value) =>
                           setNomineeCategory(nominee.id, value)
                         }
-                        disabled={isBusy}
+                        disabled={isBusy || controlsDisabled}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Escolhe uma categoria" />

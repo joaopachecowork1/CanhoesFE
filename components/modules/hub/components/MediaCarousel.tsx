@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -62,6 +62,7 @@ export function MediaCarousel({
   aspect?: "square" | "portrait";
 }>) {
   const media = useMemo(() => (urls ?? []).filter(Boolean), [urls]);
+  const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
   const { currentIndex, setCurrentIndex, handleTouchEnd, handleTouchMove, handleTouchStart } =
     useCarouselGesture(media.length);
 
@@ -74,6 +75,11 @@ export function MediaCarousel({
   if (media.length === 0) return null;
 
   const aspectClassName = aspect === "portrait" ? "aspect-[4/5]" : "aspect-square";
+  const markAsFailed = (url: string) => {
+    setFailedMedia((previousState) =>
+      previousState[url] ? previousState : { ...previousState, [url]: true }
+    );
+  };
 
   if (media.length === 1) {
     return (
@@ -84,16 +90,23 @@ export function MediaCarousel({
             aspectClassName
           )}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={absMediaUrl(media[0])}
-            alt="Media do post"
-            loading="lazy"
-            decoding="async"
-            draggable={false}
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="h-full w-full object-cover"
-          />
+          {failedMedia[media[0]] ? (
+            <MediaFallback />
+          ) : (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={absMediaUrl(media[0])}
+                alt="Media do post"
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="h-full w-full object-cover"
+                onError={() => markAsFailed(media[0])}
+              />
+            </>
+          )}
         </div>
       </div>
     );
@@ -123,16 +136,23 @@ export function MediaCarousel({
                 aria-hidden={index !== currentIndex}
                 className="h-full min-w-full flex-shrink-0 bg-[var(--color-bg-surface)]"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={absMediaUrl(url)}
-                  alt={`Imagem ${index + 1} de ${media.length}`}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  className="h-full w-full object-cover"
-                />
+                {failedMedia[url] ? (
+                  <MediaFallback />
+                ) : (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={absMediaUrl(url)}
+                      alt={`Imagem ${index + 1} de ${media.length}`}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                      sizes="(max-width: 768px) 100vw, 768px"
+                      className="h-full w-full object-cover"
+                      onError={() => markAsFailed(url)}
+                    />
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -188,6 +208,20 @@ export function MediaCarousel({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function MediaFallback() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[var(--bg-surface)] px-4 text-center text-[var(--text-muted)]">
+      <ImageOff className="h-5 w-5 text-[var(--neon-amber)]" />
+      <p className="text-sm font-medium text-[var(--text-primary)]">
+        Imagem indisponivel
+      </p>
+      <p className="max-w-[18rem] text-xs text-[var(--beige)]/72">
+        O registo do post existe, mas o ficheiro ainda nao ficou acessivel.
+      </p>
     </div>
   );
 }
