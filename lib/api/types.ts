@@ -454,6 +454,21 @@ export type EventSecretSantaOverviewDto = {
   myWishlistItemCount: number;
 };
 
+export type EventAdminSecretSantaStateDto = {
+  eventId: string;
+  eventCode: string;
+  hasDraw: boolean;
+  drawId?: string | null;
+  createdAtUtc?: string | null;
+  isLocked: boolean;
+  memberCount: number;
+  assignmentCount: number;
+};
+
+export type CreateEventSecretSantaDrawRequest = {
+  eventCode?: string | null;
+};
+
 export type EventFeedPostDto = {
   id: string;
   eventId: string;
@@ -546,10 +561,13 @@ export type EventWishlistItemDto = {
   eventId: string;
   title: string;
   link?: string | null;
+  notes?: string | null;
+  imageUrl?: string | null;
   updatedAt: string;
 };
 
 export type CreateEventWishlistItemRequest = {
   title: string;
   link?: string | null;
+  notes?: string | null;
 };

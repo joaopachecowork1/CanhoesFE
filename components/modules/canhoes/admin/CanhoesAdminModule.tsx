@@ -27,6 +27,7 @@ import { CategoriesAdmin } from "./components/CategoriesAdmin";
 import { EventStateCard } from "./components/EventStateCard";
 import { NomineesAdmin } from "./components/NomineesAdmin";
 import { PendingProposals } from "./components/PendingProposals";
+import { SecretSantaAdmin } from "./components/SecretSantaAdmin";
 import { UsersAdmin } from "./components/UsersAdmin";
 import { VotesAudit } from "./components/VotesAudit";
 
@@ -157,6 +158,7 @@ export default function CanhoesAdminModule() {
     { value: "nominees", label: "Nomeacoes", count: pendingNominees.length },
     { value: "pending", label: "Propostas", count: pendingReviewCount },
     { value: "state", label: "Estado", count: 0 },
+    { value: "secret-santa", label: "Sorteio", count: 0 },
     { value: "categories", label: "Categorias", count: 0 },
     { value: "users", label: "Membros", count: 0 },
     { value: "audit", label: "Auditoria", count: votes.length },
@@ -297,6 +299,15 @@ export default function CanhoesAdminModule() {
             eventId={activeEvent?.id ?? null}
             events={events}
             onActivateEvent={handleActivateEvent}
+            onUpdate={handleRefresh}
+          />
+        </TabsContent>
+
+        <TabsContent value="secret-santa" className="space-y-4">
+          <SecretSantaAdmin
+            activeEventName={activeEvent?.name ?? null}
+            eventId={activeEvent?.id ?? null}
+            loading={loading}
             onUpdate={handleRefresh}
           />
         </TabsContent>

@@ -73,6 +73,15 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  adminGetSecretSantaState: (eventId: string) =>
+    canhoesFetch<T.EventAdminSecretSantaStateDto>(`/v1/events/${eventId}/admin/secret-santa/state`),
+
+  adminDrawSecretSanta: (eventId: string, payload: T.CreateEventSecretSantaDrawRequest) =>
+    canhoesFetch<T.EventAdminSecretSantaStateDto>(`/v1/events/${eventId}/admin/secret-santa/draw`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   adminActivateEvent: (eventId: string) =>
     canhoesFetch<T.EventSummaryDto>(`/v1/events/${eventId}/admin/activate`, {
       method: "PUT",
