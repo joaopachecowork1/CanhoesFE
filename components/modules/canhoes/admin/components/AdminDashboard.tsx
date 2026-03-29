@@ -72,7 +72,7 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <p className="editorial-kicker">Pulso da edição</p>
+        <p className="editorial-kicker">Pulso da edicao</p>
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
           {loading ? (
             Array.from({ length: 5 }).map((_, index) => (
@@ -135,7 +135,7 @@ export function AdminDashboard({
 
             <div className="space-y-2">
               <h3 className="heading-3 text-[var(--text-ink)]">
-                Há decisões por fechar nesta edição
+                Ha decisoes por fechar nesta edicao
               </h3>
               <div className="flex flex-wrap gap-2">
                 {safePendingNominees.length > 0 ? (
@@ -162,9 +162,9 @@ export function AdminDashboard({
       {!loading && recentNominees.length > 0 ? (
         <section className="space-y-3">
           <div className="space-y-1">
-            <p className="editorial-kicker">Últimas entradas</p>
+            <p className="editorial-kicker">Ultimas entradas</p>
             <h3 className="heading-3 text-[var(--text-primary)]">
-              Nomeações recebidas mais recentemente
+              Nomeacoes recebidas mais recentemente
             </h3>
           </div>
 
@@ -172,14 +172,14 @@ export function AdminDashboard({
             {recentNominees.map((nominee) => (
               <article
                 key={nominee.id}
-                className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 space-y-1">
-                    <p className="truncate font-semibold text-[var(--text-dark)]">
+                    <p className="truncate font-semibold text-[var(--text-ink)]">
                       {nominee.title}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-[var(--bark)]/68">
                       {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
                         day: "numeric",
                         hour: "2-digit",

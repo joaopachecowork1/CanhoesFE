@@ -45,53 +45,53 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
   }, [votes, search, categoryMap]);
 
   return (
-    <Card className="border-[var(--color-moss)]/20">
+    <Card className="canhoes-paper-panel border-[rgba(107,76,42,0.14)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
       <CardHeader className="space-y-1">
-        <p className="editorial-kicker">Auditoria</p>
-        <CardTitle>Historico de votos</CardTitle>
+        <p className="editorial-kicker text-[var(--bark)]">Auditoria</p>
+        <CardTitle className="text-[var(--text-ink)]">Registo de votos</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {loading ? (
-          <div className="body-small text-[var(--color-text-muted)]">
+          <div className="body-small text-[var(--bark)]/68">
             A carregar auditoria...
           </div>
         ) : votes.length === 0 ? (
-          <div className="body-small text-[var(--color-text-muted)]">
-            Ainda nao ha votos registados.
+          <div className="body-small text-[var(--bark)]/68">
+            Ainda nao ha votos registados nesta edicao.
           </div>
         ) : (
           <>
             <Input
-              placeholder="Pesquisar por categoria, nominee ou utilizador..."
+              placeholder="Pesquisar por categoria, nomeado ou utilizador..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
 
-            <div className="body-small text-[var(--color-text-muted)]">
+            <div className="body-small text-[var(--bark)]/68">
               {filteredVotes.length} de {votes.length} votos
               {filteredVotes.length >= MAX_DISPLAY
-                ? ` (mostrando no maximo ${MAX_DISPLAY})`
+                ? ` (a mostrar no maximo ${MAX_DISPLAY})`
                 : ""}
             </div>
 
-            <Separator />
+            <Separator className="bg-[rgba(107,76,42,0.12)]" />
 
             <div className="space-y-3">
               {filteredVotes.map((vote, index) => (
                 <article
                   key={`${vote.userId}:${vote.categoryId}:${index}`}
-                  className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
+                  className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
                 >
                   <div className="space-y-2">
-                    <p className="font-semibold text-[var(--color-text-primary)]">
+                    <p className="font-semibold text-[var(--text-ink)]">
                       {categoryMap.get(vote.categoryId) ?? vote.categoryId}
                     </p>
-                    <div className="space-y-1 text-sm text-[var(--color-text-secondary)]">
-                      <p>Nominee: {vote.nomineeId}</p>
+                    <div className="space-y-1 text-sm text-[var(--bark)]/74">
+                      <p>Nomeado: {vote.nomineeId}</p>
                       <p>Utilizador: {vote.userId}</p>
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)]">
+                    <p className="text-xs text-[var(--bark)]/62">
                       {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
                     </p>
                   </div>

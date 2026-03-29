@@ -22,7 +22,7 @@ function getMemberInitials(member: PublicUserDto) {
 
 function MemberRowSkeleton() {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--color-bg-card)] px-4 py-3">
+    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-3">
       <div className="flex items-center gap-3">
         <Skeleton className="h-9 w-9 rounded-full" />
         <div className="flex-1 space-y-2">
@@ -36,26 +36,24 @@ function MemberRowSkeleton() {
 
 function MemberRow({ member }: Readonly<{ member: PublicUserDto }>) {
   return (
-    <article className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4">
+    <article className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4">
       <div className="flex items-center gap-3">
         <div
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
             member.isAdmin
-              ? "border-[var(--color-moss)]/35 bg-[var(--color-moss)]/12 text-[var(--color-title)]"
-              : "border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)] text-[var(--color-brown)]"
+              ? "border-[rgba(74,92,47,0.28)] bg-[rgba(74,92,47,0.12)] text-[var(--moss)]"
+              : "border-[rgba(107,76,42,0.16)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
           )}
         >
           {getMemberInitials(member) || "?"}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-[var(--color-text-primary)]">
+          <p className="truncate font-semibold text-[var(--text-ink)]">
             {member.displayName ?? "Sem nome"}
           </p>
-          <p className="body-small truncate text-[var(--color-text-muted)]">
-            {member.email}
-          </p>
+          <p className="body-small truncate text-[var(--bark)]/68">{member.email}</p>
         </div>
 
         {member.isAdmin ? <Badge variant="secondary">Admin</Badge> : null}
@@ -70,17 +68,17 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
 
   return (
     <div className="space-y-4">
-      <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)] text-[var(--color-title)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(74,92,47,0.2)] bg-[rgba(74,92,47,0.08)] text-[var(--moss)]">
             <Users className="h-5 w-5" />
           </div>
 
           <div>
-            <p className="heading-3 text-[var(--color-text-primary)]">
+            <p className="heading-3 text-[var(--text-ink)]">
               Membros ({loading ? "..." : members.length})
             </p>
-            <p className="body-small text-[var(--color-text-muted)]">
+            <p className="body-small text-[var(--bark)]/68">
               {loading
                 ? "A carregar membros..."
                 : `${adminMembers.length} admins · ${regularMembers.length} membros`}
@@ -116,8 +114,8 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
       ) : null}
 
       {!loading && members.length === 0 ? (
-        <p className="body-small py-10 text-center text-[var(--color-text-muted)]">
-          Nenhum membro encontrado.
+        <p className="body-small py-10 text-center text-[var(--bark)]/68">
+          Nenhum membro encontrado nesta edicao.
         </p>
       ) : null}
     </div>
