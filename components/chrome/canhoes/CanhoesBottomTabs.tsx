@@ -7,105 +7,80 @@ import { cn } from "@/lib/utils";
 
 import type { CanhoesNavItem } from "./canhoesNavigation";
 
+export type CanhoesBottomTabEntry = {
+  item: CanhoesNavItem;
+  isActive?: boolean;
+  onClick: () => void;
+};
+
 type CanhoesBottomTabsProps = {
   isComposeOpen: boolean;
-  leftItems: readonly [CanhoesNavItem, CanhoesNavItem];
+  leftItems: readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry];
   onCompose: () => void;
-  onNavigate: (href: string) => void;
-  pathname: string;
-  rightItems: readonly [CanhoesNavItem, CanhoesNavItem];
+  rightItems: readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry];
 };
 
 export function CanhoesBottomTabs({
   isComposeOpen,
   leftItems,
   onCompose,
-  onNavigate,
-  pathname,
   rightItems,
 }: Readonly<CanhoesBottomTabsProps>) {
   return (
-    // The shell contract is fixed: 2 modules, compose FAB, 2 modules.
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-subtle)] bg-[var(--bg-void)]/96 backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[rgba(212,184,150,0.12)] bg-[rgba(12,15,9,0.82)] backdrop-blur-[24px]">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,136,0.45),rgba(255,184,0,0.32),transparent)]" />
       <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-3 pb-safe">
-        <div className="grid min-h-[5.4rem] grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)] items-end gap-1 py-2">
-          <BottomTab
-            item={leftItems[0]}
-            isActive={isTabActive(pathname, leftItems[0].href)}
-            onClick={() => onNavigate(leftItems[0].href)}
-          />
-          <BottomTab
-            item={leftItems[1]}
-            isActive={isTabActive(pathname, leftItems[1].href)}
-            onClick={() => onNavigate(leftItems[1].href)}
-          />
+        <div className="canhoes-bottom-dock mt-2 grid min-h-[5.65rem] grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)] items-end gap-1.5 px-2 py-2">
+          <BottomTab entry={leftItems[0]} />
+          <BottomTab entry={leftItems[1]} />
           <ComposeButton isOpen={isComposeOpen} onClick={onCompose} />
-          <BottomTab
-            item={rightItems[0]}
-            isActive={isTabActive(pathname, rightItems[0].href)}
-            onClick={() => onNavigate(rightItems[0].href)}
-          />
-          <BottomTab
-            item={rightItems[1]}
-            isActive={isTabActive(pathname, rightItems[1].href)}
-            onClick={() => onNavigate(rightItems[1].href)}
-          />
+          <BottomTab entry={rightItems[0]} />
+          <BottomTab entry={rightItems[1]} />
         </div>
       </div>
     </nav>
   );
 }
 
-function isTabActive(pathname: string, href: string) {
-  if (href === "/canhoes") {
-    return pathname === "/canhoes" || pathname === "/canhoes/" || pathname === "/canhoes/home";
-  }
-
-  return pathname.startsWith(href);
-}
-
 function BottomTab({
-  isActive,
-  item,
-  onClick,
+  entry,
 }: Readonly<{
-  isActive: boolean;
-  item: CanhoesNavItem;
-  onClick: () => void;
+  entry: CanhoesBottomTabEntry;
 }>) {
-  const Icon = item.icon as LucideIcon;
+  const Icon = entry.item.icon as LucideIcon;
+  const isActive = Boolean(entry.isActive);
 
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={entry.onClick}
       className={cn(
-        "canhoes-tap flex min-h-12 flex-col items-center justify-center gap-1 rounded-[1rem] px-1.5 py-2 text-center transition-[background-color,color,opacity]",
-        isActive
-          ? "bg-[var(--accent)] text-[var(--text-primary)]"
-          : "text-[var(--beige)]/72 hover:text-[var(--text-primary)]"
+        "canhoes-tap canhoes-bottom-tab flex min-h-12 flex-col items-center justify-center gap-1 rounded-[1.15rem] px-1.5 py-2 text-center transition-[background-color,color,border-color,box-shadow]",
+        isActive && "is-active"
       )}
       aria-current={isActive ? "page" : undefined}
-      data-href={item.href}
+      data-href={entry.item.href}
     >
       <span
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-full border border-transparent transition-[background-color,color,border-color,box-shadow]",
+          "flex h-9 w-9 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isActive
-            ? "border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]"
-            : "bg-transparent text-[var(--beige)]/78"
+            ? "border-[rgba(0,255,136,0.18)] bg-[rgba(38,54,26,0.92)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
+            : "border-transparent bg-transparent text-[rgba(245,237,224,0.76)]"
         )}
       >
-        <Icon className="h-[1.12rem] w-[1.12rem]" />
+        <Icon className="h-[1.08rem] w-[1.08rem]" />
       </span>
+
       <span
         className={cn(
           "font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]",
-          isActive ? "font-semibold text-[var(--text-primary)]" : "font-medium"
+          isActive ? "font-semibold text-[var(--bg-paper)]" : "font-medium text-[rgba(245,237,224,0.72)]"
         )}
       >
-        {item.label}
+        {entry.item.label}
       </span>
+
       <span
         aria-hidden="true"
         className={cn(
@@ -135,14 +110,10 @@ function ComposeButton({
       aria-label="Criar post"
       title="Criar post"
     >
-      {/* The FAB is intentionally reserved for post creation. It should never
-          be reused for navigation or admin entry points. */}
       <span
         className={cn(
-          "flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full border text-[var(--text-primary)] shadow-[var(--glow-moss)] transition-[transform,background-color,border-color,color,box-shadow]",
-          isOpen
-            ? "border-[var(--border-neon)] bg-[var(--accent)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
-            : "border-[var(--border-moss)] bg-[var(--moss)] hover:border-[var(--border-neon)] hover:bg-[var(--moss-light)] hover:[box-shadow:var(--glow-green-sm)]"
+          "canhoes-bottom-fab flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full border text-[var(--bg-paper)] transition-[transform,background-color,border-color,color,box-shadow]",
+          isOpen && "is-open"
         )}
       >
         <Plus className="h-5 w-5" strokeWidth={2.4} />
@@ -150,7 +121,7 @@ function ComposeButton({
       <span
         className={cn(
           "font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em]",
-          isOpen ? "font-semibold text-[var(--neon-green)]" : "font-semibold text-[var(--text-primary)]"
+          isOpen ? "font-semibold text-[var(--neon-green)]" : "font-semibold text-[var(--bg-paper)]"
         )}
       >
         Post

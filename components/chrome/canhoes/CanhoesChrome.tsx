@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 
-import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
+import { CanhoesBottomTabs, type CanhoesBottomTabEntry } from "./CanhoesBottomTabs";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
 import { CanhoesMoreSheet } from "./CanhoesMoreSheet";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
@@ -22,7 +22,18 @@ import {
   getPrimaryRightNavItem,
   getPageTitle,
   isMoreSectionActive,
+  MORE_NAV_ITEM,
 } from "./canhoesNavigation";
+
+function isHomePath(pathname: string | null) {
+  return pathname === "/canhoes" || pathname === "/canhoes/" || pathname === "/canhoes/home";
+}
+
+function isTabActive(pathname: string | null, href: string) {
+  if (!pathname) return false;
+  if (href === "/canhoes") return isHomePath(pathname);
+  return pathname.startsWith(href);
+}
 
 export function CanhoesChrome({
   children,
@@ -49,10 +60,7 @@ export function CanhoesChrome({
   }, []);
 
   const pageTitle = getPageTitle(pathname);
-  const isEventHomePath =
-    pathname === "/canhoes" ||
-    pathname === "/canhoes/" ||
-    pathname === "/canhoes/home";
+  const isEventHomePath = isHomePath(pathname);
 
   const userLabel = useMemo(() => {
     const displayName = user?.name?.trim();
@@ -82,14 +90,66 @@ export function CanhoesChrome({
     [eventOverview.overview, isAdmin, isLocalMode, primaryRightItem.id]
   );
 
-  const isMoreActive = Boolean(pathname) && isMoreSectionActive({
-    dynamicItem: dynamicBottomItem,
-    isAdmin,
-    isLocalMode,
-    overview: eventOverview.overview,
-    pathname: pathname ?? "",
-    primaryRightItem,
-  });
+  const isMoreActive = Boolean(pathname) &&
+    isMoreSectionActive({
+      dynamicItem: dynamicBottomItem,
+      isAdmin,
+      isLocalMode,
+      overview: eventOverview.overview,
+      pathname: pathname ?? "",
+      primaryRightItem,
+    });
+
+  const isMoreDockItem = dynamicBottomItem.id === MORE_NAV_ITEM.id;
+
+  const bottomLeftEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
+    () => [
+      {
+        item: BOTTOM_LEFT_NAV_ITEMS[0],
+        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[0].href),
+        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[0].href),
+      },
+      {
+        item: BOTTOM_LEFT_NAV_ITEMS[1],
+        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[1].href),
+        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[1].href),
+      },
+    ],
+    [pathname, router]
+  );
+
+  const bottomRightEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
+    () => [
+      {
+        item: primaryRightItem,
+        isActive: isTabActive(pathname, primaryRightItem.href),
+        onClick: () => router.push(primaryRightItem.href),
+      },
+      {
+        item: dynamicBottomItem,
+        isActive: isMoreDockItem
+          ? isMoreSheetOpen || isMoreActive
+          : isTabActive(pathname, dynamicBottomItem.href),
+        onClick: () => {
+          if (isMoreDockItem) {
+            setIsMoreSheetOpen(true);
+            return;
+          }
+
+          router.push(dynamicBottomItem.href);
+        },
+      },
+    ],
+    [
+      dynamicBottomItem,
+      isMoreActive,
+      isMoreDockItem,
+      isMoreSheetOpen,
+      pathname,
+      primaryRightItem,
+      router,
+    ]
+  );
 
   return (
     <div
@@ -101,23 +161,23 @@ export function CanhoesChrome({
         className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.18),transparent_65%)]"
       />
 
-      <header className="sticky top-0 z-40 border-b border-[var(--border-subtle)] bg-[var(--bg-void)]/94 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.12)] bg-[rgba(12,15,9,0.78)] backdrop-blur-[24px]">
         <div className="page-shell-wide pb-3 pt-3">
-          <div className="page-hero border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-4 py-4 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-5 sm:py-5">
+          <div className="page-hero editorial-shell border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-4 py-4 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-5 sm:py-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2 text-[var(--beige)]">
                   <span className="inline-flex items-center gap-2">
                     <ScrollText className="h-4 w-4 text-[var(--neon-green)]" />
-                    <span className="label">Canhões do Ano</span>
+                    <span className="label text-[rgba(245,237,224,0.72)]">Canhoes do Ano</span>
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h1 className="heading-2 text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
+                  <h1 className="heading-2 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
                     Canhoes do Ano
                   </h1>
-                  <p className="body-small text-[var(--beige)]/80">{pageTitle}</p>
+                  <p className="body-small text-[rgba(245,237,224,0.72)]">{pageTitle}</p>
                 </div>
               </div>
 
@@ -126,7 +186,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="min-h-11 rounded-full px-3 text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+                    className="min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -144,12 +204,12 @@ export function CanhoesChrome({
                   className={cn(
                     "min-h-11 rounded-full border px-3",
                     isMoreActive || isMoreSheetOpen
-                      ? "border-[var(--border-neon)] bg-[var(--accent)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
-                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)]"
+                      ? "border-[rgba(0,255,136,0.3)] bg-[rgba(38,54,26,0.9)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
+                      : "border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)]"
                   )}
                   onClick={() => setIsMoreSheetOpen(true)}
-                  aria-label="Abrir menu da edição"
-                  title="Menu da edição"
+                  aria-label="Abrir menu da edicao"
+                  title="Menu da edicao"
                 >
                   <Menu className="h-4 w-4" strokeWidth={2.1} />
                   <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
@@ -160,10 +220,10 @@ export function CanhoesChrome({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <div className="inline-flex min-h-11 items-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2">
+              <div className="canhoes-shell-chip inline-flex min-h-11 items-center rounded-full px-4 py-2">
                 <div className="min-w-0">
-                  <p className="label text-[var(--beige)]/68">Perfil</p>
-                  <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                  <p className="label text-[rgba(245,237,224,0.58)]">Perfil</p>
+                  <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
                     {userLabel}
                   </p>
                 </div>
@@ -194,11 +254,9 @@ export function CanhoesChrome({
 
       <CanhoesBottomTabs
         isComposeOpen={isComposeSheetOpen}
-        leftItems={[BOTTOM_LEFT_NAV_ITEMS[0], BOTTOM_LEFT_NAV_ITEMS[1]]}
-        pathname={pathname ?? ""}
+        leftItems={bottomLeftEntries}
         onCompose={() => setIsComposeSheetOpen(true)}
-        onNavigate={(href) => router.push(href)}
-        rightItems={[primaryRightItem, dynamicBottomItem]}
+        rightItems={bottomRightEntries}
       />
 
       <CanhoesMoreSheet

@@ -6,6 +6,7 @@ import {
   Gift,
   House,
   Medal,
+  Menu,
   Ruler,
   ScrollText,
   Shield,
@@ -98,6 +99,14 @@ const ADMIN_NAV_ITEM: CanhoesNavItem = {
   id: "admin",
   label: "Admin",
   requiresAdmin: true,
+};
+
+export const MORE_NAV_ITEM: CanhoesNavItem = {
+  description: "Mapa rapido da edicao, atalhos e areas secundarias.",
+  href: "/canhoes/menu",
+  icon: Menu,
+  id: "more",
+  label: "Mais",
 };
 
 const ITEM_BY_ID: Record<string, CanhoesNavItem> = {
@@ -222,46 +231,17 @@ export function getPrimaryRightNavItem({
   );
 }
 
-export function getDynamicBottomNavItem({
-  isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
-  overview,
-  primaryItemId,
-}: Readonly<{
+export function getDynamicBottomNavItem(options: Readonly<{
   isAdmin: boolean;
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
   primaryItemId?: string;
 }>): CanhoesNavItem {
-  if (isAdmin) {
+  if (options.isAdmin) {
     return ADMIN_NAV_ITEM;
   }
 
-  // The outer-right slot is permanent but dynamic. Admins always get Admin
-  // there; regular members get the best-fit module for the current phase.
-  const phaseType = overview?.activePhase?.type ?? "DRAW";
-  const phaseCandidates: Record<string, readonly string[]> = {
-    DRAW: ["wishlist", "categories"],
-    PROPOSALS: ["categories", "wishlist"],
-    VOTING: ["voting", "categories", "wishlist"],
-    RESULTS: ["gala", "categories", "wishlist"],
-  };
-
-  return (
-    pickFirstVisibleItem(phaseCandidates[phaseType] ?? phaseCandidates.DRAW, {
-      excludedIds: primaryItemId ? [primaryItemId] : [],
-      isAdmin,
-      isLocalMode,
-      overview,
-    }) ??
-    pickFirstVisibleItem(["categories", "wishlist", "secret-santa"], {
-      excludedIds: primaryItemId ? [primaryItemId] : [],
-      isAdmin,
-      isLocalMode,
-      overview,
-    }) ??
-    CATEGORIES_NAV_ITEM
-  );
+  return MORE_NAV_ITEM;
 }
 
 export function getPageTitle(pathname: string | null) {

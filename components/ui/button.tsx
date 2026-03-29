@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-[var(--color-moss)] text-[var(--text-primary)] shadow-[var(--shadow-card)] hover:bg-[var(--color-moss-light)] hover:shadow-[var(--shadow-layered)] active:scale-[0.98]",
+          "border-[rgba(212,184,150,0.22)] bg-[linear-gradient(180deg,var(--bark),var(--bark-dark))] text-[var(--bg-paper)] shadow-[var(--shadow-card)] hover:border-[rgba(0,255,136,0.18)] hover:[box-shadow:var(--glow-green-sm)] active:scale-[0.98]",
         destructive:
-          "border-transparent bg-[var(--color-danger)] text-white shadow-[var(--shadow-card)] hover:bg-[var(--color-danger-hover)] active:scale-[0.98]",
+          "border-[rgba(224,90,58,0.22)] bg-[linear-gradient(180deg,var(--color-danger),var(--color-danger-hover))] text-white shadow-[var(--shadow-card)] hover:[box-shadow:0_0_18px_rgba(224,90,58,0.24)] active:scale-[0.98]",
         outline:
-          "border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-[var(--shadow-panel)] hover:border-[var(--border-neon)]/45 hover:bg-[var(--accent)] active:scale-[0.98]",
+          "border-[rgba(212,184,150,0.16)] bg-[rgba(20,25,12,0.92)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)] hover:border-[rgba(212,184,150,0.28)] hover:bg-[rgba(34,42,20,0.96)] active:scale-[0.98]",
         secondary:
-          "border-[var(--border-moss)] bg-[var(--bark-dark)] text-[var(--text-primary)] shadow-[var(--shadow-panel)] hover:bg-[var(--bark)] active:scale-[0.98]",
+          "border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,var(--bg-paper-soft),var(--bg-paper-alt))] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)] hover:border-[rgba(107,76,42,0.22)] hover:bg-[linear-gradient(180deg,#faf4e9,var(--bg-paper-soft))] active:scale-[0.98]",
         ghost:
-          "border-transparent bg-transparent text-[var(--text-primary)] shadow-none hover:bg-[var(--bg-surface)] active:scale-[0.98]",
+          "border-transparent bg-transparent text-[var(--text-primary)] shadow-none hover:bg-[rgba(245,237,224,0.08)] active:scale-[0.98]",
         link: "border-transparent px-0 text-[var(--neon-cyan)] underline-offset-4 shadow-none hover:text-[var(--text-primary)] hover:underline",
       },
       size: {

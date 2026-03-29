@@ -603,6 +603,69 @@ h3,
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
 }
 
+.canhoes-shell-chip {
+  border: 1px solid rgba(212, 184, 150, 0.12);
+  background:
+    linear-gradient(135deg, rgba(35, 43, 21, 0.96), rgba(21, 27, 13, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 28px rgba(0, 0, 0, 0.22);
+}
+
+.canhoes-bottom-dock {
+  position: relative;
+  border: 1px solid rgba(212, 184, 150, 0.12);
+  border-radius: 1.85rem;
+  background:
+    linear-gradient(180deg, rgba(18, 22, 11, 0.94), rgba(10, 13, 8, 0.96));
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.canhoes-bottom-dock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top center, rgba(122, 173, 58, 0.12), transparent 38%),
+    linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.08), transparent);
+}
+
+.canhoes-bottom-tab {
+  position: relative;
+  z-index: 1;
+  color: rgba(245, 237, 224, 0.72);
+}
+
+.canhoes-bottom-tab.is-active {
+  background:
+    linear-gradient(180deg, rgba(242, 231, 210, 0.12), rgba(107, 76, 42, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+.canhoes-bottom-fab {
+  border-color: rgba(212, 184, 150, 0.22);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(122, 173, 58, 0.28), transparent 45%),
+    linear-gradient(180deg, #5b6f34 0%, #3c4b22 100%);
+  box-shadow:
+    0 18px 28px rgba(12, 15, 8, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.canhoes-bottom-fab.is-open {
+  border-color: rgba(0, 255, 136, 0.28);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(0, 255, 136, 0.32), transparent 45%),
+    linear-gradient(180deg, rgba(55, 83, 35, 0.96), rgba(24, 38, 18, 0.96));
+  box-shadow: var(--glow-green-sm);
+}
+
 .editorial-shell {
   position: relative;
   overflow: hidden;

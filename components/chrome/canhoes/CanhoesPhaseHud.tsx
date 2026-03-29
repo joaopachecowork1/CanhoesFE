@@ -17,7 +17,7 @@ export function CanhoesPhaseHud({
 }>) {
   if (isLoading) {
     return (
-      <div className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-[var(--beige)]/78">
+      <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[rgba(245,237,224,0.78)]">
         <Loader2 className="h-4 w-4 animate-spin text-[var(--neon-green)]" />
         <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
           A ler fase
@@ -38,23 +38,21 @@ export function CanhoesPhaseHud({
         : "Evento ativo";
 
   return (
-    <div className="inline-flex min-h-11 items-center gap-3 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-left shadow-[var(--shadow-panel)]">
+    <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-3 rounded-full px-4 py-2 text-left">
       <span
-        className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-neon)]/50 bg-[var(--accent)] text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]"
-        )}
+        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,255,136,0.18)] bg-[rgba(38,54,26,0.92)] text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]")}
       >
         <Sparkles className="h-4 w-4" />
       </span>
 
       <span className="min-w-0">
-        <span className="block font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--beige)]/64">
+        <span className="block font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.62)]">
           {event.name}
         </span>
-        <span className="block text-sm font-semibold text-[var(--text-primary)]">
+        <span className="block text-sm font-semibold text-[var(--bg-paper)]">
           {phaseLabel}
         </span>
-        <span className="block text-xs text-[var(--beige)]/72">{subtitle}</span>
+        <span className="block text-xs text-[rgba(245,237,224,0.74)]">{subtitle}</span>
       </span>
     </div>
   );
