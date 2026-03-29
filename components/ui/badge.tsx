@@ -9,13 +9,13 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-[var(--color-moss)] text-[var(--text-primary)] shadow-[var(--shadow-paper)]",
+          "border-[rgba(0,255,136,0.18)] bg-[linear-gradient(180deg,rgba(66,88,38,0.96),rgba(38,54,24,0.96))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]",
         secondary:
-          "border-transparent bg-[var(--bark)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]",
+          "border-[rgba(107,76,42,0.18)] bg-[linear-gradient(180deg,var(--bg-paper-soft),var(--bg-paper-alt))] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]",
         destructive:
-          "border-transparent bg-[var(--color-danger)] text-white shadow-sm hover:opacity-90",
+          "border-[rgba(224,90,58,0.22)] bg-[linear-gradient(180deg,var(--color-danger),var(--color-danger-hover))] text-white shadow-sm hover:opacity-90",
         outline:
-          "border-[var(--border-neon)] bg-transparent text-[var(--neon-green)]",
+          "border-[rgba(212,184,150,0.18)] bg-[rgba(245,237,224,0.06)] text-[var(--bg-paper)]",
       },
     },
     defaultVariants: {

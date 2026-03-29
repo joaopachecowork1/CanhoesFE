@@ -22,13 +22,13 @@ export function AdminSectionNav({
         <TabsTrigger
           key={item.value}
           value={item.value}
-          className="canhoes-admin-tab min-h-[58px] w-full justify-between whitespace-normal px-3 py-3 text-left text-[11px] leading-tight tracking-[0.1em]"
+          className="canhoes-admin-tab min-h-[60px] w-full justify-between whitespace-normal rounded-[1.1rem] px-3 py-3 text-left text-[11px] leading-tight tracking-[0.1em]"
         >
           <span>{item.label}</span>
           {item.count > 0 ? (
             <Badge
               variant="secondary"
-              className="min-w-5 justify-center rounded-full border-[rgba(212,184,150,0.16)] bg-[rgba(245,237,224,0.12)] px-1.5 text-[10px] text-[var(--bg-paper)]"
+              className="min-w-5 justify-center rounded-full border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,var(--bg-paper-soft),var(--bg-paper-alt))] px-1.5 text-[10px] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]"
             >
               {item.count}
             </Badge>

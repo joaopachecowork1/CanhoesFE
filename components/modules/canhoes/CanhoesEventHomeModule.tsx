@@ -239,7 +239,7 @@ export function CanhoesEventHomeModule() {
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <div className="space-y-4 px-4 py-5 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
@@ -248,7 +248,7 @@ export function CanhoesEventHomeModule() {
             {overview.nextPhase ? (
               <Badge
                 variant="outline"
-                className="border-[var(--border-subtle)] bg-transparent text-[var(--beige)]"
+                className="border-[rgba(212,184,150,0.16)] bg-[rgba(245,237,224,0.06)] text-[var(--bg-paper)]"
               >
                 Proxima: {getPhaseLabel(overview.nextPhase.type)}
               </Badge>
@@ -259,7 +259,7 @@ export function CanhoesEventHomeModule() {
             <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[var(--beige)]/68">
               {event.name}
             </p>
-            <h1 className="heading-1 text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
+            <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
               O que está aberto nesta fase
             </h1>
             <p className="body-base max-w-3xl text-[var(--beige)]/82">{phaseSummary}</p>
@@ -297,7 +297,7 @@ export function CanhoesEventHomeModule() {
             <ActionButton action={homeCopy.secondaryAction} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border-subtle)] pt-4 text-sm text-[var(--beige)]/76">
+          <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(212,184,150,0.12)] pt-4 text-sm text-[var(--beige)]/76">
             <span className="inline-flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-[var(--neon-cyan)]" />
               {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
@@ -334,7 +334,7 @@ export function CanhoesEventHomeModule() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-[var(--fire)]" />
@@ -383,7 +383,7 @@ export function CanhoesEventHomeModule() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-[var(--fire)]" />
@@ -427,7 +427,7 @@ export function CanhoesEventHomeModule() {
             </CardContent>
           </Card>
 
-          <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Vote className="h-4 w-4 text-[var(--fire)]" />
