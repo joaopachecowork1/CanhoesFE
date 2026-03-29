@@ -30,8 +30,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Canhões do Ano",
-  description: "O ritual anual dos Canhões: feed, votações, nomeações e gala.",
+  title: "Canh\u00f5es do Ano",
+  description: "O ritual anual dos Canh\u00f5es: feed, vota\u00e7\u00f5es, nomea\u00e7\u00f5es e gala.",
 };
 
 export const viewport: Viewport = {

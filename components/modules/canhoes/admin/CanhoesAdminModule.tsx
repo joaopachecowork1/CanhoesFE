@@ -191,34 +191,34 @@ export default function CanhoesAdminModule() {
       <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
         <section className="page-hero px-4 py-4 sm:px-5">
           <div className="space-y-4">
-              <div className="flex items-center gap-2 text-[var(--neon-green)]">
-                <Shield className="h-4 w-4" />
-                <span className="editorial-kicker">Admin</span>
-              </div>
+            <div className="flex items-center gap-2 text-[var(--color-title)]">
+              <Shield className="h-4 w-4" />
+              <span className="editorial-kicker">Admin</span>
+            </div>
 
-              <div className="space-y-2">
-              <h2 className="heading-2 text-[var(--text-primary)]">
-                  Centro de controlo
-                </h2>
-              <p className="type-subhead text-[var(--beige)]/78">
-                  Moderacao, curadoria e estado do evento num painel mais legivel,
-                  com blocos compactos em mobile e hierarquia forte em desktop.
-                </p>
-              </div>
+            <div className="space-y-2">
+              <h2 className="heading-2 text-[var(--color-title-dark)]">
+                Centro de controlo
+              </h2>
+              <p className="body-small text-[var(--color-text-muted)]">
+                Moderacao, curadoria e estado do evento num painel mais legivel,
+                com blocos compactos em mobile e hierarquia forte em desktop.
+              </p>
+            </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                {overviewItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="canhoes-glass rounded-[var(--radius-md-token)] px-3 py-3"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--beige)]/68">
-                      {item.label}
-                    </p>
-                    <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
-                      {item.value}
-                    </p>
-                  </div>
+            <div className="grid grid-cols-2 gap-2">
+              {overviewItems.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3 shadow-[var(--shadow-panel)]"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-[var(--color-text-primary)]">
+                    {item.value}
+                  </p>
+                </div>
               ))}
             </div>
 
@@ -247,7 +247,7 @@ export default function CanhoesAdminModule() {
           </div>
         </section>
 
-        <TabsList className="scrollbar-none h-auto w-full justify-start gap-2 overflow-x-auto border border-[var(--border-moss)] bg-[rgba(15,18,9,0.68)] p-2 shadow-[var(--shadow-panel)] xl:flex-col xl:overflow-visible">
+        <TabsList className="scrollbar-none h-auto w-full justify-start gap-2 overflow-x-auto border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface-alt)]/78 p-2 xl:flex-col xl:overflow-visible">
           {adminTabs.map((tab) => (
             <TabsTrigger
               key={tab.value}

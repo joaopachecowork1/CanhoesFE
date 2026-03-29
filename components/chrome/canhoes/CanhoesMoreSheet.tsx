@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import type { EventOverviewDto } from "@/lib/api/types";
 
 import { cn } from "@/lib/utils";
 
@@ -21,14 +22,25 @@ export function CanhoesMoreSheet({
   onNavigate,
   onOpenChange,
   open,
+  overview,
+  primaryIds = [],
 }: Readonly<{
   isAdmin: boolean;
   isLocalMode: boolean;
   onNavigate: (href: string) => void;
   onOpenChange: (isOpen: boolean) => void;
   open: boolean;
+  overview?: EventOverviewDto | null;
+  primaryIds?: string[];
 }>) {
-  const visibleLinks = getVisibleMoreNavItems({ isAdmin, isLocalMode });
+  // This sheet only exposes modules that are not already promoted into the
+  // primary bottom navigation for the current phase.
+  const visibleLinks = getVisibleMoreNavItems({
+    excludedIds: primaryIds,
+    isAdmin,
+    isLocalMode,
+    overview,
+  });
   const adminLink = visibleLinks.find((link) => link.requiresAdmin);
   const exploreLinks = visibleLinks.filter((link) => !link.requiresAdmin);
 
@@ -45,8 +57,8 @@ export function CanhoesMoreSheet({
             Explorar outras areas do evento
           </SheetTitle>
           <SheetDescription className="body-small text-left text-[var(--beige)]/72">
-            O botao central continua reservado a criar posts. Este painel junta as
-            restantes areas do evento sem carregar a navegacao principal.
+            A navegacao principal fica focada na fase atual, no sorteio e na votacao.
+            Este painel guarda as areas secundarias e o acesso ao admin quando existe.
           </SheetDescription>
         </SheetHeader>
 
@@ -59,14 +71,13 @@ export function CanhoesMoreSheet({
                   Secoes menos frequentes
                 </h3>
                 <p className="body-small text-[var(--beige)]/68">
-                  A navegacao base fica leve em mobile. Aqui encontras as areas
-                  secundarias e, quando existe permissao, o acesso ao admin.
+                  A nav principal fica focada no evento, no feed, no modulo prioritario da fase e no botao de criar post.
                 </p>
               </div>
 
               <div className="shrink-0 text-right">
                 <p className="label text-[var(--beige)]/60">Total</p>
-                <p className="number-ticker text-lg font-semibold text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]">
+                <p className="text-lg font-semibold text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]">
                   {visibleLinks.length}
                 </p>
               </div>
@@ -80,17 +91,23 @@ export function CanhoesMoreSheet({
                 {exploreLinks.length} atalhos
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {exploreLinks.map((link) => (
-                <MoreLinkCard
-                  key={link.href}
-                  description={link.description}
-                  icon={link.icon}
-                  label={link.label}
-                  onClick={() => onNavigate(link.href)}
-                />
-              ))}
-            </div>
+            {exploreLinks.length > 0 ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {exploreLinks.map((link) => (
+                  <MoreLinkCard
+                    key={link.href}
+                    description={link.description}
+                    icon={link.icon}
+                    label={link.label}
+                    onClick={() => onNavigate(link.href)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--beige)]/74">
+                Nao existem outras areas ativas para este momento do evento.
+              </div>
+            )}
           </section>
 
           {adminLink ? (
@@ -118,8 +135,7 @@ export function CanhoesMoreSheet({
           {isLocalMode ? (
             <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] px-3 py-3">
               <p className="body-small text-[var(--beige)]/78">
-                Em modo local, areas dependentes do evento real ficam ocultas para
-                evitar navegacao sem contexto.
+                Em modo local, areas dependentes do evento real ficam ocultas para evitar navegacao sem contexto.
               </p>
             </div>
           ) : null}

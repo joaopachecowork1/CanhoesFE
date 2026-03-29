@@ -5,27 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "canhoes-tap inline-flex min-h-11 items-center justify-center gap-2 border text-sm font-semibold transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-green)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-45",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-md-token)] border font-[var(--font-mono)] text-sm font-semibold transition-[transform,background-color,border-color,color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-psycho-4)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "chamfer bg-[var(--moss)] text-[var(--text-primary)] border-[var(--moss-light)] font-[var(--font-mono)] uppercase tracking-[0.18em] shadow-[var(--glow-moss)] hover:bg-[var(--moss-light)] hover:[box-shadow:var(--glow-moss)] active:scale-[0.97]",
+          "border-transparent bg-[var(--color-moss)] text-[var(--text-primary)] shadow-[var(--shadow-card)] hover:bg-[var(--color-moss-light)] hover:shadow-[var(--shadow-layered)] active:scale-[0.98]",
         destructive:
-          "rounded-[var(--radius-sm-token)] border-transparent bg-[var(--danger)] text-white font-[var(--font-mono)] uppercase tracking-[0.14em] shadow-[0_10px_24px_rgba(224,90,58,0.28)] hover:brightness-95 active:scale-[0.97]",
+          "border-transparent bg-[var(--color-danger)] text-white shadow-[var(--shadow-card)] hover:bg-[var(--color-danger-hover)] active:scale-[0.98]",
         outline:
-          "chamfer border-[var(--neon-green)] bg-transparent text-[var(--neon-green)] font-[var(--font-mono)] uppercase tracking-[0.18em] shadow-none hover:bg-[var(--neon-green)] hover:text-[var(--bg-void)] hover:[box-shadow:var(--glow-green)] active:scale-[0.97]",
+          "border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-[var(--shadow-panel)] hover:border-[var(--border-neon)]/45 hover:bg-[var(--accent)] active:scale-[0.98]",
         secondary:
-          "chamfer border-[var(--bark)] bg-[var(--bark-dark)] text-[var(--text-primary)] font-[var(--font-mono)] uppercase tracking-[0.18em] shadow-[0_12px_24px_rgba(61,43,24,0.28)] hover:bg-[var(--bark)] active:scale-[0.97]",
+          "border-[var(--border-moss)] bg-[var(--bark-dark)] text-[var(--text-primary)] shadow-[var(--shadow-panel)] hover:bg-[var(--bark)] active:scale-[0.98]",
         ghost:
-          "rounded-[var(--radius-md-token)] border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] text-[var(--text-primary)] shadow-none hover:border-[var(--border-neon)] hover:bg-[rgba(0,255,136,0.08)] hover:text-[var(--neon-green)] active:scale-[0.97]",
-        link:
-          "h-auto min-h-0 border-transparent px-0 py-0 font-[var(--font-mono)] text-[var(--neon-green)] uppercase tracking-[0.14em] shadow-none hover:text-[var(--neon-cyan)] hover:underline underline-offset-4",
+          "border-transparent bg-transparent text-[var(--text-primary)] shadow-none hover:bg-[var(--bg-surface)] active:scale-[0.98]",
+        link: "border-transparent px-0 text-[var(--neon-cyan)] underline-offset-4 shadow-none hover:text-[var(--text-primary)] hover:underline",
       },
       size: {
         default: "px-4 py-3",
-        sm: "min-h-11 px-3 py-2 text-sm",
-        lg: "min-h-12 px-6 py-3 text-base",
+        sm: "min-h-11 rounded-[var(--radius-sm-token)] px-3 py-2 text-sm",
+        lg: "min-h-12 rounded-[var(--radius-lg-token)] px-6 py-3 text-base",
         icon: "h-11 w-11 p-0",
       },
     },

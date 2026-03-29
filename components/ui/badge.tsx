@@ -4,18 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex min-h-8 items-center justify-center border px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--neon-green)] focus:ring-offset-0 font-[var(--font-mono)]",
+  "inline-flex min-h-8 items-center justify-center rounded-full border px-3 py-1 font-[var(--font-mono)] text-xs font-semibold uppercase tracking-[0.08em] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-psycho-4)] focus:ring-offset-0",
   {
     variants: {
       variant: {
         default:
-          "rounded-full border-transparent bg-[var(--moss)] text-[var(--text-primary)] shadow-[var(--glow-moss)]",
+          "border-transparent bg-[var(--color-moss)] text-[var(--text-primary)] shadow-[var(--shadow-paper)]",
         secondary:
-          "rounded-full border-transparent bg-[var(--bark)] text-[var(--text-primary)] shadow-[0_10px_24px_rgba(61,43,24,0.2)]",
+          "border-transparent bg-[var(--bark)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]",
         destructive:
-          "rounded-full border-transparent bg-[var(--danger)] text-white shadow-sm hover:opacity-90",
+          "border-transparent bg-[var(--color-danger)] text-white shadow-sm hover:opacity-90",
         outline:
-          "chamfer border-[var(--neon-green)] bg-transparent text-[var(--neon-green)]",
+          "border-[var(--border-neon)] bg-transparent text-[var(--neon-green)]",
       },
     },
     defaultVariants: {

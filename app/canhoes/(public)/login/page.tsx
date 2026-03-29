@@ -43,7 +43,7 @@ export default function CanhoesLoginPage() {
   };
 
   return (
-    <div className="bg-circuit relative isolate min-h-[100svh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.16),transparent_28rem),linear-gradient(180deg,#151a0d_0%,#0f1209_100%)]">
+    <div className="relative isolate min-h-[100svh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.16),transparent_30rem),linear-gradient(180deg,var(--bg-deep)_0%,var(--bg-void)_100%)]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {leafParticles.map((particle) => (
           <div
@@ -61,7 +61,7 @@ export default function CanhoesLoginPage() {
 
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-4 py-10">
         <section
-          className="w-full max-w-md rounded-[var(--radius-xl-token)] border border-[var(--border-moss)] bg-[linear-gradient(180deg,rgba(22,28,14,0.9),rgba(15,18,9,0.82))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-modal)] backdrop-blur-xl sm:p-8"
+          className="w-full max-w-md rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[rgba(22,28,14,0.9)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-modal)] backdrop-blur-xl sm:p-8"
           style={{
             opacity: isVisible ? 1 : 0,
             transform: isVisible ? "translateY(0)" : "translateY(24px)",
@@ -70,9 +70,9 @@ export default function CanhoesLoginPage() {
         >
           <div className="space-y-6">
             <div className="flex items-center justify-center">
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[var(--border-neon)] bg-[rgba(0,255,136,0.08)] text-[var(--text-primary)] shadow-[var(--glow-green)]">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[var(--accent)] text-[var(--text-primary)] shadow-[var(--glow-moss)]">
                 <Target className="h-10 w-10" />
-                <Leaf className="absolute -right-1 -top-1 h-6 w-6 text-[var(--neon-amber)]" />
+                <Leaf className="absolute -right-1 -top-1 h-6 w-6 text-[var(--neon-green)]" />
               </div>
             </div>
 
@@ -83,13 +83,13 @@ export default function CanhoesLoginPage() {
               <h1 className="heading-1 text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
                 Canhoes do Ano
               </h1>
-              <p className="type-subhead text-[var(--beige)]/76">
+              <p className="body-small text-[var(--beige)]/78">
                 Um espaco privado para o feed, os premios, as votacoes e o
                 arquivo do grupo.
               </p>
             </div>
 
-            <div className="editorial-divider" />
+            <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,136,0.18),transparent)]" />
 
             <div className="space-y-3">
               <Button
@@ -101,7 +101,7 @@ export default function CanhoesLoginPage() {
                   ? "A entrar..."
                   : "Continuar com Google"}
               </Button>
-              <p className="text-center text-xs text-[var(--beige)]/70">
+              <p className="text-center text-xs text-[var(--beige)]/72">
                 Acesso reservado aos membros do evento.
               </p>
             </div>

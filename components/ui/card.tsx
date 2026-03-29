@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "canhoes-glass overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-moss)] bg-[linear-gradient(180deg,rgba(22,28,14,0.92),rgba(15,18,9,0.86))] text-[var(--text-primary)] transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-[var(--border-neon)] hover:[box-shadow:var(--glow-green-sm)]",
+        "editorial-shell overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-[var(--shadow-panel)] transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-[var(--border-neon)]/45 hover:shadow-[var(--shadow-layered)]",
         className
       )}
       {...props}
@@ -32,7 +32,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("heading-3 text-[var(--text-primary)]", className)}
+      className={cn("heading-3 text-[var(--color-text-primary)]", className)}
       {...props}
     />
   );
@@ -42,7 +42,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("body-small text-[var(--beige)]/70", className)}
+      className={cn("body-small text-[var(--color-text-muted)]", className)}
       {...props}
     />
   );
