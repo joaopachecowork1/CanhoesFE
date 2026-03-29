@@ -106,6 +106,12 @@ export type CategoryProposalDto = {
   createdAtUtc: string;
 };
 
+export type UpdateAdminCategoryProposalRequest = {
+  name?: string | null;
+  description?: string | null;
+  status?: "pending" | "approved" | "rejected" | null;
+};
+
 export type CreateCategoryProposalRequest = {
   name: string;
   description?: string | null;

@@ -283,7 +283,7 @@ export default function CanhoesAdminModule() {
         <TabsContent value="pending" className="space-y-4">
           <PendingProposals
             eventId={activeEvent?.id ?? null}
-            categoryProposals={pendingCategoryProposals}
+            categoryProposals={allCategoryProposals}
             measureProposalsAll={allMeasureProposals}
             loading={loading}
             onUpdate={loadData}

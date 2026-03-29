@@ -89,6 +89,24 @@ export const canhoesEventsRepo = {
       `/v1/events/${eventId}/admin/category-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
     ),
 
+  adminUpdateCategoryProposal: (
+    eventId: string,
+    proposalId: string,
+    payload: T.UpdateAdminCategoryProposalRequest
+  ) =>
+    canhoesFetch<T.CategoryProposalDto>(
+      `/v1/events/${eventId}/admin/category-proposals/${proposalId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  adminDeleteCategoryProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/category-proposals/${proposalId}`, {
+      method: "DELETE",
+    }),
+
   adminProposalsHistory: (eventId: string) =>
     canhoesFetch<T.AdminProposalsHistoryDto>(`/v1/events/${eventId}/admin/proposals`),
 
