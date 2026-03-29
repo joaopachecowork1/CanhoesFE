@@ -53,7 +53,13 @@ export function HubPostCard({
   onAdminPin,
   onAdminDelete,
 }: Readonly<HubPostCardProps>) {
-  const mediaUrls = (post.mediaUrls ?? []).filter(Boolean);
+  const mediaUrls = Array.from(
+    new Set(
+      [...(post.mediaUrls ?? []), post.mediaUrl].filter(
+        (value): value is string => Boolean(value)
+      )
+    )
+  );
   const reactionCounts = post.reactionCounts || {};
   const reactionCountTotal =
     Object.keys(reactionCounts).length > 0

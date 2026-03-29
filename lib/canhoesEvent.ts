@@ -5,6 +5,7 @@ import type { EventPhaseDto, EventSummaryDto } from "@/lib/api/types";
  * without threading callbacks through the page tree.
  */
 export const OPEN_COMPOSE_SHEET_EVENT = "canhoes:openCompose";
+export const REFRESH_EVENT_OVERVIEW_EVENT = "canhoes:refreshOverview";
 
 export function getPhaseLabel(phaseType?: string | null) {
   switch (phaseType) {
@@ -61,4 +62,13 @@ export function pickActiveEvent(events: readonly EventSummaryDto[]) {
 export function openComposeSheet() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
+}
+
+/**
+ * Lets admin actions notify the chrome and any other listeners that the event
+ * overview should be reloaded after a phase or module-visibility change.
+ */
+export function refreshEventOverview() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(REFRESH_EVENT_OVERVIEW_EVENT));
 }

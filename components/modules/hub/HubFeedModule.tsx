@@ -119,10 +119,11 @@ export function HubFeedModule({
     }
   };
 
+  const getPostMediaCount = (post: { mediaUrl?: string | null; mediaUrls?: string[] | null }) =>
+    Array.from(new Set([...(post.mediaUrls ?? []), post.mediaUrl].filter(Boolean))).length;
+
   const pinnedPostCount = posts.filter((post) => post.isPinned).length;
-  const postsWithMediaCount = posts.filter(
-    (post) => (post.mediaUrls ?? []).length > 0
-  ).length;
+  const postsWithMediaCount = posts.filter((post) => getPostMediaCount(post) > 0).length;
   const postsWithPollCount = posts.filter((post) => Boolean(post.poll)).length;
 
   return (

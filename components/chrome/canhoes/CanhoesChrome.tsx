@@ -4,10 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { LogOut, Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
-import type { EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
-import { OPEN_COMPOSE_SHEET_EVENT, pickActiveEvent } from "@/lib/canhoesEvent";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
 import { useAuth } from "@/hooks/useAuth";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 
@@ -25,38 +24,6 @@ import {
   isMoreSectionActive,
 } from "./canhoesNavigation";
 
-type ChromeEventState = {
-  event: EventSummaryDto | null;
-  isLoading: boolean;
-  overview: EventOverviewDto | null;
-};
-
-const EMPTY_CHROME_EVENT_STATE: ChromeEventState = {
-  event: null,
-  isLoading: false,
-  overview: null,
-};
-
-/**
- * The shell only needs a lightweight event snapshot to drive the HUD and
- * phase-aware navigation. Loading it centrally keeps that logic out of pages.
- */
-async function loadChromeEventState(): Promise<ChromeEventState> {
-  const events = await canhoesEventsRepo.listEvents();
-  const activeEvent = pickActiveEvent(events);
-
-  if (!activeEvent) {
-    return EMPTY_CHROME_EVENT_STATE;
-  }
-
-  const overview = await canhoesEventsRepo.getEventOverview(activeEvent.id);
-  return {
-    event: activeEvent,
-    isLoading: false,
-    overview,
-  };
-}
-
 export function CanhoesChrome({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -65,14 +32,10 @@ export function CanhoesChrome({
   const { isLogged, logout, user } = useAuth();
   const isAdmin = Boolean(user?.isAdmin);
   const isLocalMode = IS_LOCAL_MODE;
+  const eventOverview = useEventOverview();
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
-  const [eventState, setEventState] = useState<ChromeEventState>({
-    event: null,
-    isLoading: true,
-    overview: null,
-  });
 
   useEffect(() => {
     setIsMoreSheetOpen(false);
@@ -83,28 +46,6 @@ export function CanhoesChrome({
     const handleOpenCompose = () => setIsComposeSheetOpen(true);
     window.addEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
     return () => window.removeEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
-  }, []);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function syncChromeEventState() {
-      try {
-        const nextEventState = await loadChromeEventState();
-        if (!isCancelled) {
-          setEventState(nextEventState);
-        }
-      } catch {
-        if (!isCancelled) {
-          setEventState(EMPTY_CHROME_EVENT_STATE);
-        }
-      }
-    }
-
-    void syncChromeEventState();
-    return () => {
-      isCancelled = true;
-    };
   }, []);
 
   const pageTitle = getPageTitle(pathname);
@@ -125,9 +66,9 @@ export function CanhoesChrome({
       getPrimaryRightNavItem({
         isAdmin,
         isLocalMode,
-        overview: eventState.overview,
+        overview: eventOverview.overview,
       }),
-    [eventState.overview, isAdmin, isLocalMode]
+    [eventOverview.overview, isAdmin, isLocalMode]
   );
 
   const dynamicBottomItem = useMemo(
@@ -136,16 +77,16 @@ export function CanhoesChrome({
         isAdmin,
         isLocalMode,
         primaryItemId: primaryRightItem.id,
-        overview: eventState.overview,
+        overview: eventOverview.overview,
       }),
-    [eventState.overview, isAdmin, isLocalMode, primaryRightItem.id]
+    [eventOverview.overview, isAdmin, isLocalMode, primaryRightItem.id]
   );
 
   const isMoreActive = Boolean(pathname) && isMoreSectionActive({
     dynamicItem: dynamicBottomItem,
     isAdmin,
     isLocalMode,
-    overview: eventState.overview,
+    overview: eventOverview.overview,
     pathname: pathname ?? "",
     primaryRightItem,
   });
@@ -234,9 +175,9 @@ export function CanhoesChrome({
               </div>
 
               <CanhoesPhaseHud
-                event={eventState.event}
-                isLoading={eventState.isLoading}
-                overview={eventState.overview}
+                event={eventOverview.event}
+                isLoading={eventOverview.isLoading}
+                overview={eventOverview.overview}
               />
             </div>
           </div>
@@ -268,7 +209,7 @@ export function CanhoesChrome({
       <CanhoesMoreSheet
         isAdmin={isAdmin}
         isLocalMode={isLocalMode}
-        overview={eventState.overview}
+        overview={eventOverview.overview}
         open={isMoreSheetOpen}
         onOpenChange={setIsMoreSheetOpen}
         onNavigate={(href) => {

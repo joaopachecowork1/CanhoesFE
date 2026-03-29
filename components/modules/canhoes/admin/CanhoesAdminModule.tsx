@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEventOverview } from "@/hooks/useEventOverview";
+import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import type {
   AwardCategoryDto,
-  CanhoesStateDto,
   CategoryProposalDto,
+  EventAdminStateDto,
   MeasureProposalDto,
   NomineeDto,
   PublicUserDto,
@@ -73,7 +76,9 @@ const safe = async <T,>(promise: Promise<T>, fallback: T): Promise<T> => {
 };
 
 export default function CanhoesAdminModule() {
-  const [state, setState] = useState<CanhoesStateDto | null>(null);
+  const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
+
+  const [state, setState] = useState<EventAdminStateDto | null>(null);
   const [categories, setCategories] = useState<AwardCategoryDto[]>([]);
   const [allNominees, setAllNominees] = useState<NomineeDto[]>([]);
   const [pendingNominees, setPendingNominees] = useState<NomineeDto[]>([]);
@@ -93,7 +98,13 @@ export default function CanhoesAdminModule() {
   const [members, setMembers] = useState<PublicUserDto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (!activeEvent?.id) {
+      setLoading(false);
+      setState(null);
+      return;
+    }
+
     setLoading(true);
     try {
       const [
@@ -106,8 +117,8 @@ export default function CanhoesAdminModule() {
         measuresPayload,
         membersPayload,
       ] = await Promise.all([
-        safe<CanhoesStateDto | null>(canhoesRepo.getState(), null),
-        safe<AwardCategoryDto[]>(canhoesRepo.adminGetAllCategories(), []),
+        canhoesEventsRepo.getAdminState(activeEvent.id),
+        canhoesEventsRepo.adminGetCategories(activeEvent.id),
         safe<{
           nominees: NomineeDto[];
           categoryProposals: CategoryProposalDto[];
@@ -155,11 +166,17 @@ export default function CanhoesAdminModule() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeEvent?.id]);
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [loadData]);
+
+  const handleRefresh = useCallback(async () => {
+    await loadData();
+    refreshEventOverview();
+    void refreshOverview();
+  }, [loadData, refreshOverview]);
 
   const pendingReviewCount =
     pendingNominees.length +
@@ -231,14 +248,16 @@ export default function CanhoesAdminModule() {
                 <Badge variant="outline">Sem fila critica</Badge>
               )}
               {state ? (
-                <Badge variant="outline">Fase: {state.phase}</Badge>
+                <Badge variant="outline">
+                  Fase: {state.activePhase?.type ?? "Sem fase"}
+                </Badge>
               ) : null}
             </div>
 
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={() => void loadData()}
+              onClick={() => void handleRefresh()}
               disabled={loading}
             >
               <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
@@ -303,18 +322,19 @@ export default function CanhoesAdminModule() {
         <TabsContent value="state" className="space-y-4">
           <EventStateCard
             state={state}
-            categories={categories}
-            onUpdate={loadData}
+            eventId={activeEvent?.id ?? null}
+            onUpdate={handleRefresh}
           />
         </TabsContent>
 
         <TabsContent value="categories" className="space-y-4">
           <CategoriesAdmin
+            eventId={activeEvent?.id ?? null}
             categories={categories}
             categoryProposals={allCategoryProposals}
             measureProposals={allMeasureProposals}
             loading={loading}
-            onUpdate={loadData}
+            onUpdate={handleRefresh}
           />
         </TabsContent>
 

@@ -4,6 +4,12 @@ function normalizeMediaPath(path: string) {
   return path.trim().replaceAll("\\", "/");
 }
 
+function toUploadsProxyPath(pathname: string) {
+  return pathname.startsWith("/api/uploads/")
+    ? pathname
+    : `/api${pathname}`;
+}
+
 export function absMediaUrl(path: string | null | undefined) {
   if (!path) return "";
 
@@ -12,7 +18,7 @@ export function absMediaUrl(path: string | null | undefined) {
 
   const uploadsIndex = normalizedPath.toLowerCase().indexOf("/uploads/");
   if (uploadsIndex >= 0) {
-    return normalizedPath.slice(uploadsIndex);
+    return toUploadsProxyPath(normalizedPath.slice(uploadsIndex));
   }
 
   if (
@@ -22,7 +28,7 @@ export function absMediaUrl(path: string | null | undefined) {
     try {
       const parsedUrl = new URL(normalizedPath);
       if (parsedUrl.pathname.startsWith("/uploads/")) {
-        return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+        return `${toUploadsProxyPath(parsedUrl.pathname)}${parsedUrl.search}${parsedUrl.hash}`;
       }
     } catch {
       return normalizedPath;
@@ -32,11 +38,11 @@ export function absMediaUrl(path: string | null | undefined) {
   }
 
   if (normalizedPath.startsWith("uploads/")) {
-    return `/${normalizedPath}`;
+    return toUploadsProxyPath(`/${normalizedPath}`);
   }
 
   if (normalizedPath.startsWith("/uploads/")) {
-    return normalizedPath;
+    return toUploadsProxyPath(normalizedPath);
   }
 
   if (normalizedPath.startsWith("/")) {

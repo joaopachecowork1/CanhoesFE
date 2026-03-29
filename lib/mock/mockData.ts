@@ -431,6 +431,7 @@ export const MOCK_EVENT_POSTS: EventFeedPostDto[] = MOCK_HUB_POSTS.map((post) =>
   userName: post.authorName,
   content: post.text,
   imageUrl: post.mediaUrl,
+  mediaUrls: post.mediaUrls,
   createdAt: post.createdAtUtc,
 }));
 

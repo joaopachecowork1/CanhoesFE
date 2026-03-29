@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FolderTree, ScrollText } from "lucide-react";
+import { FolderTree, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -9,7 +9,7 @@ import type {
   CategoryProposalDto,
   MeasureProposalDto,
 } from "@/lib/api/types";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 
 type Props = {
+  eventId: string | null;
   categories: AwardCategoryDto[];
   categoryProposals: CategoryProposalDto[];
   measureProposals: MeasureProposalDto[];
@@ -60,6 +61,7 @@ function statusBadgeVariant(status: string): "default" | "destructive" | "second
 }
 
 export function CategoriesAdmin({
+  eventId,
   categories,
   categoryProposals,
   measureProposals,
@@ -130,6 +132,8 @@ export function CategoriesAdmin({
   };
 
   const saveCategory = async (categoryId: string) => {
+    if (!eventId) return;
+
     const draft = drafts[categoryId];
     if (!draft) return;
 
@@ -140,7 +144,7 @@ export function CategoriesAdmin({
     }
 
     try {
-      await canhoesRepo.adminUpdateCategory(categoryId, {
+      await canhoesEventsRepo.adminUpdateCategory(eventId, categoryId, {
         name: draft.name.trim(),
         sortOrder: parsedSortOrder,
         isActive: draft.isActive,
@@ -162,15 +166,20 @@ export function CategoriesAdmin({
   };
 
   const createCategory = async () => {
+    if (!eventId) return;
+
     const normalizedName = newCategoryName.trim();
     if (!normalizedName) return;
 
     setIsCreating(true);
     try {
-      await canhoesRepo.adminCreateCategory({
+      await canhoesEventsRepo.adminCreateCategory(eventId, {
         name: normalizedName,
         sortOrder: null,
         kind: newCategoryKind,
+        description: null,
+        voteQuestion: null,
+        voteRules: null,
       });
       setNewCategoryName("");
       toast.success("Categoria criada");
@@ -180,6 +189,20 @@ export function CategoriesAdmin({
       toast.error("Erro ao criar categoria");
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const deleteCategory = async (categoryId: string, categoryName: string) => {
+    if (!eventId) return;
+    if (!window.confirm(`Eliminar a categoria "${categoryName}"?`)) return;
+
+    try {
+      await canhoesEventsRepo.adminDeleteCategory(eventId, categoryId);
+      toast.success("Categoria removida");
+      onUpdate();
+    } catch (error) {
+      console.error(error);
+      toast.error("Nao foi possivel eliminar a categoria");
     }
   };
 
@@ -303,6 +326,16 @@ export function CategoriesAdmin({
                     disabled={loading}
                   >
                     Guardar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => void deleteCategory(row.id, row.name)}
+                    disabled={loading}
+                    className="gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
                   </Button>
                 </div>
               </div>

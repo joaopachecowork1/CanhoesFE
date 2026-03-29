@@ -27,6 +27,7 @@ import {
   openComposeSheet,
   pickActiveEvent,
 } from "@/lib/canhoesEvent";
+import { absMediaUrl } from "@/lib/media";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -356,6 +357,18 @@ export function CanhoesEventHomeModule() {
                     </span>
                   </div>
                   <p className="text-sm leading-6 text-[var(--text-primary)]">{post.content}</p>
+                  {(post.mediaUrls?.[0] || post.imageUrl) ? (
+                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
+                        alt={`Media do post de ${post.userName}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-44 w-full object-cover"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               ))
             )}

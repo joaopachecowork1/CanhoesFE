@@ -67,6 +67,9 @@ export type CreateAwardCategoryRequest = {
   name: string;
   sortOrder?: number | null;
   kind: "Sticker" | "UserVote";
+  description?: string | null;
+  voteQuestion?: string | null;
+  voteRules?: string | null;
 };
 export type UserVoteDto = {
   id: string;
@@ -369,6 +372,39 @@ export type EventOverviewDto = {
   modules: EventModulesDto;
 };
 
+export type EventAdminModuleVisibilityDto = {
+  feed: boolean;
+  secretSanta: boolean;
+  wishlist: boolean;
+  categories: boolean;
+  voting: boolean;
+  gala: boolean;
+  stickers: boolean;
+  measures: boolean;
+  nominees: boolean;
+};
+
+export type EventAdminStateDto = {
+  eventId: string;
+  activePhase?: EventPhaseDto | null;
+  phases: EventPhaseDto[];
+  nominationsVisible: boolean;
+  resultsVisible: boolean;
+  moduleVisibility: EventAdminModuleVisibilityDto;
+  effectiveModules: EventModulesDto;
+  counts: EventCountsDto;
+};
+
+export type UpdateEventAdminStateRequest = {
+  nominationsVisible?: boolean | null;
+  resultsVisible?: boolean | null;
+  moduleVisibility?: EventAdminModuleVisibilityDto | null;
+};
+
+export type UpdateEventPhaseRequest = {
+  phaseType: EventPhaseDto["type"];
+};
+
 export type EventVotingOverviewDto = {
   eventId: string;
   phaseId?: string | null;
@@ -396,6 +432,7 @@ export type EventFeedPostDto = {
   userName: string;
   content: string;
   imageUrl?: string | null;
+  mediaUrls: string[];
   createdAt: string;
 };
 

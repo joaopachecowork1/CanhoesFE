@@ -34,6 +34,45 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  adminGetCategories: (eventId: string) =>
+    canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/admin/categories`),
+
+  adminCreateCategory: (eventId: string, payload: T.CreateAwardCategoryRequest) =>
+    canhoesFetch<T.AwardCategoryDto>(`/v1/events/${eventId}/admin/categories`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  adminUpdateCategory: (
+    eventId: string,
+    categoryId: string,
+    payload: T.UpdateAwardCategoryRequest
+  ) =>
+    canhoesFetch<T.AwardCategoryDto>(`/v1/events/${eventId}/admin/categories/${categoryId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  adminDeleteCategory: (eventId: string, categoryId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/categories/${categoryId}`, {
+      method: "DELETE",
+    }),
+
+  getAdminState: (eventId: string) =>
+    canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`),
+
+  updateAdminState: (eventId: string, payload: T.UpdateEventAdminStateRequest) =>
+    canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
+  updateAdminPhase: (eventId: string, payload: T.UpdateEventPhaseRequest) =>
+    canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/phase`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+
   getVotingBoard: (eventId: string) =>
     canhoesFetch<T.EventVotingBoardDto>(`/v1/events/${eventId}/voting`),
 

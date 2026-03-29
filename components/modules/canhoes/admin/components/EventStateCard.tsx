@@ -1,256 +1,338 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, Lightbulb, PlusCircle } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { IS_LOCAL_MODE } from "@/lib/mock";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import type { AwardCategoryDto, CanhoesPhase, CanhoesStateDto } from "@/lib/api/types";
+import { useMemo, useState } from "react";
+import { Eye, Sparkles, TimerReset } from "lucide-react";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import type {
+  EventAdminModuleVisibilityDto,
+  EventAdminStateDto,
+  EventPhaseDto,
+} from "@/lib/api/types";
+
 type EventStateCardProps = {
-  state: CanhoesStateDto | null;
-  categories: AwardCategoryDto[];
+  eventId: string | null;
   onUpdate: () => Promise<void>;
+  state: EventAdminStateDto | null;
 };
 
-type CategoryKind = "Sticker" | "UserVote";
-
-const PHASE_OPTIONS: Array<{ value: CanhoesPhase; label: string }> = [
-  { value: "nominations", label: "Nomeacoes" },
-  { value: "voting", label: "Votacao" },
-  { value: "locked", label: "Fechado" },
-  { value: "gala", label: "Gala" },
+const MODULE_LABELS: Array<{
+  description: string;
+  key: keyof EventAdminModuleVisibilityDto;
+  label: string;
+}> = [
+  {
+    key: "feed",
+    label: "Feed",
+    description: "Mantem o feed principal visivel para membros.",
+  },
+  {
+    key: "secretSanta",
+    label: "Amigo secreto",
+    description: "Mostra o modulo de sorteio e atribuicao.",
+  },
+  {
+    key: "wishlist",
+    label: "Wishlist",
+    description: "Permite gerir pistas e desejos do grupo.",
+  },
+  {
+    key: "categories",
+    label: "Categorias",
+    description: "Exibe o arquivo e o ranking do evento.",
+  },
+  {
+    key: "voting",
+    label: "Votacao",
+    description: "Liberta o modulo de voto para membros.",
+  },
+  {
+    key: "gala",
+    label: "Gala",
+    description: "Abre a area final de resultados.",
+  },
+  {
+    key: "stickers",
+    label: "Stickers",
+    description: "Mostra submissao e consulta de stickers.",
+  },
+  {
+    key: "measures",
+    label: "Medidas",
+    description: "Mostra regras e medidas do evento.",
+  },
+  {
+    key: "nominees",
+    label: "Nomeacoes",
+    description: "Mostra arquivo de nomeados para membros.",
+  },
 ];
 
+function getPhaseLabel(phaseType?: string | null) {
+  switch (phaseType) {
+    case "DRAW":
+      return "DRAW";
+    case "PROPOSALS":
+      return "PROPOSALS";
+    case "VOTING":
+      return "VOTING";
+    case "RESULTS":
+      return "RESULTS";
+    default:
+      return "Sem fase";
+  }
+}
+
+function formatPhaseWindow(phase: EventPhaseDto) {
+  return new Intl.DateTimeFormat("pt-PT", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(phase.endDate));
+}
+
 export function EventStateCard({
-  state,
-  categories,
+  eventId,
   onUpdate,
+  state,
 }: Readonly<EventStateCardProps>) {
-  const [isBusy, setIsBusy] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [categoryKind, setCategoryKind] = useState<CategoryKind>("UserVote");
-  const phaseOptions = IS_LOCAL_MODE
-    ? PHASE_OPTIONS.filter((phase) => phase.value !== "gala")
-    : PHASE_OPTIONS;
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
-  const updateState = async (patch: Partial<CanhoesStateDto>) => {
-    if (!state) return;
+  const visibleModulesCount = useMemo(() => {
+    if (!state) return 0;
+    return Object.values(state.effectiveModules).filter(Boolean).length;
+  }, [state]);
 
-    setIsBusy(true);
+  const persistState = async (
+    busyStateKey: string,
+    patch: {
+      moduleVisibility?: EventAdminModuleVisibilityDto;
+      nominationsVisible?: boolean;
+      resultsVisible?: boolean;
+    }
+  ) => {
+    if (!eventId || !state) return;
+
+    setBusyKey(busyStateKey);
     try {
-      await canhoesRepo.updateState({
-        phase: (patch.phase ?? state.phase) as CanhoesPhase,
-        nominationsVisible:
-          patch.nominationsVisible ?? state.nominationsVisible,
-        resultsVisible: patch.resultsVisible ?? state.resultsVisible,
-      });
+      await canhoesEventsRepo.updateAdminState(eventId, patch);
       await onUpdate();
-      toast.success("Estado atualizado");
+      toast.success("Controlo do evento atualizado");
     } catch (error) {
-      console.error("Update state error:", error);
-      toast.error("Erro ao atualizar estado");
+      console.error("Admin state update error:", error);
+      toast.error("Nao foi possivel guardar o estado");
     } finally {
-      setIsBusy(false);
+      setBusyKey(null);
     }
   };
 
-  const createCategory = async () => {
-    const normalizedName = categoryName.trim();
+  const updatePhase = async (phaseType: EventPhaseDto["type"]) => {
+    if (!eventId) return;
 
-    if (!normalizedName) {
-      toast.error("Nome da categoria e obrigatorio");
-      return;
-    }
-
-    if (normalizedName.length < 3) {
-      toast.error("O nome deve ter pelo menos 3 caracteres");
-      return;
-    }
-
-    if (
-      categories.some(
-        (category) =>
-          category.name.toLowerCase() === normalizedName.toLowerCase()
-      )
-    ) {
-      toast.error("Ja existe uma categoria com esse nome");
-      return;
-    }
-
-    setIsBusy(true);
+    setBusyKey("phase");
     try {
-      await canhoesRepo.adminCreateCategory({
-        name: normalizedName,
-        kind: categoryKind,
-        sortOrder: null,
-      });
-      setCategoryName("");
+      await canhoesEventsRepo.updateAdminPhase(eventId, { phaseType });
       await onUpdate();
-      toast.success("Categoria criada");
+      toast.success("Fase do evento atualizada");
     } catch (error) {
-      console.error("Create category error:", error);
-      toast.error("Erro ao criar categoria");
+      console.error("Admin phase update error:", error);
+      toast.error("Nao foi possivel mudar a fase");
     } finally {
-      setIsBusy(false);
+      setBusyKey(null);
     }
   };
+
+  if (!state) {
+    return (
+      <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <CardContent className="py-6 text-sm text-[var(--beige)]/76">
+          Falta contexto do evento para abrir os controlos globais.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <Card className="border-[var(--color-moss)]/20">
-        <CardHeader className="pb-0">
-          <div className="flex items-center gap-2 text-[var(--color-title)]">
-            <PlusCircle className="h-4 w-4" />
-            <span className="label">Categorias</span>
+      <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center gap-2 text-[var(--neon-green)]">
+            <TimerReset className="h-4 w-4" />
+            <span className="label">Fluxo do evento</span>
           </div>
-          <CardTitle className="text-base">Criar categoria</CardTitle>
-          <p className="body-small text-[var(--color-text-muted)]">
-            Mantem o formulario solto e legivel em mobile. Primeiro o nome,
-            depois o tipo, por fim a acao.
+          <CardTitle>Fase atual e janelas do ciclo</CardTitle>
+          <p className="body-small text-[var(--beige)]/72">
+            Este bloco muda a fase ativa e mostra o que os membros devem ver
+            neste momento do ritual.
           </p>
         </CardHeader>
-        <CardContent className="space-y-3 pt-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="admin-category-name"
-              className="label text-[var(--color-text-muted)]"
-            >
-              Nome da categoria
-            </label>
-            <Input
-              id="admin-category-name"
-              placeholder="Ex: Melhor meme do ano"
-              value={categoryName}
-              onChange={(event) => setCategoryName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  createCategory();
-                }
-              }}
-            />
-          </div>
-
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto]">
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="space-y-2">
-              <label className="label text-[var(--color-text-muted)]">
-                Tipo de voto
-              </label>
+              <p className="label text-[var(--beige)]/68">Fase ativa</p>
               <Select
-                value={categoryKind}
-                onValueChange={(value) => setCategoryKind(value as CategoryKind)}
+                value={state.activePhase?.type ?? ""}
+                onValueChange={(value) => void updatePhase(value as EventPhaseDto["type"])}
+                disabled={busyKey === "phase"}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Escolher fase" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="UserVote">Voto em pessoa</SelectItem>
-                  <SelectItem value="Sticker">Sticker</SelectItem>
+                  {state.phases.map((phase) => (
+                    <SelectItem key={phase.id} value={phase.type}>
+                      {getPhaseLabel(phase.type)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-end">
-              <Button
-                disabled={isBusy}
-                onClick={createCategory}
-                className="w-full lg:w-auto"
-              >
-                Criar categoria
-              </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+                <p className="label text-[var(--beige)]/62">Modulos visiveis</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
+                  {visibleModulesCount}
+                </p>
+                <p className="mt-1 text-xs text-[var(--beige)]/72">Estado real para membros</p>
+              </div>
+              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+                <p className="label text-[var(--beige)]/62">Pendentes</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
+                  {state.counts.pendingProposalCount}
+                </p>
+                <p className="mt-1 text-xs text-[var(--beige)]/72">Propostas a moderar</p>
+              </div>
             </div>
           </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            {state.phases.map((phase) => (
+              <div
+                key={phase.id}
+                className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-primary)]">
+                    {getPhaseLabel(phase.type)}
+                  </p>
+                  {phase.isActive ? <Badge variant="secondary">Ativa</Badge> : null}
+                </div>
+                <p className="mt-2 text-xs text-[var(--beige)]/72">
+                  Fecha a {formatPhaseWindow(phase)}
+                </p>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-moss)]/20">
-        <CardHeader className="pb-0">
-          <CardTitle className="text-base">Estado do evento</CardTitle>
-          <p className="body-small text-[var(--color-text-muted)]">
-            Cada controlo fica no seu proprio bloco para evitar uma fila apertada
-            de inputs e botoes.
+      <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center gap-2 text-[var(--neon-cyan)]">
+            <Eye className="h-4 w-4" />
+            <span className="label">Visibilidade</span>
+          </div>
+          <CardTitle>O que os membros podem ver</CardTitle>
+          <p className="body-small text-[var(--beige)]/72">
+            Os toggles abaixo afinam a visibilidade final dos modulos. A fase
+            continua a mandar, mas o admin pode esconder areas que ainda nao
+            fazem sentido.
           </p>
         </CardHeader>
-        <CardContent className="grid gap-3 pt-4 md:grid-cols-3">
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">Fase atual</p>
-            <Select
-              value={state?.phase ?? "nominations"}
-              onValueChange={(value) =>
-                updateState({ phase: value as CanhoesPhase })
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            <VisibilityToggle
+              checked={state.nominationsVisible}
+              description="Mostra nomeacoes aos membros durante a fase certa."
+              label="Nomeacoes visiveis"
+              onChange={(checked) =>
+                void persistState("nominations", { nominationsVisible: checked })
               }
-              disabled={isBusy}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {phaseOptions.map((phase) => (
-                  <SelectItem key={phase.value} value={phase.value}>
-                    {phase.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              pending={busyKey === "nominations"}
+            />
+            <VisibilityToggle
+              checked={state.resultsVisible}
+              description="Liberta ranking e resultados fora da gala quando precisares."
+              label="Resultados visiveis"
+              onChange={(checked) =>
+                void persistState("results", { resultsVisible: checked })
+              }
+              pending={busyKey === "results"}
+            />
           </div>
 
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">
-              Nomeacoes visiveis
-            </p>
-            <Button
-              variant={state?.nominationsVisible ? "default" : "outline"}
-              className="w-full justify-between"
-              disabled={isBusy}
-              onClick={() =>
-                updateState({
-                  nominationsVisible: !state?.nominationsVisible,
-                })
-              }
-            >
-              <span>{state?.nominationsVisible ? "Ativas" : "Escondidas"}</span>
-              <Eye className="h-4 w-4" />
-            </Button>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {MODULE_LABELS.map((module) => (
+              <VisibilityToggle
+                key={module.key}
+                checked={state.moduleVisibility[module.key]}
+                description={module.description}
+                hint={state.effectiveModules[module.key] ? "Ativo para membros" : "Oculto aos membros"}
+                label={module.label}
+                onChange={(checked) =>
+                  void persistState(module.key, {
+                    moduleVisibility: {
+                      ...state.moduleVisibility,
+                      [module.key]: checked,
+                    },
+                  })
+                }
+                pending={busyKey === module.key}
+              />
+            ))}
           </div>
 
-          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)]/85 p-3">
-            <p className="label text-[var(--color-text-muted)]">
-              Resultados visiveis
+          <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3">
+            <div className="flex items-center gap-2 text-[var(--text-primary)]">
+              <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
+              <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
+                Leitura rapida
+              </p>
+            </div>
+            <p className="mt-2 text-sm text-[var(--beige)]/76">
+              A fase continua a bloquear o que nao faz sentido. Estes toggles
+              servem para esconder modulos mesmo quando a fase os permitir.
             </p>
-            <Button
-              variant={state?.resultsVisible ? "default" : "outline"}
-              className="w-full justify-between"
-              disabled={isBusy}
-              onClick={() =>
-                updateState({ resultsVisible: !state?.resultsVisible })
-              }
-            >
-              <span>{state?.resultsVisible ? "Ativos" : "Escondidos"}</span>
-              <Eye className="h-4 w-4" />
-            </Button>
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
-      <div className="flex gap-3 rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/30 bg-[var(--color-bg-surface)]/85 p-4">
-        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-fire)]" />
-        <p className="body-small text-[var(--color-text-primary)]">
-          A votacao so funciona em <strong>voting</strong>. Os resultados aparecem
-          quando <strong>resultsVisible</strong> esta ativo ou quando a fase entra
-          em <strong>gala</strong>.
-          {IS_LOCAL_MODE ? " Em modo local, a fase Gala fica escondida." : ""}
-        </p>
+function VisibilityToggle({
+  checked,
+  description,
+  hint,
+  label,
+  onChange,
+  pending,
+}: Readonly<{
+  checked: boolean;
+  description: string;
+  hint?: string;
+  label: string;
+  onChange: (checked: boolean) => void;
+  pending: boolean;
+}>) {
+  return (
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-primary)]">
+            {label}
+          </p>
+          <p className="text-sm text-[var(--beige)]/76">{description}</p>
+          {hint ? (
+            <p className="text-xs text-[var(--text-muted)]">{hint}</p>
+          ) : null}
+        </div>
+        <Switch checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>
     </div>
   );
