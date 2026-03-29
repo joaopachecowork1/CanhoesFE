@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -11,26 +12,7 @@ import { Button } from "@/components/ui/button";
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
 import { CanhoesMoreSheet } from "./CanhoesMoreSheet";
-
-const PAGE_TITLES = [
-  { href: "/canhoes/admin", label: "Admin" },
-  { href: "/canhoes/amigo-secreto", label: "Amigo secreto" },
-  { href: "/canhoes/categorias", label: "Categorias" },
-  { href: "/canhoes/feed", label: "Feed" },
-  { href: "/canhoes/gala", label: "Gala" },
-  { href: "/canhoes/medidas", label: "Medidas" },
-  { href: "/canhoes/nomeacoes", label: "Nomeacoes" },
-  { href: "/canhoes/stickers", label: "Stickers" },
-  { href: "/canhoes/votacao", label: "Votacao" },
-  { href: "/canhoes/wishlist", label: "Wishlist" },
-] as const;
-
-function getPageTitle(pathname: string | null) {
-  if (!pathname) return "Feed";
-
-  const matchedPage = PAGE_TITLES.find(({ href }) => pathname.startsWith(href));
-  return matchedPage?.label ?? "Feed";
-}
+import { getPageTitle, isMoreSectionActive } from "./canhoesNavigation";
 
 export function CanhoesChrome({
   children,
@@ -38,6 +20,8 @@ export function CanhoesChrome({
   const pathname = usePathname();
   const router = useRouter();
   const { isLogged, logout, user } = useAuth();
+  const isAdmin = Boolean(user?.isAdmin);
+  const isLocalMode = IS_LOCAL_MODE;
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
@@ -60,6 +44,12 @@ export function CanhoesChrome({
     return "Membro";
   }, [user?.email, user?.name]);
 
+  const isMoreActive = Boolean(pathname) && isMoreSectionActive({
+    isAdmin,
+    isLocalMode,
+    pathname: pathname ?? "",
+  });
+
   return (
     <div
       data-theme="canhoes"
@@ -73,11 +63,16 @@ export function CanhoesChrome({
       <header className="sticky top-0 z-40 border-b border-[var(--border-subtle)] bg-[rgba(15,18,9,0.82)] backdrop-blur-xl">
         <div className="page-shell-wide pb-3 pt-3">
           <div className="page-hero px-4 py-4 sm:px-5 sm:py-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0 space-y-3">
                 <div className="flex items-center gap-2 text-[var(--neon-green)]">
                   <ScrollText className="h-4 w-4" />
                   <span className="label text-[var(--beige)]">Canhoes</span>
+                  {isLocalMode ? (
+                    <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--neon-amber)]">
+                      Local
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="space-y-1">
@@ -90,12 +85,12 @@ export function CanhoesChrome({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 sm:justify-end">
-                <div className="canhoes-glass rounded-full px-3 py-2 text-right">
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center xl:min-w-[26rem]">
+                <div className="canhoes-glass rounded-[1.25rem] px-4 py-3 text-left sm:text-right">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--beige)]/70">
                     Perfil
                   </p>
-                  <p className="max-w-[11rem] truncate text-sm font-semibold text-[var(--text-primary)]">
+                  <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
                     {userLabel}
                   </p>
                 </div>
@@ -104,7 +99,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="rounded-full px-4"
+                    className="min-h-11 rounded-full px-4"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -118,10 +113,10 @@ export function CanhoesChrome({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="shrink-0 rounded-full"
+                  className="min-h-11 shrink-0 rounded-full"
                   onClick={() => setIsMoreSheetOpen(true)}
-                  aria-label="Abrir menu"
-                  title={user?.email ?? "Mais opcoes"}
+                  aria-label="Abrir mais opções"
+                  title={user?.email ?? "Mais opções"}
                 >
                   <Menu className="h-5 w-5" strokeWidth={2.1} />
                 </Button>
@@ -152,14 +147,21 @@ export function CanhoesChrome({
       </main>
 
       <CanhoesBottomTabs
+        isMoreActive={isMoreActive || isMoreSheetOpen}
         pathname={pathname ?? ""}
         onNavigate={(href) => router.push(href)}
-        onCompose={() => setIsComposeSheetOpen(true)}
+        onOpenMore={() => setIsMoreSheetOpen(true)}
       />
 
       <CanhoesMoreSheet
+        isAdmin={isAdmin}
+        isLocalMode={isLocalMode}
         open={isMoreSheetOpen}
         onOpenChange={setIsMoreSheetOpen}
+        onCompose={() => {
+          setIsMoreSheetOpen(false);
+          setIsComposeSheetOpen(true);
+        }}
         onNavigate={(href) => {
           setIsMoreSheetOpen(false);
           router.push(href);

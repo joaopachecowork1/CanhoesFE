@@ -1,91 +1,52 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Flame, Leaf, Plus, Shield, Trophy } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type TabConfig = {
-  href: string;
-  icon: ReactNode;
-  isAdmin?: boolean;
-  label: string;
-};
+import { BOTTOM_NAV_ITEMS, isTabActive } from "./canhoesNavigation";
 
 type CanhoesBottomTabsProps = {
-  pathname: string;
+  isMoreActive: boolean;
   onNavigate: (href: string) => void;
-  onCompose: () => void;
+  onOpenMore: () => void;
+  pathname: string;
 };
 
-const TABS: TabConfig[] = [
-  { href: "/canhoes", icon: <Leaf className="h-5 w-5" />, label: "Feed" },
-  {
-    href: "/canhoes/categorias",
-    icon: <Trophy className="h-5 w-5" />,
-    label: "Ranking",
-  },
-  {
-    href: "/canhoes/votacao",
-    icon: <Flame className="h-5 w-5" />,
-    label: "Votacao",
-  },
-  {
-    href: "/canhoes/admin",
-    icon: <Shield className="h-5 w-5" />,
-    isAdmin: true,
-    label: "Admin",
-  },
-] as const;
-
-function isTabActive(pathname: string, href: string) {
-  if (href === "/canhoes") {
-    return (
-      pathname === "/canhoes" ||
-      pathname === "/canhoes/" ||
-      pathname === "/canhoes/feed"
-    );
-  }
-
-  return pathname.startsWith(href);
-}
-
 export function CanhoesBottomTabs({
-  pathname,
+  isMoreActive,
   onNavigate,
-  onCompose,
+  onOpenMore,
+  pathname,
 }: Readonly<CanhoesBottomTabsProps>) {
-  const [feedTab, rankingTab, votingTab, adminTab] = TABS;
+  const [feedTab, rankingTab, votingTab] = BOTTOM_NAV_ITEMS;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-subtle)] bg-[rgba(15,18,9,0.9)] backdrop-blur-xl">
-      <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-2 pb-safe">
-        <div className="grid min-h-[4.4rem] grid-cols-5 items-end gap-1 py-2">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-neon)]/25 bg-[rgba(15,18,9,0.94)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[rgba(15,18,9,0.86)]">
+      <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-3 pb-safe">
+        <div className="grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 py-2">
           <BottomTab
+            href={feedTab.href}
             icon={feedTab.icon}
             isActive={isTabActive(pathname, feedTab.href)}
             label={feedTab.label}
             onClick={() => onNavigate(feedTab.href)}
           />
           <BottomTab
+            href={rankingTab.href}
             icon={rankingTab.icon}
             isActive={isTabActive(pathname, rankingTab.href)}
             label={rankingTab.label}
             onClick={() => onNavigate(rankingTab.href)}
           />
-          <ComposeButton onClick={onCompose} />
+          <MoreButton isActive={isMoreActive} onClick={onOpenMore} />
           <BottomTab
+            href={votingTab.href}
             icon={votingTab.icon}
             isActive={isTabActive(pathname, votingTab.href)}
             label={votingTab.label}
             onClick={() => onNavigate(votingTab.href)}
-          />
-          <BottomTab
-            icon={adminTab.icon}
-            isActive={isTabActive(pathname, adminTab.href)}
-            isAdmin={adminTab.isAdmin}
-            label={adminTab.label}
-            onClick={() => onNavigate(adminTab.href)}
           />
         </div>
       </div>
@@ -94,62 +55,98 @@ export function CanhoesBottomTabs({
 }
 
 function BottomTab({
-  icon,
+  href,
+  icon: Icon,
   isActive,
-  isAdmin = false,
   label,
   onClick,
 }: Readonly<{
-  icon: ReactNode;
+  href: string;
+  icon: LucideIcon;
   isActive: boolean;
-  isAdmin?: boolean;
   label: string;
   onClick: () => void;
 }>) {
-  const activeClasses = isAdmin
-    ? "text-[var(--neon-amber)]"
-    : "text-[var(--neon-green)]";
-  const indicatorClasses = isAdmin
-    ? "bg-[var(--neon-amber)]"
-    : "bg-[var(--neon-green)]";
-
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "canhoes-tap flex min-h-11 flex-col items-center justify-center gap-1 rounded-[1rem] px-2 pb-1 pt-2 text-[11px] font-semibold",
+        "canhoes-tap flex min-h-12 flex-col items-center justify-center gap-1 rounded-[1rem] px-2 py-2 text-center transition-colors",
         isActive
-          ? activeClasses
-          : "text-[var(--beige)]/60 hover:text-[var(--text-primary)]"
+          ? "bg-[rgba(0,255,136,0.08)] text-[var(--text-primary)]"
+          : "text-[rgba(232,223,200,0.62)] hover:text-[var(--text-primary)]"
       )}
       aria-current={isActive ? "page" : undefined}
+      data-href={href}
     >
-      <div className={cn("flex items-center justify-center", !isActive && "opacity-80")}>
-        {icon}
-      </div>
-      <span className={cn(isActive ? "font-bold" : "font-medium")}>{label}</span>
+      <span
+        className={cn(
+          "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+          isActive
+            ? "bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]"
+            : "bg-transparent"
+        )}
+      >
+        <Icon className="h-[1.15rem] w-[1.15rem]" />
+      </span>
+      <span
+        className={cn(
+          "font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.12em]",
+          isActive ? "font-semibold text-[var(--text-primary)]" : "font-medium"
+        )}
+      >
+        {label}
+      </span>
       <span
         aria-hidden="true"
         className={cn(
-          "h-0.5 w-6 rounded-full transition-opacity",
-          isActive ? indicatorClasses : "opacity-0"
+          "h-0.5 w-7 rounded-full transition-opacity",
+          isActive
+            ? "bg-[var(--neon-green)] opacity-100 [box-shadow:var(--glow-green-sm)]"
+            : "opacity-0"
         )}
       />
     </button>
   );
 }
 
-function ComposeButton({ onClick }: Readonly<{ onClick: () => void }>) {
+function MoreButton({
+  isActive,
+  onClick,
+}: Readonly<{
+  isActive: boolean;
+  onClick: () => void;
+}>) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="canhoes-tap mx-auto -mt-5 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--border-neon)] bg-[var(--neon-green)] text-[var(--bg-void)] shadow-[var(--glow-green)]"
-      aria-label="Criar post"
-      title="Criar post"
+      className="canhoes-tap mx-auto flex min-h-12 flex-col items-center justify-center gap-1 px-2 py-1.5"
+      aria-current={isActive ? "page" : undefined}
+      aria-label="Abrir mais opções"
+      title="Mais opções"
     >
-      <Plus className="h-5 w-5" strokeWidth={2.2} />
+      <span
+        className={cn(
+          "flex h-12 w-12 items-center justify-center rounded-full border text-[var(--text-primary)] shadow-[var(--glow-moss)] transition-[transform,background-color,border-color,color,box-shadow]",
+          isActive
+            ? "border-[var(--border-neon)] bg-[rgba(0,255,136,0.14)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
+            : "border-[var(--border-moss)] bg-[var(--moss)] hover:border-[var(--border-neon)] hover:text-[var(--neon-green)]"
+        )}
+      >
+        <Plus className="h-5 w-5" strokeWidth={2.2} />
+      </span>
+      <span
+        className={cn(
+          "font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.12em]",
+          isActive
+            ? "font-semibold text-[var(--text-primary)]"
+            : "font-medium text-[rgba(232,223,200,0.74)]"
+        )}
+      >
+        Mais
+      </span>
     </button>
   );
 }
