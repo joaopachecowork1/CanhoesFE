@@ -172,12 +172,12 @@ export default function CanhoesAdminModule() {
           </div>
         </section>
 
-        <TabsList className="scrollbar-none h-auto w-full justify-start gap-2 overflow-x-auto border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface-alt)]/78 p-2 xl:flex-col xl:overflow-visible">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-2 overflow-visible whitespace-normal border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface-alt)]/78 p-2 sm:grid-cols-3 xl:flex xl:flex-col">
           {adminTabs.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="w-full shrink-0 justify-between rounded-[var(--radius-md-token)] px-3 py-3 xl:w-full"
+              className="min-h-[56px] w-full justify-between whitespace-normal rounded-[var(--radius-md-token)] px-3 py-3 text-left leading-tight xl:w-full"
             >
               <span>{tab.label}</span>
               {tab.count > 0 ? (
