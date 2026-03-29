@@ -4,6 +4,7 @@ import { CalendarRange, RefreshCw, ShieldCheck, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { adminCopy } from "@/lib/canhoesCopy";
 
 import {
   ADMIN_QUICK_ACTIONS,
@@ -41,7 +42,9 @@ export function AdminControlStrip({
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 text-[var(--bark)]">
                 <ShieldCheck className="h-4 w-4" />
-                <span className="editorial-kicker text-[var(--bark)]">Admin</span>
+                <span className="editorial-kicker text-[var(--bark)]">
+                  {adminCopy.controlStrip.kicker}
+                </span>
               </span>
               <Badge className="border-[rgba(107,76,42,0.18)] bg-[rgba(107,76,42,0.08)] text-[var(--bark)]">
                 {phaseLabel}
@@ -52,15 +55,16 @@ export function AdminControlStrip({
               >
                 {pendingReviewCount > 0
                   ? `${pendingReviewCount} por rever`
-                  : "Sem pendencias abertas"}
+                  : adminCopy.controlStrip.clearQueue}
               </Badge>
             </div>
 
             <div className="space-y-1">
-              <h2 className="heading-2 text-[var(--text-ink)]">Mesa da edicao</h2>
+              <h2 className="heading-2 text-[var(--text-ink)]">
+                {adminCopy.controlStrip.title}
+              </h2>
               <p className="body-small max-w-2xl text-[var(--bark)]/76">
-                Fase, moderacao e visibilidade desta edicao num painel pensado
-                para decisoes rapidas no telemovel.
+                {adminCopy.controlStrip.description}
               </p>
             </div>
           </div>

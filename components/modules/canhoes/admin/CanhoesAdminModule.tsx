@@ -8,6 +8,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
+import { adminCopy } from "@/lib/canhoesCopy";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import {
@@ -159,9 +160,7 @@ export default function CanhoesAdminModule() {
       {dashboardError ? (
         <div className="flex flex-wrap gap-2">
           <Badge variant="destructive">Erro: {dashboardError}</Badge>
-          <Badge variant="outline">
-            Atualiza a edicao ou verifica o backend antes de moderar.
-          </Badge>
+          <Badge variant="outline">{adminCopy.shell.backendHint}</Badge>
         </div>
       ) : null}
 

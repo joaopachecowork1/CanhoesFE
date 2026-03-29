@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle, Trophy, Users, Vote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/StatCard";
+import { adminCopy } from "@/lib/canhoesCopy";
 import { colors } from "@/lib/theme/tokens";
 import type {
   AwardCategoryDto,
@@ -72,7 +73,7 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <p className="editorial-kicker">Pulso da edicao</p>
+        <p className="editorial-kicker">{adminCopy.dashboard.pulseKicker}</p>
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
           {loading ? (
             Array.from({ length: 5 }).map((_, index) => (
@@ -130,12 +131,14 @@ export function AdminDashboard({
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-[var(--bark)]">
               <AlertTriangle className="h-4 w-4" />
-              <span className="editorial-kicker text-[var(--bark)]">Fila aberta</span>
+              <span className="editorial-kicker text-[var(--bark)]">
+                {adminCopy.dashboard.queueKicker}
+              </span>
             </div>
 
             <div className="space-y-2">
               <h3 className="heading-3 text-[var(--text-ink)]">
-                Ha decisoes por fechar nesta edicao
+                {adminCopy.dashboard.queueTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {safePendingNominees.length > 0 ? (
@@ -162,7 +165,7 @@ export function AdminDashboard({
       {!loading && recentNominees.length > 0 ? (
         <section className="space-y-3">
           <div className="space-y-1">
-            <p className="editorial-kicker">Ultimas entradas</p>
+            <p className="editorial-kicker">{adminCopy.dashboard.recentKicker}</p>
             <h3 className="heading-3 text-[var(--text-primary)]">
               Nomeacoes recebidas mais recentemente
             </h3>

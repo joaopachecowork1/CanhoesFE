@@ -27,6 +27,7 @@ import {
   openComposeSheet,
   pickActiveEvent,
 } from "@/lib/canhoesEvent";
+import { homeCopy as productHomeCopy } from "@/lib/canhoesCopy";
 import { absMediaUrl } from "@/lib/media";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
@@ -206,7 +207,7 @@ export function CanhoesEventHomeModule() {
             <div className="flex items-center gap-3 text-[var(--beige)]/76">
               <Loader2 className="h-5 w-5 animate-spin text-[var(--neon-green)]" />
               <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
-                A preparar a edição
+                {productHomeCopy.loading}
               </span>
             </div>
           </CardContent>
@@ -219,11 +220,8 @@ export function CanhoesEventHomeModule() {
     return (
       <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <CardContent className="space-y-3 py-8 text-center">
-          <p className="heading-3 text-[var(--text-primary)]">Não foi possível abrir esta edição.</p>
-          <p className="body-small text-[var(--beige)]/76">
-            Falta contexto para perceber a fase atual e o que já está aberto
-            para o grupo.
-          </p>
+          <p className="heading-3 text-[var(--text-primary)]">{productHomeCopy.errorTitle}</p>
+          <p className="body-small text-[var(--beige)]/76">{productHomeCopy.errorDescription}</p>
           <div className="flex justify-center">
             <Button onClick={() => window.location.reload()}>Tentar outra vez</Button>
           </div>
@@ -260,7 +258,7 @@ export function CanhoesEventHomeModule() {
               {event.name}
             </p>
             <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
-              O que está aberto nesta fase
+              {productHomeCopy.heroTitle}
             </h1>
             <p className="body-base max-w-3xl text-[var(--beige)]/82">{phaseSummary}</p>
           </div>
@@ -305,8 +303,8 @@ export function CanhoesEventHomeModule() {
             <span className="inline-flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
               {overview.permissions.canManage
-                ? "Tens acesso à gestão desta edição."
-                : "Visão de membro desta edição."}
+                ? productHomeCopy.manageLabel
+                : productHomeCopy.memberLabel}
             </span>
           </div>
         </div>
@@ -317,7 +315,7 @@ export function CanhoesEventHomeModule() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
               <Clock3 className="h-4 w-4 text-[var(--bark)]" />
-              Atenção desta fase
+              {productHomeCopy.alertsTitle}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -344,7 +342,7 @@ export function CanhoesEventHomeModule() {
           <CardContent className="space-y-3">
             {recentPosts.length === 0 ? (
               <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-4 text-sm text-[var(--text-muted)]">
-                Ainda não há posts publicados nesta edição.
+                {productHomeCopy.emptyFeed}
               </div>
             ) : (
               recentPosts.map((post) => (
@@ -387,7 +385,7 @@ export function CanhoesEventHomeModule() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-[var(--fire)]" />
-                O teu Amigo Secreto
+                {productHomeCopy.secretSantaTitle}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -431,7 +429,7 @@ export function CanhoesEventHomeModule() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Vote className="h-4 w-4 text-[var(--fire)]" />
-                O que falta tratar
+                {productHomeCopy.checklistTitle}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
