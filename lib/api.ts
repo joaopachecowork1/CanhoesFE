@@ -6,5 +6,5 @@
 //
 // Keep this file so existing imports ("@/lib/api") keep working.
 
-export { ApiError, canhoesFetch } from "@/lib/api/canhoesClient";
+export { ApiError, canhoesFetch, canhoesFetchNullable } from "@/lib/api/canhoesClient";
 

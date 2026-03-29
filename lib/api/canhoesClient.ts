@@ -5,8 +5,8 @@
  *
  * Goals:
  * - Junior-friendly
- * - Safe defaults for auth bootstrap (avoid crashing on 401)
- * - Still allow "strict" mode when you want to throw on 401
+ * - Keep feature calls strict by default
+ * - Still allow explicit nullable bootstrap flows where 401/403 are expected
  */
 
 export const CANHOES_API_URL =
@@ -58,13 +58,17 @@ function isUnauthorizedStatus(status: number) {
 }
 
 /**
- * Main fetch.
+ * Shared low-level request helper for the proxy-backed Canhoes API.
  *
- * Default behavior:
- * - Throws on non-2xx EXCEPT 401/403, which returns null (so app doesn't crash on bootstrap)
- * - If you want strict unauthorized behavior: pass { canhoes: { throwOnUnauthorized: true } }
+ * Most feature repositories should use the strict `canhoesFetch()` variant so
+ * 401/403 remain observable. Only auth/bootstrap flows should opt into the
+ * nullable helper.
  */
-export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): Promise<T> {
+async function requestCanhoes<T>(
+  path: string,
+  init: CanhoesRequestInit | undefined,
+  allowUnauthorizedNull: boolean
+): Promise<T | null> {
   const normalized = normalizePath(path);
   if (!normalized) {
     throw new ApiError("Invalid API path: path cannot be empty", 400);
@@ -98,11 +102,33 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
       ? String((details as { message: unknown }).message)
       : res.statusText || "Request failed";
 
-  // ✅ default: DON'T crash on 401/403 (bootstrap loads)
   const throwOnUnauthorized = Boolean(canhoes?.throwOnUnauthorized);
-  if (isUnauthorizedStatus(res.status) && !throwOnUnauthorized) {
-    return null as unknown as T;
+  if (isUnauthorizedStatus(res.status) && allowUnauthorizedNull && !throwOnUnauthorized) {
+    return null;
   }
 
   throw new ApiError(msg, res.status, details);
+}
+
+/**
+ * Strict API fetch for authenticated feature calls.
+ *
+ * Unlike the historical wrapper, this does not silently coerce 401/403 into a
+ * `null` payload. The caller must either catch the error or use the nullable
+ * variant intentionally.
+ */
+export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): Promise<T> {
+  const result = await requestCanhoes<T>(path, init, false);
+  return result as T;
+}
+
+/**
+ * Nullable fetch for bootstrap flows that may legitimately run before auth is
+ * fully hydrated, such as `/api/me`.
+ */
+export async function canhoesFetchNullable<T>(
+  path: string,
+  init?: CanhoesRequestInit
+): Promise<T | null> {
+  return requestCanhoes<T>(path, init, true);
 }

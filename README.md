@@ -1,107 +1,53 @@
-This is a [Next.js](https://nextjs.org) project — **Canhões do Ano**, a micro social network + voting platform.
+# CanhoesFE
 
-## Getting Started
+Frontend for **Canhoes do Ano**, a private event-driven social app built with
+Next.js App Router.
 
-First, run the development server:
+## Runtime flow
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- UI -> repositories -> `canhoesFetch` -> `/api/proxy/*` -> backend API
+- Google auth is handled by NextAuth
+- The Google OpenID `id_token` is forwarded to the backend by the proxy route
+- The backend `/api/me` endpoint is the source of truth for `isAdmin`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Main areas
 
----
-
-## 🧪 Mock Mode (Offline Development)
-
-You can run the entire app without a backend or Google OAuth using **Mock Mode**.
-
-### Activate
-
-Create a `.env.local` file in the `canhoesfe/` directory:
-
-```bash
-# .env.local
-NEXT_PUBLIC_MOCK_AUTH=true
-```
-
-Or pass it inline:
-
-```bash
-NEXT_PUBLIC_MOCK_AUTH=true npm run dev
-```
-
-### What Mock Mode does
-
-| Feature | Behaviour |
-|---------|-----------|
-| Authentication | Injects a `Dev Admin` user with `isAdmin: true` — no Google login required |
-| Login page | Never shown — the app goes straight to the feed |
-| Admin panel | Fully accessible and pre-populated with demo data |
-| API calls | Intercepted and returned as static fixtures (no backend needed) |
-| Dev banner | A 🧪 DEV MODE badge appears in the bottom-left corner |
-
-> ⚠️ Mock mode is **hard-guarded** behind `process.env.NODE_ENV !== 'production'`. It can never run in a production deployment even if the env variable is accidentally set.
-
-### Mock data
-
-Fixtures live in `lib/mock/mockData.ts`. Edit them to adjust the data shown in dev.
-
----
-
-## Project Structure
-
-```
+```text
 app/
-  canhoes/(app)/          — Protected app pages (feed, admin, categorias, …)
-  canhoes/(public)/       — Public pages (login)
-  api/                    — Next.js API routes (auth, proxy, uploads)
+  canhoes/(app)/          protected app pages
+  canhoes/(public)/       login and public entry points
+  api/                    auth, proxy, uploads, me
 components/
-  chrome/canhoes/         — Navigation shell (bottom tabs, header)
-  modules/canhoes/        — Feature modules
-    admin/                — Admin panel & components
-  dev/                    — DevModeBanner (dev-only)
-  ui/                     — Shared UI components (shadcn/ui)
-lib/
-  api/                    — canhoesFetch wrapper
-  mock/                   — Mock mode: index, mockData, mockFetch
-  repositories/           — API repositories (canhoesRepo, hubRepo)
-  auth/                   — Auth utilities (useIsAdmin)
+  chrome/canhoes/         event shell and navigation
+  modules/canhoes/        event modules
+  modules/hub/            social feed modules
+  ui/                     shared UI primitives
 contexts/
-  AuthContext.tsx          — App-level auth state
+  AuthContext.tsx         app auth state hydrated from /api/me
 hooks/
-  useAuth.ts              — Re-export of AuthContext
+  useEventOverview.ts     active event + overview bootstrap
+lib/
+  api/                    fetch client and contracts
+  repositories/           legacy and v1 repositories
+  media.ts                media URL normalization
+  canhoesEvent.ts         event selectors and shell events
 ```
 
-## Architecture
+## Auth
 
-- **UI → Repository → canhoesFetch → /api/proxy → Backend**
-- Auth: NextAuth v4 with Google provider, JWT strategy
-- Admin check: `user.isAdmin` from the `/api/me` backend endpoint
-- Mock mode bypasses all auth and API calls with static fixtures
+- NextAuth stores the Google `id_token` in the JWT/session
+- `/api/proxy/*` forwards `Authorization: Bearer <id_token>` to the backend
+- `/api/me` returns the backend-mapped user profile
+- Frontend role checks must rely on the backend profile, not hardcoded emails
+
+## Mock mode
+
+Mock mode is dev-only and is guarded behind `NODE_ENV !== "production"`.
 
 ## Commands
 
 ```bash
-npm run dev       # Development server
-npm run build     # Production build
-npm run lint      # ESLint
+npm run dev
+npm run lint
+npm run build
 ```
-
----
-
-## Google OAuth Notes (Local + Vercel)
-
-- Local dev runs on `http://localhost:3000`.
-- Keep `NEXTAUTH_URL=http://localhost:3000` in `.env.local`.
-- In Google Cloud OAuth client, include:
-	- `http://localhost:3000/api/auth/callback/google`
-	- `https://canhoes.vercel.app/api/auth/callback/google`
-- Avoid LAN callback URLs like `http://192.168.x.x/...` with Google OAuth web flow.
-- Use **Mock Mode** (above) to avoid needing Google OAuth during development.

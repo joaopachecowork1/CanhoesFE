@@ -37,47 +37,29 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   return handleProxyRequest(request, resolvedParams, "PATCH");
 }
 
+async function resolveIdToken(request: NextRequest) {
+  const token = await getToken({ req: request });
+  if (token?.idToken) {
+    return token.idToken;
+  }
+
+  const session = await getServerSession(authOptions);
+  return session?.idToken ?? null;
+}
+
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }, method: string) {
   try {
-    // Try to get idToken from JWT
-    const token = await getToken({ req: request });
-    let idToken = token?.idToken;
-
-    console.log("[Proxy] getToken result:", {
-      hasToken: !!token,
-      hasIdToken: !!idToken,
-      tokenEmail: token?.email,
-      tokenSub: token?.sub,
-    });
-
-    // Fallback to server session
-    if (!idToken) {
-      const session = await getServerSession(authOptions);
-      idToken = session?.idToken;
-      
-      console.log("[Proxy] getServerSession fallback:", {
-        hasSession: !!session,
-        hasIdToken: !!idToken,
-        userEmail: session?.user?.email,
-      });
-    }
-
+    const idToken = await resolveIdToken(request);
     const path = params.path.join("/");
     const backendBase = process.env.CANHOES_API_URL || "http://localhost:5000";
     const backendUrl = `${backendBase}/api/${path}${request.nextUrl.search}`;
 
-    // Build headers
     const headers = new Headers();
 
-    // Add Authorization if we have idToken
     if (idToken) {
       headers.set("Authorization", `Bearer ${idToken}`);
-      console.log("[Proxy] Authorization header set, token starts with:", idToken.substring(0, 50) + "...");
-    } else {
-      console.warn("[Proxy] NO ID TOKEN - request will likely fail auth");
     }
 
-    // Forward content-type so backend can parse JSON or multipart properly.
     const contentType = request.headers.get("content-type");
     if (contentType) headers.set("Content-Type", contentType);
 
@@ -86,21 +68,12 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       body = await request.arrayBuffer();
     }
 
-    console.log(`[Proxy] ${method} ${backendUrl}`, {
-      hasToken: !!idToken,
-      path,
-      isAdmin: token?.isAdmin,
-    });
-
     const response = await fetch(backendUrl, {
       method,
       headers,
       body: body ?? undefined,
     });
 
-    console.log(`[Proxy] Response ${response.status} for ${path}`);
-
-    // 204 has no body by definition; passing a body causes NextResponse to throw.
     if (response.status === 204) {
       return new NextResponse(null, {
         status: 204,
@@ -118,7 +91,11 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       },
     });
   } catch (error) {
-    console.error("[Proxy Error]", error);
+    console.error("[Proxy Error]", {
+      message: error instanceof Error ? error.message : "Unknown proxy failure",
+      method,
+      path: params.path.join("/"),
+    });
     return NextResponse.json({ message: "Internal proxy error" }, { status: 500 });
   }
 }

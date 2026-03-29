@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useAuthCache } from "@/hooks/useAuthCache";
 
 export type AuthUser = {
   id: string;
@@ -22,11 +23,31 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const { data: me, loading: meLoading, refresh, clearCache } = useAuthCache();
+  const sessionIdentity = session?.user?.email ?? null;
 
-  const user = useMemo<AuthUser | null>(() => {
-    if (status !== "authenticated") return null;
+  useEffect(() => {
+    if (status === "authenticated") {
+      clearCache();
+      void refresh();
+      return;
+    }
 
-    const sessionUser = session?.user as
+    clearCache();
+  }, [clearCache, refresh, sessionIdentity, status]);
+
+  const sessionUser = useMemo<
+    | {
+        email?: string | null;
+        id?: string | null;
+        isAdmin?: boolean | null;
+        name?: string | null;
+      }
+    | undefined
+  >(() => {
+    if (status !== "authenticated") return undefined;
+
+    return session?.user as
       | {
           email?: string | null;
           id?: string | null;
@@ -34,24 +55,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name?: string | null;
         }
       | undefined;
+  }, [session?.user, status]);
+
+  const user = useMemo<AuthUser | null>(() => {
+    if (!sessionUser) return null;
+
+    const backendUser = me?.user;
 
     return {
-      id: sessionUser?.id || "unknown",
-      email: sessionUser?.email || "",
-      name: sessionUser?.name || sessionUser?.email?.split("@")[0] || "",
-      isAdmin: Boolean(sessionUser?.isAdmin),
+      id: backendUser?.id || sessionUser.id || "unknown",
+      email: backendUser?.email || sessionUser.email || "",
+      name:
+        backendUser?.displayName ||
+        sessionUser.name ||
+        sessionUser.email?.split("@")[0] ||
+        "",
+      // The backend `/api/me` profile is the authority for admin role.
+      isAdmin: Boolean(backendUser?.isAdmin ?? sessionUser.isAdmin),
     };
-  }, [session?.user, status]);
+  }, [me?.user, sessionUser]);
+
+  const loading = status === "loading" || (status === "authenticated" && meLoading && !me);
 
   const value = useMemo<AuthContextType>(
     () => ({
       user,
       isLogged: status === "authenticated",
-      loading: status === "loading",
+      loading,
       loginGoogle: () => signIn("google"),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
     }),
-    [status, user]
+    [loading, status, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
