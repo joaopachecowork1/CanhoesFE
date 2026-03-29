@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { Check, FolderTree, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
+import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
+import { statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,12 +35,6 @@ const FILTER_LABELS: Record<StatusFilter, string> = {
   pending: "Pendentes",
   approved: "Aprovadas",
 };
-
-function statusVariant(status: NomineeDto["status"]) {
-  if (status === "approved") return "default";
-  if (status === "rejected") return "destructive";
-  return "secondary";
-}
 
 export function NomineesAdmin({
   eventId,
@@ -122,43 +119,31 @@ export function NomineesAdmin({
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {(Object.keys(FILTER_LABELS) as StatusFilter[]).map((filterKey) => (
-            <Button
-              key={filterKey}
-              size="sm"
-              variant={statusFilter === filterKey ? "default" : "outline"}
-              className="shrink-0 rounded-full px-4"
-              onClick={() => setStatusFilter(filterKey)}
-            >
-              {FILTER_LABELS[filterKey]}
-              <Badge
-                variant="secondary"
-                className="ml-2 min-w-5 justify-center px-1.5 text-[11px]"
-              >
-                {counts[filterKey]}
-              </Badge>
-            </Button>
-          ))}
+          <AdminStatusFilters
+            active={statusFilter}
+            counts={counts}
+            labels={FILTER_LABELS}
+            onChange={setStatusFilter}
+            options={["all", "pending", "approved"]}
+          />
         </div>
       </CardHeader>
 
       <CardContent className="space-y-3">
         {loading ? (
-          <div className="body-small text-[var(--color-text-muted)]">
-            A carregar nomeacoes...
-          </div>
+          <AdminStateMessage>A carregar nomeacoes...</AdminStateMessage>
         ) : null}
 
         {!loading && controlsDisabled ? (
-          <div className="body-small text-[var(--color-text-muted)]">
+          <AdminStateMessage>
             O evento ativo ainda nao ficou disponivel para moderacao.
-          </div>
+          </AdminStateMessage>
         ) : null}
 
         {!loading && !controlsDisabled && filteredNominees.length === 0 ? (
-          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
+          <AdminStateMessage variant="panel">
             Nao ha nomeacoes neste estado.
-          </div>
+          </AdminStateMessage>
         ) : null}
 
         {!loading &&
@@ -180,7 +165,7 @@ export function NomineesAdmin({
                       <h3 className="heading-3 text-[var(--color-text-primary)]">
                         {nominee.title}
                       </h3>
-                      <Badge variant={statusVariant(nominee.status)}>
+                      <Badge variant={statusBadgeVariant(nominee.status)}>
                         {nominee.status}
                       </Badge>
                     </div>

@@ -255,9 +255,7 @@ export default function CanhoesAdminModule() {
             categoryProposals={allCategoryProposals}
             measureProposals={allMeasureProposals}
             loading={loading}
-            onUpdate={() => {
-              void handleRefresh();
-            }}
+            onUpdate={handleRefresh}
           />
         </TabsContent>
 

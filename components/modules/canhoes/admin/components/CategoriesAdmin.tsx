@@ -4,6 +4,11 @@ import { useMemo, useState } from "react";
 import { FolderTree, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
+import {
+  statusBadgeVariant,
+  summarizeModerationStatuses,
+} from "@/components/modules/canhoes/admin/moderationUtils";
 import type {
   AwardCategoryDto,
   CategoryProposalDto,
@@ -24,7 +29,7 @@ type Props = {
   categoryProposals: CategoryProposalDto[];
   measureProposals: MeasureProposalDto[];
   loading: boolean;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 };
 
 type Draft = {
@@ -34,31 +39,6 @@ type Draft = {
   kind: string;
   isActive: boolean;
 };
-
-type ProposalStatus = "pending" | "approved" | "rejected";
-type ProposalSummary = Record<ProposalStatus, number>;
-
-function ensureArray<T>(value: unknown): T[] {
-  return Array.isArray(value) ? (value as T[]) : [];
-}
-
-function summarizeStatuses(items: unknown): ProposalSummary {
-  return ensureArray<{ status: string }>(items).reduce<ProposalSummary>(
-    (summary, item) => {
-      if (item.status === "pending") summary.pending += 1;
-      if (item.status === "approved") summary.approved += 1;
-      if (item.status === "rejected") summary.rejected += 1;
-      return summary;
-    },
-    { pending: 0, approved: 0, rejected: 0 }
-  );
-}
-
-function statusBadgeVariant(status: string): "default" | "destructive" | "secondary" {
-  if (status === "approved") return "default";
-  if (status === "rejected") return "destructive";
-  return "secondary";
-}
 
 export function CategoriesAdmin({
   eventId,
@@ -100,15 +80,10 @@ export function CategoriesAdmin({
     [categories, drafts]
   );
 
-  const categoryProposalList = useMemo(
-    () => ensureArray<CategoryProposalDto>(categoryProposals),
-    [categoryProposals]
-  );
-
   const proposalSummary = useMemo(
     () => ({
-      categories: summarizeStatuses(categoryProposals),
-      measures: summarizeStatuses(measureProposals),
+      categories: summarizeModerationStatuses(categoryProposals),
+      measures: summarizeModerationStatuses(measureProposals),
     }),
     [categoryProposals, measureProposals]
   );
@@ -158,7 +133,7 @@ export function CategoriesAdmin({
       });
 
       toast.success("Categoria atualizada");
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       console.error(error);
       toast.error("Erro ao guardar categoria");
@@ -183,7 +158,7 @@ export function CategoriesAdmin({
       });
       setNewCategoryName("");
       toast.success("Categoria criada");
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       console.error(error);
       toast.error("Erro ao criar categoria");
@@ -199,7 +174,7 @@ export function CategoriesAdmin({
     try {
       await canhoesEventsRepo.adminDeleteCategory(eventId, categoryId);
       toast.success("Categoria removida");
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       console.error(error);
       toast.error("Nao foi possivel eliminar a categoria");
@@ -261,6 +236,12 @@ export function CategoriesAdmin({
         </CardHeader>
 
         <CardContent className="space-y-3">
+          {!loading && rows.length === 0 ? (
+            <AdminStateMessage variant="panel">
+              Ainda nao existem categorias neste evento.
+            </AdminStateMessage>
+          ) : null}
+
           {rows.map((row) => (
             <article
               key={row.id}
@@ -373,7 +354,7 @@ export function CategoriesAdmin({
           </div>
 
           <div className="space-y-3">
-            {categoryProposalList.slice(0, 30).map((proposal) => (
+            {categoryProposals.slice(0, 30).map((proposal) => (
               <article
                 key={proposal.id}
                 className="editorial-shell rounded-[var(--radius-md-token)] px-4 py-4"
@@ -404,6 +385,12 @@ export function CategoriesAdmin({
                 </div>
               </article>
             ))}
+
+            {!loading && categoryProposals.length === 0 ? (
+              <AdminStateMessage variant="panel">
+                Ainda nao existem propostas de categoria para este evento.
+              </AdminStateMessage>
+            ) : null}
           </div>
         </CardContent>
       </Card>

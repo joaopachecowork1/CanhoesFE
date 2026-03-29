@@ -4,6 +4,12 @@ import { useMemo, useState } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
+import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
+import {
+  statusBadgeVariant,
+  summarizeModerationStatuses,
+} from "@/components/modules/canhoes/admin/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,12 +64,6 @@ function ProposalShell({
   );
 }
 
-function statusBadgeVariant(status: ProposalStatus): "default" | "destructive" | "secondary" {
-  if (status === "approved") return "default";
-  if (status === "rejected") return "destructive";
-  return "secondary";
-}
-
 export function PendingProposals({
   eventId,
   categoryProposals,
@@ -79,22 +79,12 @@ export function PendingProposals({
   const controlsDisabled = !eventId;
 
   const categoryCounts = useMemo(
-    () => ({
-      all: categoryProposals.length,
-      approved: categoryProposals.filter((proposal) => proposal.status === "approved").length,
-      pending: categoryProposals.filter((proposal) => proposal.status === "pending").length,
-      rejected: categoryProposals.filter((proposal) => proposal.status === "rejected").length,
-    }),
+    () => ({ all: categoryProposals.length, ...summarizeModerationStatuses(categoryProposals) }),
     [categoryProposals]
   );
 
   const measureCounts = useMemo(
-    () => ({
-      all: measureProposalsAll.length,
-      approved: measureProposalsAll.filter((proposal) => proposal.status === "approved").length,
-      pending: measureProposalsAll.filter((proposal) => proposal.status === "pending").length,
-      rejected: measureProposalsAll.filter((proposal) => proposal.status === "rejected").length,
-    }),
+    () => ({ all: measureProposalsAll.length, ...summarizeModerationStatuses(measureProposalsAll) }),
     [measureProposalsAll]
   );
 
@@ -233,41 +223,29 @@ export function PendingProposals({
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {(Object.keys(FILTER_LABELS) as ProposalFilter[]).map((status) => (
-            <Button
-              key={status}
-              size="sm"
-              variant={categoryFilter === status ? "default" : "outline"}
-              className="rounded-full px-4"
-              onClick={() => setCategoryFilter(status)}
-            >
-              {FILTER_LABELS[status]}
-              <Badge
-                variant="secondary"
-                className="ml-2 min-w-5 justify-center px-1.5 text-[11px]"
-              >
-                {categoryCounts[status]}
-              </Badge>
-            </Button>
-          ))}
+          <AdminStatusFilters
+            active={categoryFilter}
+            counts={categoryCounts}
+            labels={FILTER_LABELS}
+            onChange={setCategoryFilter}
+            options={["all", "pending", "approved", "rejected"]}
+          />
         </div>
 
         {loading ? (
-          <div className="body-small text-[var(--color-text-muted)]">
-            A carregar propostas...
-          </div>
+          <AdminStateMessage>A carregar propostas...</AdminStateMessage>
         ) : null}
 
         {!loading && controlsDisabled ? (
-          <div className="body-small text-[var(--color-text-muted)]">
+          <AdminStateMessage>
             O evento ativo ainda nao ficou disponivel para moderacao.
-          </div>
+          </AdminStateMessage>
         ) : null}
 
         {!loading && !controlsDisabled && filteredCategoryProposals.length === 0 ? (
-          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
+          <AdminStateMessage variant="panel">
             Sem propostas de categoria neste estado.
-          </div>
+          </AdminStateMessage>
         ) : null}
 
         {!loading &&
@@ -380,35 +358,23 @@ export function PendingProposals({
         subtitle="Curadoria"
       >
         <div className="flex flex-wrap gap-2">
-          {(Object.keys(FILTER_LABELS) as ProposalFilter[]).map((status) => (
-            <Button
-              key={status}
-              size="sm"
-              variant={measureFilter === status ? "default" : "outline"}
-              className="rounded-full px-4"
-              onClick={() => setMeasureFilter(status)}
-            >
-              {FILTER_LABELS[status]}
-              <Badge
-                variant="secondary"
-                className="ml-2 min-w-5 justify-center px-1.5 text-[11px]"
-              >
-                {measureCounts[status]}
-              </Badge>
-            </Button>
-          ))}
+          <AdminStatusFilters
+            active={measureFilter}
+            counts={measureCounts}
+            labels={FILTER_LABELS}
+            onChange={setMeasureFilter}
+            options={["all", "pending", "approved", "rejected"]}
+          />
         </div>
 
         {loading ? (
-          <div className="body-small text-[var(--color-text-muted)]">
-            A carregar propostas...
-          </div>
+          <AdminStateMessage>A carregar propostas...</AdminStateMessage>
         ) : null}
 
         {!loading && !controlsDisabled && filteredMeasureProposals.length === 0 ? (
-          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--color-moss)]/20 bg-[var(--color-bg-surface)]/50 px-4 py-8 text-center body-small text-[var(--color-text-muted)]">
+          <AdminStateMessage variant="panel">
             Sem propostas neste estado.
-          </div>
+          </AdminStateMessage>
         ) : null}
 
         {!loading &&
