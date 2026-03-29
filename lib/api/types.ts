@@ -424,6 +424,17 @@ export type EventAdminStateDto = {
   counts: EventCountsDto;
 };
 
+export type EventAdminBootstrapDto = {
+  events: EventSummaryDto[];
+  state: EventAdminStateDto;
+  categories: AwardCategoryDto[];
+  nominees: NomineeDto[];
+  proposals: AdminProposalsHistoryDto;
+  votes: AdminVotesDto;
+  members: PublicUserDto[];
+  secretSanta: EventAdminSecretSantaStateDto;
+};
+
 export type UpdateEventAdminStateRequest = {
   nominationsVisible?: boolean | null;
   resultsVisible?: boolean | null;

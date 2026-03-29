@@ -1,26 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { RefreshCw, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-
-import type {
-  AdminVoteAuditRowDto,
-  AwardCategoryDto,
-  CategoryProposalDto,
-  EventAdminStateDto,
-  EventSummaryDto,
-  MeasureProposalDto,
-  NomineeDto,
-  PublicUserDto,
-} from "@/lib/api/types";
 
 import { AdminDashboard } from "./components/AdminDashboard";
 import { CategoriesAdmin } from "./components/CategoriesAdmin";
@@ -31,88 +21,28 @@ import { SecretSantaAdmin } from "./components/SecretSantaAdmin";
 import { UsersAdmin } from "./components/UsersAdmin";
 import { VotesAudit } from "./components/VotesAudit";
 
-function flattenByStatus<T>(items: {
-  approved: T[];
-  pending: T[];
-  rejected: T[];
-}) {
-  return [...items.pending, ...items.approved, ...items.rejected];
-}
-
 export default function CanhoesAdminModule() {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
-
-  const [state, setState] = useState<EventAdminStateDto | null>(null);
-  const [events, setEvents] = useState<EventSummaryDto[]>([]);
-  const [categories, setCategories] = useState<AwardCategoryDto[]>([]);
-  const [allNominees, setAllNominees] = useState<NomineeDto[]>([]);
-  const [allCategoryProposals, setAllCategoryProposals] = useState<CategoryProposalDto[]>([]);
-  const [allMeasureProposals, setAllMeasureProposals] = useState<MeasureProposalDto[]>([]);
-  const [votes, setVotes] = useState<AdminVoteAuditRowDto[]>([]);
-  const [members, setMembers] = useState<PublicUserDto[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Keep the control center on the event-scoped API so module visibility,
-  // moderation queues and active-event changes all come from the same source.
-  const loadData = useCallback(async () => {
-    if (!activeEvent?.id) {
-      setLoading(false);
-      setState(null);
-      setEvents([]);
-      setCategories([]);
-      setAllNominees([]);
-      setAllCategoryProposals([]);
-      setAllMeasureProposals([]);
-      setVotes([]);
-      setMembers([]);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const [
-        nextState,
-        nextEvents,
-        nextCategories,
-        nextNominees,
-        historyPayload,
-        votesPayload,
-        membersPayload,
-      ] = await Promise.all([
-        canhoesEventsRepo.getAdminState(activeEvent.id),
-        canhoesEventsRepo.listEvents(),
-        canhoesEventsRepo.adminGetCategories(activeEvent.id),
-        canhoesEventsRepo.adminGetNominees(activeEvent.id),
-        canhoesEventsRepo.adminProposalsHistory(activeEvent.id),
-        canhoesEventsRepo.adminVotes(activeEvent.id),
-        canhoesEventsRepo.adminGetMembers(activeEvent.id),
-      ]);
-
-      setState(nextState);
-      setEvents(nextEvents);
-      setCategories(nextCategories);
-      setAllNominees(nextNominees);
-      setVotes(votesPayload.votes ?? []);
-      setAllCategoryProposals(flattenByStatus(historyPayload.categoryProposals));
-      setAllMeasureProposals(flattenByStatus(historyPayload.measureProposals));
-      setMembers(membersPayload ?? []);
-    } catch (error) {
-      console.error("Admin load error:", error);
-      toast.error("Erro ao carregar dados do admin");
-    } finally {
-      setLoading(false);
-    }
-  }, [activeEvent?.id]);
-
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
+  const {
+    allCategoryProposals,
+    allMeasureProposals,
+    allNominees,
+    categories,
+    error,
+    events,
+    loading,
+    members,
+    secretSanta,
+    state,
+    votes,
+    refresh,
+  } = useAdminBootstrap(activeEvent?.id ?? null);
 
   const handleRefresh = useCallback(async () => {
-    await loadData();
+    await refresh();
     refreshEventOverview();
-    void refreshOverview();
-  }, [loadData, refreshOverview]);
+    await refreshOverview();
+  }, [refresh, refreshOverview]);
 
   const handleActivateEvent = useCallback(
     async (eventId: string) => {
@@ -132,6 +62,8 @@ export default function CanhoesAdminModule() {
     },
     [activeEvent?.id, refreshOverview]
   );
+
+  const dashboardError = error instanceof Error ? error.message : null;
 
   const pendingNominees = useMemo(
     () => allNominees.filter((nominee) => nominee.status === "pending"),
@@ -211,6 +143,9 @@ export default function CanhoesAdminModule() {
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {dashboardError ? (
+                <Badge variant="destructive">Erro: {dashboardError}</Badge>
+              ) : null}
               {pendingReviewCount > 0 ? (
                 <Badge variant="secondary">
                   {pendingReviewCount} pendentes
@@ -278,7 +213,7 @@ export default function CanhoesAdminModule() {
             nominees={allNominees}
             categories={categories}
             loading={loading}
-            onUpdate={loadData}
+            onUpdate={handleRefresh}
           />
         </TabsContent>
 
@@ -288,7 +223,7 @@ export default function CanhoesAdminModule() {
             categoryProposals={allCategoryProposals}
             measureProposalsAll={allMeasureProposals}
             loading={loading}
-            onUpdate={loadData}
+            onUpdate={handleRefresh}
           />
         </TabsContent>
 
@@ -309,6 +244,7 @@ export default function CanhoesAdminModule() {
             eventId={activeEvent?.id ?? null}
             loading={loading}
             onUpdate={handleRefresh}
+            state={secretSanta}
           />
         </TabsContent>
 
@@ -319,7 +255,9 @@ export default function CanhoesAdminModule() {
             categoryProposals={allCategoryProposals}
             measureProposals={allMeasureProposals}
             loading={loading}
-            onUpdate={handleRefresh}
+            onUpdate={() => {
+              void handleRefresh();
+            }}
           />
         </TabsContent>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Gift, RefreshCw, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,6 +17,7 @@ type SecretSantaAdminProps = {
   eventId: string | null;
   loading: boolean;
   onUpdate: () => Promise<void>;
+  state: EventAdminSecretSantaStateDto | null;
 };
 
 function buildDefaultEventCode(eventId: string | null) {
@@ -29,51 +30,41 @@ export function SecretSantaAdmin({
   eventId,
   loading,
   onUpdate,
+  state,
 }: Readonly<SecretSantaAdminProps>) {
-  const [state, setState] = useState<EventAdminSecretSantaStateDto | null>(null);
   const [eventCode, setEventCode] = useState(() => buildDefaultEventCode(eventId));
-  const [busy, setBusy] = useState<"draw" | "load" | null>(null);
-
-  const loadState = useCallback(async () => {
-    if (!eventId) {
-      setState(null);
-      setEventCode(buildDefaultEventCode(eventId));
-      return;
-    }
-
-    setBusy("load");
-    try {
-      const nextState = await canhoesEventsRepo.adminGetSecretSantaState(eventId);
-      setState(nextState);
-      setEventCode(nextState.eventCode || buildDefaultEventCode(eventId));
-    } catch (error) {
-      console.error("Admin secret santa state error:", error);
-      toast.error("Nao foi possivel carregar o estado do sorteio");
-    } finally {
-      setBusy(null);
-    }
-  }, [eventId]);
+  const [busy, setBusy] = useState<"draw" | "refresh" | null>(null);
 
   useEffect(() => {
-    void loadState();
-  }, [loadState]);
+    setEventCode(state?.eventCode || buildDefaultEventCode(eventId));
+  }, [eventId, state?.eventCode]);
 
   const handleDraw = async () => {
     if (!eventId) return;
 
     const hadDrawBefore = Boolean(state?.hasDraw);
-    setBusy("draw");
+      setBusy("draw");
     try {
-      const nextState = await canhoesEventsRepo.adminDrawSecretSanta(eventId, {
+      await canhoesEventsRepo.adminDrawSecretSanta(eventId, {
         eventCode: eventCode.trim() || null,
       });
-      setState(nextState);
-      setEventCode(nextState.eventCode || buildDefaultEventCode(eventId));
       await onUpdate();
       toast.success(hadDrawBefore ? "Sorteio atualizado" : "Sorteio criado");
     } catch (error) {
       console.error("Admin secret santa draw error:", error);
       toast.error("Nao foi possivel gerar o sorteio");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setBusy("refresh");
+    try {
+      await onUpdate();
+    } catch (error) {
+      console.error("Admin secret santa refresh error:", error);
+      toast.error("Nao foi possivel atualizar o estado do sorteio");
     } finally {
       setBusy(null);
     }
@@ -106,11 +97,11 @@ export function SecretSantaAdmin({
             <Button
               type="button"
               variant="outline"
-              onClick={() => void loadState()}
-              disabled={!eventId || busy === "load" || loading}
+              onClick={() => void handleRefresh()}
+              disabled={!eventId || busy === "refresh" || loading}
               className="gap-2"
             >
-              <RefreshCw className={busy === "load" ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+              <RefreshCw className={busy === "refresh" ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
               Atualizar
             </Button>
 

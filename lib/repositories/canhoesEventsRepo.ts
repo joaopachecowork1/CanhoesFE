@@ -61,6 +61,9 @@ export const canhoesEventsRepo = {
   getAdminState: (eventId: string) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`),
 
+  getAdminBootstrap: (eventId: string) =>
+    canhoesFetch<T.EventAdminBootstrapDto>(`/v1/events/${eventId}/admin/bootstrap`),
+
   updateAdminState: (eventId: string, payload: T.UpdateEventAdminStateRequest) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`, {
       method: "PUT",
