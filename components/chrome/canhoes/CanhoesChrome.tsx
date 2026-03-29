@@ -5,7 +5,7 @@ import { LogOut, Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import type { EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
-import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
+import { OPEN_COMPOSE_SHEET_EVENT, pickActiveEvent } from "@/lib/canhoesEvent";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { useAuth } from "@/hooks/useAuth";
 import { IS_LOCAL_MODE } from "@/lib/mock";
@@ -43,7 +43,7 @@ const EMPTY_CHROME_EVENT_STATE: ChromeEventState = {
  */
 async function loadChromeEventState(): Promise<ChromeEventState> {
   const events = await canhoesEventsRepo.listEvents();
-  const activeEvent = events.find((event) => event.isActive) ?? events[0] ?? null;
+  const activeEvent = pickActiveEvent(events);
 
   if (!activeEvent) {
     return EMPTY_CHROME_EVENT_STATE;

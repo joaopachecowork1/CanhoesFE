@@ -25,6 +25,7 @@ import {
   getPhaseLabel,
   getPhaseSummary,
   openComposeSheet,
+  pickActiveEvent,
 } from "@/lib/canhoesEvent";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
@@ -52,9 +53,86 @@ type ActionLink = {
   tone?: "default" | "outline" | "secondary";
 };
 
+function buildHomeActions({
+  overview,
+  secretSanta,
+  voting,
+}: Readonly<{
+  overview: EventOverviewDto;
+  secretSanta: EventSecretSantaOverviewDto;
+  voting: EventVotingOverviewDto;
+}>): { primaryAction: ActionLink; secondaryAction: ActionLink } {
+  const phaseType = overview.activePhase?.type;
+
+  const primaryAction: ActionLink = (() => {
+    switch (phaseType) {
+      case "DRAW":
+        if (secretSanta.hasAssignment) {
+          return { href: "/canhoes/amigo-secreto", label: "Ver amigo secreto" };
+        }
+        if (overview.permissions.canManage && !secretSanta.hasDraw) {
+          return { href: "/canhoes/admin", label: "Abrir sorteio" };
+        }
+        return { href: "/canhoes/wishlist", label: "Ver wishlists" };
+      case "PROPOSALS":
+        return {
+          href: "/canhoes/categorias",
+          label: overview.permissions.canSubmitProposal ? "Enviar proposta" : "Ver categorias",
+        };
+      case "VOTING":
+        return {
+          href: "/canhoes/votacao",
+          label: voting.remainingVoteCount > 0 ? "Votar agora" : "Rever votacao",
+        };
+      case "RESULTS":
+        return {
+          href: IS_LOCAL_MODE ? "/canhoes/categorias" : "/canhoes/gala",
+          label: IS_LOCAL_MODE ? "Ver ranking" : "Abrir gala",
+        };
+      default:
+        return { href: "/canhoes/categorias", label: "Explorar evento" };
+    }
+  })();
+
+  const secondaryAction: ActionLink =
+    phaseType === "DRAW"
+      ? { href: "/canhoes/wishlist", label: "Abrir wishlist", tone: "outline" }
+      : { label: "Criar post", onClick: openComposeSheet, tone: "outline" };
+
+  return { primaryAction, secondaryAction };
+}
+
+function buildHomeAlerts({
+  overview,
+  secretSanta,
+  voting,
+}: Readonly<{
+  overview: EventOverviewDto;
+  secretSanta: EventSecretSantaOverviewDto;
+  voting: EventVotingOverviewDto;
+}>) {
+  return [
+    !secretSanta.hasDraw
+      ? "O sorteio ainda nao foi gerado para este ciclo."
+      : null,
+    secretSanta.hasDraw && !secretSanta.hasAssignment
+      ? "Ja existe sorteio, mas ainda nao tens atribuicao disponivel."
+      : null,
+    overview.permissions.canSubmitProposal && overview.myProposalCount === 0
+      ? "Ainda nao submeteste nenhuma proposta nesta fase."
+      : null,
+    voting.remainingVoteCount > 0
+      ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
+      : null,
+    secretSanta.myWishlistItemCount === 0
+      ? "A tua wishlist ainda esta vazia. Da pistas antes do sorteio fechar."
+      : null,
+  ].filter(Boolean) as string[];
+}
+
 async function loadHomeState(): Promise<HomeState> {
   const events = await canhoesEventsRepo.listEvents();
-  const activeEvent = events.find((event) => event.isActive) ?? events[0];
+  const activeEvent = pickActiveEvent(events);
 
   if (!activeEvent) {
     return { status: "error" };
@@ -106,62 +184,17 @@ export function CanhoesEventHomeModule() {
     if (homeState.status !== "ready") return null;
 
     const { overview, secretSanta, voting } = homeState;
-    const phaseType = overview.activePhase?.type;
+    const { primaryAction, secondaryAction } = buildHomeActions({
+      overview,
+      secretSanta,
+      voting,
+    });
 
-    const primaryAction: ActionLink = (() => {
-      switch (phaseType) {
-        case "DRAW":
-          if (secretSanta.hasAssignment) {
-            return { href: "/canhoes/amigo-secreto", label: "Ver amigo secreto" };
-          }
-          if (overview.permissions.canManage && !secretSanta.hasDraw) {
-            return { href: "/canhoes/admin", label: "Abrir sorteio" };
-          }
-          return { href: "/canhoes/wishlist", label: "Ver wishlists" };
-        case "PROPOSALS":
-          return {
-            href: "/canhoes/categorias",
-            label: overview.permissions.canSubmitProposal ? "Enviar proposta" : "Ver categorias",
-          };
-        case "VOTING":
-          return {
-            href: "/canhoes/votacao",
-            label: voting.remainingVoteCount > 0 ? "Votar agora" : "Rever votacao",
-          };
-        case "RESULTS":
-          return {
-            href: IS_LOCAL_MODE ? "/canhoes/categorias" : "/canhoes/gala",
-            label: IS_LOCAL_MODE ? "Ver ranking" : "Abrir gala",
-          };
-        default:
-          return { href: "/canhoes/categorias", label: "Explorar evento" };
-      }
-    })();
-
-    const secondaryAction: ActionLink =
-      phaseType === "DRAW"
-        ? { href: "/canhoes/wishlist", label: "Abrir wishlist", tone: "outline" }
-        : { label: "Criar post", onClick: openComposeSheet, tone: "outline" };
-
-    const alerts = [
-      !secretSanta.hasDraw
-        ? "O sorteio ainda não foi gerado para este ciclo."
-        : null,
-      secretSanta.hasDraw && !secretSanta.hasAssignment
-        ? "Já existe sorteio, mas ainda não tens atribuição disponível."
-        : null,
-      overview.permissions.canSubmitProposal && overview.myProposalCount === 0
-        ? "Ainda não submeteste nenhuma proposta nesta fase."
-        : null,
-      voting.remainingVoteCount > 0
-        ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
-        : null,
-      secretSanta.myWishlistItemCount === 0
-        ? "A tua wishlist ainda está vazia. Dá pistas antes do sorteio fechar."
-        : null,
-    ].filter(Boolean) as string[];
-
-    return { alerts, primaryAction, secondaryAction };
+    return {
+      alerts: buildHomeAlerts({ overview, secretSanta, voting }),
+      primaryAction,
+      secondaryAction,
+    };
   }, [homeState]);
 
   if (homeState.status === "loading") {
@@ -185,9 +218,9 @@ export function CanhoesEventHomeModule() {
     return (
       <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <CardContent className="space-y-3 py-8 text-center">
-          <p className="heading-3 text-[var(--text-primary)]">Não foi possível montar a home do evento.</p>
+          <p className="heading-3 text-[var(--text-primary)]">Nao foi possivel montar a home do evento.</p>
           <p className="body-small text-[var(--beige)]/76">
-            O feed continua disponível, mas falta contexto para perceber a fase atual.
+            O feed continua disponivel, mas falta contexto para perceber a fase atual.
           </p>
           <div className="flex justify-center">
             <Button onClick={() => window.location.reload()}>Tentar outra vez</Button>
@@ -211,8 +244,11 @@ export function CanhoesEventHomeModule() {
               {phaseLabel}
             </Badge>
             {overview.nextPhase ? (
-              <Badge variant="outline" className="border-[var(--border-subtle)] bg-transparent text-[var(--beige)]">
-                Próxima: {getPhaseLabel(overview.nextPhase.type)}
+              <Badge
+                variant="outline"
+                className="border-[var(--border-subtle)] bg-transparent text-[var(--beige)]"
+              >
+                Proxima: {getPhaseLabel(overview.nextPhase.type)}
               </Badge>
             ) : null}
           </div>
@@ -231,7 +267,11 @@ export function CanhoesEventHomeModule() {
             <MetricCard
               label="Votos fechados"
               value={`${voting.submittedVoteCount}/${voting.categoryCount}`}
-              hint={voting.categoryCount > 0 ? `${voting.remainingVoteCount} por fechar` : "Sem categorias abertas"}
+              hint={
+                voting.categoryCount > 0
+                  ? `${voting.remainingVoteCount} por fechar`
+                  : "Sem categorias abertas"
+              }
             />
             <MetricCard
               label="A tua wishlist"
@@ -241,7 +281,7 @@ export function CanhoesEventHomeModule() {
             <MetricCard
               label="Feed recente"
               value={String(overview.counts.feedPostCount)}
-              hint="Posts já publicados neste ciclo"
+              hint="Posts ja publicados neste ciclo"
             />
             <MetricCard
               label="Membros"
@@ -262,7 +302,9 @@ export function CanhoesEventHomeModule() {
             </span>
             <span className="inline-flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
-              {overview.permissions.canManage ? "Tens permissões de gestão." : "Fluxo principal de membro."}
+              {overview.permissions.canManage
+                ? "Tens permissoes de gestao."
+                : "Fluxo principal de membro."}
             </span>
           </div>
         </div>
@@ -300,7 +342,7 @@ export function CanhoesEventHomeModule() {
           <CardContent className="space-y-3">
             {recentPosts.length === 0 ? (
               <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-4 text-sm text-[var(--text-muted)]">
-                Ainda não existem posts neste evento.
+                Ainda nao existem posts neste evento.
               </div>
             ) : (
               recentPosts.map((post) => (
@@ -338,7 +380,7 @@ export function CanhoesEventHomeModule() {
               {secretSanta.hasAssignment && secretSanta.assignedUser ? (
                 <div className="canhoes-list-item space-y-2 px-3 py-3">
                   <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                    Pessoa atribuída
+                    Pessoa atribuida
                   </p>
                   <p className="text-base font-semibold text-[var(--text-primary)]">
                     {secretSanta.assignedUser.name}
@@ -354,8 +396,8 @@ export function CanhoesEventHomeModule() {
                   </p>
                   <p className="text-sm text-[var(--text-primary)]">
                     {secretSanta.hasDraw
-                      ? "O sorteio existe mas ainda não tens atribuição disponível."
-                      : "Ainda não existe sorteio gerado."}
+                      ? "O sorteio existe mas ainda nao tens atribuicao disponivel."
+                      : "Ainda nao existe sorteio gerado."}
                   </p>
                 </div>
               )}
@@ -394,11 +436,11 @@ export function CanhoesEventHomeModule() {
               />
               <ChecklistItem
                 done={voting.remainingVoteCount === 0}
-                label="Votação deste ciclo"
+                label="Votacao deste ciclo"
                 hint={
                   voting.categoryCount > 0
                     ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias`
-                    : "Sem votações abertas"
+                    : "Sem votacoes abertas"
                 }
               />
             </CardContent>

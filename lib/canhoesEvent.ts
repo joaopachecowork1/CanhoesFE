@@ -1,4 +1,4 @@
-import type { EventPhaseDto } from "@/lib/api/types";
+import type { EventPhaseDto, EventSummaryDto } from "@/lib/api/types";
 
 /**
  * Global event used by the shell to open the compose sheet from any module
@@ -43,6 +43,15 @@ export function formatPhaseWindow(phase?: EventPhaseDto | null) {
     day: "2-digit",
     month: "short",
   }).format(new Date(phase.endDate));
+}
+
+/**
+ * The shell and event home both need the same "active event or first fallback"
+ * rule. Keep that decision in one place so the dashboard and navigation do not
+ * drift when multiple event summaries are returned.
+ */
+export function pickActiveEvent(events: readonly EventSummaryDto[]) {
+  return events.find((event) => event.isActive) ?? events[0] ?? null;
 }
 
 /**
