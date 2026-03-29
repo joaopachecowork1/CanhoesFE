@@ -1,11 +1,9 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { PlusCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -20,14 +18,12 @@ import { getVisibleMoreNavItems } from "./canhoesNavigation";
 export function CanhoesMoreSheet({
   isAdmin,
   isLocalMode,
-  onCompose,
   onNavigate,
   onOpenChange,
   open,
 }: Readonly<{
   isAdmin: boolean;
   isLocalMode: boolean;
-  onCompose: () => void;
   onNavigate: (href: string) => void;
   onOpenChange: (isOpen: boolean) => void;
   open: boolean;
@@ -38,55 +34,53 @@ export function CanhoesMoreSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="pb-safe">
-        <SheetHeader className="space-y-2 pb-2">
-          <p className="label text-[var(--beige)]/72">Mais opções</p>
-          <SheetTitle className="text-left">Atalhos secundários do evento</SheetTitle>
-          <SheetDescription className="body-small text-left text-[var(--beige)]/68">
-            A barra inferior fica focada no essencial. Este painel junta as áreas
-            menos frequentes e o acesso de administração quando existir.
+      <SheetContent
+        side="bottom"
+        className="border-[var(--border-subtle)] bg-[var(--bg-deep)] pb-safe text-[var(--text-primary)] [&_[data-slot=sheet-close]]:border-[var(--border-subtle)] [&_[data-slot=sheet-close]]:bg-[var(--bg-surface)] [&_[data-slot=sheet-close]]:text-[var(--text-primary)] [&_[data-slot=sheet-close]]:opacity-90"
+      >
+        <SheetHeader className="space-y-2 border-b border-[var(--border-subtle)] pb-4">
+          <div className="mx-auto h-1.5 w-16 rounded-full bg-[var(--border-moss)]" />
+          <p className="label text-left text-[var(--beige)]/72">Acoes secundarias</p>
+          <SheetTitle className="text-left text-[var(--text-primary)]">
+            Explorar outras areas do evento
+          </SheetTitle>
+          <SheetDescription className="body-small text-left text-[var(--beige)]/72">
+            O botao central continua reservado a criar posts. Este painel junta as
+            restantes areas do evento sem carregar a navegacao principal.
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 px-4 pb-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
-            <section className="canhoes-glass rounded-[var(--radius-lg-token)] p-4">
-              <div className="space-y-2">
-                <p className="label text-[var(--beige)]/72">Atalho rápido</p>
+          <section className="canhoes-glass rounded-[var(--radius-lg-token)] px-4 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 space-y-1">
+                <p className="label text-[var(--beige)]/70">Mapa rapido</p>
                 <h3 className="heading-3 text-[var(--text-primary)]">
-                  Novo registo no arquivo
+                  Secoes menos frequentes
                 </h3>
                 <p className="body-small text-[var(--beige)]/68">
-                  Mantemos a criação acessível a partir daqui para não perder a
-                  ação rápida quando o “+” passou a abrir o painel de mais.
+                  A navegacao base fica leve em mobile. Aqui encontras as areas
+                  secundarias e, quando existe permissao, o acesso ao admin.
                 </p>
               </div>
 
-              <Button
-                variant="secondary"
-                className="mt-4 w-full justify-center gap-2 lg:w-auto"
-                onClick={onCompose}
-              >
-                <PlusCircle className="h-4 w-4" />
-                Criar post
-              </Button>
-            </section>
+              <div className="shrink-0 text-right">
+                <p className="label text-[var(--beige)]/60">Total</p>
+                <p className="number-ticker text-lg font-semibold text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]">
+                  {visibleLinks.length}
+                </p>
+              </div>
+            </div>
+          </section>
 
-            <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] p-4">
-              <p className="label text-[var(--beige)]/72">Resumo</p>
-              <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
-                {exploreLinks.length + (adminLink ? 1 : 0)} secções disponíveis
+          <section className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <p className="label text-[var(--beige)]/72">Explorar</p>
+              <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                {exploreLinks.length} atalhos
               </p>
-              <p className="mt-1 text-sm text-[var(--beige)]/68">
-                A navegação secundária fica agrupada aqui para reduzir ruído na
-                barra principal e dar mais espaço ao feed.
-              </p>
-            </section>
-          </div>
-
-          <div className="space-y-2">
-            <p className="label text-[var(--beige)]/72">Explorar</p>
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
               {exploreLinks.map((link) => (
                 <MoreLinkCard
                   key={link.href}
@@ -97,13 +91,19 @@ export function CanhoesMoreSheet({
                 />
               ))}
             </div>
-          </div>
+          </section>
 
           {adminLink ? (
             <>
               <Separator className="bg-[var(--border-subtle)]" />
-              <div className="space-y-2">
-                <p className="label text-[var(--beige)]/72">Administração</p>
+              <section className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="label text-[var(--beige)]/72">Administracao</p>
+                  <span className="inline-flex min-h-8 items-center rounded-full border border-[var(--border-neon)]/60 bg-[var(--accent)] px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--neon-green)]">
+                    Admin
+                  </span>
+                </div>
+
                 <MoreLinkCard
                   description={adminLink.description}
                   icon={adminLink.icon}
@@ -111,15 +111,17 @@ export function CanhoesMoreSheet({
                   onClick={() => onNavigate(adminLink.href)}
                   tone="admin"
                 />
-              </div>
+              </section>
             </>
           ) : null}
 
           {isLocalMode ? (
-            <p className="body-small rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] px-3 py-2 text-[var(--beige)]/72">
-              Algumas áreas ficam ocultas em modo local para evitar navegação
-              para fluxos que dependem do evento real.
-            </p>
+            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] px-3 py-3">
+              <p className="body-small text-[var(--beige)]/78">
+                Em modo local, areas dependentes do evento real ficam ocultas para
+                evitar navegacao sem contexto.
+              </p>
+            </div>
           ) : null}
         </div>
       </SheetContent>
@@ -147,29 +149,29 @@ function MoreLinkCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "canhoes-tap flex min-h-14 items-start gap-3 rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-[transform,border-color,background-color,box-shadow] active:scale-[0.99]",
+        "canhoes-tap flex min-h-[4.75rem] items-start gap-3 rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-[transform,border-color,background-color,box-shadow] active:scale-[0.99]",
         isAdminTone
-          ? "border-[var(--border-neon)]/45 bg-[rgba(0,255,136,0.08)] shadow-[var(--glow-green-sm)] hover:border-[var(--border-neon)]"
-          : "border-[var(--border-subtle)] bg-[rgba(245,237,224,0.08)] shadow-[var(--shadow-paper)] hover:border-[var(--border-neon)]/35"
+          ? "border-[var(--border-neon)]/55 bg-[var(--accent)] shadow-[var(--glow-green-sm)] hover:border-[var(--border-neon)]"
+          : "border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-panel)] hover:border-[var(--border-neon)]/45"
       )}
     >
       <span
         className={cn(
-          "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+          "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isAdminTone
-            ? "bg-[var(--neon-green)] text-[var(--bg-void)]"
-            : "bg-[var(--bg-deep)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]"
+            ? "border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
+            : "border-[var(--border-moss)] bg-[var(--bg-void)] text-[var(--beige)]"
         )}
       >
         <Icon className="h-4 w-4" />
       </span>
 
       <span className="min-w-0 space-y-1">
-        <span className="block text-sm font-semibold text-[var(--text-primary)]">
+        <span className="block font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--text-primary)]">
           {label}
         </span>
         {description ? (
-          <span className="block text-xs leading-5 text-[var(--beige)]/68">
+          <span className="block text-sm leading-5 text-[var(--beige)]/72">
             {description}
           </span>
         ) : null}
