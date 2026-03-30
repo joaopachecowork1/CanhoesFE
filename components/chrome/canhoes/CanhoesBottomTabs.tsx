@@ -49,6 +49,7 @@ function BottomTab({
 }>) {
   const Icon = entry.item.icon as LucideIcon;
   const isActive = Boolean(entry.isActive);
+  const isMoreItem = entry.item.id === "more";
 
   return (
     <button
@@ -66,7 +67,9 @@ function BottomTab({
           "flex h-9 w-9 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isActive
             ? "border-[rgba(177,140,255,0.34)] bg-[linear-gradient(180deg,rgba(47,63,27,0.96),rgba(25,31,18,0.98))] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm),var(--glow-purple)]"
-            : "border-transparent bg-transparent text-[rgba(245,237,224,0.76)]"
+            : isMoreItem
+              ? "border-[rgba(177,140,255,0.22)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_40%),rgba(30,36,21,0.72)] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
+              : "border-transparent bg-transparent text-[rgba(245,237,224,0.76)]"
         )}
       >
         <Icon className="h-[1.08rem] w-[1.08rem]" />
@@ -75,7 +78,11 @@ function BottomTab({
       <span
         className={cn(
           "font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]",
-          isActive ? "font-semibold text-[var(--bg-paper)]" : "font-medium text-[rgba(245,237,224,0.72)]"
+          isActive
+            ? "font-semibold text-[var(--bg-paper)]"
+            : isMoreItem
+              ? "font-semibold text-[var(--accent-purple-soft)]"
+              : "font-medium text-[rgba(245,237,224,0.72)]"
         )}
       >
         {entry.item.label}

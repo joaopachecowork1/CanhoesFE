@@ -31,6 +31,7 @@ import { homeCopy as productHomeCopy } from "@/lib/canhoesCopy";
 import { absMediaUrl } from "@/lib/media";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,20 +115,18 @@ function buildHomeAlerts({
   voting: EventVotingOverviewDto;
 }>) {
   return [
-    !secretSanta.hasDraw
-      ? "O sorteio desta edição ainda não foi gerado."
-      : null,
+    !secretSanta.hasDraw ? "O sorteio desta edicao ainda nao foi gerado." : null,
     secretSanta.hasDraw && !secretSanta.hasAssignment
-      ? "O sorteio já existe, mas a tua atribuição ainda não ficou disponível."
+      ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
       : null,
     overview.permissions.canSubmitProposal && overview.myProposalCount === 0
-      ? "Ainda não submeteste nenhuma proposta nesta fase."
+      ? "Ainda nao submeteste nenhuma proposta nesta fase."
       : null,
     voting.remainingVoteCount > 0
       ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
       : null,
     secretSanta.myWishlistItemCount === 0
-      ? "A tua wishlist ainda está vazia. Deixa pistas antes de o sorteio fechar."
+      ? "A tua wishlist ainda esta vazia. Deixa pistas antes de o sorteio fechar."
       : null,
   ].filter(Boolean) as string[];
 }
@@ -151,9 +150,9 @@ async function loadHomeState(): Promise<HomeState> {
     status: "ready",
     event: activeEvent,
     overview,
+    recentPosts: feedPosts.slice(0, 3),
     secretSanta,
     voting,
-    recentPosts: feedPosts.slice(0, 3),
   };
 }
 
@@ -165,8 +164,8 @@ export function CanhoesEventHomeModule() {
 
     async function hydrateHome() {
       try {
-        // The home is the event dashboard. It preloads the small overview
-        // endpoints together so the first screen can answer "what now?".
+        // The home preloads the lightweight overview endpoints together so the
+        // first screen can answer "what should I do now?" without extra hops.
         const nextHomeState = await loadHomeState();
         if (!isCancelled) setHomeState(nextHomeState);
       } catch {
@@ -180,8 +179,6 @@ export function CanhoesEventHomeModule() {
     };
   }, []);
 
-  // This block translates raw overview data into the current "do this now"
-  // copy shown at the top of the event dashboard.
   const homeCopy = useMemo(() => {
     if (homeState.status !== "ready") return null;
 
@@ -202,10 +199,10 @@ export function CanhoesEventHomeModule() {
   if (homeState.status === "loading") {
     return (
       <div className="space-y-4">
-        <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
           <CardContent className="flex min-h-[16rem] items-center justify-center">
             <div className="flex items-center gap-3 text-[var(--beige)]/76">
-              <Loader2 className="h-5 w-5 animate-spin text-[var(--neon-green)]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--accent-purple-soft)]" />
               <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
                 {productHomeCopy.loading}
               </span>
@@ -218,7 +215,7 @@ export function CanhoesEventHomeModule() {
 
   if (homeState.status === "error" || !homeCopy) {
     return (
-      <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <CardContent className="space-y-3 py-8 text-center">
           <p className="heading-3 text-[var(--text-primary)]">{productHomeCopy.errorTitle}</p>
           <p className="body-small text-[var(--beige)]/76">{productHomeCopy.errorDescription}</p>
@@ -237,7 +234,7 @@ export function CanhoesEventHomeModule() {
 
   return (
     <div className="space-y-4">
-      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <div className="space-y-4 px-4 py-5 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
@@ -246,7 +243,7 @@ export function CanhoesEventHomeModule() {
             {overview.nextPhase ? (
               <Badge
                 variant="outline"
-                className="border-[rgba(212,184,150,0.16)] bg-[rgba(245,237,224,0.06)] text-[var(--bg-paper)]"
+                className="border-[var(--border-purple)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)]"
               >
                 Proxima: {getPhaseLabel(overview.nextPhase.type)}
               </Badge>
@@ -257,7 +254,7 @@ export function CanhoesEventHomeModule() {
             <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[var(--beige)]/68">
               {event.name}
             </p>
-            <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+            <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm),var(--glow-purple-sm)]">
               {productHomeCopy.heroTitle}
             </h1>
             <p className="body-base max-w-3xl text-[var(--beige)]/82">{phaseSummary}</p>
@@ -265,8 +262,9 @@ export function CanhoesEventHomeModule() {
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Votação"
+              label="Votacao"
               value={`${voting.submittedVoteCount}/${voting.categoryCount}`}
+              tone="purple"
               hint={
                 voting.categoryCount > 0
                   ? `${voting.remainingVoteCount} por fechar`
@@ -276,17 +274,22 @@ export function CanhoesEventHomeModule() {
             <MetricCard
               label="Wishlist"
               value={String(secretSanta.myWishlistItemCount)}
-              hint={secretSanta.hasAssignment ? "Ligada ao teu amigo secreto" : "Prepara antes do sorteio"}
+              hint={
+                secretSanta.hasAssignment
+                  ? "Ligada ao teu amigo secreto"
+                  : "Prepara antes do sorteio"
+              }
             />
             <MetricCard
               label="Feed"
               value={String(overview.counts.feedPostCount)}
-              hint="Posts já publicados nesta edição"
+              tone="purple"
+              hint="Posts ja publicados nesta edicao"
             />
             <MetricCard
               label="Membros"
               value={String(overview.counts.memberCount)}
-              hint={`${overview.counts.pendingProposalCount} itens em revisão`}
+              hint={`${overview.counts.pendingProposalCount} itens em revisao`}
             />
           </div>
 
@@ -297,7 +300,7 @@ export function CanhoesEventHomeModule() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(212,184,150,0.12)] pt-4 text-sm text-[var(--beige)]/76">
             <span className="inline-flex items-center gap-2">
-              <Clock3 className="h-4 w-4 text-[var(--neon-cyan)]" />
+              <Clock3 className="h-4 w-4 text-[var(--accent-purple-soft)]" />
               {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
             </span>
             <span className="inline-flex items-center gap-2">
@@ -311,10 +314,10 @@ export function CanhoesEventHomeModule() {
       </section>
 
       {homeCopy.alerts.length > 0 ? (
-        <Card className="canhoes-paper-panel border-[rgba(107,76,42,0.12)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+        <Card className="canhoes-paper-panel border-[var(--border-purple)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-              <Clock3 className="h-4 w-4 text-[var(--bark)]" />
+              <Clock3 className="h-4 w-4 text-[var(--accent-purple-deep)]" />
               {productHomeCopy.alertsTitle}
             </CardTitle>
           </CardHeader>
@@ -322,7 +325,7 @@ export function CanhoesEventHomeModule() {
             {homeCopy.alerts.map((alert) => (
               <div
                 key={alert}
-                className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(248,240,226,0.78)] px-3 py-3 text-sm text-[var(--bark)]/82"
+                className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),rgba(248,240,226,0.78)] px-3 py-3 text-sm text-[var(--bark)]/82"
               >
                 {alert}
               </div>
@@ -332,16 +335,16 @@ export function CanhoesEventHomeModule() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-[var(--fire)]" />
-              Feed da edição
+              <MessageSquare className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+              Feed da edicao
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentPosts.length === 0 ? (
-              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-4 text-sm text-[var(--text-muted)]">
+              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[rgba(177,140,255,0.08)] px-3 py-4 text-sm text-[var(--text-muted)]">
                 {productHomeCopy.emptyFeed}
               </div>
             ) : (
@@ -357,7 +360,7 @@ export function CanhoesEventHomeModule() {
                   </div>
                   <p className="text-sm leading-6 text-[var(--text-primary)]">{post.content}</p>
                   {(post.mediaUrls?.[0] || post.imageUrl) ? (
-                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[var(--bg-surface)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
@@ -381,10 +384,10 @@ export function CanhoesEventHomeModule() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_38%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-4 w-4 text-[var(--fire)]" />
+                <Gift className="h-4 w-4 text-[var(--accent-purple-soft)]" />
                 {productHomeCopy.secretSantaTitle}
               </CardTitle>
             </CardHeader>
@@ -392,7 +395,7 @@ export function CanhoesEventHomeModule() {
               {secretSanta.hasAssignment && secretSanta.assignedUser ? (
                 <div className="canhoes-list-item space-y-2 px-3 py-3">
                   <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                    Pessoa atribuída
+                    Pessoa atribuida
                   </p>
                   <p className="text-base font-semibold text-[var(--text-primary)]">
                     {secretSanta.assignedUser.name}
@@ -408,15 +411,15 @@ export function CanhoesEventHomeModule() {
                   </p>
                   <p className="text-sm text-[var(--text-primary)]">
                     {secretSanta.hasDraw
-                      ? "O sorteio já existe, mas a tua atribuição ainda não ficou disponível."
-                      : "O sorteio desta edição ainda não foi gerado."}
+                      ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
+                      : "O sorteio desta edicao ainda nao foi gerado."}
                   </p>
                 </div>
               )}
 
               <div className="grid gap-2 sm:grid-cols-2">
                 <Button variant="outline" asChild>
-                  <Link href="/canhoes/amigo-secreto">Abrir área do sorteio</Link>
+                  <Link href="/canhoes/amigo-secreto">Abrir area do sorteio</Link>
                 </Button>
                 <Button variant="secondary" asChild>
                   <Link href="/canhoes/wishlist">Gerir wishlist</Link>
@@ -425,10 +428,10 @@ export function CanhoesEventHomeModule() {
             </CardContent>
           </Card>
 
-          <Card className="text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_34%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <Vote className="h-4 w-4 text-[var(--fire)]" />
+                <Vote className="h-4 w-4 text-[var(--accent-purple-soft)]" />
                 {productHomeCopy.checklistTitle}
               </CardTitle>
             </CardHeader>
@@ -466,14 +469,22 @@ export function CanhoesEventHomeModule() {
 function MetricCard({
   hint,
   label,
+  tone = "green",
   value,
 }: Readonly<{
   hint: string;
   label: string;
+  tone?: "green" | "purple";
   value: string;
 }>) {
   return (
-    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
+    <div
+      className={cn(
+        "canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3",
+        tone === "purple" &&
+          "border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_38%),linear-gradient(180deg,rgba(250,244,233,0.98),rgba(236,228,212,0.98))] shadow-[var(--glow-purple-sm)]"
+      )}
+    >
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
         {label}
       </p>
@@ -484,9 +495,14 @@ function MetricCard({
 }
 
 function ActionButton({ action }: Readonly<{ action: ActionLink }>) {
+  const outlineClassName =
+    action.tone === "outline"
+      ? "border-[var(--border-purple)] bg-[rgba(177,140,255,0.08)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)] hover:bg-[rgba(177,140,255,0.14)]"
+      : undefined;
+
   if (action.href) {
     return (
-      <Button variant={action.tone ?? "default"} asChild>
+      <Button variant={action.tone ?? "default"} className={outlineClassName} asChild>
         <Link href={action.href}>
           {action.label}
           <ArrowRight className="h-4 w-4" />
@@ -496,7 +512,11 @@ function ActionButton({ action }: Readonly<{ action: ActionLink }>) {
   }
 
   return (
-    <Button variant={action.tone ?? "default"} onClick={action.onClick}>
+    <Button
+      variant={action.tone ?? "default"}
+      className={outlineClassName}
+      onClick={action.onClick}
+    >
       {action.label}
       <ArrowRight className="h-4 w-4" />
     </Button>
@@ -515,11 +535,12 @@ function ChecklistItem({
   return (
     <div className="canhoes-paper-card flex items-start gap-3 rounded-[var(--radius-md-token)] px-3 py-3">
       <span
-        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
+        className={cn(
+          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
           done
             ? "border-[rgba(74,92,47,0.24)] bg-[rgba(74,92,47,0.12)] text-[var(--success)]"
-            : "border-[rgba(107,76,42,0.14)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
-        }`}
+            : "border-[var(--border-purple)] bg-[rgba(177,140,255,0.14)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
+        )}
       >
         <CheckCircle2 className="h-4 w-4" />
       </span>

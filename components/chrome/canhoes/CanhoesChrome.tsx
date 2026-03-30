@@ -116,7 +116,7 @@ export function CanhoesChrome({
                     "min-h-11 rounded-full border px-3",
                     isMoreActive || isMoreSheetOpen
                       ? "border-[rgba(177,140,255,0.36)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]"
-                      : "border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)]"
+                      : "border-[rgba(177,140,255,0.24)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_42%),rgba(28,34,18,0.8)] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
                   )}
                   onClick={() => setIsMoreSheetOpen(true)}
                   aria-label={adminCopy.shell.more.openAction}
