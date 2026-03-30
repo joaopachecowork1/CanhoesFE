@@ -154,7 +154,7 @@ export default function CanhoesAdminModule() {
       />
 
       <div className="sticky top-[5.75rem] z-20">
-        <AdminSectionNav items={adminTabs} />
+        <AdminSectionNav activeId={activeTab} items={adminTabs} />
       </div>
 
       {dashboardError ? (

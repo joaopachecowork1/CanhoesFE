@@ -25,6 +25,7 @@ export type AdminSectionCountContext = {
 
 export type AdminSectionItem = {
   count: number;
+  group: "primary" | "secondary";
   id: AdminSectionId;
   label: string;
 };
@@ -57,6 +58,13 @@ const SECTION_ORDER: readonly AdminSectionId[] = [
   "users",
   "audit",
   "dashboard",
+];
+
+const PRIMARY_SECTION_IDS: readonly AdminSectionId[] = [
+  "pending",
+  "state",
+  "categories",
+  "nominees",
 ];
 
 export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] = [
@@ -117,6 +125,7 @@ export function buildAdminSectionItems(
   return SECTION_ORDER.map((sectionId) => ({
     id: sectionId,
     label: SECTION_LABELS[sectionId],
+    group: PRIMARY_SECTION_IDS.includes(sectionId) ? "primary" : "secondary",
     count: SECTION_COUNT_RESOLVERS[sectionId](context),
   }));
 }
