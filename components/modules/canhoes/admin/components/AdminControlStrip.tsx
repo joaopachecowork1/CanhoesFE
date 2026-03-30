@@ -108,9 +108,19 @@ export function AdminControlStrip({
                 key={action.id}
                 type="button"
                 onClick={() => onSelectSection(action.id)}
-                className="canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] px-3 py-3 text-left transition-transform active:scale-[0.98]"
+                className={
+                  action.tone === "primary"
+                    ? "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] border-[rgba(122,173,58,0.26)] bg-[linear-gradient(180deg,rgba(250,244,233,0.98),rgba(236,228,212,0.98))] px-3 py-3 text-left shadow-[var(--glow-green-sm)] transition-transform active:scale-[0.98]"
+                    : "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] px-3 py-3 text-left transition-transform active:scale-[0.98]"
+                }
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(107,76,42,0.12)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]">
+                <span
+                  className={
+                    action.tone === "primary"
+                      ? "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(122,173,58,0.22)] bg-[rgba(74,92,47,0.1)] text-[var(--moss)]"
+                      : "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(107,76,42,0.12)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
+                  }
+                >
                   <Icon className="h-4 w-4" />
                 </span>
                 <span className="space-y-1">

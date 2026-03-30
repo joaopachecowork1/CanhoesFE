@@ -34,6 +34,7 @@ export type AdminQuickAction = {
   icon: LucideIcon;
   id: AdminSectionId;
   label: string;
+  tone?: "primary" | "secondary";
 };
 
 const SECTION_LABELS: Record<AdminSectionId, string> = {
@@ -64,30 +65,35 @@ export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] = [
     label: "Fila de revisao",
     description: "Propostas e nomeacoes por decidir.",
     icon: TicketCheck,
+    tone: "primary",
   },
   {
     id: "state",
     label: "Evento e fase",
     description: "Evento ativo, fase e visibilidade.",
     icon: CalendarRange,
+    tone: "primary",
   },
   {
     id: "categories",
     label: "Categorias",
     description: "Criar, editar e limpar categorias.",
     icon: FolderTree,
+    tone: "primary",
   },
   {
     id: "secret-santa",
     label: "Sorteio",
     description: "Gerar ou rever o Amigo Secreto.",
     icon: Sparkles,
+    tone: "secondary",
   },
   {
     id: "users",
     label: "Membros",
     description: "Ver quem participa nesta edicao.",
     icon: Users,
+    tone: "secondary",
   },
 ] as const;
 

@@ -15,6 +15,8 @@ import type {
   PublicUserDto,
 } from "@/lib/api/types";
 
+import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
+
 type AdminDashboardProps = {
   allNominees: NomineeDto[];
   categories: AwardCategoryDto[];
@@ -163,51 +165,46 @@ export function AdminDashboard({
       ) : null}
 
       {!loading && recentNominees.length > 0 ? (
-        <section className="space-y-3">
-          <div className="space-y-1">
-            <p className="editorial-kicker">{adminCopy.dashboard.recentKicker}</p>
-            <h3 className="heading-3 text-[var(--text-primary)]">
-              {adminCopy.dashboard.recentTitle}
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            {recentNominees.map((nominee) => (
-              <article
-                key={nominee.id}
-                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 space-y-1">
-                    <p className="truncate font-semibold text-[var(--text-ink)]">
-                      {nominee.title}
-                    </p>
-                    <p className="text-xs text-[var(--bark)]/68">
-                      {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        month: "short",
-                      })}
-                    </p>
-                  </div>
-
-                  <Badge
-                    variant={
-                      nominee.status === "approved"
-                        ? "default"
-                        : nominee.status === "rejected"
-                          ? "destructive"
-                          : "outline"
-                    }
-                  >
-                    {nominee.status}
-                  </Badge>
+        <AdminCollapsibleSection
+          kicker={adminCopy.dashboard.recentKicker}
+          title={adminCopy.dashboard.recentTitle}
+          count={recentNominees.length}
+        >
+          {recentNominees.map((nominee) => (
+            <article
+              key={nominee.id}
+              className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate font-semibold text-[var(--text-ink)]">
+                    {nominee.title}
+                  </p>
+                  <p className="text-xs text-[var(--bark)]/68">
+                    {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      month: "short",
+                    })}
+                  </p>
                 </div>
-              </article>
-            ))}
-          </div>
-        </section>
+
+                <Badge
+                  variant={
+                    nominee.status === "approved"
+                      ? "default"
+                      : nominee.status === "rejected"
+                        ? "destructive"
+                        : "outline"
+                  }
+                >
+                  {nominee.status}
+                </Badge>
+              </div>
+            </article>
+          ))}
+        </AdminCollapsibleSection>
       ) : null}
     </div>
   );

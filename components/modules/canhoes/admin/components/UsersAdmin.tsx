@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PublicUserDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
+import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
+
 type UsersAdminProps = {
   loading: boolean;
   members: PublicUserDto[];
@@ -96,21 +98,28 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
       ) : null}
 
       {!loading && adminMembers.length > 0 ? (
-        <section className="space-y-2">
-          <p className="editorial-kicker px-1">Administradores</p>
+        <AdminCollapsibleSection
+          kicker="Administracao"
+          title="Admins desta edicao"
+          count={adminMembers.length}
+          defaultOpen
+        >
           {adminMembers.map((member) => (
             <MemberRow key={member.id} member={member} />
           ))}
-        </section>
+        </AdminCollapsibleSection>
       ) : null}
 
       {!loading && regularMembers.length > 0 ? (
-        <section className="space-y-2">
-          <p className="editorial-kicker px-1">Membros</p>
+        <AdminCollapsibleSection
+          kicker="Grupo"
+          title="Membros desta edicao"
+          count={regularMembers.length}
+        >
           {regularMembers.map((member) => (
             <MemberRow key={member.id} member={member} />
           ))}
-        </section>
+        </AdminCollapsibleSection>
       ) : null}
 
       {!loading && members.length === 0 ? (
