@@ -4,17 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
-  ArrowRight,
   BarChart3,
-  GripHorizontal,
   ImagePlus,
   Leaf,
   Loader2,
-  PlusCircle,
   Send,
-  Trash2,
-  X,
 } from "lucide-react";
 
 import { hubRepo } from "@/lib/repositories/hubRepo";
@@ -22,137 +16,20 @@ import { cn } from "@/lib/utils";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 
-const MAX_MEDIA_FILES = 10;
-const MAX_FILE_MB = 15;
-const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
-const TARGET_UPLOAD_MB = 2.5;
-const TARGET_UPLOAD_BYTES = TARGET_UPLOAD_MB * 1024 * 1024;
-const TARGET_MAX_DIMENSION = 1600;
-const TARGET_QUALITY = 0.8;
+import {
+  isAcceptedImage,
+  MAX_FILE_BYTES,
+  MAX_FILE_MB,
+  MAX_MEDIA_FILES,
+  normalizeUploadImage,
+} from "./compose/composeUpload";
+import { ComposeMediaGrid } from "./compose/ComposeMediaGrid";
+import { ComposePollEditor } from "./compose/ComposePollEditor";
+import { ComposeUploadProgress } from "./compose/ComposeUploadProgress";
 
-const ACCEPTED_IMAGE_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/heic",
-  "image/heif",
-]);
-
-const ACCEPTED_IMAGE_EXTENSIONS = new Set([
-  "jpg",
-  "jpeg",
-  "png",
-  "webp",
-  "gif",
-  "heic",
-  "heif",
-]);
-
-const TRANSCODE_IMAGE_TYPES = new Set(["image/heic", "image/heif"]);
-
-function fileExtension(name: string) {
-  const extensionStart = name.lastIndexOf(".");
-  if (extensionStart < 0) return "";
-  return name.slice(extensionStart + 1).toLowerCase();
-}
-
-function isAcceptedImage(file: File) {
-  const mimeType = (file.type || "").toLowerCase();
-  if (mimeType && ACCEPTED_IMAGE_TYPES.has(mimeType)) return true;
-  return ACCEPTED_IMAGE_EXTENSIONS.has(fileExtension(file.name));
-}
-
-function shouldTranscode(file: File) {
-  const mimeType = (file.type || "").toLowerCase();
-  if (TRANSCODE_IMAGE_TYPES.has(mimeType)) return true;
-  return ["heic", "heif"].includes(fileExtension(file.name));
-}
-
-function supportsWebpEncode() {
-  if (typeof document === "undefined") return false;
-  const canvas = document.createElement("canvas");
-  return canvas.toDataURL("image/webp").startsWith("data:image/webp");
-}
-
-async function decodeImage(file: File) {
-  const objectUrl = URL.createObjectURL(file);
-
-  try {
-    if ("createImageBitmap" in globalThis) {
-      const bitmap = await createImageBitmap(file);
-
-      return {
-        draw: (context: CanvasRenderingContext2D, width: number, height: number) => {
-          context.drawImage(bitmap, 0, 0, width, height);
-          bitmap.close();
-        },
-        height: bitmap.height,
-        width: bitmap.width,
-      };
-    }
-
-    const imageElement = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const nextImageElement = new Image();
-      nextImageElement.onload = () => resolve(nextImageElement);
-      nextImageElement.onerror = reject;
-      nextImageElement.decoding = "async";
-      nextImageElement.src = objectUrl;
-    });
-
-    return {
-      draw: (context: CanvasRenderingContext2D, width: number, height: number) => {
-        context.drawImage(imageElement, 0, 0, width, height);
-      },
-      height: imageElement.naturalHeight,
-      width: imageElement.naturalWidth,
-    };
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-async function normalizeUploadImage(file: File) {
-  const mustTranscode = shouldTranscode(file);
-
-  if (!mustTranscode && file.size <= TARGET_UPLOAD_BYTES) return file;
-
-  try {
-    const sourceImage = await decodeImage(file);
-    const scale = Math.min(1, TARGET_MAX_DIMENSION / Math.max(sourceImage.width, sourceImage.height));
-    const targetWidth = Math.max(1, Math.round(sourceImage.width * scale));
-    const targetHeight = Math.max(1, Math.round(sourceImage.height * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-
-    const context = canvas.getContext("2d", { alpha: false });
-    if (!context) return file;
-
-    sourceImage.draw(context, targetWidth, targetHeight);
-
-    const mimeType = supportsWebpEncode() ? "image/webp" : "image/jpeg";
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mimeType, TARGET_QUALITY));
-
-    if (!blob) return file;
-    if (!mustTranscode && blob.size >= file.size) return file;
-
-    const extension = mimeType === "image/webp" ? "webp" : "jpg";
-    const baseName = file.name.replace(/\.[^/.]+$/, "");
-
-    return new File([blob], `${baseName}.${extension}`, {
-      lastModified: Date.now(),
-      type: mimeType,
-    });
-  } catch {
-    return file;
-  }
-}
+const MAX_POLL_OPTIONS = 6;
 
 export function CanhoesComposeSheet({
   open,
@@ -219,15 +96,15 @@ export function CanhoesComposeSheet({
 
       if (existingKeys.has(fileKey)) continue;
       if (!isAcceptedImage(incomingFile)) {
-        toast.error(`${incomingFile.name}: formato não suportado`);
+        toast.error(`${incomingFile.name}: formato nao suportado`);
         continue;
       }
       if (incomingFile.size > MAX_FILE_BYTES) {
-        toast.error(`${incomingFile.name}: máximo ${MAX_FILE_MB}MB`);
+        toast.error(`${incomingFile.name}: maximo ${MAX_FILE_MB}MB`);
         continue;
       }
       if (nextFiles.length >= MAX_MEDIA_FILES) {
-        toast.error(`Máximo de ${MAX_MEDIA_FILES} imagens por post`);
+        toast.error(`Maximo de ${MAX_MEDIA_FILES} imagens por post`);
         break;
       }
 
@@ -241,7 +118,7 @@ export function CanhoesComposeSheet({
     setSelectedFiles(nextFiles);
 
     if (optimizedFileCount > 0) {
-      toast.success(`${optimizedFileCount} imagem(ns) otimizadas para upload rápido`);
+      toast.success(`${optimizedFileCount} imagem(ns) otimizadas para upload rapido`);
     }
 
     if (fileInputRef.current) {
@@ -274,7 +151,7 @@ export function CanhoesComposeSheet({
   };
 
   const handleAddPollOption = () => {
-    if (pollOptions.length < 6) {
+    if (pollOptions.length < MAX_POLL_OPTIONS) {
       setPollOptions((currentOptions) => [...currentOptions, ""]);
     }
   };
@@ -343,7 +220,7 @@ export function CanhoesComposeSheet({
       console.error(error);
       const errorSuffix =
         error instanceof Error && error.message ? `: ${error.message.slice(0, 160)}` : "";
-      toast.error(`Não foi possível publicar${errorSuffix}`);
+      toast.error(`Nao foi possivel publicar${errorSuffix}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -377,131 +254,32 @@ export function CanhoesComposeSheet({
               autoFocus
             />
 
-            {selectedFiles.length > 0 ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-[11px] font-medium text-[var(--color-text-muted)]">
-                  <span className="inline-flex items-center gap-1">
-                    <GripHorizontal className="h-3.5 w-3.5" />
-                    Ordem das fotos no post
-                  </span>
-                  <span>
-                    {selectedFiles.length}/{MAX_MEDIA_FILES}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {selectedFiles.map((selectedFile, index) => (
-                    <div
-                      key={`${selectedFile.name}-${selectedFile.size}-${index}`}
-                      className="group relative aspect-square overflow-hidden rounded-xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)]"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={previewUrls[index]}
-                        className="h-full w-full object-cover"
-                        alt={selectedFile.name}
-                        loading="lazy"
-                        decoding="async"
-                      />
-
-                      <div className="absolute left-1 top-1 rounded-md bg-[rgba(26,31,20,0.8)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-text-primary)]">
-                        {index + 1}
-                      </div>
-
-                      <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => handleMoveFile(index, -1)}
-                          disabled={index === 0}
-                          className="canhoes-tap flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] disabled:opacity-40"
-                          aria-label="Mover para a esquerda"
-                        >
-                          <ArrowLeft className="h-3.5 w-3.5" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleMoveFile(index, 1)}
-                          disabled={index === selectedFiles.length - 1}
-                          className="canhoes-tap flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] disabled:opacity-40"
-                          aria-label="Mover para a direita"
-                        >
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFile(index)}
-                        className="canhoes-tap absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
-                        aria-label="Remover imagem"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <ComposeMediaGrid
+              files={selectedFiles}
+              maxFiles={MAX_MEDIA_FILES}
+              previewUrls={previewUrls}
+              onMove={handleMoveFile}
+              onRemove={handleRemoveFile}
+            />
 
             {isSubmitting && selectedFiles.length > 0 ? (
-              <div className="space-y-2 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
-                <div className="flex items-center justify-between text-xs font-medium text-[var(--text-primary)]">
-                  <span>{uploadLabel || "A enviar..."}</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} className="h-1.5 bg-[rgba(61,43,24,0.16)]" />
-              </div>
+              <ComposeUploadProgress
+                label={uploadLabel || "A enviar..."}
+                progress={uploadProgress}
+              />
             ) : null}
 
             {isPollEnabled ? (
-              <div className="space-y-3 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-                  <BarChart3 className="h-4 w-4 text-[var(--color-fire)]" />
-                  Votação
-                </div>
-
-                <Textarea
-                  value={pollQuestion}
-                  onChange={(event) => setPollQuestion(event.target.value)}
-                  placeholder="Pergunta da votação..."
-                  className="min-h-16 resize-none"
-                />
-
-                <div className="space-y-2">
-                  {pollOptions.map((pollOption, index) => (
-                    <div key={`poll-${index}-${pollOption.length}`} className="flex gap-2">
-                      <Input
-                        value={pollOption}
-                        onChange={(event) => handlePollOptionChange(index, event.target.value)}
-                        placeholder={`Opção ${index + 1}`}
-                      />
-
-                      {pollOptions.length > 2 ? (
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePollOption(index)}
-                          className="canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--color-beige-dark)]/25 bg-transparent text-[var(--color-danger)]"
-                          aria-label={`Remover opção ${index + 1}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-
-                  {pollOptions.length < 6 ? (
-                    <button
-                      type="button"
-                      onClick={handleAddPollOption}
-                      className="canhoes-tap inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-[var(--color-brown)]"
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                      Adicionar opção
-                    </button>
-                  ) : null}
-                </div>
-              </div>
+              <ComposePollEditor
+                disabled={isSubmitting}
+                maxOptions={MAX_POLL_OPTIONS}
+                onAddOption={handleAddPollOption}
+                onOptionChange={handlePollOptionChange}
+                onQuestionChange={setPollQuestion}
+                onRemoveOption={handleRemovePollOption}
+                options={pollOptions}
+                question={pollQuestion}
+              />
             ) : null}
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
