@@ -1,6 +1,9 @@
 import {
+  Award,
+  BarChart3,
   CalendarRange,
   FolderTree,
+  LayoutDashboard,
   Sparkles,
   TicketCheck,
   Users,
@@ -26,6 +29,7 @@ export type AdminSectionCountContext = {
 export type AdminSectionItem = {
   count: number;
   group: "primary" | "secondary";
+  icon: LucideIcon;
   id: AdminSectionId;
   label: string;
 };
@@ -66,6 +70,17 @@ const PRIMARY_SECTION_IDS: readonly AdminSectionId[] = [
   "categories",
   "nominees",
 ];
+
+const SECTION_ICONS: Record<AdminSectionId, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  pending: TicketCheck,
+  state: CalendarRange,
+  categories: FolderTree,
+  nominees: Award,
+  "secret-santa": Sparkles,
+  users: Users,
+  audit: BarChart3,
+};
 
 export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] = [
   {
@@ -126,6 +141,7 @@ export function buildAdminSectionItems(
     id: sectionId,
     label: SECTION_LABELS[sectionId],
     group: PRIMARY_SECTION_IDS.includes(sectionId) ? "primary" : "secondary",
+    icon: SECTION_ICONS[sectionId],
     count: SECTION_COUNT_RESOLVERS[sectionId](context),
   }));
 }

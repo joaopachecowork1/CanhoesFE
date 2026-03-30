@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
@@ -135,12 +134,105 @@ export default function CanhoesAdminModule() {
     [categories]
   );
 
+  const activeSectionContent = useMemo(() => {
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <AdminDashboard
+            categories={categories}
+            allNominees={allNominees}
+            pendingNominees={pendingNominees}
+            pendingCategoryProposals={pendingCategoryProposals}
+            pendingMeasureProposals={pendingMeasureProposals}
+            members={members}
+            totalVotes={votes.length}
+            loading={loading}
+          />
+        );
+      case "nominees":
+        return (
+          <NomineesAdmin
+            eventId={activeEvent?.id ?? null}
+            nominees={allNominees}
+            categories={categories}
+            loading={loading}
+            onUpdate={handleRefresh}
+          />
+        );
+      case "pending":
+        return (
+          <PendingProposals
+            eventId={activeEvent?.id ?? null}
+            categoryProposals={allCategoryProposals}
+            measureProposalsAll={allMeasureProposals}
+            loading={loading}
+            onUpdate={handleRefresh}
+          />
+        );
+      case "state":
+        return (
+          <EventStateCard
+            activeEventName={activeEvent?.name ?? null}
+            state={state}
+            eventId={activeEvent?.id ?? null}
+            events={events}
+            onActivateEvent={handleActivateEvent}
+            onUpdate={handleRefresh}
+          />
+        );
+      case "secret-santa":
+        return (
+          <SecretSantaAdmin
+            activeEventName={activeEvent?.name ?? null}
+            eventId={activeEvent?.id ?? null}
+            loading={loading}
+            onUpdate={handleRefresh}
+            state={secretSanta}
+          />
+        );
+      case "categories":
+        return (
+          <CategoriesAdmin
+            eventId={activeEvent?.id ?? null}
+            categories={categories}
+            categoryProposals={allCategoryProposals}
+            measureProposals={allMeasureProposals}
+            loading={loading}
+            onUpdate={handleRefresh}
+          />
+        );
+      case "users":
+        return <UsersAdmin members={members} loading={loading} />;
+      case "audit":
+        return (
+          <VotesAudit votes={votes} categories={categories} loading={loading} />
+        );
+      default:
+        return null;
+    }
+  }, [
+    activeEvent?.id,
+    activeEvent?.name,
+    activeTab,
+    allCategoryProposals,
+    allMeasureProposals,
+    allNominees,
+    categories,
+    events,
+    handleActivateEvent,
+    handleRefresh,
+    loading,
+    members,
+    pendingCategoryProposals,
+    pendingMeasureProposals,
+    pendingNominees,
+    secretSanta,
+    state,
+    votes,
+  ]);
+
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={(value) => setActiveTab(value as AdminSectionId)}
-      className="space-y-4"
-    >
+    <div className="space-y-4">
       <AdminControlStrip
         activeEventName={activeEvent?.name ?? null}
         loading={loading}
@@ -154,7 +246,11 @@ export default function CanhoesAdminModule() {
       />
 
       <div className="sticky top-[5.75rem] z-20">
-        <AdminSectionNav activeId={activeTab} items={adminTabs} />
+        <AdminSectionNav
+          activeId={activeTab}
+          items={adminTabs}
+          onSelect={setActiveTab}
+        />
       </div>
 
       {dashboardError ? (
@@ -164,80 +260,7 @@ export default function CanhoesAdminModule() {
         </div>
       ) : null}
 
-      <div className="space-y-4">
-        <TabsContent value="dashboard" className="space-y-4">
-          <AdminDashboard
-            categories={categories}
-            allNominees={allNominees}
-            pendingNominees={pendingNominees}
-            pendingCategoryProposals={pendingCategoryProposals}
-            pendingMeasureProposals={pendingMeasureProposals}
-            members={members}
-            totalVotes={votes.length}
-            loading={loading}
-          />
-        </TabsContent>
-
-        <TabsContent value="nominees" className="space-y-4">
-          <NomineesAdmin
-            eventId={activeEvent?.id ?? null}
-            nominees={allNominees}
-            categories={categories}
-            loading={loading}
-            onUpdate={handleRefresh}
-          />
-        </TabsContent>
-
-        <TabsContent value="pending" className="space-y-4">
-          <PendingProposals
-            eventId={activeEvent?.id ?? null}
-            categoryProposals={allCategoryProposals}
-            measureProposalsAll={allMeasureProposals}
-            loading={loading}
-            onUpdate={handleRefresh}
-          />
-        </TabsContent>
-
-        <TabsContent value="state" className="space-y-4">
-          <EventStateCard
-            activeEventName={activeEvent?.name ?? null}
-            state={state}
-            eventId={activeEvent?.id ?? null}
-            events={events}
-            onActivateEvent={handleActivateEvent}
-            onUpdate={handleRefresh}
-          />
-        </TabsContent>
-
-        <TabsContent value="secret-santa" className="space-y-4">
-          <SecretSantaAdmin
-            activeEventName={activeEvent?.name ?? null}
-            eventId={activeEvent?.id ?? null}
-            loading={loading}
-            onUpdate={handleRefresh}
-            state={secretSanta}
-          />
-        </TabsContent>
-
-        <TabsContent value="categories" className="space-y-4">
-          <CategoriesAdmin
-            eventId={activeEvent?.id ?? null}
-            categories={categories}
-            categoryProposals={allCategoryProposals}
-            measureProposals={allMeasureProposals}
-            loading={loading}
-            onUpdate={handleRefresh}
-          />
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
-          <UsersAdmin members={members} loading={loading} />
-        </TabsContent>
-
-        <TabsContent value="audit" className="space-y-4">
-          <VotesAudit votes={votes} categories={categories} loading={loading} />
-        </TabsContent>
-      </div>
-    </Tabs>
+      <div className="space-y-4">{activeSectionContent}</div>
+    </div>
   );
 }
