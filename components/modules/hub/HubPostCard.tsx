@@ -72,7 +72,7 @@ export function HubPostCard({
 
   return (
     <BlurFade delay={index * 50}>
-      <article className="editorial-shell rounded-[var(--radius-lg-token)]">
+      <article className="editorial-shell rounded-[var(--radius-lg-token)] bg-[linear-gradient(180deg,rgba(20,25,12,0.96),rgba(11,14,8,0.98))]">
         <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
           <PostHeader
             authorName={post.authorName}
@@ -84,7 +84,7 @@ export function HubPostCard({
           />
 
           {post.text ? (
-            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(236,223,197,0.86))] px-4 py-3 shadow-[var(--shadow-paper)]">
+            <div className="canhoes-paper-panel rounded-[var(--radius-md-token)] px-4 py-3">
               <p className="body-base whitespace-pre-wrap break-words text-[var(--text-dark)]">
                 {post.text}
               </p>
@@ -154,10 +154,10 @@ export function HubPostCard({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
-              <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
+              <span className="canhoes-paper-card rounded-full px-2.5 py-1 text-[var(--text-dark)] shadow-none">
                 {post.commentCount ?? 0} {feedCopy.post.commentCount}
               </span>
-              <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
+              <span className="canhoes-paper-card rounded-full px-2.5 py-1 text-[var(--text-dark)] shadow-none">
                 {reactionCountTotal} {feedCopy.post.reactionCount}
               </span>
               {post.isPinned ? (

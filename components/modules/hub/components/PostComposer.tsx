@@ -118,6 +118,13 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
     }
   };
 
+  const pollButtonActiveClassName = pollOn
+    ? "border-[rgba(177,140,255,0.26)] [box-shadow:var(--glow-purple-sm)]"
+    : "";
+  const mediaButtonActiveClassName = files.length > 0
+    ? "border-[rgba(0,255,136,0.18)] shadow-[var(--glow-green-sm)]"
+    : "";
+
   return (
     <section className="editorial-shell bg-circuit rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-4">
@@ -142,7 +149,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
               type="button"
               variant={files.length > 0 ? "secondary" : "outline"}
               size="sm"
-              className="gap-2 rounded-full px-4"
+              className={cn("gap-2 rounded-full px-4", mediaButtonActiveClassName)}
               onClick={() => fileInputRef.current?.click()}
               disabled={isSubmitting}
             >
@@ -155,7 +162,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
               type="button"
               variant={pollOn ? "secondary" : "outline"}
               size="sm"
-              className="gap-2 rounded-full px-4"
+              className={cn("gap-2 rounded-full px-4", pollButtonActiveClassName)}
               onClick={() => setPollOn((currentValue) => !currentValue)}
               disabled={isSubmitting}
             >
@@ -177,52 +184,54 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder={feedCopy.composer.textPlaceholder}
-            className="min-h-[132px] resize-none bg-[rgba(255,249,240,0.9)]"
+            className="min-h-[132px] resize-none"
           />
         </div>
 
         {files.length > 0 ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="editorial-kicker text-[var(--color-text-muted)]">
-                {feedCopy.composer.mediaSelected}
-              </p>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                {files.length}/{MAX_MEDIA_FILES}
-              </p>
-            </div>
+          <div className="canhoes-paper-card rounded-[var(--radius-lg-token)] p-4 sm:p-5">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="editorial-kicker text-[var(--text-muted)]">
+                  {feedCopy.composer.mediaSelected}
+                </p>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {files.length}/{MAX_MEDIA_FILES}
+                </p>
+              </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {files.map((file, fileIndex) => (
-                <div
-                  key={`${file.name}-${file.size}-${fileIndex}`}
-                  className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)]"
-                >
-                  <div className="aspect-square">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={previewUrls[fileIndex]}
-                      alt={file.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => removeFile(fileIndex)}
-                    className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(15,18,9,0.82)] text-[var(--text-primary)] shadow-sm transition-transform active:scale-95"
-                    aria-label="Remover imagem"
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {files.map((file, fileIndex) => (
+                  <div
+                    key={`${file.name}-${file.size}-${fileIndex}`}
+                    className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.16)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper-soft)]"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
+                    <div className="aspect-square">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewUrls[fileIndex]}
+                        alt={file.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeFile(fileIndex)}
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(107,76,42,0.16)] bg-[rgba(255,248,239,0.96)] text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] transition-transform active:scale-95"
+                      aria-label="Remover imagem"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ) : null}
 
         {pollOn ? (
-          <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.94),rgba(234,220,193,0.84))] p-4 shadow-[var(--shadow-paper)] sm:p-5">
+          <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] p-4 sm:p-5">
             <div className="space-y-4">
               <div className="space-y-1">
                 <p className="editorial-kicker">{feedCopy.composer.pollLabel}</p>
@@ -246,7 +255,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                   value={pollQuestion}
                   onChange={(event) => setPollQuestion(event.target.value)}
                   placeholder={feedCopy.composer.pollQuestionPlaceholder}
-                  className="min-h-[88px] resize-none bg-[rgba(255,249,240,0.9)]"
+                  className="min-h-[88px] resize-none"
                 />
               </div>
 
@@ -266,7 +275,6 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                           updatePollOption(optionIndex, event.target.value)
                         }
                         placeholder={`${feedCopy.composer.pollOptionPlaceholder} ${optionIndex + 1}`}
-                        className="bg-[rgba(255,249,240,0.9)]"
                       />
 
                       {pollOptions.length > 2 ? (
@@ -290,7 +298,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="justify-start gap-2 px-0 text-[var(--moss)]"
+                    className="justify-start gap-2 px-0 text-[var(--accent-purple-deep)] hover:text-[var(--accent-purple)]"
                     onClick={addPollOption}
                   >
                     <PlusCircle className="h-4 w-4" />

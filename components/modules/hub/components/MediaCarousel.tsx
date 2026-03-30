@@ -87,7 +87,7 @@ export function MediaCarousel({
       <div className={cn("w-full", className)}>
         <div
           className={cn(
-            "overflow-hidden rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]",
+            "overflow-hidden rounded-2xl border border-[rgba(107,76,42,0.16)] bg-[var(--bg-paper-alt)] shadow-[var(--shadow-paper-soft)]",
             aspectClassName
           )}
         >
@@ -115,7 +115,7 @@ export function MediaCarousel({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="group relative overflow-hidden rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface)]">
+      <div className="group relative overflow-hidden rounded-2xl border border-[rgba(107,76,42,0.16)] bg-[var(--bg-paper-alt)] shadow-[var(--shadow-paper-soft)]">
         <div
           className={cn("relative w-full", aspectClassName)}
           style={{ touchAction: "pan-y" }}
@@ -135,7 +135,7 @@ export function MediaCarousel({
               <div
                 key={url}
                 aria-hidden={index !== currentIndex}
-                className="h-full min-w-full flex-shrink-0 bg-[var(--color-bg-surface)]"
+                className="h-full min-w-full flex-shrink-0 bg-[var(--bg-paper-alt)]"
               >
                 {failedMedia[url] ? (
                   <MediaFallback />
@@ -162,7 +162,7 @@ export function MediaCarousel({
             type="button"
             onClick={() => setCurrentIndex((previousIndex) => Math.max(0, previousIndex - 1))}
             aria-label="Imagem anterior"
-            className="canhoes-tap absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1 text-[var(--text-primary)] opacity-95 shadow-[var(--shadow-panel)] transition-all sm:left-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+            className="canhoes-tap absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[rgba(107,76,42,0.16)] bg-[rgba(255,248,239,0.94)] p-1 text-[var(--text-dark)] opacity-95 shadow-[var(--shadow-paper-soft)] transition-all sm:left-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={currentIndex === 0}
           >
             <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -176,7 +176,7 @@ export function MediaCarousel({
               )
             }
             aria-label="Proxima imagem"
-            className="canhoes-tap absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1 text-[var(--text-primary)] opacity-95 shadow-[var(--shadow-panel)] transition-all sm:right-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+            className="canhoes-tap absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[rgba(107,76,42,0.16)] bg-[rgba(255,248,239,0.94)] p-1 text-[var(--text-dark)] opacity-95 shadow-[var(--shadow-paper-soft)] transition-all sm:right-2 sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={currentIndex === media.length - 1}
           >
             <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -202,8 +202,8 @@ export function MediaCarousel({
             className={cn(
               "canhoes-tap h-1.5 rounded-full transition-all",
               index === currentIndex
-                ? "w-4 bg-[var(--color-moss)] sm:w-5"
-                : "w-1.5 bg-[var(--color-brown)]/30"
+                ? "w-4 bg-[var(--accent-purple)] [box-shadow:var(--glow-purple-sm)] sm:w-5"
+                : "w-1.5 bg-[var(--bark)]/26"
             )}
             onClick={() => setCurrentIndex(index)}
           />
@@ -217,10 +217,10 @@ function MediaFallback() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(234,220,193,0.88))] px-4 text-center text-[var(--text-muted)]">
       <ImageOff className="h-5 w-5 text-[var(--neon-amber)]" />
-      <p className="text-sm font-medium text-[var(--text-primary)]">
+      <p className="text-sm font-medium text-[var(--text-dark)]">
         {feedCopy.media.unavailable}
       </p>
-      <p className="max-w-[18rem] text-xs text-[var(--beige)]/72">
+      <p className="max-w-[18rem] text-xs text-[var(--text-muted)]">
         {feedCopy.media.detail}
       </p>
     </div>

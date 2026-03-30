@@ -24,21 +24,32 @@ function FeedInsightCard({
   value,
   description,
   icon,
+  tone = "green",
 }: Readonly<{
   label: string;
   value: number;
   description: string;
   icon: ReactNode;
+  tone?: "green" | "purple";
 }>) {
+  const isPurpleTone = tone === "purple";
+
   return (
-    <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(246,239,225,0.96),rgba(236,223,197,0.84))] px-4 py-4 text-[var(--text-dark)] shadow-[var(--shadow-paper)] sm:px-5">
+    <section className="canhoes-paper-card rounded-[var(--radius-lg-token)] px-4 py-4 text-[var(--text-dark)] sm:px-5">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
             <p className="editorial-kicker text-[var(--text-muted)]">{label}</p>
             <p className="heading-2 text-[var(--text-dark)]">{value}</p>
           </div>
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
+          <span
+            className={cn(
+              "flex h-11 w-11 items-center justify-center rounded-full border shadow-[var(--shadow-card)]",
+              isPurpleTone
+                ? "border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(36,28,53,0.96),rgba(20,16,32,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
+                : "border-[rgba(0,255,136,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]"
+            )}
+          >
             {icon}
           </span>
         </div>
@@ -220,6 +231,7 @@ export function HubFeedModule({
           value={postsWithPollCount}
           description={feedCopy.insights.polls.description}
           icon={<Vote className="h-4 w-4" />}
+          tone="purple"
         />
         <FeedInsightCard
           label={feedCopy.insights.pinned.label}

@@ -26,13 +26,13 @@ export function CommentsSection({
   onToggleReaction: (commentId: string, emoji: string) => void;
 }>) {
   return (
-    <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-alt)]/82 p-3 sm:p-4">
+    <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(247,240,227,0.9),rgba(233,221,198,0.82))] p-3 shadow-[var(--shadow-paper-soft)] sm:p-4">
       <div className="space-y-3">
         {(comments ?? []).length > 0 ? (
           (comments ?? []).map((comment) => (
             <article
               key={comment.id}
-              className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]"
+              className="canhoes-paper-panel rounded-[var(--radius-md-token)] px-3 py-3"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-[var(--text-dark)]">
@@ -43,7 +43,7 @@ export function CommentsSection({
                 </p>
               </div>
 
-              <p className="body-small mt-2 whitespace-pre-wrap break-words text-[var(--color-text-secondary)]">
+              <p className="body-small mt-2 whitespace-pre-wrap break-words text-[var(--text-dark)]/82">
                 {comment.text}
               </p>
 
@@ -72,14 +72,14 @@ export function CommentsSection({
             </article>
           ))
         ) : (
-          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--border-paper)] px-4 py-6 text-center">
+          <div className="rounded-[var(--radius-md-token)] border border-dashed border-[rgba(107,76,42,0.2)] bg-[rgba(255,248,239,0.55)] px-4 py-6 text-center">
             <p className="body-small text-[var(--text-muted)]">
               {feedCopy.comments.empty}
             </p>
           </div>
         )}
 
-        <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(236,223,197,0.9))] p-3 shadow-[var(--shadow-paper)]">
+        <div className="canhoes-paper-panel rounded-[var(--radius-md-token)] p-3">
           <div className="space-y-3">
             <label
               htmlFor="hub-comment-draft"
@@ -94,7 +94,7 @@ export function CommentsSection({
                 value={draft}
                 onChange={(event) => onDraftChange(event.target.value)}
                 placeholder={feedCopy.comments.placeholder}
-                className="min-h-[96px] flex-1 resize-none bg-[rgba(255,249,240,0.88)]"
+                className="min-h-[96px] flex-1 resize-none"
               />
 
               <Button
