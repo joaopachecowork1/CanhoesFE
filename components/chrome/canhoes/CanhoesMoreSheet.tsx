@@ -6,6 +6,7 @@ import type { EventOverviewDto } from "@/lib/api/types";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -88,15 +89,10 @@ export function CanhoesMoreSheet({
             </div>
           </section>
 
-          <section className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <p className="label text-[rgba(245,237,224,0.68)]">
-                {adminCopy.shell.more.explore}
-              </p>
-              <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {exploreLinks.length} {adminCopy.shell.more.shortcuts}
-              </p>
-            </div>
+          <MoreSection
+            label={adminCopy.shell.more.explore}
+            meta={`${exploreLinks.length} ${adminCopy.shell.more.shortcuts}`}
+          >
             {exploreLinks.length > 0 ? (
               <div className="grid gap-2 sm:grid-cols-2">
                 {exploreLinks.map((link) => (
@@ -114,34 +110,101 @@ export function CanhoesMoreSheet({
                 {adminCopy.shell.more.empty}
               </div>
             )}
-          </section>
+          </MoreSection>
 
           {adminLink ? (
             <>
               <Separator className="bg-[rgba(212,184,150,0.12)]" />
-              <section className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="label text-[rgba(245,237,224,0.68)]">
-                    {adminCopy.shell.more.admin}
-                  </p>
-                  <span className="inline-flex min-h-8 items-center rounded-full border border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--neon-green)]">
-                    Admin
-                  </span>
-                </div>
-
-                <MoreLinkCard
-                  description={adminLink.description}
+              <MoreSection
+                label={adminCopy.shell.more.admin}
+                meta="Admin"
+                metaTone="admin"
+              >
+                <AdminShortcutCard
+                  description={adminCopy.shell.more.adminDescription}
                   icon={adminLink.icon}
-                  label={adminLink.label}
+                  title={adminCopy.shell.more.adminTitle}
+                  actionLabel={adminCopy.shell.more.adminAction}
                   onClick={() => onNavigate(adminLink.href)}
-                  tone="admin"
                 />
-              </section>
+              </MoreSection>
             </>
           ) : null}
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function MoreSection({
+  children,
+  label,
+  meta,
+  metaTone = "default",
+}: Readonly<{
+  children: React.ReactNode;
+  label: string;
+  meta?: string;
+  metaTone?: "admin" | "default";
+}>) {
+  return (
+    <section className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <p className="label text-[rgba(245,237,224,0.68)]">{label}</p>
+        {meta ? (
+          <span
+            className={cn(
+              "inline-flex min-h-8 items-center rounded-full border px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em]",
+              metaTone === "admin"
+                ? "border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] text-[var(--neon-green)]"
+                : "border-[rgba(177,140,255,0.22)] bg-[rgba(34,28,48,0.82)] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
+            )}
+          >
+            {meta}
+          </span>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function AdminShortcutCard({
+  actionLabel,
+  description,
+  icon: Icon,
+  onClick,
+  title,
+}: Readonly<{
+  actionLabel: string;
+  description: string;
+  icon: LucideIcon;
+  onClick: () => void;
+  title: string;
+}>) {
+  return (
+    <section className="rounded-[var(--radius-lg-token)] border border-[rgba(0,255,136,0.2)] bg-[linear-gradient(180deg,rgba(34,48,22,0.96),rgba(17,24,11,0.98))] px-4 py-4 shadow-[var(--glow-green-sm)]">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(43,35,61,0.96),rgba(24,19,36,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]">
+          <Icon className="h-4 w-4" />
+        </span>
+
+        <div className="min-w-0 flex-1 space-y-1">
+          <h3 className="font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--bg-paper)]">
+            {title}
+          </h3>
+          <p className="text-sm leading-5 text-[rgba(245,237,224,0.74)]">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <Button type="button" className="w-full sm:w-auto" onClick={onClick}>
+          {actionLabel}
+        </Button>
+      </div>
+    </section>
   );
 }
 

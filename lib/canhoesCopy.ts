@@ -36,6 +36,10 @@ export const adminCopy = {
       empty: "Nao ha outras areas abertas nesta fase.",
       explore: "Explorar",
       admin: "Administracao",
+      adminTitle: "Mesa da edicao",
+      adminDescription:
+        "Moderacao, fases e visibilidade ficam reunidas aqui para quem gere a edicao.",
+      adminAction: "Abrir admin",
       total: "Total",
       shortcuts: "atalhos",
     },
