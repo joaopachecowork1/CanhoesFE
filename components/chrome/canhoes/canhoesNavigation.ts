@@ -155,7 +155,6 @@ export const MORE_NAV_ITEMS: readonly CanhoesNavItem[] = [
   GALA_NAV_ITEM,
   MEASURES_NAV_ITEM,
   NOMINEES_NAV_ITEM,
-  ADMIN_NAV_ITEM,
 ] as const;
 
 const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
@@ -166,6 +165,7 @@ const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
   VOTING_NAV_ITEM,
   GALA_NAV_ITEM,
   ...MORE_NAV_ITEMS,
+  ADMIN_NAV_ITEM,
 ];
 
 function isNavItemAvailable({
@@ -253,7 +253,8 @@ export function getVisibleMoreNavItems({
   overview?: EventOverviewDto | null;
 }>) {
   // The More sheet only shows modules that are not already promoted to the
-  // bottom navigation for the current user and phase.
+  // bottom navigation for the current user and phase. Admin access is kept
+  // separate so non-admin users never depend on filtering a mixed list.
   return MORE_NAV_ITEMS.filter((item) => {
     if (excludedIds.includes(item.id)) return false;
 
@@ -264,6 +265,32 @@ export function getVisibleMoreNavItems({
       overview,
     });
   });
+}
+
+export function getVisibleMoreAdminItem({
+  excludedIds = [],
+  isAdmin,
+  isLocalMode = IS_LOCAL_MODE,
+  overview,
+}: Readonly<{
+  excludedIds?: string[];
+  isAdmin: boolean;
+  isLocalMode?: boolean;
+  overview?: EventOverviewDto | null;
+}>) {
+  if (excludedIds.includes(ADMIN_NAV_ITEM.id)) return null;
+  if (
+    !isNavItemAvailable({
+      itemId: ADMIN_NAV_ITEM.id,
+      isAdmin,
+      isLocalMode,
+      overview,
+    })
+  ) {
+    return null;
+  }
+
+  return ADMIN_NAV_ITEM;
 }
 
 export function isMoreSectionActive({

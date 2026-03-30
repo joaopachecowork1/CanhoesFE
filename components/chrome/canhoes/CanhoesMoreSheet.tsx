@@ -16,7 +16,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { getVisibleMoreNavItems } from "./canhoesNavigation";
+import { getVisibleMoreAdminItem, getVisibleMoreNavItems } from "./canhoesNavigation";
 
 export function CanhoesMoreSheet({
   isAdmin,
@@ -35,14 +35,19 @@ export function CanhoesMoreSheet({
   overview?: EventOverviewDto | null;
   primaryIds?: string[];
 }>) {
-  const visibleLinks = getVisibleMoreNavItems({
+  const exploreLinks = getVisibleMoreNavItems({
     excludedIds: primaryIds,
     isAdmin,
     isLocalMode,
     overview,
   });
-  const adminLink = visibleLinks.find((link) => link.requiresAdmin);
-  const exploreLinks = visibleLinks.filter((link) => !link.requiresAdmin);
+  const adminLink = getVisibleMoreAdminItem({
+    excludedIds: primaryIds,
+    isAdmin,
+    isLocalMode,
+    overview,
+  });
+  const totalShortcuts = exploreLinks.length + (adminLink ? 1 : 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -83,7 +88,7 @@ export function CanhoesMoreSheet({
                   {adminCopy.shell.more.total}
                 </p>
                 <p className="text-lg font-semibold text-[var(--accent-purple-deep)] [text-shadow:var(--glow-purple-sm)]">
-                  {visibleLinks.length}
+                  {totalShortcuts}
                 </p>
               </div>
             </div>
