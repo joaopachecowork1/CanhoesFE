@@ -71,6 +71,57 @@ export const adminCopy = {
       "Estes toggles escondem modulos mesmo quando a fase ja os permitir. Sao ajuste fino, nao substituem a fase ativa.",
     noState: "Falta uma edicao ativa para abrir os controlos globais.",
   },
+  categories: {
+    createKicker: "Curadoria",
+    createTitle: "Nova categoria",
+    createDescription:
+      "Abre categorias para esta edicao sem sair da mesa de controlo.",
+    manageKicker: "Gestao",
+    manageTitle: "Categorias da edicao",
+    empty: "Esta edicao ainda nao tem categorias criadas.",
+    historyKicker: "Arquivo",
+    historyTitle: "Historico de propostas",
+    historyEmpty:
+      "Ainda nao chegaram propostas de categoria para esta edicao.",
+  },
+  secretSanta: {
+    kicker: "Amigo secreto",
+    title: "Sorteio desta edicao",
+    description:
+      "O sorteio usa apenas os membros desta edicao. Cada pessoa ve apenas a sua atribuicao e a wishlist correspondente.",
+    refresh: "Atualizar",
+    draw: "Gerar sorteio",
+    redraw: "Refazer sorteio",
+    drawing: "A sortear...",
+    editionLabel: "Edicao",
+    editionHint: "Contexto atual do sorteio",
+    drawLabel: "Draw",
+    drawReady: "Criado",
+    drawMissing: "Por gerar",
+    assignmentsLabel: "Atribuicoes",
+    membersHintSuffix: "membros neste evento",
+    statusLabel: "Estado",
+    statusLocked: "Fechado",
+    statusOpen: "Aberto",
+    noDrawHint: "Sem sorteio criado",
+    available: "Sorteio disponivel",
+    unavailable: "Sem sorteio",
+    generatedSuffix: "atribuicoes geradas",
+  },
+  users: {
+    title: "Membros",
+    loading: "A carregar membros...",
+    empty: "Nenhum membro encontrado nesta edicao.",
+    admins: "Admins desta edicao",
+    members: "Membros desta edicao",
+  },
+  audit: {
+    kicker: "Votos",
+    title: "Registo de votos",
+    loading: "A carregar auditoria...",
+    empty: "Ainda nao ha votos registados nesta edicao.",
+    search: "Pesquisar por categoria, nomeado ou utilizador...",
+  },
 } as const;
 
 export const homeCopy = {

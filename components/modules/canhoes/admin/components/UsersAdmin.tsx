@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { adminCopy } from "@/lib/canhoesCopy";
 import type { PublicUserDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
@@ -78,11 +79,11 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
 
           <div>
             <p className="heading-3 text-[var(--text-ink)]">
-              Membros ({loading ? "..." : members.length})
+              {adminCopy.users.title} ({loading ? "..." : members.length})
             </p>
             <p className="body-small text-[var(--bark)]/68">
               {loading
-                ? "A carregar membros..."
+                ? adminCopy.users.loading
                 : `${adminMembers.length} admins · ${regularMembers.length} membros`}
             </p>
           </div>
@@ -100,7 +101,7 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
       {!loading && adminMembers.length > 0 ? (
         <AdminCollapsibleSection
           kicker="Administracao"
-          title="Admins desta edicao"
+          title={adminCopy.users.admins}
           count={adminMembers.length}
           defaultOpen
         >
@@ -113,7 +114,7 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
       {!loading && regularMembers.length > 0 ? (
         <AdminCollapsibleSection
           kicker="Grupo"
-          title="Membros desta edicao"
+          title={adminCopy.users.members}
           count={regularMembers.length}
         >
           {regularMembers.map((member) => (
@@ -124,7 +125,7 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
 
       {!loading && members.length === 0 ? (
         <p className="body-small py-10 text-center text-[var(--bark)]/68">
-          Nenhum membro encontrado nesta edicao.
+          {adminCopy.users.empty}
         </p>
       ) : null}
     </div>

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { adminCopy } from "@/lib/canhoesCopy";
 import type { AwardCategoryDto } from "@/lib/api/types";
 
 type VoteAuditRow = {
@@ -47,23 +48,23 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
   return (
     <Card className="canhoes-paper-panel border-[rgba(107,76,42,0.14)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
       <CardHeader className="space-y-1">
-        <p className="editorial-kicker text-[var(--bark)]">Auditoria</p>
-        <CardTitle className="text-[var(--text-ink)]">Registo de votos</CardTitle>
+        <p className="editorial-kicker text-[var(--bark)]">{adminCopy.audit.kicker}</p>
+        <CardTitle className="text-[var(--text-ink)]">{adminCopy.audit.title}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {loading ? (
           <div className="body-small text-[var(--bark)]/68">
-            A carregar auditoria...
+            {adminCopy.audit.loading}
           </div>
         ) : votes.length === 0 ? (
           <div className="body-small text-[var(--bark)]/68">
-            Ainda nao ha votos registados nesta edicao.
+            {adminCopy.audit.empty}
           </div>
         ) : (
           <>
             <Input
-              placeholder="Pesquisar por categoria, nomeado ou utilizador..."
+              placeholder={adminCopy.audit.search}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />

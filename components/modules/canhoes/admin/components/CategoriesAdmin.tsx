@@ -9,6 +9,7 @@ import {
   statusBadgeVariant,
   summarizeModerationStatuses,
 } from "@/components/modules/canhoes/admin/moderationUtils";
+import { adminCopy } from "@/lib/canhoesCopy";
 import type {
   AwardCategoryDto,
   CategoryProposalDto,
@@ -20,7 +21,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
 type Props = {
@@ -34,10 +41,10 @@ type Props = {
 
 type Draft = {
   id: string;
+  isActive: boolean;
+  kind: string;
   name: string;
   sortOrder: string;
-  kind: string;
-  isActive: boolean;
 };
 
 export function CategoriesAdmin({
@@ -70,10 +77,10 @@ export function CategoriesAdmin({
           return (
             draft ?? {
               id: category.id,
+              isActive: category.isActive,
+              kind: category.kind,
               name: category.name,
               sortOrder: String(category.sortOrder),
-              kind: category.kind,
-              isActive: category.isActive,
             }
           );
         }),
@@ -93,10 +100,10 @@ export function CategoriesAdmin({
       const sourceCategory = categoriesById.get(categoryId);
       const baseDraft = currentDrafts[categoryId] ?? {
         id: categoryId,
+        isActive: sourceCategory?.isActive ?? true,
+        kind: sourceCategory?.kind ?? "Sticker",
         name: sourceCategory?.name ?? "",
         sortOrder: String(sourceCategory?.sortOrder ?? 0),
-        kind: sourceCategory?.kind ?? "Sticker",
-        isActive: sourceCategory?.isActive ?? true,
       };
 
       return {
@@ -114,7 +121,7 @@ export function CategoriesAdmin({
 
     const parsedSortOrder = Number(draft.sortOrder);
     if (!Number.isFinite(parsedSortOrder)) {
-      toast.error("Sort order invalido");
+      toast.error("Ordem invalida");
       return;
     }
 
@@ -185,14 +192,13 @@ export function CategoriesAdmin({
     <div className="space-y-4">
       <Card className="border-[var(--color-moss)]/20">
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Curadoria</p>
-          <CardTitle>Nova categoria</CardTitle>
+          <p className="editorial-kicker">{adminCopy.categories.createKicker}</p>
+          <CardTitle>{adminCopy.categories.createTitle}</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-3">
           <p className="body-small text-[var(--color-text-muted)]">
-            Abre novas categorias para esta edição sem sair do painel de
-            controlo.
+            {adminCopy.categories.createDescription}
           </p>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto]">
             <Input
@@ -232,8 +238,8 @@ export function CategoriesAdmin({
         <CardHeader className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <p className="editorial-kicker">Gestão</p>
-              <CardTitle>Categorias da edição</CardTitle>
+              <p className="editorial-kicker">{adminCopy.categories.manageKicker}</p>
+              <CardTitle>{adminCopy.categories.manageTitle}</CardTitle>
             </div>
             <Badge variant="outline">{categories.length}</Badge>
           </div>
@@ -242,7 +248,7 @@ export function CategoriesAdmin({
         <CardContent className="space-y-3">
           {!loading && rows.length === 0 ? (
             <AdminStateMessage variant="panel">
-              Esta edicao ainda nao tem categorias criadas.
+              {adminCopy.categories.empty}
             </AdminStateMessage>
           ) : null}
 
@@ -259,9 +265,7 @@ export function CategoriesAdmin({
                   </label>
                   <Input
                     value={row.name}
-                    onChange={(event) =>
-                      setDraft(row.id, { name: event.target.value })
-                    }
+                    onChange={(event) => setDraft(row.id, { name: event.target.value })}
                   />
                 </div>
 
@@ -269,9 +273,7 @@ export function CategoriesAdmin({
                   <label className="editorial-kicker">Ordem</label>
                   <Input
                     value={row.sortOrder}
-                    onChange={(event) =>
-                      setDraft(row.id, { sortOrder: event.target.value })
-                    }
+                    onChange={(event) => setDraft(row.id, { sortOrder: event.target.value })}
                     inputMode="numeric"
                   />
                 </div>
@@ -293,15 +295,13 @@ export function CategoriesAdmin({
                 </div>
 
                 <div className="flex flex-col gap-3 lg:justify-end">
-                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--color-bg-surface)] px-3 py-2">
-                    <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--bg-paper-olive)] px-3 py-2">
+                    <span className="text-sm font-medium text-[var(--text-ink)]">
                       Ativa
                     </span>
                     <Switch
                       checked={row.isActive}
-                      onCheckedChange={(checked) =>
-                        setDraft(row.id, { isActive: checked })
-                      }
+                      onCheckedChange={(checked) => setDraft(row.id, { isActive: checked })}
                     />
                   </div>
 
@@ -331,8 +331,8 @@ export function CategoriesAdmin({
 
       <Card className="border-[var(--color-moss)]/20">
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Arquivo</p>
-          <CardTitle>Histórico de propostas</CardTitle>
+          <p className="editorial-kicker">{adminCopy.categories.historyKicker}</p>
+          <CardTitle>{adminCopy.categories.historyTitle}</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -367,7 +367,7 @@ export function CategoriesAdmin({
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 text-[var(--color-title)]">
                       <ScrollText className="h-4 w-4" />
-                      <span className="font-semibold text-[var(--color-text-primary)]">
+                      <span className="font-semibold text-[var(--text-ink)]">
                         {proposal.name}
                       </span>
                     </div>
@@ -378,12 +378,12 @@ export function CategoriesAdmin({
                   </div>
 
                   {proposal.description ? (
-                    <p className="body-small text-[var(--color-text-secondary)]">
+                    <p className="body-small text-[var(--bark)]/74">
                       {proposal.description}
                     </p>
                   ) : null}
 
-                  <p className="text-xs text-[var(--color-text-muted)]">
+                  <p className="text-xs text-[var(--bark)]/62">
                     {new Date(proposal.createdAtUtc).toLocaleString("pt-PT")}
                   </p>
                 </div>
@@ -392,7 +392,7 @@ export function CategoriesAdmin({
 
             {!loading && categoryProposals.length === 0 ? (
               <AdminStateMessage variant="panel">
-                Ainda nao chegaram propostas de categoria para esta edicao.
+                {adminCopy.categories.historyEmpty}
               </AdminStateMessage>
             ) : null}
           </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Gift, RefreshCw, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
+import { adminCopy } from "@/lib/canhoesCopy";
 import type { EventAdminSecretSantaStateDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -43,7 +44,7 @@ export function SecretSantaAdmin({
     if (!eventId) return;
 
     const hadDrawBefore = Boolean(state?.hasDraw);
-      setBusy("draw");
+    setBusy("draw");
     try {
       await canhoesEventsRepo.adminDrawSecretSanta(eventId, {
         eventCode: eventCode.trim() || null,
@@ -76,12 +77,11 @@ export function SecretSantaAdmin({
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <Gift className="h-4 w-4" />
-            <span className="label">Amigo secreto</span>
+            <span className="label">{adminCopy.secretSanta.kicker}</span>
           </div>
-          <CardTitle>Sorteio desta edição</CardTitle>
+          <CardTitle>{adminCopy.secretSanta.title}</CardTitle>
           <p className="body-small text-[var(--beige)]/72">
-            O draw usa apenas os membros desta edição. Cada pessoa vê apenas a
-            sua atribuição e a wishlist correspondente.
+            {adminCopy.secretSanta.description}
           </p>
         </CardHeader>
 
@@ -102,7 +102,7 @@ export function SecretSantaAdmin({
               className="gap-2"
             >
               <RefreshCw className={busy === "refresh" ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-              Atualizar
+              {adminCopy.secretSanta.refresh}
             </Button>
 
             <Button
@@ -112,43 +112,59 @@ export function SecretSantaAdmin({
               className="gap-2"
             >
               <Shuffle className="h-4 w-4" />
-              {busy === "draw" ? "A sortear..." : state?.hasDraw ? "Refazer draw" : "Gerar sorteio"}
+              {busy === "draw"
+                ? adminCopy.secretSanta.drawing
+                : state?.hasDraw
+                  ? adminCopy.secretSanta.redraw
+                  : adminCopy.secretSanta.draw}
             </Button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <StatusMetric
-              label="Edição"
-              value={activeEventName ?? "Sem evento"}
-              hint="Contexto atual do sorteio"
+              label={adminCopy.secretSanta.editionLabel}
+              value={activeEventName ?? adminCopy.controlStrip.activeEventFallback}
+              hint={adminCopy.secretSanta.editionHint}
             />
             <StatusMetric
-              label="Draw"
-              value={state?.hasDraw ? "Criado" : "Por gerar"}
+              label={adminCopy.secretSanta.drawLabel}
+              value={
+                state?.hasDraw
+                  ? adminCopy.secretSanta.drawReady
+                  : adminCopy.secretSanta.drawMissing
+              }
               hint={state?.eventCode ?? buildDefaultEventCode(eventId)}
             />
             <StatusMetric
-              label="Assignments"
+              label={adminCopy.secretSanta.assignmentsLabel}
               value={String(state?.assignmentCount ?? 0)}
-              hint={`${state?.memberCount ?? 0} membros neste evento`}
+              hint={`${state?.memberCount ?? 0} ${adminCopy.secretSanta.membersHintSuffix}`}
             />
             <StatusMetric
-              label="Estado"
-              value={state?.isLocked ? "Locked" : "Aberto"}
+              label={adminCopy.secretSanta.statusLabel}
+              value={
+                state?.isLocked
+                  ? adminCopy.secretSanta.statusLocked
+                  : adminCopy.secretSanta.statusOpen
+              }
               hint={
                 state?.createdAtUtc
                   ? `Criado a ${new Date(state.createdAtUtc).toLocaleString("pt-PT")}`
-                  : "Sem sorteio criado"
+                  : adminCopy.secretSanta.noDrawHint
               }
             />
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Badge variant={state?.hasDraw ? "secondary" : "outline"}>
-              {state?.hasDraw ? "Sorteio disponivel" : "Sem sorteio"}
+              {state?.hasDraw
+                ? adminCopy.secretSanta.available
+                : adminCopy.secretSanta.unavailable}
             </Badge>
             {state?.assignmentCount ? (
-              <Badge variant="outline">{state.assignmentCount} atribuicoes geradas</Badge>
+              <Badge variant="outline">
+                {state.assignmentCount} {adminCopy.secretSanta.generatedSuffix}
+              </Badge>
             ) : null}
           </div>
         </CardContent>
