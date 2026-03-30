@@ -2,6 +2,7 @@ import {
   Award,
   BarChart3,
   CalendarRange,
+  Eye,
   FolderTree,
   LayoutDashboard,
   Sparkles,
@@ -14,6 +15,7 @@ export type AdminSectionId =
   | "dashboard"
   | "pending"
   | "state"
+  | "visibility"
   | "categories"
   | "nominees"
   | "secret-santa"
@@ -68,9 +70,18 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
     id: "state",
     label: "Evento",
-    description: "Evento ativo, fase, calendario e modulos disponiveis.",
+    description: "Evento ativo, fase aberta e calendario desta edicao.",
     group: "primary",
     icon: CalendarRange,
+    quickActionTone: "primary",
+    count: () => 0,
+  },
+  {
+    id: "visibility",
+    label: "Modulos",
+    description: "Controla o que fica visivel para os membros desta edicao.",
+    group: "primary",
+    icon: Eye,
     quickActionTone: "primary",
     count: () => 0,
   },

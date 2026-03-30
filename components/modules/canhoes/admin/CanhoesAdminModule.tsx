@@ -13,13 +13,16 @@ import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import {
   type AdminSectionId,
   buildAdminSectionItems,
+  getAdminSection,
   getDefaultAdminSection,
 } from "./adminSections";
 import { AdminControlStrip } from "./components/AdminControlStrip";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminSectionNav } from "./components/AdminSectionNav";
+import { AdminSectionStage } from "./components/AdminSectionStage";
 import { CategoriesAdmin } from "./components/CategoriesAdmin";
 import { EventStateCard } from "./components/EventStateCard";
+import { ModuleVisibilityAdmin } from "./components/ModuleVisibilityAdmin";
 import { NomineesAdmin } from "./components/NomineesAdmin";
 import { PendingProposals } from "./components/PendingProposals";
 import { SecretSantaAdmin } from "./components/SecretSantaAdmin";
@@ -119,14 +122,18 @@ export default function CanhoesAdminModule() {
 
   const dashboardError = error instanceof Error ? error.message : null;
 
-  const adminTabs = useMemo(
-    () =>
-      buildAdminSectionItems({
-        nomineePendingCount: pendingNominees.length,
-        pendingReviewCount,
-        voteCount: votes.length,
-      }),
+  const adminCountsContext = useMemo(
+    () => ({
+      nomineePendingCount: pendingNominees.length,
+      pendingReviewCount,
+      voteCount: votes.length,
+    }),
     [pendingNominees.length, pendingReviewCount, votes.length]
+  );
+
+  const adminTabs = useMemo(
+    () => buildAdminSectionItems(adminCountsContext),
+    [adminCountsContext]
   );
 
   const activeCategories = useMemo(
@@ -180,6 +187,14 @@ export default function CanhoesAdminModule() {
             onUpdate={handleRefresh}
           />
         );
+      case "visibility":
+        return (
+          <ModuleVisibilityAdmin
+            eventId={activeEvent?.id ?? null}
+            onUpdate={handleRefresh}
+            state={state}
+          />
+        );
       case "secret-santa":
         return (
           <SecretSantaAdmin
@@ -231,6 +246,12 @@ export default function CanhoesAdminModule() {
     votes,
   ]);
 
+  const activeSection = useMemo(() => getAdminSection(activeTab), [activeTab]);
+  const activeSectionCount = useMemo(
+    () => activeSection?.count(adminCountsContext) ?? 0,
+    [activeSection, adminCountsContext]
+  );
+
   return (
     <div className="space-y-4">
       <AdminControlStrip
@@ -260,7 +281,16 @@ export default function CanhoesAdminModule() {
         </div>
       ) : null}
 
-      <div className="space-y-4">{activeSectionContent}</div>
+      <AdminSectionStage
+        title={activeSection?.label ?? "Painel"}
+        description={
+          activeSection?.description ?? "Controlos ativos desta edicao."
+        }
+        count={activeSectionCount}
+        tone={activeTab === "visibility" ? "purple" : "default"}
+      >
+        {activeSectionContent}
+      </AdminSectionStage>
     </div>
   );
 }

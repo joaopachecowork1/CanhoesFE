@@ -4,14 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useModuleVisibility } from "@/hooks/useModuleVisibility";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { EventAdminStateDto, EventPhaseDto, EventSummaryDto } from "@/lib/api/types";
 
 import { EventConfigurationPanel } from "./EventConfigurationPanel";
 import { EventContextPanel } from "./EventContextPanel";
-import { ModuleVisibilityPanel } from "./ModuleVisibilityPanel";
 
 type EventStateCardProps = {
   activeEventName: string | null;
@@ -31,21 +29,6 @@ export function EventStateCard({
   state,
 }: Readonly<EventStateCardProps>) {
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const {
-    allDisabled,
-    allEnabled,
-    moduleItems,
-    savingKey,
-    setAllModules,
-    setNominationsVisible,
-    setResultsVisible,
-    toggleModule,
-    visibleCount,
-  } = useModuleVisibility({
-    eventId,
-    onUpdate,
-    state,
-  });
 
   const updatePhase = async (phaseType: EventPhaseDto["type"]) => {
     if (!eventId) return;
@@ -84,41 +67,19 @@ export function EventStateCard({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <EventContextPanel
-          activeEventName={activeEventName}
-          busy={busyKey === "event"}
-          eventId={eventId}
-          events={events}
-          onActivateEvent={(nextEventId) => void activateEvent(nextEventId)}
-        />
-        <EventConfigurationPanel
-          busy={busyKey === "phase"}
-          onUpdatePhase={(phaseType) => void updatePhase(phaseType)}
-          state={state}
-          visibleModulesCount={visibleCount}
-        />
-      </div>
-
-      <ModuleVisibilityPanel
-        allDisabled={allDisabled}
-        allEnabled={allEnabled}
-        moduleItems={moduleItems}
-        nominationsVisible={state.nominationsVisible}
-        onDisableAll={() => void setAllModules(false)}
-        onEnableAll={() => void setAllModules(true)}
-        onToggleModule={(moduleKey, checked) =>
-          void toggleModule(moduleKey, checked)
-        }
-        onVisibilityChange={(type, checked) =>
-          void (type === "nominations"
-            ? setNominationsVisible(checked)
-            : setResultsVisible(checked))
-        }
-        resultsVisible={state.resultsVisible}
-        savingKey={savingKey}
-        visibleCount={visibleCount}
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+      <EventContextPanel
+        activeEventName={activeEventName}
+        busy={busyKey === "event"}
+        eventId={eventId}
+        events={events}
+        onActivateEvent={(nextEventId) => void activateEvent(nextEventId)}
+      />
+      <EventConfigurationPanel
+        busy={busyKey === "phase"}
+        onUpdatePhase={(phaseType) => void updatePhase(phaseType)}
+        state={state}
+        visibleModulesCount={Object.values(state.effectiveModules).filter(Boolean).length}
       />
     </div>
   );
