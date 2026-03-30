@@ -41,17 +41,23 @@ export function AdminControlStrip({
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 text-[var(--bark)]">
-                <ShieldCheck className="h-4 w-4" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-purple)] bg-[rgba(177,140,255,0.16)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]">
+                  <ShieldCheck className="h-4 w-4" />
+                </span>
                 <span className="editorial-kicker text-[var(--bark)]">
                   {adminCopy.controlStrip.kicker}
                 </span>
               </span>
-              <Badge className="border-[rgba(107,76,42,0.18)] bg-[rgba(107,76,42,0.08)] text-[var(--bark)]">
+              <Badge className="border-[var(--border-purple)] bg-[rgba(177,140,255,0.16)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]">
                 {phaseLabel}
               </Badge>
               <Badge
                 variant={pendingReviewCount > 0 ? "secondary" : "outline"}
-                className="border-[rgba(107,76,42,0.16)] text-[var(--bark)]"
+                className={
+                  pendingReviewCount > 0
+                    ? "border-[rgba(122,173,58,0.24)] bg-[linear-gradient(180deg,rgba(250,244,233,0.96),rgba(236,228,212,0.98))] text-[var(--text-ink)] shadow-[var(--glow-green-sm)]"
+                    : "border-[var(--border-purple)] bg-[rgba(177,140,255,0.1)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
+                }
               >
                 {pendingReviewCount > 0
                   ? `${pendingReviewCount} por rever`
@@ -71,7 +77,7 @@ export function AdminControlStrip({
 
           <Button
             variant="secondary"
-            className="border-[rgba(107,76,42,0.15)] bg-[var(--bark-dark)] text-[var(--bg-paper)]"
+            className="border-[var(--border-purple)] bg-[linear-gradient(180deg,rgba(64,45,92,0.96),rgba(44,30,63,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
             onClick={onRefresh}
             disabled={loading}
           >
@@ -110,15 +116,15 @@ export function AdminControlStrip({
                 onClick={() => onSelectSection(action.id)}
                 className={
                   action.tone === "primary"
-                    ? "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] border-[rgba(122,173,58,0.26)] bg-[linear-gradient(180deg,rgba(250,244,233,0.98),rgba(236,228,212,0.98))] px-3 py-3 text-left shadow-[var(--glow-green-sm)] transition-transform active:scale-[0.98]"
-                    : "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] px-3 py-3 text-left transition-transform active:scale-[0.98]"
+                    ? "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] border-[rgba(122,173,58,0.26)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),linear-gradient(180deg,rgba(250,244,233,0.98),rgba(236,228,212,0.98))] px-3 py-3 text-left shadow-[var(--glow-green-sm)] transition-transform active:scale-[0.98]"
+                    : "canhoes-paper-card canhoes-tap flex min-h-[88px] flex-col items-start justify-between rounded-[var(--radius-md-token)] border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_38%),linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] px-3 py-3 text-left shadow-[var(--glow-purple-sm)] transition-transform active:scale-[0.98]"
                 }
               >
                 <span
                   className={
                     action.tone === "primary"
                       ? "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(122,173,58,0.22)] bg-[rgba(74,92,47,0.1)] text-[var(--moss)]"
-                      : "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(107,76,42,0.12)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
+                      : "flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-purple)] bg-[rgba(177,140,255,0.16)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
                   }
                 >
                   <Icon className="h-4 w-4" />
@@ -164,8 +170,8 @@ function StripMetric({
     <div
       className={
         tone === "alert"
-          ? "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.22)] bg-[linear-gradient(180deg,rgba(245,237,224,0.92),rgba(234,220,193,0.86))] px-3 py-3 shadow-[var(--glow-green-xs)]"
-          : "rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(248,240,226,0.72)] px-3 py-3"
+          ? "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.22)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),linear-gradient(180deg,rgba(245,237,224,0.92),rgba(234,220,193,0.86))] px-3 py-3 shadow-[var(--glow-green-sm)]"
+          : "rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),rgba(248,240,226,0.78)] px-3 py-3 shadow-[var(--glow-purple-sm)]"
       }
     >
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/64">

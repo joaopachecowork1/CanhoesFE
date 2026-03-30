@@ -18,8 +18,9 @@ export function AdminReviewCard({
   title,
 }: Readonly<AdminReviewCardProps>) {
   return (
-    <article className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4 shadow-[var(--shadow-paper-soft)]">
-      <div className="space-y-4">
+    <article className="canhoes-paper-card relative overflow-hidden rounded-[var(--radius-md-token)] px-4 py-4 shadow-[var(--shadow-paper-soft)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_32%)]" />
+      <div className="relative space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +28,10 @@ export function AdminReviewCard({
               {status}
             </div>
             {meta ? (
-              <Badge variant="outline" className="w-fit text-[var(--text-ink)]">
+              <Badge
+                variant="outline"
+                className="w-fit border-[var(--border-purple)] bg-[rgba(177,140,255,0.14)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
+              >
                 {meta}
               </Badge>
             ) : null}
