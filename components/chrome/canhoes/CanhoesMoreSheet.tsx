@@ -157,7 +157,7 @@ function MoreSection({
               "inline-flex min-h-8 items-center rounded-full border px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em]",
               metaTone === "admin"
                 ? "border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] text-[var(--neon-green)]"
-                : "border-[rgba(177,140,255,0.22)] bg-[rgba(34,28,48,0.82)] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
+                : "border-[rgba(177,140,255,0.3)] bg-[rgba(34,28,48,0.9)] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]"
             )}
           >
             {meta}
@@ -183,9 +183,9 @@ function AdminShortcutCard({
   title: string;
 }>) {
   return (
-    <section className="rounded-[var(--radius-lg-token)] border border-[rgba(0,255,136,0.2)] bg-[linear-gradient(180deg,rgba(34,48,22,0.96),rgba(17,24,11,0.98))] px-4 py-4 shadow-[var(--glow-green-sm)]">
+    <section className="rounded-[var(--radius-lg-token)] border border-[rgba(0,255,136,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(34,48,22,0.96),rgba(17,24,11,0.98))] px-4 py-4 shadow-[var(--glow-green-sm)]">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(43,35,61,0.96),rgba(24,19,36,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]">
+        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]">
           <Icon className="h-4 w-4" />
         </span>
 
@@ -239,7 +239,7 @@ function MoreLinkCard({
           "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isAdminTone
             ? "border-[rgba(0,255,136,0.28)] bg-[rgba(18,28,12,0.92)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
-            : "border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(43,35,61,0.96),rgba(24,19,36,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
+            : "border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]"
         )}
       >
         <Icon className="h-4 w-4" />

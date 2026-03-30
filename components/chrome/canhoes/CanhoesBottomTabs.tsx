@@ -65,7 +65,7 @@ function BottomTab({
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isActive
-            ? "border-[rgba(177,140,255,0.22)] bg-[linear-gradient(180deg,rgba(43,58,26,0.94),rgba(26,33,17,0.96))] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm),var(--glow-purple-sm)]"
+            ? "border-[rgba(177,140,255,0.34)] bg-[linear-gradient(180deg,rgba(47,63,27,0.96),rgba(25,31,18,0.98))] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm),var(--glow-purple)]"
             : "border-transparent bg-transparent text-[rgba(245,237,224,0.76)]"
         )}
       >
@@ -86,7 +86,7 @@ function BottomTab({
         className={cn(
           "h-0.5 w-7 rounded-full transition-opacity",
           isActive
-            ? "bg-[var(--neon-green)] opacity-100 [box-shadow:var(--glow-green-sm)]"
+            ? "bg-[linear-gradient(90deg,var(--neon-green),var(--accent-purple))] opacity-100 [box-shadow:var(--glow-green-sm),var(--glow-purple-sm)]"
             : "opacity-0"
         )}
       />
@@ -113,7 +113,7 @@ function ComposeButton({
       <span
         className={cn(
           "canhoes-bottom-fab flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full border text-[var(--bg-paper)] transition-[transform,background-color,border-color,color,box-shadow]",
-          isOpen && "is-open [box-shadow:var(--glow-green-sm),var(--glow-purple-sm)]"
+          isOpen && "is-open [box-shadow:var(--glow-green-sm),var(--glow-purple)]"
         )}
       >
         <Plus className="h-5 w-5" strokeWidth={2.4} />

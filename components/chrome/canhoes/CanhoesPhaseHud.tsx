@@ -40,7 +40,7 @@ export function CanhoesPhaseHud({
   return (
     <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-3 rounded-full px-4 py-2 text-left">
       <span
-        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(177,140,255,0.2)] bg-[linear-gradient(180deg,rgba(38,54,26,0.92),rgba(24,31,16,0.94))] text-[var(--neon-green)] [box-shadow:var(--glow-purple-sm)] [text-shadow:var(--glow-green-sm)]")}
+        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(44,59,26,0.94),rgba(25,31,18,0.96))] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm),var(--glow-purple-sm)] [text-shadow:var(--glow-green-sm)]")}
       >
         <Sparkles className="h-4 w-4" />
       </span>
