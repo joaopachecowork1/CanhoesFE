@@ -36,7 +36,12 @@ export const adminCopy = {
         "Abre o que fica fora do dock sem perder o ritmo desta fase.",
       empty: "Nao ha outras areas abertas nesta fase.",
       explore: "Explorar",
+      exploreTitle: "Areas abertas nesta fase",
+      exploreDescription:
+        "Atalhos para modulos secundarios que ficam fora do dock principal.",
       admin: "Administracao",
+      adminSectionDescription:
+        "Controlos reservados a quem gere a edicao, separados do resto do menu.",
       adminTitle: "Mesa da edicao",
       adminDescription:
         "Moderacao, fases e visibilidade ficam reunidas aqui para quem gere a edicao.",

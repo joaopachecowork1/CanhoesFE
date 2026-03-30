@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import type { EventOverviewDto } from "@/lib/api/types";
@@ -56,7 +57,7 @@ export function CanhoesMoreSheet({
         className="canhoes-sheet border-[rgba(212,184,150,0.16)] pb-safe text-[var(--text-primary)] [&_[data-slot=sheet-close]]:border-[rgba(212,184,150,0.12)] [&_[data-slot=sheet-close]]:bg-[rgba(28,34,18,0.9)] [&_[data-slot=sheet-close]]:text-[var(--bg-paper)] [&_[data-slot=sheet-close]]:opacity-90"
       >
         <SheetHeader className="space-y-2 border-b border-[rgba(212,184,150,0.12)] pb-4">
-          <div className="mx-auto h-1.5 w-16 rounded-full bg-[rgba(122,173,58,0.38)]" />
+          <div className="mx-auto h-1.5 w-16 rounded-full bg-[rgba(177,140,255,0.46)] [box-shadow:var(--glow-purple-sm)]" />
           <p className="label text-left text-[rgba(245,237,224,0.68)]">
             {adminCopy.shell.more.kicker}
           </p>
@@ -97,9 +98,12 @@ export function CanhoesMoreSheet({
           <MoreSection
             label={adminCopy.shell.more.explore}
             meta={`${exploreLinks.length} ${adminCopy.shell.more.shortcuts}`}
+            metaTone="default"
+            title={adminCopy.shell.more.exploreTitle}
+            description={adminCopy.shell.more.exploreDescription}
           >
             {exploreLinks.length > 0 ? (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2" role="list" aria-label={adminCopy.shell.more.exploreTitle}>
                 {exploreLinks.map((link) => (
                   <MoreLinkCard
                     key={link.href}
@@ -119,11 +123,13 @@ export function CanhoesMoreSheet({
 
           {adminLink ? (
             <>
-              <Separator className="bg-[rgba(212,184,150,0.12)]" />
+              <Separator className="bg-[rgba(177,140,255,0.18)]" />
               <MoreSection
                 label={adminCopy.shell.more.admin}
                 meta="Admin"
                 metaTone="admin"
+                title={adminCopy.shell.more.adminTitle}
+                description={adminCopy.shell.more.adminSectionDescription}
               >
                 <AdminShortcutCard
                   description={adminCopy.shell.more.adminDescription}
@@ -143,19 +149,40 @@ export function CanhoesMoreSheet({
 
 function MoreSection({
   children,
+  description,
   label,
   meta,
   metaTone = "default",
+  title,
 }: Readonly<{
   children: React.ReactNode;
+  description: string;
   label: string;
   meta?: string;
   metaTone?: "admin" | "default";
+  title: string;
 }>) {
+  const headingId = useId();
+
   return (
-    <section className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <p className="label text-[rgba(245,237,224,0.68)]">{label}</p>
+    <section
+      role="region"
+      aria-labelledby={headingId}
+      className={cn(
+        "space-y-3 rounded-[var(--radius-lg-token)] border px-4 py-4",
+        metaTone === "admin"
+          ? "border-[rgba(0,255,136,0.16)] bg-[linear-gradient(180deg,rgba(16,22,11,0.92),rgba(10,13,8,0.96))] shadow-[var(--glow-green-sm)]"
+          : "border-[rgba(177,140,255,0.16)] bg-[linear-gradient(180deg,rgba(18,22,11,0.88),rgba(10,13,8,0.92))] shadow-[var(--glow-purple-sm)]"
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <p className="label text-[rgba(245,237,224,0.62)]">{label}</p>
+          <h3 id={headingId} className="heading-3 text-[var(--bg-paper)]">
+            {title}
+          </h3>
+          <p className="body-small text-[rgba(245,237,224,0.72)]">{description}</p>
+        </div>
         {meta ? (
           <span
             className={cn(
@@ -169,6 +196,8 @@ function MoreSection({
           </span>
         ) : null}
       </div>
+
+      <div className="editorial-divider bg-[linear-gradient(90deg,transparent,rgba(177,140,255,0.22),transparent)]" />
       {children}
     </section>
   );
@@ -218,54 +247,28 @@ function MoreLinkCard({
   icon: Icon,
   label,
   onClick,
-  tone = "default",
 }: Readonly<{
   description?: string;
   icon: LucideIcon;
   label: string;
   onClick: () => void;
-  tone?: "admin" | "default";
 }>) {
-  const isAdminTone = tone === "admin";
-
   return (
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "canhoes-tap flex min-h-[4.75rem] items-start gap-3 rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-[transform,border-color,background-color,box-shadow] active:scale-[0.99]",
-        isAdminTone
-          ? "border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] shadow-[var(--glow-green-sm)] hover:border-[rgba(0,255,136,0.38)]"
-          : "border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] hover:border-[rgba(177,140,255,0.28)] hover:[box-shadow:var(--glow-purple-sm)]"
-      )}
+      className="canhoes-tap flex min-h-[4.75rem] items-start gap-3 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] px-4 py-3 text-left text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] transition-[transform,border-color,background-color,box-shadow] hover:border-[rgba(177,140,255,0.28)] hover:[box-shadow:var(--glow-purple-sm)] active:scale-[0.99]"
     >
-      <span
-        className={cn(
-          "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
-          isAdminTone
-            ? "border-[rgba(0,255,136,0.28)] bg-[rgba(18,28,12,0.92)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
-            : "border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]"
-        )}
-      >
+      <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]">
         <Icon className="h-4 w-4" />
       </span>
 
       <span className="min-w-0 space-y-1">
-        <span
-          className={cn(
-            "block font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em]",
-            isAdminTone ? "text-[var(--bg-paper)]" : "text-[var(--text-dark)]"
-          )}
-        >
+        <span className="block font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--text-dark)]">
           {label}
         </span>
         {description ? (
-          <span
-            className={cn(
-              "block text-sm leading-5",
-              isAdminTone ? "text-[rgba(245,237,224,0.72)]" : "text-[var(--text-muted)]"
-            )}
-          >
+          <span className="block text-sm leading-5 text-[var(--text-muted)]">
             {description}
           </span>
         ) : null}
