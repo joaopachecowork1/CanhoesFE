@@ -5,6 +5,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { HubCommentDto } from "@/lib/api/types";
+import { feedCopy } from "@/lib/canhoesCopy";
 
 import { formatDateTime } from "./hubUtils";
 
@@ -73,18 +74,18 @@ export function CommentsSection({
         ) : (
           <div className="rounded-[var(--radius-md-token)] border border-dashed border-[var(--border-paper)] px-4 py-6 text-center">
             <p className="body-small text-[var(--text-muted)]">
-              Ainda nao ha comentarios neste post.
+              {feedCopy.comments.empty}
             </p>
           </div>
         )}
 
-        <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] p-3">
+        <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(236,223,197,0.9))] p-3 shadow-[var(--shadow-paper)]">
           <div className="space-y-3">
             <label
               htmlFor="hub-comment-draft"
               className="editorial-kicker text-[var(--text-muted)]"
             >
-              Responder
+              {feedCopy.comments.label}
             </label>
 
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -92,8 +93,8 @@ export function CommentsSection({
                 id="hub-comment-draft"
                 value={draft}
                 onChange={(event) => onDraftChange(event.target.value)}
-                placeholder="Escreve um comentario..."
-                className="min-h-[96px] flex-1 resize-none bg-[var(--bg-paper-alt)]"
+                placeholder={feedCopy.comments.placeholder}
+                className="min-h-[96px] flex-1 resize-none bg-[rgba(255,249,240,0.88)]"
               />
 
               <Button
@@ -102,7 +103,7 @@ export function CommentsSection({
                 onClick={onSubmit}
                 disabled={!draft.trim()}
               >
-                Enviar
+                {feedCopy.comments.submit}
               </Button>
             </div>
           </div>

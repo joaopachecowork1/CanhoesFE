@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BlurFade } from "@/components/animations/BlurFade";
 import { NumberTicker } from "@/components/animations/NumberTicker";
+import { feedCopy } from "@/lib/canhoesCopy";
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 
 import { CommentsSection } from "./components/CommentsSection";
@@ -83,9 +84,11 @@ export function HubPostCard({
           />
 
           {post.text ? (
-            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-dark)]">
-              {post.text}
-            </p>
+            <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(236,223,197,0.86))] px-4 py-3 shadow-[var(--shadow-paper)]">
+              <p className="body-base whitespace-pre-wrap break-words text-[var(--text-dark)]">
+                {post.text}
+              </p>
+            </div>
           ) : null}
         </div>
 
@@ -143,20 +146,22 @@ export function HubPostCard({
                 </span>
                 <NumberTicker value={post.commentCount ?? 0} className="text-xs" />
                 <span className="text-xs font-semibold">
-                  {openComments ? "Fechar" : "Comentarios"}
+                  {openComments
+                    ? feedCopy.post.closeComments
+                    : feedCopy.post.openComments}
                 </span>
               </Button>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
               <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
-                {post.commentCount ?? 0} comentarios
+                {post.commentCount ?? 0} {feedCopy.post.commentCount}
               </span>
               <span className="rounded-full border border-[var(--border-paper)] bg-[var(--bg-paper-alt)] px-2.5 py-1">
-                {reactionCountTotal} reacoes
+                {reactionCountTotal} {feedCopy.post.reactionCount}
               </span>
               {post.isPinned ? (
-                <Badge variant="secondary">Arquivo em destaque</Badge>
+                <Badge variant="secondary">{feedCopy.post.pinned}</Badge>
               ) : null}
             </div>
           </div>

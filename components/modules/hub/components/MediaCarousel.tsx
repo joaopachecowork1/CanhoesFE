@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
+import { feedCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
 
 import { absMediaUrl } from "./hubUtils";
@@ -214,13 +215,13 @@ export function MediaCarousel({
 
 function MediaFallback() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[var(--bg-surface)] px-4 text-center text-[var(--text-muted)]">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[linear-gradient(180deg,rgba(245,237,224,0.98),rgba(234,220,193,0.88))] px-4 text-center text-[var(--text-muted)]">
       <ImageOff className="h-5 w-5 text-[var(--neon-amber)]" />
       <p className="text-sm font-medium text-[var(--text-primary)]">
-        Imagem indisponivel
+        {feedCopy.media.unavailable}
       </p>
       <p className="max-w-[18rem] text-xs text-[var(--beige)]/72">
-        O registo do post existe, mas o ficheiro ainda nao ficou acessivel.
+        {feedCopy.media.detail}
       </p>
     </div>
   );

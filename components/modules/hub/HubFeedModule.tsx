@@ -9,6 +9,7 @@ import { Particles } from "@/components/animations/Particles";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { Button } from "@/components/ui/button";
 import { useHubFeed } from "@/hooks/useHubFeed";
+import { feedCopy } from "@/lib/canhoesCopy";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { cn } from "@/lib/utils";
 
@@ -30,14 +31,14 @@ function FeedInsightCard({
   icon: ReactNode;
 }>) {
   return (
-    <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+    <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(246,239,225,0.96),rgba(236,223,197,0.84))] px-4 py-4 text-[var(--text-dark)] shadow-[var(--shadow-paper)] sm:px-5">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="editorial-kicker">{label}</p>
+            <p className="editorial-kicker text-[var(--text-muted)]">{label}</p>
             <p className="heading-2 text-[var(--text-dark)]">{value}</p>
           </div>
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[var(--bg-deep)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
             {icon}
           </span>
         </div>
@@ -134,16 +135,14 @@ export function HubFeedModule({
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[var(--neon-green)]">
                 <ScrollText className="h-4 w-4" />
-                <span className="editorial-kicker">Feed</span>
+                <span className="editorial-kicker">{feedCopy.hero.kicker}</span>
               </div>
               <div className="space-y-1">
                 <h2 className="heading-2 text-[var(--text-primary)]">
-                  Cronica do evento
+                  {feedCopy.hero.title}
                 </h2>
                 <p className="type-subhead max-w-2xl text-[var(--beige)]/78">
-                  O feed mistura tom editorial e ritmo de produto: cards
-                  respiraveis, media consistente e interacoes com area de toque
-                  real para funcionar bem em telemovel.
+                  {feedCopy.hero.description}
                 </p>
               </div>
             </div>
@@ -157,7 +156,7 @@ export function HubFeedModule({
               disabled={loading}
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-              Atualizar
+              {feedCopy.hero.refresh}
             </Button>
           </div>
         </section>
@@ -190,12 +189,12 @@ export function HubFeedModule({
 
             {posts.length === 0 ? (
               <section className="editorial-shell rounded-[var(--radius-lg-token)] px-4 py-10 text-center sm:px-5">
-                <p className="editorial-kicker">Ainda vazio</p>
+                <p className="editorial-kicker">{feedCopy.empty.kicker}</p>
                 <h3 className="heading-3 mt-2 text-[var(--text-dark)]">
-                  O arquivo deste ano ainda nao tem publicacoes
+                  {feedCopy.empty.title}
                 </h3>
                 <p className="body-small mt-2 text-[var(--text-muted)]">
-                  Publica o primeiro post para abrir o feed do grupo.
+                  {feedCopy.empty.description}
                 </p>
               </section>
             ) : null}
@@ -205,27 +204,27 @@ export function HubFeedModule({
 
       <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
         <FeedInsightCard
-          label="Arquivo"
+          label={feedCopy.insights.archive.label}
           value={posts.length}
-          description="Numero total de publicacoes disponiveis no feed deste evento."
+          description={feedCopy.insights.archive.description}
           icon={<ScrollText className="h-4 w-4" />}
         />
         <FeedInsightCard
-          label="Momentos visuais"
+          label={feedCopy.insights.media.label}
           value={postsWithMediaCount}
-          description="Posts com fotografias ou imagens que ajudam a dar ritmo ao feed."
+          description={feedCopy.insights.media.description}
           icon={<Camera className="h-4 w-4" />}
         />
         <FeedInsightCard
-          label="Votacoes"
+          label={feedCopy.insights.polls.label}
           value={postsWithPollCount}
-          description="Blocos com participacao direta para dinamizar semanas mortas."
+          description={feedCopy.insights.polls.description}
           icon={<Vote className="h-4 w-4" />}
         />
         <FeedInsightCard
-          label="Destaques"
+          label={feedCopy.insights.pinned.label}
           value={pinnedPostCount}
-          description="Posts fixados pelos admins para manter contexto editorial no topo."
+          description={feedCopy.insights.pinned.description}
           icon={<Pin className="h-4 w-4" />}
         />
       </aside>

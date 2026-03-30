@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { feedCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
 
 export interface PostComposerSubmitData {
@@ -124,15 +125,14 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[var(--neon-green)]">
               <ScrollText className="h-4 w-4" />
-              <span className="editorial-kicker">Novo registo</span>
+              <span className="editorial-kicker">{feedCopy.composer.kicker}</span>
             </div>
             <div className="space-y-1">
               <h3 className="heading-3 text-[var(--text-dark)]">
-                Publicar no arquivo do grupo
+                {feedCopy.composer.title}
               </h3>
               <p className="body-small text-[var(--text-muted)]">
-                Texto, imagens e votacoes no mesmo bloco, com prioridades claras
-                para mobile.
+                {feedCopy.composer.description}
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
               disabled={isSubmitting}
             >
               <ImagePlus className="h-4 w-4" />
-              Imagens
+              {feedCopy.composer.mediaLabel}
               {files.length > 0 ? <span>{files.length}</span> : null}
             </Button>
 
@@ -160,7 +160,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
               disabled={isSubmitting}
             >
               <BarChart3 className="h-4 w-4" />
-              Votacao
+              {feedCopy.composer.pollLabel}
             </Button>
           </div>
         </div>
@@ -170,14 +170,14 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
             htmlFor="hub-post-text"
             className="editorial-kicker block text-[var(--color-text-muted)]"
           >
-            Texto do post
+            {feedCopy.composer.textLabel}
           </label>
           <Textarea
             id="hub-post-text"
             value={text}
             onChange={(event) => setText(event.target.value)}
-            placeholder="Escreve uma nota, um teaser da gala ou uma atualizacao para o grupo."
-            className="min-h-[132px] resize-none bg-[var(--bg-paper)]"
+            placeholder={feedCopy.composer.textPlaceholder}
+            className="min-h-[132px] resize-none bg-[rgba(255,249,240,0.9)]"
           />
         </div>
 
@@ -185,7 +185,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <p className="editorial-kicker text-[var(--color-text-muted)]">
-                Media selecionada
+                {feedCopy.composer.mediaSelected}
               </p>
               <p className="text-xs text-[var(--color-text-muted)]">
                 {files.length}/{MAX_MEDIA_FILES}
@@ -222,13 +222,16 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
         ) : null}
 
         {pollOn ? (
-          <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[rgba(245,237,224,0.75)] p-4 sm:p-5">
+          <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[linear-gradient(180deg,rgba(245,237,224,0.94),rgba(234,220,193,0.84))] p-4 shadow-[var(--shadow-paper)] sm:p-5">
             <div className="space-y-4">
               <div className="space-y-1">
-                <p className="editorial-kicker">Votacao</p>
+                <p className="editorial-kicker">{feedCopy.composer.pollLabel}</p>
                 <h4 className="heading-3 text-[var(--text-dark)]">
-                  Adicionar pergunta e opcoes
+                  {feedCopy.composer.pollTitle}
                 </h4>
+                <p className="body-small text-[var(--text-muted)]">
+                  {feedCopy.composer.pollDescription}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -236,20 +239,20 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                   htmlFor="hub-poll-question"
                   className="editorial-kicker text-[var(--color-text-muted)]"
                 >
-                  Pergunta
+                  {feedCopy.composer.pollQuestionLabel}
                 </label>
                 <Textarea
                   id="hub-poll-question"
                   value={pollQuestion}
                   onChange={(event) => setPollQuestion(event.target.value)}
-                  placeholder="Ex: Qual foi o momento mais caotico deste mes?"
-                  className="min-h-[88px] resize-none bg-[var(--bg-paper)]"
+                  placeholder={feedCopy.composer.pollQuestionPlaceholder}
+                  className="min-h-[88px] resize-none bg-[rgba(255,249,240,0.9)]"
                 />
               </div>
 
               <div className="space-y-2">
                 <p className="editorial-kicker text-[var(--color-text-muted)]">
-                  Opcoes
+                  {feedCopy.composer.pollOptionsLabel}
                 </p>
                 <div className="space-y-2">
                   {pollOptions.map((option, optionIndex) => (
@@ -262,8 +265,8 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                         onChange={(event) =>
                           updatePollOption(optionIndex, event.target.value)
                         }
-                        placeholder={`Opcao ${optionIndex + 1}`}
-                        className="bg-[var(--bg-paper)]"
+                        placeholder={`${feedCopy.composer.pollOptionPlaceholder} ${optionIndex + 1}`}
+                        className="bg-[rgba(255,249,240,0.9)]"
                       />
 
                       {pollOptions.length > 2 ? (
@@ -291,7 +294,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
                     onClick={addPollOption}
                   >
                     <PlusCircle className="h-4 w-4" />
-                    Adicionar opcao
+                    {feedCopy.composer.addOption}
                   </Button>
                 ) : null}
               </div>
@@ -303,8 +306,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="body-small text-[var(--text-muted)]">
-            Mantem o texto curto e visual. O feed funciona melhor com blocos
-            claros e media bem enquadrada.
+            {feedCopy.composer.helper}
           </p>
 
           <Button
@@ -321,7 +323,7 @@ export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
             ) : (
               <Send className="h-4 w-4" />
             )}
-            Publicar
+            {feedCopy.composer.submit}
           </Button>
         </div>
       </div>
