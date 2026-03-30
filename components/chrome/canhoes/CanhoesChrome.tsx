@@ -204,16 +204,16 @@ export function CanhoesChrome({
                   className={cn(
                     "min-h-11 rounded-full border px-3",
                     isMoreActive || isMoreSheetOpen
-                      ? "border-[rgba(0,255,136,0.3)] bg-[rgba(38,54,26,0.9)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
+                      ? "border-[rgba(177,140,255,0.28)] bg-[linear-gradient(180deg,rgba(43,35,61,0.94),rgba(24,19,36,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
                       : "border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)]"
                   )}
                   onClick={() => setIsMoreSheetOpen(true)}
-                  aria-label="Abrir menu da edicao"
-                  title="Menu da edicao"
+                  aria-label="Abrir mais areas da edicao"
+                  title="Mais areas da edicao"
                 >
                   <Menu className="h-4 w-4" strokeWidth={2.1} />
                   <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
-                    Menu
+                    Mais
                   </span>
                 </Button>
               </div>

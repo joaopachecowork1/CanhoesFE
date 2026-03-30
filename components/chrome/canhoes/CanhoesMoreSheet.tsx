@@ -63,25 +63,25 @@ export function CanhoesMoreSheet({
         </SheetHeader>
 
         <div className="space-y-4 px-4 pb-4">
-          <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,11,0.9)] px-4 py-4 shadow-[var(--shadow-panel)]">
+          <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <p className="label text-[rgba(245,237,224,0.64)]">
+                <p className="label text-[var(--text-muted)]">
                   {adminCopy.shell.more.summaryLabel}
                 </p>
-                <h3 className="heading-3 text-[var(--bg-paper)]">
+                <h3 className="heading-3 text-[var(--text-dark)]">
                   {adminCopy.shell.more.summaryTitle}
                 </h3>
-                <p className="body-small text-[rgba(245,237,224,0.68)]">
+                <p className="body-small text-[var(--text-muted)]">
                   {adminCopy.shell.more.summaryDescription}
                 </p>
               </div>
 
               <div className="shrink-0 text-right">
-                <p className="label text-[rgba(245,237,224,0.52)]">
+                <p className="label text-[var(--text-muted)]">
                   {adminCopy.shell.more.total}
                 </p>
-                <p className="text-lg font-semibold text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]">
+                <p className="text-lg font-semibold text-[var(--accent-purple-deep)] [text-shadow:var(--glow-purple-sm)]">
                   {visibleLinks.length}
                 </p>
               </div>
@@ -110,7 +110,7 @@ export function CanhoesMoreSheet({
                 ))}
               </div>
             ) : (
-              <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.8)] px-4 py-3 text-sm text-[rgba(245,237,224,0.72)]">
+              <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-3 text-sm text-[var(--text-muted)]">
                 {adminCopy.shell.more.empty}
               </div>
             )}
@@ -168,7 +168,7 @@ function MoreLinkCard({
         "canhoes-tap flex min-h-[4.75rem] items-start gap-3 rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-[transform,border-color,background-color,box-shadow] active:scale-[0.99]",
         isAdminTone
           ? "border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] shadow-[var(--glow-green-sm)] hover:border-[rgba(0,255,136,0.38)]"
-          : "border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.84)] shadow-[var(--shadow-panel)] hover:border-[rgba(212,184,150,0.22)]"
+          : "border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] hover:border-[rgba(177,140,255,0.28)] hover:[box-shadow:var(--glow-purple-sm)]"
       )}
     >
       <span
@@ -176,18 +176,28 @@ function MoreLinkCard({
           "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-[background-color,color,border-color,box-shadow]",
           isAdminTone
             ? "border-[rgba(0,255,136,0.28)] bg-[rgba(18,28,12,0.92)] text-[var(--neon-green)] [box-shadow:var(--glow-green-sm)]"
-            : "border-[rgba(212,184,150,0.14)] bg-[rgba(16,20,11,0.92)] text-[var(--beige)]"
+            : "border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(43,35,61,0.96),rgba(24,19,36,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
         )}
       >
         <Icon className="h-4 w-4" />
       </span>
 
       <span className="min-w-0 space-y-1">
-        <span className="block font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--bg-paper)]">
+        <span
+          className={cn(
+            "block font-[var(--font-mono)] text-[12px] font-semibold uppercase tracking-[0.14em]",
+            isAdminTone ? "text-[var(--bg-paper)]" : "text-[var(--text-dark)]"
+          )}
+        >
           {label}
         </span>
         {description ? (
-          <span className="block text-sm leading-5 text-[rgba(245,237,224,0.72)]">
+          <span
+            className={cn(
+              "block text-sm leading-5",
+              isAdminTone ? "text-[rgba(245,237,224,0.72)]" : "text-[var(--text-muted)]"
+            )}
+          >
             {description}
           </span>
         ) : null}

@@ -26,13 +26,13 @@ export const adminCopy = {
     backendHint: "Atualiza a edicao ou confirma o backend antes de continuar a moderacao.",
     more: {
       kicker: "Mapa da edicao",
-      title: "Mais areas desta edicao",
+      title: "Mais areas da edicao",
       description:
-        "Atalhos para areas secundarias, sem tirar foco ao que fica sempre na navegacao principal.",
+        "Atalhos para o resto da edicao sem tirar foco ao que fica sempre na navegacao principal.",
       summaryLabel: "Atalhos",
-      summaryTitle: "Explorar outras areas",
+      summaryTitle: "Outras paragens da edicao",
       summaryDescription:
-        "Mantem o foco no essencial e abre o resto da edicao quando precisares.",
+        "Abre o que fica fora do dock sem perder o ritmo desta fase.",
       empty: "Nao ha outras areas abertas nesta fase.",
       explore: "Explorar",
       admin: "Administracao",

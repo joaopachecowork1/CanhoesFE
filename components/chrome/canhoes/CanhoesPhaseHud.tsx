@@ -20,7 +20,7 @@ export function CanhoesPhaseHud({
       <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[rgba(245,237,224,0.78)]">
         <Loader2 className="h-4 w-4 animate-spin text-[var(--neon-green)]" />
         <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
-          A ler fase
+          A abrir edicao
         </span>
       </div>
     );
@@ -40,7 +40,7 @@ export function CanhoesPhaseHud({
   return (
     <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-3 rounded-full px-4 py-2 text-left">
       <span
-        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,255,136,0.18)] bg-[rgba(38,54,26,0.92)] text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]")}
+        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(177,140,255,0.2)] bg-[linear-gradient(180deg,rgba(38,54,26,0.92),rgba(24,31,16,0.94))] text-[var(--neon-green)] [box-shadow:var(--glow-purple-sm)] [text-shadow:var(--glow-green-sm)]")}
       >
         <Sparkles className="h-4 w-4" />
       </span>

@@ -69,7 +69,7 @@ const GALA_NAV_ITEM: CanhoesNavItem = {
 };
 
 const STICKERS_NAV_ITEM: CanhoesNavItem = {
-  description: "Submete e revê stickers aprovados.",
+  description: "Submete e reve stickers aprovados nesta edicao.",
   href: "/canhoes/stickers",
   icon: Sticker,
   id: "stickers",
@@ -102,7 +102,7 @@ const ADMIN_NAV_ITEM: CanhoesNavItem = {
 };
 
 export const MORE_NAV_ITEM: CanhoesNavItem = {
-  description: "Mapa rapido da edicao, atalhos e areas secundarias.",
+  description: "Atalhos para o resto da edicao e areas secundarias.",
   href: "/canhoes/menu",
   icon: Menu,
   id: "more",
