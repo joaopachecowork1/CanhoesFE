@@ -2,6 +2,8 @@
 
 import { ArrowLeft, ArrowRight, GripHorizontal, X } from "lucide-react";
 
+import { feedCopy } from "@/lib/canhoesCopy";
+
 type ComposeMediaGridProps = {
   files: File[];
   maxFiles: number;
@@ -18,13 +20,14 @@ export function ComposeMediaGrid({
   onRemove,
 }: Readonly<ComposeMediaGridProps>) {
   if (files.length === 0) return null;
+  const composeCopy = feedCopy.composer;
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[11px] font-medium text-[var(--color-text-muted)]">
         <span className="inline-flex items-center gap-1">
           <GripHorizontal className="h-3.5 w-3.5" />
-          Ordem das fotos no post
+          {composeCopy.mediaOrderLabel}
         </span>
         <span>
           {files.length}/{maxFiles}
@@ -56,7 +59,7 @@ export function ComposeMediaGrid({
                 onClick={() => onMove(index, -1)}
                 disabled={index === 0}
                 className="canhoes-tap flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] disabled:opacity-40"
-                aria-label="Mover para a esquerda"
+                aria-label={composeCopy.moveLeft}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
               </button>
@@ -66,7 +69,7 @@ export function ComposeMediaGrid({
                 onClick={() => onMove(index, 1)}
                 disabled={index === files.length - 1}
                 className="canhoes-tap flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] disabled:opacity-40"
-                aria-label="Mover para a direita"
+                aria-label={composeCopy.moveRight}
               >
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
@@ -76,7 +79,7 @@ export function ComposeMediaGrid({
               type="button"
               onClick={() => onRemove(index)}
               className="canhoes-tap absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(26,31,20,0.8)] text-[var(--color-text-primary)] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
-              aria-label="Remover imagem"
+              aria-label={composeCopy.removeImage}
             >
               <X className="h-3.5 w-3.5" />
             </button>

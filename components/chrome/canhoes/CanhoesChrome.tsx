@@ -5,6 +5,7 @@ import { LogOut, Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
+import { adminCopy } from "@/lib/canhoesCopy";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { IS_LOCAL_MODE } from "@/lib/mock";
@@ -118,8 +119,8 @@ export function CanhoesChrome({
                       : "border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)]"
                   )}
                   onClick={() => setIsMoreSheetOpen(true)}
-                  aria-label="Abrir mais areas da edicao"
-                  title="Mais areas da edicao"
+                  aria-label={adminCopy.shell.more.openAction}
+                  title={adminCopy.shell.more.openAction}
                 >
                   <Menu className="h-4 w-4" strokeWidth={2.1} />
                   <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">

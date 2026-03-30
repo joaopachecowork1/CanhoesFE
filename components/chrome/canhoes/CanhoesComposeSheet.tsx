@@ -3,21 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import {
-  BarChart3,
-  ImagePlus,
-  Leaf,
-  Loader2,
-  Send,
-} from "lucide-react";
+import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
 
+import { feedCopy } from "@/lib/canhoesCopy";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 import { cn } from "@/lib/utils";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import { ComposeMediaGrid } from "./compose/ComposeMediaGrid";
+import { ComposePollEditor } from "./compose/ComposePollEditor";
+import { ComposeUploadProgress } from "./compose/ComposeUploadProgress";
 import {
   isAcceptedImage,
   MAX_FILE_BYTES,
@@ -25,9 +23,6 @@ import {
   MAX_MEDIA_FILES,
   normalizeUploadImage,
 } from "./compose/composeUpload";
-import { ComposeMediaGrid } from "./compose/ComposeMediaGrid";
-import { ComposePollEditor } from "./compose/ComposePollEditor";
-import { ComposeUploadProgress } from "./compose/ComposeUploadProgress";
 
 const MAX_POLL_OPTIONS = 6;
 
@@ -42,6 +37,7 @@ export function CanhoesComposeSheet({
 }>) {
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
+  const composeCopy = feedCopy.composer;
 
   const [postText, setPostText] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -96,15 +92,17 @@ export function CanhoesComposeSheet({
 
       if (existingKeys.has(fileKey)) continue;
       if (!isAcceptedImage(incomingFile)) {
-        toast.error(`${incomingFile.name}: formato nao suportado`);
+        toast.error(`${incomingFile.name}: ${composeCopy.unsupportedFormat}`);
         continue;
       }
       if (incomingFile.size > MAX_FILE_BYTES) {
-        toast.error(`${incomingFile.name}: maximo ${MAX_FILE_MB}MB`);
+        toast.error(
+          `${incomingFile.name}: ${composeCopy.fileTooLargeLabel} ${MAX_FILE_MB}MB`
+        );
         continue;
       }
       if (nextFiles.length >= MAX_MEDIA_FILES) {
-        toast.error(`Maximo de ${MAX_MEDIA_FILES} imagens por post`);
+        toast.error(`${composeCopy.maxImagesLabel} ${MAX_MEDIA_FILES}`);
         break;
       }
 
@@ -118,7 +116,7 @@ export function CanhoesComposeSheet({
     setSelectedFiles(nextFiles);
 
     if (optimizedFileCount > 0) {
-      toast.success(`${optimizedFileCount} imagem(ns) otimizadas para upload rapido`);
+      toast.success(`${optimizedFileCount} ${composeCopy.optimizedLabel}`);
     }
 
     if (fileInputRef.current) {
@@ -176,7 +174,7 @@ export function CanhoesComposeSheet({
       let mediaUrls: string[] = [];
 
       if (selectedFiles.length > 0) {
-        setUploadLabel("A enviar imagens...");
+        setUploadLabel(composeCopy.uploading);
         const uploadedUrls: string[] = [];
 
         for (let index = 0; index < selectedFiles.length; index++) {
@@ -190,7 +188,7 @@ export function CanhoesComposeSheet({
 
           uploadedUrls.push(uploadedUrl);
           setUploadProgress(Math.round(((index + 1) / selectedFiles.length) * 100));
-          setUploadLabel(`A enviar imagens... ${index + 1}/${selectedFiles.length}`);
+          setUploadLabel(`${composeCopy.uploading} ${index + 1}/${selectedFiles.length}`);
         }
 
         mediaUrls = uploadedUrls;
@@ -212,7 +210,7 @@ export function CanhoesComposeSheet({
         window.dispatchEvent(new CustomEvent("hub:postCreated", { detail: createdPost }));
       }
 
-      toast.success("Post publicado");
+      toast.success(composeCopy.published);
       resetComposer();
       onDone?.();
       onOpenChange(false);
@@ -220,7 +218,7 @@ export function CanhoesComposeSheet({
       console.error(error);
       const errorSuffix =
         error instanceof Error && error.message ? `: ${error.message.slice(0, 160)}` : "";
-      toast.error(`Nao foi possivel publicar${errorSuffix}`);
+      toast.error(`${composeCopy.publishError}${errorSuffix}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -236,9 +234,9 @@ export function CanhoesComposeSheet({
             </span>
 
             <div className="space-y-1">
-              <SheetTitle>Novo Post</SheetTitle>
+              <SheetTitle>{composeCopy.sheetTitle}</SheetTitle>
               <p className="body-small text-[var(--color-text-muted)]">
-                Partilha uma foto, um texto ou uma votação.
+                {composeCopy.sheetDescription}
               </p>
             </div>
           </div>
@@ -249,7 +247,7 @@ export function CanhoesComposeSheet({
             <Textarea
               value={postText}
               onChange={(event) => setPostText(event.target.value)}
-              placeholder="O que está a acontecer?"
+              placeholder={composeCopy.textPlaceholder}
               className="min-h-24 resize-none"
               autoFocus
             />
@@ -264,7 +262,7 @@ export function CanhoesComposeSheet({
 
             {isSubmitting && selectedFiles.length > 0 ? (
               <ComposeUploadProgress
-                label={uploadLabel || "A enviar..."}
+                label={uploadLabel || composeCopy.uploadingFallback}
                 progress={uploadProgress}
               />
             ) : null}
@@ -287,7 +285,7 @@ export function CanhoesComposeSheet({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  title="Imagens"
+                  title={composeCopy.mediaLabel}
                   disabled={isSubmitting || selectedFiles.length >= MAX_MEDIA_FILES}
                   className={cn(
                     "canhoes-tap relative flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
@@ -307,7 +305,7 @@ export function CanhoesComposeSheet({
                 <button
                   type="button"
                   onClick={() => setIsPollEnabled((currentValue) => !currentValue)}
-                  title="Votação"
+                  title={composeCopy.pollLabel}
                   disabled={isSubmitting}
                   className={cn(
                     "canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
@@ -325,16 +323,22 @@ export function CanhoesComposeSheet({
                 disabled={isSubmitting || !postText.trim()}
                 className="min-w-[120px]"
               >
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Publicar
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                {composeCopy.submit}
               </Button>
             </div>
           </div>
         ) : (
           <div className="space-y-3 px-4 pb-4">
-            <p className="body-small text-[var(--color-text-muted)]">Para publicar, inicia sessão.</p>
+            <p className="body-small text-[var(--color-text-muted)]">
+              {composeCopy.authPrompt}
+            </p>
             <Button onClick={() => signIn("google")} className="w-full">
-              Entrar com Google
+              {composeCopy.signIn}
             </Button>
           </div>
         )}
@@ -345,7 +349,7 @@ export function CanhoesComposeSheet({
           accept="image/*"
           multiple
           className="hidden"
-          onChange={(event) => handleFiles(event.target.files)}
+          onChange={(event) => void handleFiles(event.target.files)}
         />
       </SheetContent>
     </Sheet>

@@ -2,6 +2,8 @@
 
 import { BarChart3, PlusCircle, Trash2 } from "lucide-react";
 
+import { feedCopy } from "@/lib/canhoesCopy";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -26,17 +28,19 @@ export function ComposePollEditor({
   options,
   question,
 }: Readonly<ComposePollEditorProps>) {
+  const composeCopy = feedCopy.composer;
+
   return (
     <div className="space-y-3 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
         <BarChart3 className="h-4 w-4 text-[var(--color-fire)]" />
-        Votação
+        {composeCopy.pollLabel}
       </div>
 
       <Textarea
         value={question}
         onChange={(event) => onQuestionChange(event.target.value)}
-        placeholder="Pergunta da votação..."
+        placeholder={composeCopy.pollQuestionPlaceholder}
         className="min-h-16 resize-none"
         disabled={disabled}
       />
@@ -47,7 +51,7 @@ export function ComposePollEditor({
             <Input
               value={pollOption}
               onChange={(event) => onOptionChange(index, event.target.value)}
-              placeholder={`Opção ${index + 1}`}
+              placeholder={`${composeCopy.pollOptionPlaceholder} ${index + 1}`}
               disabled={disabled}
             />
 
@@ -56,7 +60,7 @@ export function ComposePollEditor({
                 type="button"
                 onClick={() => onRemoveOption(index)}
                 className="canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--color-beige-dark)]/25 bg-transparent text-[var(--color-danger)]"
-                aria-label={`Remover opção ${index + 1}`}
+                aria-label={`${composeCopy.removeOption} ${index + 1}`}
                 disabled={disabled}
               >
                 <Trash2 className="h-4 w-4" />
@@ -73,7 +77,7 @@ export function ComposePollEditor({
             disabled={disabled}
           >
             <PlusCircle className="h-4 w-4" />
-            Adicionar opção
+            {composeCopy.addOption}
           </button>
         ) : null}
       </div>

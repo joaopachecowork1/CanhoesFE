@@ -25,6 +25,7 @@ export const adminCopy = {
   shell: {
     backendHint: "Atualiza a edicao ou confirma o backend antes de continuar a moderacao.",
     more: {
+      openAction: "Abrir mais areas da edicao",
       kicker: "Mapa da edicao",
       title: "Mais areas da edicao",
       description:
@@ -179,6 +180,9 @@ export const feedCopy = {
     title: "Publicar no mural da edicao",
     description:
       "Partilha uma nota, uma imagem ou uma votacao curta para manter o grupo dentro do momento.",
+    sheetTitle: "Novo registo",
+    sheetDescription:
+      "Partilha uma foto, um texto ou uma votacao curta para manter o grupo dentro desta fase.",
     mediaLabel: "Imagens",
     pollLabel: "Votacao",
     textLabel: "Texto",
@@ -193,6 +197,21 @@ export const feedCopy = {
     pollOptionsLabel: "Opcoes",
     pollOptionPlaceholder: "Opcao",
     addOption: "Adicionar opcao",
+    authPrompt: "Para publicar no mural, inicia sessao.",
+    signIn: "Entrar com Google",
+    uploading: "A enviar imagens...",
+    uploadingFallback: "A enviar...",
+    unsupportedFormat: "formato nao suportado",
+    fileTooLargeLabel: "maximo",
+    maxImagesLabel: "Maximo de imagens por post",
+    optimizedLabel: "imagem(ns) otimizadas para upload rapido",
+    published: "Post publicado",
+    publishError: "Nao foi possivel publicar",
+    mediaOrderLabel: "Ordem das imagens no post",
+    moveLeft: "Mover imagem para a esquerda",
+    moveRight: "Mover imagem para a direita",
+    removeImage: "Remover imagem",
+    removeOption: "Remover opcao",
     helper:
       "Os melhores posts sao curtos, claros e com uma imagem ou pergunta que puxe reacao.",
     submit: "Publicar no mural",
