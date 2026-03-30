@@ -1,58 +1,136 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 
-/**
- * Hook para gerir estado e ações do Feed/Hub
- *
- * Separa a lógica complexa do HubFeedModule para um hook reutilizável
- *
- * Uso:
- * ```tsx
- * const {
- *   posts,
- *   loading,
- *   comments,
- *   openComments,
- *   votePoll,
- *   toggleReaction,
- *   toggleComments,
- *   addComment,
- *   adminPin,
- *   adminDelete,
- *   refresh,
- * } = useHubFeed();
- * ```
- */
+const HEART_REACTION = "\u2764\uFE0F";
+
+function sanitizePosts(posts: HubPostDto[] | null | undefined) {
+  return (Array.isArray(posts) ? posts : []).filter(
+    (post): post is HubPostDto => Boolean(post?.id)
+  );
+}
+
+function updatePostById(
+  posts: HubPostDto[],
+  postId: string,
+  updater: (post: HubPostDto) => HubPostDto
+) {
+  return posts.map((post) => (post.id === postId ? updater(post) : post));
+}
+
+function sortPinnedPosts(posts: HubPostDto[]) {
+  return [...posts].sort(
+    (left, right) =>
+      Number(Boolean(right.isPinned)) - Number(Boolean(left.isPinned)) ||
+      String(right.createdAtUtc).localeCompare(String(left.createdAtUtc))
+  );
+}
+
+function applyPostReaction(post: HubPostDto, emoji: string) {
+  const myReactions = new Set(post.myReactions ?? []);
+  const wasActive = myReactions.has(emoji);
+
+  if (wasActive) myReactions.delete(emoji);
+  else myReactions.add(emoji);
+
+  const reactionCounts = { ...(post.reactionCounts ?? {}) };
+  reactionCounts[emoji] = Math.max(
+    0,
+    (reactionCounts[emoji] ?? 0) + (wasActive ? -1 : 1)
+  );
+
+  const nextLikeCount =
+    emoji === HEART_REACTION
+      ? Math.max(0, (post.likeCount ?? 0) + (wasActive ? -1 : 1))
+      : (post.likeCount ?? 0);
+
+  return {
+    ...post,
+    likeCount: nextLikeCount,
+    likedByMe: emoji === HEART_REACTION ? !wasActive : post.likedByMe,
+    myReactions: Array.from(myReactions),
+    reactionCounts,
+  };
+}
+
+function applyPollVote(post: HubPostDto, optionId: string) {
+  if (!post.poll) return post;
+
+  const currentPoll = post.poll;
+  const previousOptionId = currentPoll.myOptionId ?? null;
+  if (previousOptionId === optionId) return post;
+
+  const options = currentPoll.options.map((option) => {
+    if (option.id === optionId) {
+      return { ...option, voteCount: option.voteCount + 1 };
+    }
+
+    if (previousOptionId && option.id === previousOptionId) {
+      return { ...option, voteCount: Math.max(0, option.voteCount - 1) };
+    }
+
+    return option;
+  });
+
+  return {
+    ...post,
+    poll: {
+      ...currentPoll,
+      myOptionId: optionId,
+      options,
+      totalVotes: previousOptionId
+        ? currentPoll.totalVotes
+        : currentPoll.totalVotes + 1,
+    },
+  };
+}
+
+function applyCommentReaction(comment: HubCommentDto, emoji: string) {
+  const myReactions = new Set(comment.myReactions ?? []);
+  const wasActive = myReactions.has(emoji);
+
+  if (wasActive) myReactions.delete(emoji);
+  else myReactions.add(emoji);
+
+  const reactionCounts = { ...(comment.reactionCounts ?? {}) };
+  reactionCounts[emoji] = Math.max(
+    0,
+    (reactionCounts[emoji] ?? 0) + (wasActive ? -1 : 1)
+  );
+
+  return {
+    ...comment,
+    myReactions: Array.from(myReactions),
+    reactionCounts,
+  };
+}
+
 export function useHubFeed() {
   const [posts, setPosts] = useState<HubPostDto[]>([]);
-  const safePosts = useMemo(() => {
-    const arr = Array.isArray(posts) ? posts : [];
-    return arr.filter((p): p is HubPostDto => Boolean(p?.id));
-  }, [posts]);
-
   const [loading, setLoading] = useState(true);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
-  // Particles effect ao votar
-  const [showParticles, setShowParticles] = useState<{ postId: string; x: number; y: number } | null>(null);
+  // Voting triggers a short celebratory overlay in the current experience.
+  const [showParticles, setShowParticles] = useState<{
+    postId: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
-  /** Carregar posts */
+  const safePosts = useMemo(() => sanitizePosts(posts), [posts]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      console.log("[useHubFeed] Loading posts...");
       const data = await hubRepo.getPosts(50);
-      console.log("[useHubFeed] Posts loaded:", data?.length ?? 0);
-      setPosts((data ?? []).filter(Boolean));
-    } catch (e) {
-      console.error("[useHubFeed] Error loading posts:", e);
+      setPosts(sanitizePosts(data));
+    } catch {
       toast.error("Erro ao carregar o feed");
       setPosts([]);
     } finally {
@@ -69,12 +147,10 @@ export function useHubFeed() {
       const createdPost = (event as CustomEvent<HubPostDto | undefined>).detail;
       if (!createdPost?.id) return;
 
-      setPosts((currentPosts) => {
-        const dedupedPosts = (currentPosts ?? []).filter(
-          (post) => post?.id !== createdPost.id
-        );
-        return [createdPost, ...dedupedPosts];
-      });
+      setPosts((currentPosts) => [
+        createdPost,
+        ...currentPosts.filter((post) => post.id !== createdPost.id),
+      ]);
     };
 
     window.addEventListener("hub:postCreated", handlePostCreated);
@@ -82,207 +158,170 @@ export function useHubFeed() {
       window.removeEventListener("hub:postCreated", handlePostCreated);
   }, []);
 
-  /** Toggle reaction (emoji) num post */
-  const toggleReaction = useCallback(async (postId: string, emoji: string) => {
-    // Optimistic UI update
-    setPosts((prev: HubPostDto[]) =>
-      (prev ?? []).map((p: HubPostDto) => {
-        if (p?.id !== postId) return p;
-        const mine = new Set(p.myReactions || []);
-        const wasActive = mine.has(emoji);
-        if (wasActive) mine.delete(emoji);
-        else mine.add(emoji);
-
-        const nextCounts = { ...p.reactionCounts };
-        nextCounts[emoji] = Math.max(0, (nextCounts[emoji] ?? 0) + (wasActive ? -1 : 1));
-
-        let nextLikeCount = p.likeCount ?? 0;
-        if (emoji === "❤️") {
-          nextLikeCount = nextLikeCount + (wasActive ? -1 : 1);
-        }
-        const likeCount = Math.max(0, nextLikeCount);
-
-        return {
-          ...p,
-          myReactions: Array.from(mine),
-          reactionCounts: nextCounts,
-          likedByMe: emoji === "❤️" ? !wasActive : p.likedByMe,
-          likeCount,
-        };
-      })
-    );
-
-    try {
-      if (emoji === "❤️") {
-        const r = await hubRepo.toggleLike(postId);
-        setPosts((prev: HubPostDto[]) =>
-          (prev ?? []).map((p: HubPostDto) => {
-            if (p?.id !== postId) return p;
-            const mine = new Set(p.myReactions || []);
-            if (r.liked) mine.add("❤️");
-            else mine.delete("❤️");
-            return { ...p, likedByMe: r.liked, myReactions: Array.from(mine) };
-          })
-        );
-      } else {
-        await hubRepo.toggleReaction(postId, emoji);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error("Erro ao atualizar reação");
-      void load();
-    }
-  }, [load]);
-
-  /** Votar numa poll */
-  const votePoll = useCallback(async (postId: string, optionId: string) => {
-    // Trigger particles effect
-    setShowParticles({ postId, x: 50, y: 50 });
-
-    // Optimistic update
-    setPosts((prev: HubPostDto[]) => {
-      return prev.map((post) => {
-        if (post.id !== postId || !post.poll) return post;
-
-        const currentPoll = post.poll;
-        const previousOptionId = currentPoll.myOptionId ?? null;
-        if (previousOptionId === optionId) return post;
-
-        const nextOptions = currentPoll.options.map((option) => {
-          if (option.id === optionId) {
-            return { ...option, voteCount: option.voteCount + 1 };
-          }
-          if (previousOptionId && option.id === previousOptionId) {
-            return { ...option, voteCount: Math.max(0, option.voteCount - 1) };
-          }
-          return option;
-        });
-
-        const nextTotal = previousOptionId ? currentPoll.totalVotes : currentPoll.totalVotes + 1;
-        return {
-          ...post,
-          poll: {
-            ...currentPoll,
-            options: nextOptions,
-            myOptionId: optionId,
-            totalVotes: nextTotal,
-          },
-        };
-      });
-    });
-
-    try {
-      await hubRepo.votePoll(postId, optionId);
-    } catch (e) {
-      console.error(e);
-      toast.error("Erro ao votar");
-      void load();
-    }
-  }, [load]);
-
-  /** Toggle visibilidade dos comentários */
-  const toggleComments = useCallback(async (postId: string) => {
-    setOpenComments((m: Record<string, boolean>) => ({ ...m, [postId]: !m[postId] }));
-    if (!comments[postId]) {
-      try {
-        const list = await hubRepo.getComments(postId);
-        setComments((c: Record<string, HubCommentDto[]>) => ({ ...c, [postId]: (list ?? []).filter(Boolean) }));
-      } catch (e) {
-        console.error(e);
-        toast.error("Erro ao carregar comentários");
-      }
-    }
-  }, [comments]);
-
-  /** Adicionar comentário */
-  const addComment = useCallback(async (postId: string) => {
-    const draft = (commentDrafts[postId] ?? "").trim();
-    if (!draft) return;
-    try {
-      const c = await hubRepo.createComment(postId, { text: draft });
-      setCommentDrafts((d: Record<string, string>) => ({ ...d, [postId]: "" }));
-      setComments((prev: Record<string, HubCommentDto[]>) => ({ ...prev, [postId]: [...(prev[postId] ?? []), ...(c ? [c] : [])] }));
-      setPosts((prev: HubPostDto[]) =>
-        (prev ?? []).map((p: HubPostDto) =>
-          p?.id === postId ? { ...p, commentCount: (p.commentCount ?? 0) + 1 } : p
+  const toggleReaction = useCallback(
+    async (postId: string, emoji: string) => {
+      setPosts((currentPosts) =>
+        updatePostById(currentPosts, postId, (post) =>
+          applyPostReaction(post, emoji)
         )
       );
-    } catch (e) {
-      console.error(e);
-      toast.error("Erro ao comentar");
-    }
-  }, [commentDrafts]);
 
-  /** Toggle reação num comentário */
-  const toggleCommentReaction = useCallback(async (postId: string, commentId: string, emoji: string) => {
-    setComments((prev) => {
-      const list = prev[postId] ?? [];
-      return {
-        ...prev,
-        [postId]: list.map((comment) => {
-          if (comment.id !== commentId) return comment;
+      try {
+        if (emoji === HEART_REACTION) {
+          const result = await hubRepo.toggleLike(postId);
+          setPosts((currentPosts) =>
+            updatePostById(currentPosts, postId, (post) => {
+              const myReactions = new Set(post.myReactions ?? []);
+              if (result.liked) myReactions.add(HEART_REACTION);
+              else myReactions.delete(HEART_REACTION);
 
-          const mine = new Set(comment.myReactions ?? []);
-          const wasActive = mine.has(emoji);
-          if (wasActive) mine.delete(emoji);
-          else mine.add(emoji);
+              return {
+                ...post,
+                likedByMe: result.liked,
+                myReactions: Array.from(myReactions),
+              };
+            })
+          );
+          return;
+        }
 
-          const nextCounts = { ...comment.reactionCounts };
-          nextCounts[emoji] = Math.max(0, (nextCounts[emoji] ?? 0) + (wasActive ? -1 : 1));
+        await hubRepo.toggleReaction(postId, emoji);
+      } catch {
+        toast.error("Erro ao atualizar reacao");
+        void load();
+      }
+    },
+    [load]
+  );
 
-          return {
-            ...comment,
-            myReactions: Array.from(mine),
-            reactionCounts: nextCounts,
-          };
-        }),
-      };
-    });
+  const votePoll = useCallback(
+    async (postId: string, optionId: string) => {
+      setShowParticles({ postId, x: 50, y: 50 });
 
-    try {
-      await hubRepo.toggleCommentReaction(postId, commentId, emoji);
-    } catch (e) {
-      console.error(e);
-      toast.error("Erro ao atualizar reação do comentário");
+      setPosts((currentPosts) =>
+        updatePostById(currentPosts, postId, (post) =>
+          applyPollVote(post, optionId)
+        )
+      );
+
+      try {
+        await hubRepo.votePoll(postId, optionId);
+      } catch {
+        toast.error("Erro ao votar");
+        void load();
+      }
+    },
+    [load]
+  );
+
+  const toggleComments = useCallback(
+    async (postId: string) => {
+      setOpenComments((currentState) => ({
+        ...currentState,
+        [postId]: !currentState[postId],
+      }));
+
+      if (comments[postId]) return;
+
       try {
         const list = await hubRepo.getComments(postId);
-        setComments((prev) => ({ ...prev, [postId]: (list ?? []).filter(Boolean) }));
+        setComments((currentComments) => ({
+          ...currentComments,
+          [postId]: (list ?? []).filter(Boolean),
+        }));
       } catch {
-        // ignore
+        toast.error("Erro ao carregar comentarios");
       }
-    }
-  }, []);
+    },
+    [comments]
+  );
 
-  /** Admin: Fixar post */
+  const addComment = useCallback(
+    async (postId: string) => {
+      const draft = (commentDrafts[postId] ?? "").trim();
+      if (!draft) return;
+
+      try {
+        const createdComment = await hubRepo.createComment(postId, { text: draft });
+
+        setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: "" }));
+        setComments((currentComments) => ({
+          ...currentComments,
+          [postId]: [
+            ...(currentComments[postId] ?? []),
+            ...(createdComment ? [createdComment] : []),
+          ],
+        }));
+        setPosts((currentPosts) =>
+          updatePostById(currentPosts, postId, (post) => ({
+            ...post,
+            commentCount: (post.commentCount ?? 0) + 1,
+          }))
+        );
+      } catch {
+        toast.error("Erro ao comentar");
+      }
+    },
+    [commentDrafts]
+  );
+
+  const toggleCommentReaction = useCallback(
+    async (postId: string, commentId: string, emoji: string) => {
+      setComments((currentComments) => ({
+        ...currentComments,
+        [postId]: (currentComments[postId] ?? []).map((comment) =>
+          comment.id === commentId ? applyCommentReaction(comment, emoji) : comment
+        ),
+      }));
+
+      try {
+        await hubRepo.toggleCommentReaction(postId, commentId, emoji);
+      } catch {
+        toast.error("Erro ao atualizar reacao do comentario");
+        try {
+          const list = await hubRepo.getComments(postId);
+          setComments((currentComments) => ({
+            ...currentComments,
+            [postId]: (list ?? []).filter(Boolean),
+          }));
+        } catch {
+          // Keep the optimistic state if the recovery fetch also fails.
+        }
+      }
+    },
+    []
+  );
+
   const adminPin = useCallback(async (postId: string) => {
     try {
-      const r = await hubRepo.adminTogglePin(postId);
-      setPosts((prev: HubPostDto[]) =>
-        [...(prev ?? [])]
-          .map((p: HubPostDto) => (p?.id === postId ? { ...p, isPinned: r.pinned } : p))
-          .sort((a: HubPostDto, b: HubPostDto) => Number(Boolean(b?.isPinned)) - Number(Boolean(a?.isPinned)) || (String(b?.createdAtUtc) > String(a?.createdAtUtc) ? 1 : -1))
+      const result = await hubRepo.adminTogglePin(postId);
+      setPosts((currentPosts) =>
+        sortPinnedPosts(
+          updatePostById(currentPosts, postId, (post) => ({
+            ...post,
+            isPinned: result.pinned,
+          }))
+        )
       );
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("Erro ao fixar post");
     }
   }, []);
 
-  /** Admin: Eliminar post */
   const adminDelete = useCallback(async (postId: string) => {
     try {
       await hubRepo.adminDeletePost(postId);
-      setPosts((prev: HubPostDto[]) => (prev ?? []).filter((p: HubPostDto) => p?.id !== postId));
+      setPosts((currentPosts) =>
+        currentPosts.filter((post) => post.id !== postId)
+      );
       toast.success("Post removido");
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("Erro ao remover post");
     }
   }, []);
 
-  /** Update draft de comentário */
   const setCommentDraft = useCallback((postId: string, text: string) => {
-    setCommentDrafts((d: Record<string, string>) => ({ ...d, [postId]: text }));
+    setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: text }));
   }, []);
 
   return {
