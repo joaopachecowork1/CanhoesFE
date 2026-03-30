@@ -285,7 +285,11 @@ export function EventStateCard({
             {state.phases.map((phase) => (
               <div
                 key={phase.id}
-                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3"
+                className={
+                  phase.isActive
+                    ? "canhoes-paper-card rounded-[var(--radius-md-token)] border-[var(--border-purple)] px-3 py-3 shadow-[var(--glow-purple-sm)]"
+                    : "canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3"
+                }
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-ink)]">
@@ -403,7 +407,11 @@ function VisibilityToggle({
             {label}
           </p>
           <p className="text-sm text-[var(--bark)]/76">{description}</p>
-          {hint ? <p className="text-xs text-[var(--bark)]/62">{hint}</p> : null}
+          {hint ? (
+            <Badge variant={checked ? "secondary" : "outline"} className="mt-1 w-fit">
+              {hint}
+            </Badge>
+          ) : null}
         </div>
         <Switch checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>

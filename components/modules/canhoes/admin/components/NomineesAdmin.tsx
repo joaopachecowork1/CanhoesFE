@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, FolderTree, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminReviewCard } from "@/components/modules/canhoes/admin/components/AdminReviewCard";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
 import { statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
@@ -91,8 +92,7 @@ export function NomineesAdmin({
   const setNomineeCategory = (nomineeId: string, categoryId: string) =>
     withProcessing(nomineeId, () =>
       canhoesEventsRepo.adminSetNomineeCategory(eventId!, nomineeId, {
-        categoryId:
-          categoryId && categoryId !== "__none__" ? categoryId : null,
+        categoryId: categoryId && categoryId !== "__none__" ? categoryId : null,
       })
     );
 
@@ -110,11 +110,10 @@ export function NomineesAdmin({
     <Card className="border-[var(--color-moss)]/20">
       <CardHeader className="space-y-3">
         <div className="space-y-1">
-          <p className="editorial-kicker">Moderação</p>
-          <CardTitle>Nomeações em revisão</CardTitle>
+          <p className="editorial-kicker">Moderacao</p>
+          <CardTitle>Nomeacoes em revisao</CardTitle>
           <p className="body-small text-[var(--color-text-muted)]">
-            Atribui categoria, aprova ou rejeita cada nomeação sem sair da fila
-            de revisão.
+            Atribui categoria, aprova ou rejeita cada nomeacao sem sair da fila.
           </p>
         </div>
 
@@ -130,9 +129,7 @@ export function NomineesAdmin({
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {loading ? (
-          <AdminStateMessage>A carregar nomeacoes...</AdminStateMessage>
-        ) : null}
+        {loading ? <AdminStateMessage>A carregar nomeacoes...</AdminStateMessage> : null}
 
         {!loading && controlsDisabled ? (
           <AdminStateMessage>
@@ -155,32 +152,13 @@ export function NomineesAdmin({
               : null;
 
             return (
-              <article
+              <AdminReviewCard
                 key={nominee.id}
-                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="heading-3 text-[var(--color-text-primary)]">
-                        {nominee.title}
-                      </h3>
-                      <Badge variant={statusBadgeVariant(nominee.status)}>
-                        {nominee.status}
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
-                      <span className="rounded-full bg-[var(--color-bg-surface)] px-2.5 py-1">
-                        {categoryName ?? "Sem categoria"}
-                      </span>
-                      <span className="rounded-full bg-[var(--color-bg-surface)] px-2.5 py-1">
-                        {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 sm:justify-end">
+                title={nominee.title}
+                meta={new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
+                status={<Badge variant={statusBadgeVariant(nominee.status)}>{nominee.status}</Badge>}
+                actions={
+                  <>
                     {nominee.status === "pending" ? (
                       <Button
                         disabled={isBusy || controlsDisabled || !nominee.categoryId}
@@ -197,8 +175,7 @@ export function NomineesAdmin({
                       </Button>
                     ) : null}
 
-                    {(nominee.status === "pending" ||
-                      nominee.status === "approved") && (
+                    {(nominee.status === "pending" || nominee.status === "approved") && (
                       <Button
                         variant="destructive"
                         disabled={isBusy || controlsDisabled}
@@ -209,11 +186,20 @@ export function NomineesAdmin({
                         Rejeitar
                       </Button>
                     )}
-                  </div>
+                  </>
+                }
+              >
+                <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
+                  <span className="rounded-full bg-[var(--bg-paper-olive)] px-2.5 py-1 text-[var(--text-ink)]">
+                    {categoryName ?? "Sem categoria"}
+                  </span>
+                  <span className="rounded-full bg-[var(--bg-paper-olive)] px-2.5 py-1 text-[var(--text-ink)]">
+                    {nominee.status === "pending" ? "Em revisao" : "Ja tratado"}
+                  </span>
                 </div>
 
                 {nominee.status === "pending" ? (
-                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                     <div className="space-y-2">
                       <label className="editorial-kicker flex items-center gap-2">
                         <FolderTree className="h-3.5 w-3.5" />
@@ -221,9 +207,7 @@ export function NomineesAdmin({
                       </label>
                       <Select
                         value={nominee.categoryId ?? "__none__"}
-                        onValueChange={(value) =>
-                          setNomineeCategory(nominee.id, value)
-                        }
+                        onValueChange={(value) => setNomineeCategory(nominee.id, value)}
                         disabled={isBusy || controlsDisabled}
                       >
                         <SelectTrigger>
@@ -241,13 +225,13 @@ export function NomineesAdmin({
                     </div>
 
                     {!nominee.categoryId ? (
-                      <div className="rounded-[var(--radius-sm-token)] bg-[var(--color-bg-surface)] px-3 py-2 text-xs text-[var(--color-text-muted)] lg:self-end">
+                      <div className="rounded-[var(--radius-sm-token)] bg-[var(--bg-paper-olive)] px-3 py-2 text-xs text-[var(--text-ink)] lg:self-end">
                         Categoria obrigatoria para aprovar.
                       </div>
                     ) : null}
                   </div>
                 ) : null}
-              </article>
+              </AdminReviewCard>
             );
           })}
       </CardContent>
