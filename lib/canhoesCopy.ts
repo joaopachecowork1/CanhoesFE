@@ -5,15 +5,71 @@ export const adminCopy = {
     description:
       "Fase, moderacao e visibilidade num painel pensado para decisoes rapidas no telemovel.",
     clearQueue: "Fila limpa",
+    refresh: "Atualizar mesa",
+    activeEventFallback: "Sem edicao ativa",
+    membersSummary: "membros nesta edicao",
+    metrics: {
+      pending: "Pendentes",
+      categories: "Categorias ativas",
+      members: "Membros",
+      votes: "Votos registados",
+    },
   },
   dashboard: {
     pulseKicker: "Ritmo da edicao",
     queueKicker: "Decisoes por fechar",
     recentKicker: "Arquivo recente",
     queueTitle: "Ha aprovacoes para fechar nesta edicao",
+    recentTitle: "Nomeacoes recebidas mais recentemente",
   },
   shell: {
     backendHint: "Atualiza a edicao ou confirma o backend antes de continuar a moderacao.",
+    more: {
+      kicker: "Mapa da edicao",
+      title: "Mais areas desta edicao",
+      description:
+        "Atalhos para areas secundarias, sem tirar foco ao que fica sempre na navegacao principal.",
+      summaryLabel: "Atalhos",
+      summaryTitle: "Explorar outras areas",
+      summaryDescription:
+        "Mantem o foco no essencial e abre o resto da edicao quando precisares.",
+      empty: "Nao ha outras areas abertas nesta fase.",
+      explore: "Explorar",
+      admin: "Administracao",
+      total: "Total",
+      shortcuts: "atalhos",
+    },
+  },
+  state: {
+    sectionKicker: "Edicao",
+    sectionTitle: "Evento ativo, fase e calendario",
+    sectionDescription:
+      "Define a edicao em curso, a fase aberta e a janela de cada momento.",
+    activeEventLabel: "Evento ativo",
+    currentEditionLabel: "Edicao em curso",
+    currentEditionDescription:
+      "Trocar a edicao atualiza a shell, a moderacao e os modulos dos membros.",
+    phaseLabel: "Fase ativa",
+    visibleModulesLabel: "Modulos visiveis",
+    visibleModulesDescription: "O que o grupo ve agora",
+    pendingLabel: "Pendentes",
+    pendingDescription: "Itens por rever",
+    phaseClosesPrefix: "Fecha a",
+    activeBadge: "Ativa",
+    visibilityKicker: "Acesso",
+    visibilityTitle: "O que fica aberto para o grupo",
+    visibilityDescription:
+      "A fase manda no ritmo, mas a mesa da edicao decide o que ainda fica escondido.",
+    nominationsVisible: "Nomeacoes visiveis",
+    nominationsDescription:
+      "Mostra as nomeacoes aos membros quando a fase ja o permite.",
+    resultsVisible: "Resultados visiveis",
+    resultsDescription:
+      "Liberta ranking e resultados fora da gala quando for preciso.",
+    visibilityRuleTitle: "Regra de visibilidade",
+    visibilityRuleDescription:
+      "Estes toggles escondem modulos mesmo quando a fase ja os permitir. Sao ajuste fino, nao substituem a fase ativa.",
+    noState: "Falta uma edicao ativa para abrir os controlos globais.",
   },
 } as const;
 

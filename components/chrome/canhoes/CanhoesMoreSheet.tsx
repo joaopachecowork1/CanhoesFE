@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import type { EventOverviewDto } from "@/lib/api/types";
+import { adminCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
 
 import { Separator } from "@/components/ui/separator";
@@ -50,13 +51,14 @@ export function CanhoesMoreSheet({
       >
         <SheetHeader className="space-y-2 border-b border-[rgba(212,184,150,0.12)] pb-4">
           <div className="mx-auto h-1.5 w-16 rounded-full bg-[rgba(122,173,58,0.38)]" />
-          <p className="label text-left text-[rgba(245,237,224,0.68)]">Mapa da edicao</p>
+          <p className="label text-left text-[rgba(245,237,224,0.68)]">
+            {adminCopy.shell.more.kicker}
+          </p>
           <SheetTitle className="text-left text-[var(--bg-paper)]">
-            Mais areas desta edicao
+            {adminCopy.shell.more.title}
           </SheetTitle>
           <SheetDescription className="body-small text-left text-[rgba(245,237,224,0.72)]">
-            Atalhos para categorias, arquivo, wishlist e outras areas que nao
-            precisam de ficar sempre na navegacao principal.
+            {adminCopy.shell.more.description}
           </SheetDescription>
         </SheetHeader>
 
@@ -64,16 +66,21 @@ export function CanhoesMoreSheet({
           <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,11,0.9)] px-4 py-4 shadow-[var(--shadow-panel)]">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <p className="label text-[rgba(245,237,224,0.64)]">Atalhos</p>
-                <h3 className="heading-3 text-[var(--bg-paper)]">Areas secundarias</h3>
+                <p className="label text-[rgba(245,237,224,0.64)]">
+                  {adminCopy.shell.more.summaryLabel}
+                </p>
+                <h3 className="heading-3 text-[var(--bg-paper)]">
+                  {adminCopy.shell.more.summaryTitle}
+                </h3>
                 <p className="body-small text-[rgba(245,237,224,0.68)]">
-                  Mantem o foco no essencial sem perder acesso ao resto da
-                  edicao.
+                  {adminCopy.shell.more.summaryDescription}
                 </p>
               </div>
 
               <div className="shrink-0 text-right">
-                <p className="label text-[rgba(245,237,224,0.52)]">Total</p>
+                <p className="label text-[rgba(245,237,224,0.52)]">
+                  {adminCopy.shell.more.total}
+                </p>
                 <p className="text-lg font-semibold text-[var(--neon-green)] [text-shadow:var(--glow-green-sm)]">
                   {visibleLinks.length}
                 </p>
@@ -83,9 +90,11 @@ export function CanhoesMoreSheet({
 
           <section className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <p className="label text-[rgba(245,237,224,0.68)]">Explorar</p>
+              <p className="label text-[rgba(245,237,224,0.68)]">
+                {adminCopy.shell.more.explore}
+              </p>
               <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {exploreLinks.length} atalhos
+                {exploreLinks.length} {adminCopy.shell.more.shortcuts}
               </p>
             </div>
             {exploreLinks.length > 0 ? (
@@ -102,7 +111,7 @@ export function CanhoesMoreSheet({
               </div>
             ) : (
               <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.8)] px-4 py-3 text-sm text-[rgba(245,237,224,0.72)]">
-                Nao ha outras areas abertas nesta fase.
+                {adminCopy.shell.more.empty}
               </div>
             )}
           </section>
@@ -112,7 +121,9 @@ export function CanhoesMoreSheet({
               <Separator className="bg-[rgba(212,184,150,0.12)]" />
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="label text-[rgba(245,237,224,0.68)]">Administracao</p>
+                  <p className="label text-[rgba(245,237,224,0.68)]">
+                    {adminCopy.shell.more.admin}
+                  </p>
                   <span className="inline-flex min-h-8 items-center rounded-full border border-[rgba(0,255,136,0.28)] bg-[rgba(38,54,26,0.9)] px-3 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--neon-green)]">
                     Admin
                   </span>

@@ -37,14 +37,14 @@ export type AdminQuickAction = {
 };
 
 const SECTION_LABELS: Record<AdminSectionId, string> = {
-  dashboard: "Hoje",
-  pending: "Fila",
-  state: "Edicao",
+  dashboard: "Resumo",
+  pending: "Pendentes",
+  state: "Evento",
   categories: "Categorias",
   nominees: "Nomeacoes",
   "secret-santa": "Amigo",
   users: "Membros",
-  audit: "Auditoria",
+  audit: "Votos",
 };
 
 const SECTION_ORDER: readonly AdminSectionId[] = [
@@ -67,7 +67,7 @@ export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] = [
   },
   {
     id: "state",
-    label: "Estado da edicao",
+    label: "Evento e fase",
     description: "Evento ativo, fase e visibilidade.",
     icon: CalendarRange,
   },

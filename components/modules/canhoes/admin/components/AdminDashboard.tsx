@@ -167,7 +167,7 @@ export function AdminDashboard({
           <div className="space-y-1">
             <p className="editorial-kicker">{adminCopy.dashboard.recentKicker}</p>
             <h3 className="heading-3 text-[var(--text-primary)]">
-              Nomeacoes recebidas mais recentemente
+              {adminCopy.dashboard.recentTitle}
             </h3>
           </div>
 

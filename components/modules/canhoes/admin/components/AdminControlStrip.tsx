@@ -76,15 +76,28 @@ export function AdminControlStrip({
             disabled={loading}
           >
             <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-            Atualizar edicao
+            {adminCopy.controlStrip.refresh}
           </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <StripMetric label="Categorias ativas" value={visibleCategoryCount} />
-          <StripMetric label="Membros" value={memberCount} />
-          <StripMetric label="Pendentes" value={pendingReviewCount} />
-          <StripMetric label="Votos registados" value={totalVotes} />
+          <StripMetric
+            label={adminCopy.controlStrip.metrics.pending}
+            value={pendingReviewCount}
+            tone={pendingReviewCount > 0 ? "alert" : "default"}
+          />
+          <StripMetric
+            label={adminCopy.controlStrip.metrics.categories}
+            value={visibleCategoryCount}
+          />
+          <StripMetric
+            label={adminCopy.controlStrip.metrics.members}
+            value={memberCount}
+          />
+          <StripMetric
+            label={adminCopy.controlStrip.metrics.votes}
+            value={totalVotes}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -116,11 +129,11 @@ export function AdminControlStrip({
         <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(107,76,42,0.1)] pt-4 text-sm text-[var(--bark)]/72">
           <span className="inline-flex items-center gap-2">
             <CalendarRange className="h-4 w-4 text-[var(--moss)]" />
-            {activeEventName ?? "Sem edicao ativa"}
+            {activeEventName ?? adminCopy.controlStrip.activeEventFallback}
           </span>
           <span className="inline-flex items-center gap-2">
             <Users className="h-4 w-4 text-[var(--moss)]" />
-            {memberCount} membros nesta edicao
+            {memberCount} {adminCopy.controlStrip.membersSummary}
           </span>
         </div>
       </div>
@@ -130,13 +143,21 @@ export function AdminControlStrip({
 
 function StripMetric({
   label,
+  tone = "default",
   value,
 }: Readonly<{
   label: string;
+  tone?: "alert" | "default";
   value: number;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(248,240,226,0.72)] px-3 py-3">
+    <div
+      className={
+        tone === "alert"
+          ? "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.22)] bg-[linear-gradient(180deg,rgba(245,237,224,0.92),rgba(234,220,193,0.86))] px-3 py-3 shadow-[var(--glow-green-xs)]"
+          : "rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(248,240,226,0.72)] px-3 py-3"
+      }
+    >
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/64">
         {label}
       </p>
