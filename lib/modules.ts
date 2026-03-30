@@ -13,6 +13,9 @@ export type CanhoesMemberModuleDefinition = {
   navLabel?: string;
 };
 
+// Source of truth for member-facing modules. Admin UI, visibility toggles and
+// shell navigation should read from this registry instead of spreading labels
+// and descriptions across unrelated files.
 export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = [
   {
     key: "feed",

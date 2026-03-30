@@ -26,9 +26,12 @@ export type AdminSectionCountContext = {
   voteCount: number;
 };
 
+export type AdminSectionGroup = "primary" | "secondary";
+
 export type AdminSectionItem = {
   count: number;
-  group: "primary" | "secondary";
+  description: string;
+  group: AdminSectionGroup;
   icon: LucideIcon;
   id: AdminSectionId;
   label: string;
@@ -39,111 +42,121 @@ export type AdminQuickAction = {
   icon: LucideIcon;
   id: AdminSectionId;
   label: string;
-  tone?: "primary" | "secondary";
+  tone: "primary" | "secondary";
 };
 
-const SECTION_LABELS: Record<AdminSectionId, string> = {
-  dashboard: "Resumo",
-  pending: "Pendentes",
-  state: "Evento",
-  categories: "Categorias",
-  nominees: "Nomeacoes",
-  "secret-santa": "Amigo",
-  users: "Membros",
-  audit: "Votos",
+type AdminSectionDefinition = {
+  count: (context: AdminSectionCountContext) => number;
+  description: string;
+  group: AdminSectionGroup;
+  icon: LucideIcon;
+  id: AdminSectionId;
+  label: string;
+  quickActionTone?: "primary" | "secondary";
 };
 
-const SECTION_ORDER: readonly AdminSectionId[] = [
-  "pending",
-  "state",
-  "categories",
-  "nominees",
-  "secret-santa",
-  "users",
-  "audit",
-  "dashboard",
-];
-
-const PRIMARY_SECTION_IDS: readonly AdminSectionId[] = [
-  "pending",
-  "state",
-  "categories",
-  "nominees",
-];
-
-const SECTION_ICONS: Record<AdminSectionId, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  pending: TicketCheck,
-  state: CalendarRange,
-  categories: FolderTree,
-  nominees: Award,
-  "secret-santa": Sparkles,
-  users: Users,
-  audit: BarChart3,
-};
-
-export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] = [
+const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
     id: "pending",
-    label: "Fila de revisao",
-    description: "Propostas e nomeacoes por decidir.",
+    label: "Pendentes",
+    description: "Fila de revisao para fechar propostas e nomeacoes.",
+    group: "primary",
     icon: TicketCheck,
-    tone: "primary",
+    quickActionTone: "primary",
+    count: (context) => context.pendingReviewCount,
   },
   {
     id: "state",
-    label: "Evento e fase",
-    description: "Evento ativo, fase e visibilidade.",
+    label: "Evento",
+    description: "Evento ativo, fase, calendario e modulos disponiveis.",
+    group: "primary",
     icon: CalendarRange,
-    tone: "primary",
+    quickActionTone: "primary",
+    count: () => 0,
   },
   {
     id: "categories",
     label: "Categorias",
-    description: "Criar, editar e limpar categorias.",
+    description: "Curadoria e manutencao das categorias desta edicao.",
+    group: "primary",
     icon: FolderTree,
-    tone: "primary",
+    quickActionTone: "primary",
+    count: () => 0,
+  },
+  {
+    id: "nominees",
+    label: "Nomeacoes",
+    description: "Moderacao de nomeacoes submetidas pelo grupo.",
+    group: "primary",
+    icon: Award,
+    count: (context) => context.nomineePendingCount,
   },
   {
     id: "secret-santa",
-    label: "Sorteio",
-    description: "Gerar ou rever o Amigo Secreto.",
+    label: "Amigo",
+    description: "Sorteio, atribuicoes e estado do Amigo Secreto.",
+    group: "secondary",
     icon: Sparkles,
-    tone: "secondary",
+    quickActionTone: "secondary",
+    count: () => 0,
   },
   {
     id: "users",
     label: "Membros",
-    description: "Ver quem participa nesta edicao.",
+    description: "Participantes, admins e composicao da edicao.",
+    group: "secondary",
     icon: Users,
-    tone: "secondary",
+    quickActionTone: "secondary",
+    count: () => 0,
+  },
+  {
+    id: "audit",
+    label: "Votos",
+    description: "Auditoria de votos e registo do que ja foi submetido.",
+    group: "secondary",
+    icon: BarChart3,
+    count: (context) => context.voteCount,
+  },
+  {
+    id: "dashboard",
+    label: "Resumo",
+    description: "Pulso geral da edicao e atividade mais recente.",
+    group: "secondary",
+    icon: LayoutDashboard,
+    count: () => 0,
   },
 ] as const;
 
-const SECTION_COUNT_RESOLVERS: Record<
-  AdminSectionId,
-  (context: AdminSectionCountContext) => number
-> = {
-  dashboard: () => 0,
-  pending: (context) => context.pendingReviewCount,
-  state: () => 0,
-  categories: () => 0,
-  nominees: (context) => context.nomineePendingCount,
-  "secret-santa": () => 0,
-  users: () => 0,
-  audit: (context) => context.voteCount,
-};
+export const ADMIN_QUICK_ACTIONS: readonly AdminQuickAction[] =
+  ADMIN_SECTION_REGISTRY.filter(
+    (sectionDefinition) => sectionDefinition.quickActionTone
+  ).map((sectionDefinition) => ({
+    id: sectionDefinition.id,
+    label: sectionDefinition.label,
+    description: sectionDefinition.description,
+    icon: sectionDefinition.icon,
+    tone: sectionDefinition.quickActionTone!,
+  }));
 
 export function buildAdminSectionItems(
   context: Readonly<AdminSectionCountContext>
 ): AdminSectionItem[] {
-  return SECTION_ORDER.map((sectionId) => ({
-    id: sectionId,
-    label: SECTION_LABELS[sectionId],
-    group: PRIMARY_SECTION_IDS.includes(sectionId) ? "primary" : "secondary",
-    icon: SECTION_ICONS[sectionId],
-    count: SECTION_COUNT_RESOLVERS[sectionId](context),
+  return ADMIN_SECTION_REGISTRY.map((sectionDefinition) => ({
+    id: sectionDefinition.id,
+    label: sectionDefinition.label,
+    description: sectionDefinition.description,
+    group: sectionDefinition.group,
+    icon: sectionDefinition.icon,
+    count: sectionDefinition.count(context),
   }));
+}
+
+export function getAdminSection(
+  sectionId: AdminSectionId
+): AdminSectionDefinition | undefined {
+  return ADMIN_SECTION_REGISTRY.find(
+    (sectionDefinition) => sectionDefinition.id === sectionId
+  );
 }
 
 export function getDefaultAdminSection(

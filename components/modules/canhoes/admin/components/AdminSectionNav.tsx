@@ -45,6 +45,11 @@ export function AdminSectionNav({
           <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
             {activeItem?.label ?? "Painel"}
           </p>
+          {activeItem?.description ? (
+            <p className="mt-1 line-clamp-2 text-xs text-[rgba(245,237,224,0.58)]">
+              {activeItem.description}
+            </p>
+          ) : null}
         </div>
 
         {activeItem?.count ? (
@@ -93,14 +98,14 @@ export function AdminSectionNav({
                     <Icon className="h-4 w-4" />
                   </span>
 
-                  <span className="space-y-0.5">
-                    <span className="block text-sm font-semibold leading-none">
-                      {item.label}
-                    </span>
-                    <span className="block text-[0.68rem] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.48)]">
-                      Secao
-                    </span>
+                <span className="space-y-0.5">
+                  <span className="block text-sm font-semibold leading-none">
+                    {item.label}
                   </span>
+                  <span className="block max-w-[13rem] line-clamp-2 text-[0.68rem] leading-4 text-[rgba(245,237,224,0.48)]">
+                    {item.description}
+                  </span>
+                </span>
 
                   {item.count > 0 ? (
                     <Badge className="rounded-full border-[rgba(176,129,255,0.38)] bg-[rgba(138,92,255,0.16)] px-2 text-[0.72rem] font-semibold text-[var(--accent-purple-soft)] shadow-[0_0_18px_rgba(138,92,255,0.14)]">
