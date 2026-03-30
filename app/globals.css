@@ -383,6 +383,13 @@ body {
    CYBER-ORGANIC THEME OVERRIDES
    ============================================= */
 :root {
+  /*
+   * Theme roles:
+   * - shell/depth: bg-void, bg-deep, bg-surface
+   * - readable content: bg-paper*
+   * - primary live controls: moss + neon green
+   * - secondary cyber accent only: accent-purple*
+   */
   --bg-void: #0f1209;
   --bg-deep: #161c0e;
   --bg-surface: #1e2614;
@@ -409,11 +416,18 @@ body {
   --neon-amber: #ffb800;
   --neon-cyan: #00d4aa;
   --neon-red: #ff3a3a;
+  --accent-purple: #b18cff;
+  --accent-purple-soft: #d7c4ff;
+  --accent-purple-deep: #7a54d8;
 
   --glow-green: 0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.25),
     0 0 40px rgba(0, 255, 136, 0.12);
   --glow-green-sm: 0 0 4px #00ff88, 0 0 10px rgba(0, 255, 136, 0.2);
   --glow-amber: 0 0 6px #ffb800, 0 0 20px rgba(255, 184, 0, 0.25);
+  --glow-purple: 0 0 8px rgba(177, 140, 255, 0.45),
+    0 0 22px rgba(177, 140, 255, 0.2);
+  --glow-purple-sm: 0 0 6px rgba(177, 140, 255, 0.28),
+    0 0 16px rgba(177, 140, 255, 0.14);
   --glow-moss: 0 10px 30px rgba(74, 92, 47, 0.4);
   --glow-paper: 0 18px 40px rgba(10, 12, 8, 0.2);
 
@@ -432,6 +446,7 @@ body {
   --border-moss: rgba(74, 92, 47, 0.5);
   --border-neon: rgba(0, 255, 136, 0.4);
   --border-paper: rgba(212, 184, 150, 0.5);
+  --border-purple: rgba(177, 140, 255, 0.36);
   --border-default: var(--border-moss);
   --border-beige: var(--border-paper);
 
@@ -504,6 +519,7 @@ body {
   --color-psycho-3: var(--psycho-3);
   --color-psycho-4: var(--psycho-4);
   --color-psycho-5: var(--psycho-5);
+  --color-accent-purple: var(--accent-purple);
   --color-border-subtle: var(--border-subtle);
 }
 
@@ -604,13 +620,14 @@ h3,
 }
 
 .canhoes-admin-tab[data-state="active"] {
-  border-color: rgba(212, 184, 150, 0.24);
+  border-color: rgba(177, 140, 255, 0.22);
   background:
-    linear-gradient(180deg, rgba(245, 237, 224, 0.16), rgba(212, 184, 150, 0.12));
+    linear-gradient(180deg, rgba(245, 237, 224, 0.16), rgba(177, 140, 255, 0.1));
   color: var(--bg-paper);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 26px rgba(0, 0, 0, 0.2);
+    0 12px 26px rgba(0, 0, 0, 0.2),
+    var(--glow-purple-sm);
 }
 
 .canhoes-shell-chip {
@@ -641,7 +658,7 @@ h3,
   pointer-events: none;
   background:
     radial-gradient(circle at top center, rgba(122, 173, 58, 0.12), transparent 38%),
-    linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.08), transparent);
+    linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.08), rgba(177, 140, 255, 0.08), transparent);
 }
 
 .canhoes-bottom-tab {
@@ -652,10 +669,11 @@ h3,
 
 .canhoes-bottom-tab.is-active {
   background:
-    linear-gradient(180deg, rgba(242, 231, 210, 0.12), rgba(107, 76, 42, 0.08));
+    linear-gradient(180deg, rgba(242, 231, 210, 0.12), rgba(177, 140, 255, 0.08));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 10px 20px rgba(0, 0, 0, 0.16);
+    0 10px 20px rgba(0, 0, 0, 0.16),
+    var(--glow-purple-sm);
 }
 
 .canhoes-bottom-fab {
@@ -687,7 +705,7 @@ h3,
   inset: 0 auto auto 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan), var(--neon-amber), transparent);
+  background: linear-gradient(90deg, var(--neon-green), var(--accent-purple), var(--neon-amber), transparent);
   opacity: 0.55;
 }
 

@@ -23,6 +23,9 @@ export const colors = {
   psycho3: "#6bcb77",
   psycho4: "#4d96ff",
   psycho5: "#c77dff",
+  accentPurple: "#b18cff",
+  accentPurpleSoft: "#d7c4ff",
+  accentPurpleDeep: "#7a54d8",
 
   textPrimary: "#e8dfc8",
   textSecondary: "#c7bba1",
@@ -59,6 +62,7 @@ export const shadows = {
   lg: "0 28px 64px rgba(0, 0, 0, 0.42)",
   glow: "0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.18)",
   psycho: "0 0 18px rgba(199, 125, 255, 0.22)",
+  accentPurple: "0 0 8px rgba(177, 140, 255, 0.35), 0 0 22px rgba(177, 140, 255, 0.18)",
 };
 
 export const transitions = {
