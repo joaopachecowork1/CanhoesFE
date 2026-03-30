@@ -52,13 +52,21 @@ export const adminCopy = {
   },
   state: {
     sectionKicker: "Edicao",
-    sectionTitle: "Evento ativo, fase e calendario",
+    sectionTitle: "Evento, fase e modulos desta edicao",
     sectionDescription:
-      "Define a edicao em curso, a fase aberta e a janela de cada momento.",
+      "Junta contexto, configuracao e visibilidade num unico bloco de controlo.",
+    contextKicker: "Contexto",
+    contextTitle: "Evento ativo",
+    contextDescription:
+      "Escolhe a edicao em curso e confirma rapidamente em que mesa estas a trabalhar.",
     activeEventLabel: "Evento ativo",
     currentEditionLabel: "Edicao em curso",
     currentEditionDescription:
       "Trocar a edicao atualiza a shell, a moderacao e os modulos dos membros.",
+    configurationKicker: "Configuracao",
+    configurationTitle: "Fase e calendario",
+    configurationDescription:
+      "Muda a fase aberta, acompanha o calendario e percebe quantos modulos estao ativos.",
     phaseLabel: "Fase ativa",
     visibleModulesLabel: "Modulos visiveis",
     visibleModulesDescription: "O que o grupo ve agora",
@@ -67,9 +75,16 @@ export const adminCopy = {
     phaseClosesPrefix: "Fecha a",
     activeBadge: "Ativa",
     visibilityKicker: "Acesso",
-    visibilityTitle: "O que fica aberto para o grupo",
+    visibilityTitle: "Visibilidade dos modulos",
     visibilityDescription:
-      "A fase manda no ritmo, mas a mesa da edicao decide o que ainda fica escondido.",
+      "A fase manda no ritmo, mas a mesa da edicao decide o que ainda fica aberto para o grupo.",
+    visibilityActionsLabel: "Acoes rapidas",
+    enableAll: "Ativar todos",
+    disableAll: "Desativar todos",
+    saving: "A guardar...",
+    groupCore: "Base da edicao",
+    groupCommunity: "Participacao",
+    groupFinale: "Reta final",
     nominationsVisible: "Nomeacoes visiveis",
     nominationsDescription:
       "Mostra as nomeacoes aos membros quando a fase ja o permite.",

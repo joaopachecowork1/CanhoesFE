@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import type { EventModulesDto, EventOverviewDto } from "@/lib/api/types";
+import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 
 export type CanhoesNavItem = {
@@ -28,68 +29,68 @@ export type CanhoesNavItem = {
 };
 
 const SECRET_SANTA_NAV_ITEM: CanhoesNavItem = {
-  description: "Sorteio, pessoa atribuida e wishlist ligada ao ritual.",
+  description: CANHOES_MEMBER_MODULE_MAP.secretSanta.description,
   href: "/canhoes/amigo-secreto",
   icon: Gift,
   id: "secret-santa",
-  label: "Amigo",
+  label: CANHOES_MEMBER_MODULE_MAP.secretSanta.navLabel ?? "Amigo",
 };
 
 const WISHLIST_NAV_ITEM: CanhoesNavItem = {
-  description: "Consulta e gere a wishlist do grupo.",
+  description: CANHOES_MEMBER_MODULE_MAP.wishlist.description,
   href: "/canhoes/wishlist",
   icon: Gift,
   id: "wishlist",
-  label: "Wishlist",
+  label: CANHOES_MEMBER_MODULE_MAP.wishlist.navLabel ?? "Wishlist",
 };
 
 const CATEGORIES_NAV_ITEM: CanhoesNavItem = {
-  description: "Arquivo de categorias, nomeados e resultados do evento.",
+  description: CANHOES_MEMBER_MODULE_MAP.categories.description,
   href: "/canhoes/categorias",
   icon: Trophy,
   id: "categories",
-  label: "Categorias",
+  label: CANHOES_MEMBER_MODULE_MAP.categories.navLabel ?? "Categorias",
 };
 
 const VOTING_NAV_ITEM: CanhoesNavItem = {
-  description: "Boletim da fase de votacao e progresso por categoria.",
+  description: CANHOES_MEMBER_MODULE_MAP.voting.description,
   href: "/canhoes/votacao",
   icon: Flame,
   id: "voting",
-  label: "Votos",
+  label: CANHOES_MEMBER_MODULE_MAP.voting.navLabel ?? "Votos",
 };
 
 const GALA_NAV_ITEM: CanhoesNavItem = {
-  description: "Area final do evento. Fica oculta em modo local.",
+  description: CANHOES_MEMBER_MODULE_MAP.gala.description,
   hideInLocalMode: true,
   href: "/canhoes/gala",
   icon: Medal,
   id: "gala",
-  label: "Gala",
+  label: CANHOES_MEMBER_MODULE_MAP.gala.navLabel ?? "Gala",
 };
 
 const STICKERS_NAV_ITEM: CanhoesNavItem = {
-  description: "Submete e reve stickers aprovados nesta edicao.",
+  description: CANHOES_MEMBER_MODULE_MAP.stickers.description,
   href: "/canhoes/stickers",
   icon: Sticker,
   id: "stickers",
-  label: "Stickers",
+  label: CANHOES_MEMBER_MODULE_MAP.stickers.navLabel ?? "Stickers",
 };
 
 const MEASURES_NAV_ITEM: CanhoesNavItem = {
-  description: "Regras e medidas aprovadas para a reta final.",
+  description: CANHOES_MEMBER_MODULE_MAP.measures.description,
   href: "/canhoes/medidas",
   icon: Ruler,
   id: "measures",
-  label: "Medidas",
+  label: CANHOES_MEMBER_MODULE_MAP.measures.navLabel ?? "Medidas",
 };
 
 const NOMINEES_NAV_ITEM: CanhoesNavItem = {
-  description: "Arquivo completo de nomeacoes aprovadas.",
+  description: CANHOES_MEMBER_MODULE_MAP.nominees.description,
   href: "/canhoes/nomeacoes",
   icon: ScrollText,
   id: "nominees",
-  label: "Nomeacoes",
+  label: CANHOES_MEMBER_MODULE_MAP.nominees.navLabel ?? "Nomeacoes",
 };
 
 const ADMIN_NAV_ITEM: CanhoesNavItem = {
