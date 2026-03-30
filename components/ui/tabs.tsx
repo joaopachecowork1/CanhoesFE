@@ -64,8 +64,8 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md-token)] border border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-green)] disabled:pointer-events-none disabled:opacity-50 flex-shrink-0 font-[var(--font-mono)] uppercase tracking-[0.12em]",
-        "data-[state=active]:border-[rgba(212,184,150,0.24)] data-[state=active]:bg-[linear-gradient(180deg,rgba(245,237,224,0.16),rgba(107,76,42,0.08))] data-[state=active]:text-[var(--bg-paper)] data-[state=active]:shadow-[0_12px_26px_rgba(0,0,0,0.2)]",
+        "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md-token)] border border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-purple)] disabled:pointer-events-none disabled:opacity-50 flex-shrink-0 font-[var(--font-mono)] uppercase tracking-[0.12em]",
+        "data-[state=active]:border-[var(--border-purple)] data-[state=active]:bg-[linear-gradient(180deg,rgba(245,237,224,0.16),rgba(177,140,255,0.1))] data-[state=active]:text-[var(--bg-paper)] data-[state=active]:shadow-[var(--glow-purple-sm)]",
         "hover:border-[rgba(212,184,150,0.18)] hover:bg-[rgba(245,237,224,0.08)] hover:text-[var(--bg-paper)]",
         className
       )}

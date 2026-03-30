@@ -36,7 +36,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[rgba(17,21,13,0.72)] backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(177,140,255,0.14),transparent_28%),rgba(17,21,13,0.74)] backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
         className
       )}
       {...props}
@@ -60,11 +60,11 @@ function SheetContent({
         className={cn(
           "fixed z-50 flex flex-col gap-4 border shadow-[var(--shadow-modal)] transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:duration-300",
           side === "right" &&
-            "inset-y-0 right-0 h-full w-[85vw] border-l border-[var(--color-beige-dark)]/30 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+            "inset-y-0 right-0 h-full w-[85vw] border-l border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
           side === "left" &&
-            "inset-y-0 left-0 h-full w-[85vw] border-r border-[var(--color-beige-dark)]/30 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+            "inset-y-0 left-0 h-full w-[85vw] border-r border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
           side === "top" &&
-            "inset-x-0 top-0 h-auto border-b border-[var(--color-beige-dark)]/30 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+            "inset-x-0 top-0 h-auto border-b border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
           side === "bottom" &&
             "canhoes-sheet inset-x-0 bottom-0 h-auto rounded-t-[1.75rem] border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           className
@@ -72,7 +72,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetClose className="absolute right-4 top-4 rounded-full border border-[var(--color-beige-dark)]/30 p-2 text-[var(--text-primary)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--color-psycho-4)] disabled:pointer-events-none">
+        <SheetClose className="absolute right-4 top-4 rounded-full border border-[rgba(107,76,42,0.16)] p-2 text-[var(--text-ink)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetClose>
@@ -121,7 +121,7 @@ function SheetDescription({
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={cn("body-small text-[var(--color-text-muted)]", className)}
+      className={cn("body-small text-[var(--bark)]/72", className)}
       {...props}
     />
   )

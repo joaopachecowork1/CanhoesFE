@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "editorial-shell overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(28,35,17,0.98),rgba(14,18,10,0.98))] text-[var(--color-text-primary)] shadow-[var(--shadow-panel)] transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-[var(--border-neon)]/45 hover:shadow-[var(--shadow-layered)]",
+        "editorial-shell overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(28,35,17,0.98),rgba(14,18,10,0.98))] text-[var(--color-text-primary)] shadow-[var(--shadow-panel)] transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-[var(--border-purple)] hover:shadow-[var(--shadow-layered)]",
         className
       )}
       {...props}
