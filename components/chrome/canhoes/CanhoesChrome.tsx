@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LogOut, Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -12,28 +12,11 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 
-import { CanhoesBottomTabs, type CanhoesBottomTabEntry } from "./CanhoesBottomTabs";
+import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
 import { CanhoesMoreSheet } from "./CanhoesMoreSheet";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
-import {
-  BOTTOM_LEFT_NAV_ITEMS,
-  getDynamicBottomNavItem,
-  getPrimaryRightNavItem,
-  getPageTitle,
-  isMoreSectionActive,
-  MORE_NAV_ITEM,
-} from "./canhoesNavigation";
-
-function isHomePath(pathname: string | null) {
-  return pathname === "/canhoes" || pathname === "/canhoes/" || pathname === "/canhoes/home";
-}
-
-function isTabActive(pathname: string | null, href: string) {
-  if (!pathname) return false;
-  if (href === "/canhoes") return isHomePath(pathname);
-  return pathname.startsWith(href);
-}
+import { useCanhoesShellNavigation } from "./useCanhoesShellNavigation";
 
 export function CanhoesChrome({
   children,
@@ -59,97 +42,24 @@ export function CanhoesChrome({
     return () => window.removeEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
   }, []);
 
-  const pageTitle = getPageTitle(pathname);
-  const isEventHomePath = isHomePath(pathname);
-
-  const userLabel = useMemo(() => {
-    const displayName = user?.name?.trim();
-    if (displayName) return displayName;
-    if (user?.email) return user.email;
-    return "Membro";
-  }, [user?.email, user?.name]);
-
-  const primaryRightItem = useMemo(
-    () =>
-      getPrimaryRightNavItem({
-        isAdmin,
-        isLocalMode,
-        overview: eventOverview.overview,
-      }),
-    [eventOverview.overview, isAdmin, isLocalMode]
-  );
-
-  const dynamicBottomItem = useMemo(
-    () =>
-      getDynamicBottomNavItem({
-        isAdmin,
-        isLocalMode,
-        primaryItemId: primaryRightItem.id,
-        overview: eventOverview.overview,
-      }),
-    [eventOverview.overview, isAdmin, isLocalMode, primaryRightItem.id]
-  );
-
-  const isMoreActive = Boolean(pathname) &&
-    isMoreSectionActive({
-      dynamicItem: dynamicBottomItem,
-      isAdmin,
-      isLocalMode,
-      overview: eventOverview.overview,
-      pathname: pathname ?? "",
-      primaryRightItem,
-    });
-
-  const isMoreDockItem = dynamicBottomItem.id === MORE_NAV_ITEM.id;
-
-  const bottomLeftEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
-    () => [
-      {
-        item: BOTTOM_LEFT_NAV_ITEMS[0],
-        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[0].href),
-        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[0].href),
-      },
-      {
-        item: BOTTOM_LEFT_NAV_ITEMS[1],
-        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[1].href),
-        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[1].href),
-      },
-    ],
-    [pathname, router]
-  );
-
-  const bottomRightEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
-    () => [
-      {
-        item: primaryRightItem,
-        isActive: isTabActive(pathname, primaryRightItem.href),
-        onClick: () => router.push(primaryRightItem.href),
-      },
-      {
-        item: dynamicBottomItem,
-        isActive: isMoreDockItem
-          ? isMoreSheetOpen || isMoreActive
-          : isTabActive(pathname, dynamicBottomItem.href),
-        onClick: () => {
-          if (isMoreDockItem) {
-            setIsMoreSheetOpen(true);
-            return;
-          }
-
-          router.push(dynamicBottomItem.href);
-        },
-      },
-    ],
-    [
-      dynamicBottomItem,
-      isMoreActive,
-      isMoreDockItem,
-      isMoreSheetOpen,
-      pathname,
-      primaryRightItem,
-      router,
-    ]
-  );
+  const {
+    bottomLeftEntries,
+    bottomRightEntries,
+    isEventHomePath,
+    isMoreActive,
+    moreSheetPrimaryIds,
+    pageTitle,
+    userLabel,
+  } = useCanhoesShellNavigation({
+    isAdmin,
+    isLocalMode,
+    isMoreSheetOpen,
+    onOpenMoreSheet: () => setIsMoreSheetOpen(true),
+    overview: eventOverview.overview,
+    pathname,
+    router,
+    user,
+  });
 
   return (
     <div
@@ -269,11 +179,7 @@ export function CanhoesChrome({
           setIsMoreSheetOpen(false);
           router.push(href);
         }}
-        primaryIds={[
-          ...BOTTOM_LEFT_NAV_ITEMS.map((item) => item.id),
-          primaryRightItem.id,
-          dynamicBottomItem.id,
-        ]}
+        primaryIds={moreSheetPrimaryIds}
       />
 
       <CanhoesComposeSheet

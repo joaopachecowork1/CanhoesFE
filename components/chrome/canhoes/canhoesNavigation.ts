@@ -231,19 +231,6 @@ export function getPrimaryRightNavItem({
   );
 }
 
-export function getDynamicBottomNavItem(options: Readonly<{
-  isAdmin: boolean;
-  isLocalMode?: boolean;
-  overview?: EventOverviewDto | null;
-  primaryItemId?: string;
-}>): CanhoesNavItem {
-  if (options.isAdmin) {
-    return ADMIN_NAV_ITEM;
-  }
-
-  return MORE_NAV_ITEM;
-}
-
 export function getPageTitle(pathname: string | null) {
   if (!pathname) return "Evento";
 
@@ -280,14 +267,12 @@ export function getVisibleMoreNavItems({
 }
 
 export function isMoreSectionActive({
-  dynamicItem,
   isAdmin,
   isLocalMode = IS_LOCAL_MODE,
   overview,
   pathname,
   primaryRightItem,
 }: Readonly<{
-  dynamicItem?: CanhoesNavItem | null;
   isAdmin: boolean;
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
@@ -297,7 +282,7 @@ export function isMoreSectionActive({
   const primaryIds = [
     ...BOTTOM_LEFT_NAV_ITEMS.map((item) => item.id),
     primaryRightItem?.id,
-    dynamicItem?.id,
+    MORE_NAV_ITEM.id,
   ].filter(Boolean) as string[];
 
   return getVisibleMoreNavItems({
