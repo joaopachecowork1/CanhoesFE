@@ -17,15 +17,11 @@ import {
   getDefaultAdminSection,
 } from "./adminSections";
 import { AdminControlStrip } from "./components/AdminControlStrip";
-import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminSectionNav } from "./components/AdminSectionNav";
 import { AdminSectionStage } from "./components/AdminSectionStage";
+import { AdminControlCenter } from "./components/AdminControlCenter";
 import { CategoriesAdmin } from "./components/CategoriesAdmin";
-import { EventStateCard } from "./components/EventStateCard";
-import { ModuleVisibilityAdmin } from "./components/ModuleVisibilityAdmin";
-import { NomineesAdmin } from "./components/NomineesAdmin";
-import { PendingProposals } from "./components/PendingProposals";
-import { SecretSantaAdmin } from "./components/SecretSantaAdmin";
+import { ModerationWorkspace } from "./components/ModerationWorkspace";
 import { UsersAdmin } from "./components/UsersAdmin";
 import { VotesAudit } from "./components/VotesAudit";
 
@@ -48,16 +44,16 @@ export default function CanhoesAdminModule() {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
   const {
     allCategoryProposals,
-    allMeasureProposals,
+    allMeasureProposals: measureProposals,
     allNominees,
     categories,
     error,
     events,
     loading,
-    members,
+    members: eventMembers,
     secretSanta,
-    state,
-    votes,
+    state: eventState,
+    votes: voteAuditRows,
     refresh,
   } = useAdminBootstrap(activeEvent?.id ?? null);
 
@@ -72,8 +68,8 @@ export default function CanhoesAdminModule() {
   );
   const pendingMeasureProposals = useMemo(
     () =>
-      allMeasureProposals.filter((proposal) => proposal.status === "pending"),
-    [allMeasureProposals]
+      measureProposals.filter((proposal) => proposal.status === "pending"),
+    [measureProposals]
   );
 
   const pendingReviewCount =
@@ -126,9 +122,9 @@ export default function CanhoesAdminModule() {
     () => ({
       nomineePendingCount: pendingNominees.length,
       pendingReviewCount,
-      voteCount: votes.length,
+      voteCount: voteAuditRows.length,
     }),
-    [pendingNominees.length, pendingReviewCount, votes.length]
+    [pendingNominees.length, pendingReviewCount, voteAuditRows.length]
   );
 
   const adminTabs = useMemo(
@@ -143,66 +139,29 @@ export default function CanhoesAdminModule() {
 
   const activeSectionContent = useMemo(() => {
     switch (activeTab) {
-      case "dashboard":
+      case "control-center":
         return (
-          <AdminDashboard
-            categories={categories}
-            allNominees={allNominees}
-            pendingNominees={pendingNominees}
-            pendingCategoryProposals={pendingCategoryProposals}
-            pendingMeasureProposals={pendingMeasureProposals}
-            members={members}
-            totalVotes={votes.length}
+          <AdminControlCenter
+            activeEventName={activeEvent?.name ?? null}
+            eventId={activeEvent?.id ?? null}
+            events={events}
+            eventState={eventState}
+            secretSantaState={secretSanta}
             loading={loading}
+            onActivateEvent={handleActivateEvent}
+            onRefresh={handleRefresh}
           />
         );
-      case "nominees":
+      case "moderation":
         return (
-          <NomineesAdmin
+          <ModerationWorkspace
             eventId={activeEvent?.id ?? null}
             nominees={allNominees}
             categories={categories}
-            loading={loading}
-            onUpdate={handleRefresh}
-          />
-        );
-      case "pending":
-        return (
-          <PendingProposals
-            eventId={activeEvent?.id ?? null}
             categoryProposals={allCategoryProposals}
-            measureProposalsAll={allMeasureProposals}
+            measureProposals={measureProposals}
             loading={loading}
             onUpdate={handleRefresh}
-          />
-        );
-      case "state":
-        return (
-          <EventStateCard
-            activeEventName={activeEvent?.name ?? null}
-            state={state}
-            eventId={activeEvent?.id ?? null}
-            events={events}
-            onActivateEvent={handleActivateEvent}
-            onUpdate={handleRefresh}
-          />
-        );
-      case "visibility":
-        return (
-          <ModuleVisibilityAdmin
-            eventId={activeEvent?.id ?? null}
-            onUpdate={handleRefresh}
-            state={state}
-          />
-        );
-      case "secret-santa":
-        return (
-          <SecretSantaAdmin
-            activeEventName={activeEvent?.name ?? null}
-            eventId={activeEvent?.id ?? null}
-            loading={loading}
-            onUpdate={handleRefresh}
-            state={secretSanta}
           />
         );
       case "categories":
@@ -211,16 +170,16 @@ export default function CanhoesAdminModule() {
             eventId={activeEvent?.id ?? null}
             categories={categories}
             categoryProposals={allCategoryProposals}
-            measureProposals={allMeasureProposals}
+            measureProposals={measureProposals}
             loading={loading}
             onUpdate={handleRefresh}
           />
         );
-      case "users":
-        return <UsersAdmin members={members} loading={loading} />;
+      case "members":
+        return <UsersAdmin members={eventMembers} loading={loading} />;
       case "audit":
         return (
-          <VotesAudit votes={votes} categories={categories} loading={loading} />
+          <VotesAudit votes={voteAuditRows} categories={categories} loading={loading} />
         );
       default:
         return null;
@@ -230,20 +189,17 @@ export default function CanhoesAdminModule() {
     activeEvent?.name,
     activeTab,
     allCategoryProposals,
-    allMeasureProposals,
     allNominees,
     categories,
     events,
     handleActivateEvent,
     handleRefresh,
     loading,
-    members,
-    pendingCategoryProposals,
-    pendingMeasureProposals,
-    pendingNominees,
+    eventMembers,
     secretSanta,
-    state,
-    votes,
+    eventState,
+    voteAuditRows,
+    measureProposals,
   ]);
 
   const activeSection = useMemo(() => getAdminSection(activeTab), [activeTab]);
@@ -257,10 +213,10 @@ export default function CanhoesAdminModule() {
       <AdminControlStrip
         activeEventName={activeEvent?.name ?? null}
         loading={loading}
-        memberCount={members.length}
+        memberCount={eventMembers.length}
         pendingReviewCount={pendingReviewCount}
-        phaseLabel={getActivePhaseLabel(state?.activePhase?.type)}
-        totalVotes={votes.length}
+        phaseLabel={getActivePhaseLabel(eventState?.activePhase?.type)}
+        totalVotes={voteAuditRows.length}
         visibleCategoryCount={activeCategories}
         onRefresh={() => void handleRefresh()}
         onSelectSection={setActiveTab}
@@ -287,7 +243,7 @@ export default function CanhoesAdminModule() {
           activeSection?.description ?? "Controlos ativos desta edicao."
         }
         count={activeSectionCount}
-        tone={activeTab === "visibility" ? "purple" : "default"}
+        tone="default"
       >
         {activeSectionContent}
       </AdminSectionStage>

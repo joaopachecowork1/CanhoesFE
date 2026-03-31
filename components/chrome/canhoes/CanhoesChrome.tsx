@@ -25,9 +25,10 @@ export function CanhoesChrome({
   const pathname = usePathname();
   const router = useRouter();
   const { isLogged, logout, user } = useAuth();
-  const isAdmin = Boolean(user?.isAdmin);
   const isLocalMode = IS_LOCAL_MODE;
   const eventOverview = useEventOverview();
+  const isAdmin =
+    Boolean(user?.isAdmin) || Boolean(eventOverview.overview?.permissions.isAdmin);
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);

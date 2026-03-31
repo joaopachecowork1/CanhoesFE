@@ -441,6 +441,29 @@ export type UpdateEventAdminStateRequest = {
   moduleVisibility?: EventAdminModuleVisibilityDto | null;
 };
 
+export type AdminModuleKey =
+  | "feed"
+  | "secretSanta"
+  | "wishlist"
+  | "categories"
+  | "voting"
+  | "gala"
+  | "stickers"
+  | "measures"
+  | "nominees";
+
+export type AdminModuleDefinition = {
+  key: AdminModuleKey;
+  label: string;
+  description: string;
+  group: "community" | "core" | "finale";
+  locked?: boolean;
+};
+
+export type UpdateEventModulesRequest = {
+  modules: EventModulesDto;
+};
+
 export type UpdateEventPhaseRequest = {
   phaseType: EventPhaseDto["type"];
 };

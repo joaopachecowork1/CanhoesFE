@@ -54,7 +54,7 @@ export function CanhoesMoreSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="canhoes-sheet border-[rgba(212,184,150,0.16)] pb-safe text-[var(--text-primary)] [&_[data-slot=sheet-close]]:border-[rgba(212,184,150,0.12)] [&_[data-slot=sheet-close]]:bg-[rgba(28,34,18,0.9)] [&_[data-slot=sheet-close]]:text-[var(--bg-paper)] [&_[data-slot=sheet-close]]:opacity-90"
+        className="canhoes-sheet flex max-h-[88svh] flex-col border-[rgba(212,184,150,0.16)] pb-safe text-[var(--text-primary)] [&_[data-slot=sheet-close]]:border-[rgba(212,184,150,0.12)] [&_[data-slot=sheet-close]]:bg-[rgba(28,34,18,0.9)] [&_[data-slot=sheet-close]]:text-[var(--bg-paper)] [&_[data-slot=sheet-close]]:opacity-90"
       >
         <SheetHeader className="space-y-2 border-b border-[rgba(212,184,150,0.12)] pb-4">
           <div className="mx-auto h-1.5 w-16 rounded-full bg-[rgba(177,140,255,0.46)] [box-shadow:var(--glow-purple-sm)]" />
@@ -69,31 +69,23 @@ export function CanhoesMoreSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-4 px-4 pb-4">
-          <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 space-y-1">
-                <p className="label text-[var(--text-muted)]">
-                  {adminCopy.shell.more.summaryLabel}
-                </p>
-                <h3 className="heading-3 text-[var(--text-dark)]">
-                  {adminCopy.shell.more.summaryTitle}
-                </h3>
-                <p className="body-small text-[var(--text-muted)]">
-                  {adminCopy.shell.more.summaryDescription}
-                </p>
-              </div>
-
-              <div className="shrink-0 text-right">
-                <p className="label text-[var(--text-muted)]">
-                  {adminCopy.shell.more.total}
-                </p>
-                <p className="text-lg font-semibold text-[var(--accent-purple-deep)] [text-shadow:var(--glow-purple-sm)]">
-                  {totalShortcuts}
-                </p>
-              </div>
-            </div>
-          </section>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          <div className="mb-3 flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(177,140,255,0.2)] bg-[rgba(18,22,11,0.6)] px-3 py-2">
+            <p className="text-sm text-[rgba(245,237,224,0.82)]">
+              {adminCopy.shell.more.total}:{" "}
+              <span className="font-semibold text-[var(--accent-purple-soft)]">
+                {totalShortcuts}
+              </span>
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 px-2 text-xs"
+              onClick={() => onOpenChange(false)}
+            >
+              Fechar
+            </Button>
+          </div>
 
           <MoreSection
             label={adminCopy.shell.more.explore}
@@ -141,6 +133,17 @@ export function CanhoesMoreSheet({
               </MoreSection>
             </>
           ) : null}
+
+          <div className="sticky bottom-0 mt-4 border-t border-[rgba(212,184,150,0.12)] bg-[linear-gradient(180deg,rgba(12,15,9,0),rgba(12,15,9,0.92)_34%)] pt-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => onOpenChange(false)}
+            >
+              Fechar menu
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
@@ -257,9 +260,9 @@ function MoreLinkCard({
     <button
       type="button"
       onClick={onClick}
-      className="canhoes-tap flex min-h-[4.75rem] items-start gap-3 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] px-4 py-3 text-left text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] transition-[transform,border-color,background-color,box-shadow] hover:border-[rgba(177,140,255,0.28)] hover:[box-shadow:var(--glow-purple-sm)] active:scale-[0.99]"
+      className="canhoes-tap flex min-h-[4.1rem] items-start gap-3 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[linear-gradient(180deg,rgba(251,244,232,0.98),rgba(237,227,204,0.96))] px-4 py-3 text-left text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] transition-[transform,border-color,background-color,box-shadow] hover:border-[rgba(177,140,255,0.28)] hover:[box-shadow:var(--glow-purple-sm)] active:scale-[0.99]"
     >
-      <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(54,43,74,0.96),rgba(28,21,42,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]">
         <Icon className="h-4 w-4" />
       </span>
 

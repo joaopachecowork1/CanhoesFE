@@ -1,14 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FolderTree, ScrollText, Trash2 } from "lucide-react";
+import { FolderTree, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
-import {
-  statusBadgeVariant,
-  summarizeModerationStatuses,
-} from "@/components/modules/canhoes/admin/moderationUtils";
+import { summarizeModerationStatuses } from "@/components/modules/canhoes/admin/moderationUtils";
 import { adminCopy } from "@/lib/canhoesCopy";
 import type {
   AwardCategoryDto,
@@ -50,8 +47,8 @@ type Draft = {
 export function CategoriesAdmin({
   eventId,
   categories,
-  categoryProposals,
-  measureProposals,
+  categoryProposals: _categoryProposals,
+  measureProposals: _measureProposals,
   loading,
   onUpdate,
 }: Readonly<Props>) {
@@ -85,14 +82,6 @@ export function CategoriesAdmin({
           );
         }),
     [categories, drafts]
-  );
-
-  const proposalSummary = useMemo(
-    () => ({
-      categories: summarizeModerationStatuses(categoryProposals),
-      measures: summarizeModerationStatuses(measureProposals),
-    }),
-    [categoryProposals, measureProposals]
   );
 
   const setDraft = (categoryId: string, patch: Partial<Draft>) => {
@@ -329,75 +318,7 @@ export function CategoriesAdmin({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-moss)]/20">
-        <CardHeader className="space-y-1">
-          <p className="editorial-kicker">{adminCopy.categories.historyKicker}</p>
-          <CardTitle>{adminCopy.categories.historyTitle}</CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">
-              Categorias pendentes: {proposalSummary.categories.pending}
-            </Badge>
-            <Badge variant="outline">
-              Categorias aprovadas: {proposalSummary.categories.approved}
-            </Badge>
-            <Badge variant="outline">
-              Categorias rejeitadas: {proposalSummary.categories.rejected}
-            </Badge>
-            <Badge variant="secondary">
-              Medidas pendentes: {proposalSummary.measures.pending}
-            </Badge>
-            <Badge variant="outline">
-              Medidas aprovadas: {proposalSummary.measures.approved}
-            </Badge>
-            <Badge variant="outline">
-              Medidas rejeitadas: {proposalSummary.measures.rejected}
-            </Badge>
-          </div>
-
-          <div className="space-y-3">
-            {categoryProposals.slice(0, 30).map((proposal) => (
-              <article
-                key={proposal.id}
-                className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
-              >
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2 text-[var(--color-title)]">
-                      <ScrollText className="h-4 w-4" />
-                      <span className="font-semibold text-[var(--text-ink)]">
-                        {proposal.name}
-                      </span>
-                    </div>
-
-                    <Badge variant={statusBadgeVariant(proposal.status)}>
-                      {proposal.status}
-                    </Badge>
-                  </div>
-
-                  {proposal.description ? (
-                    <p className="body-small text-[var(--bark)]/74">
-                      {proposal.description}
-                    </p>
-                  ) : null}
-
-                  <p className="text-xs text-[var(--bark)]/62">
-                    {new Date(proposal.createdAtUtc).toLocaleString("pt-PT")}
-                  </p>
-                </div>
-              </article>
-            ))}
-
-            {!loading && categoryProposals.length === 0 ? (
-              <AdminStateMessage variant="panel">
-                {adminCopy.categories.historyEmpty}
-              </AdminStateMessage>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Historico completo de propostas e medidas vive agora na area de Moderation para evitar duplicacao com PendingProposals */}
     </div>
   );
 }

@@ -1,26 +1,6 @@
-import {
-  Award,
-  BarChart3,
-  CalendarRange,
-  Eye,
-  FolderTree,
-  LayoutDashboard,
-  Sparkles,
-  TicketCheck,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { Award, BarChart3, FolderTree, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 
-export type AdminSectionId =
-  | "dashboard"
-  | "pending"
-  | "state"
-  | "visibility"
-  | "categories"
-  | "nominees"
-  | "secret-santa"
-  | "users"
-  | "audit";
+export type AdminSectionId = "control-center" | "moderation" | "categories" | "members" | "audit";
 
 export type AdminSectionCountContext = {
   nomineePendingCount: number;
@@ -59,82 +39,48 @@ type AdminSectionDefinition = {
 
 const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
-    id: "pending",
-    label: "Pendentes",
-    description: "Fila de revisao para fechar propostas e nomeacoes.",
+    id: "control-center",
+    label: "Control Center",
+    description: "Evento ativo, fase atual, calendario e modulos desta edicao.",
     group: "primary",
-    icon: TicketCheck,
+    icon: ShieldCheck,
+    quickActionTone: "primary",
+    count: () => 0,
+  },
+  {
+    id: "moderation",
+    label: "Moderation",
+    description: "Fila de moderacao para nomeacoes, categorias e medidas.",
+    group: "primary",
+    icon: Award,
     quickActionTone: "primary",
     count: (context) => context.pendingReviewCount,
   },
   {
-    id: "state",
-    label: "Evento",
-    description: "Evento ativo, fase aberta e calendario desta edicao.",
-    group: "primary",
-    icon: CalendarRange,
-    quickActionTone: "primary",
-    count: () => 0,
-  },
-  {
-    id: "visibility",
-    label: "Modulos",
-    description: "Controla o que fica visivel para os membros desta edicao.",
-    group: "primary",
-    icon: Eye,
-    quickActionTone: "primary",
-    count: () => 0,
-  },
-  {
     id: "categories",
-    label: "Categorias",
-    description: "Curadoria e manutencao das categorias desta edicao.",
+    label: "Categories",
+    description: "CRUD e configuracao das categorias desta edicao.",
     group: "primary",
     icon: FolderTree,
     quickActionTone: "primary",
     count: () => 0,
   },
   {
-    id: "nominees",
-    label: "Nomeacoes",
-    description: "Moderacao de nomeacoes submetidas pelo grupo.",
-    group: "primary",
-    icon: Award,
-    count: (context) => context.nomineePendingCount,
-  },
-  {
-    id: "secret-santa",
-    label: "Amigo",
-    description: "Sorteio, atribuicoes e estado do Amigo Secreto.",
-    group: "secondary",
-    icon: Sparkles,
-    quickActionTone: "secondary",
-    count: () => 0,
-  },
-  {
-    id: "users",
-    label: "Membros",
+    id: "members",
+    label: "Members",
     description: "Participantes, admins e composicao da edicao.",
-    group: "secondary",
+    group: "primary",
     icon: Users,
     quickActionTone: "secondary",
     count: () => 0,
   },
   {
     id: "audit",
-    label: "Votos",
+    label: "Audit",
     description: "Auditoria de votos e registo do que ja foi submetido.",
     group: "secondary",
     icon: BarChart3,
     count: (context) => context.voteCount,
-  },
-  {
-    id: "dashboard",
-    label: "Resumo",
-    description: "Pulso geral da edicao e atividade mais recente.",
-    group: "secondary",
-    icon: LayoutDashboard,
-    count: () => 0,
   },
 ] as const;
 
@@ -173,5 +119,5 @@ export function getAdminSection(
 export function getDefaultAdminSection(
   context: Readonly<Pick<AdminSectionCountContext, "pendingReviewCount">>
 ): AdminSectionId {
-  return context.pendingReviewCount > 0 ? "pending" : "state";
+  return context.pendingReviewCount > 0 ? "moderation" : "control-center";
 }

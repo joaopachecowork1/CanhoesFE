@@ -1,9 +1,10 @@
 import type {
+  AdminModuleKey,
   EventAdminModuleVisibilityDto,
   EventModulesDto,
 } from "@/lib/api/types";
 
-export type CanhoesMemberModuleKey = keyof EventAdminModuleVisibilityDto;
+export type CanhoesMemberModuleKey = AdminModuleKey;
 
 export type CanhoesMemberModuleDefinition = {
   description: string;

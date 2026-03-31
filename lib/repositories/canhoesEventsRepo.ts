@@ -70,6 +70,12 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  updateEventModules: (eventId: string, payload: T.UpdateEventModulesRequest) =>
+    canhoesFetch<T.EventOverviewDto>(`/v1/events/${eventId}/modules`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
   updateAdminPhase: (eventId: string, payload: T.UpdateEventPhaseRequest) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/phase`, {
       method: "PUT",
