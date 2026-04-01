@@ -72,7 +72,8 @@ export function HubPostCard({
 
   return (
     <BlurFade delay={index * 50}>
-      <article className="editorial-shell rounded-[var(--radius-lg-token)] bg-[linear-gradient(180deg,rgba(20,25,12,0.96),rgba(11,14,8,0.98))]">
+      {/* Paper surface card: warm beige background ensures text is always readable */}
+      <article className="canhoes-paper-panel overflow-hidden rounded-[var(--radius-lg-token)]">
         <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
           <PostHeader
             authorName={post.authorName}
@@ -84,11 +85,9 @@ export function HubPostCard({
           />
 
           {post.text ? (
-            <div className="canhoes-paper-panel rounded-[var(--radius-md-token)] px-4 py-3">
-              <p className="body-base whitespace-pre-wrap break-words text-[var(--text-dark)]">
-                {post.text}
-              </p>
-            </div>
+            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-ink)]">
+              {post.text}
+            </p>
           ) : null}
         </div>
 
@@ -108,10 +107,11 @@ export function HubPostCard({
         ) : null}
 
         <div className="px-4 pb-4 sm:px-5 sm:pb-5">
-          <div className="editorial-divider" />
+          {/* Paper-themed divider: warm brown instead of neon green */}
+          <div className="h-px w-full bg-[rgba(107,76,42,0.14)]" />
 
           <div className="mt-4 space-y-4">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 [&>button]:border-[rgba(107,76,42,0.18)] [&>button]:bg-[rgba(255,255,255,0.35)] [&>button]:text-[var(--text-ink)] [&>button:hover]:bg-[rgba(255,255,255,0.55)]">
               {HUB_EMOJIS.map((emoji, emojiIndex) => {
                 const isActive = (post.myReactions ?? []).includes(emoji);
                 const reactionCount =
