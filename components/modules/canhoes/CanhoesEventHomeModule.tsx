@@ -199,10 +199,10 @@ export function CanhoesEventHomeModule() {
   if (homeState.status === "loading") {
     return (
       <div className="space-y-4">
-        <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
           <CardContent className="flex min-h-[16rem] items-center justify-center">
-            <div className="flex items-center gap-3 text-[var(--beige)]/76">
-              <Loader2 className="h-5 w-5 animate-spin text-[var(--accent-purple-soft)]" />
+            <div className="flex items-center gap-3 text-[var(--bark)]/76">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--moss)]" />
               <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
                 {productHomeCopy.loading}
               </span>
@@ -215,10 +215,10 @@ export function CanhoesEventHomeModule() {
 
   if (homeState.status === "error" || !homeCopy) {
     return (
-      <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
         <CardContent className="space-y-3 py-8 text-center">
-          <p className="heading-3 text-[var(--text-primary)]">{productHomeCopy.errorTitle}</p>
-          <p className="body-small text-[var(--beige)]/76">{productHomeCopy.errorDescription}</p>
+          <p className="heading-3 text-[var(--text-ink)]">{productHomeCopy.errorTitle}</p>
+          <p className="body-small text-[var(--bark)]/76">{productHomeCopy.errorDescription}</p>
           <div className="flex justify-center">
             <Button onClick={() => window.location.reload()}>Tentar outra vez</Button>
           </div>
@@ -234,6 +234,7 @@ export function CanhoesEventHomeModule() {
 
   return (
     <div className="space-y-4">
+      {/* Hero panel: keeps the dark/neon aesthetic for event branding at the top */}
       <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <div className="space-y-4 px-4 py-5 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
@@ -335,32 +336,33 @@ export function CanhoesEventHomeModule() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_36%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        {/* Feed da edicao – paper surface for readable post previews */}
+        <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+            <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+              <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
               Feed da edicao
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentPosts.length === 0 ? (
-              <div className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[rgba(177,140,255,0.08)] px-3 py-4 text-sm text-[var(--text-muted)]">
+              <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[rgba(255,255,255,0.35)] px-3 py-4 text-sm text-[var(--bark)]">
                 {productHomeCopy.emptyFeed}
               </div>
             ) : (
               recentPosts.map((post) => (
-                <div key={post.id} className="canhoes-list-item space-y-2 px-3 py-3">
+                <div key={post.id} className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
                       {post.userName}
                     </p>
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-[var(--bark)]/72">
                       {new Date(post.createdAt).toLocaleDateString("pt-PT")}
                     </span>
                   </div>
-                  <p className="text-sm leading-6 text-[var(--text-primary)]">{post.content}</p>
+                  <p className="text-sm leading-6 text-[var(--text-ink)]">{post.content}</p>
                   {(post.mediaUrls?.[0] || post.imageUrl) ? (
-                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[var(--bg-surface)]">
+                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
@@ -384,32 +386,33 @@ export function CanhoesEventHomeModule() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_38%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          {/* Amigo Secreto – paper surface */}
+          <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+              <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+                <Gift className="h-4 w-4 text-[var(--moss)]" />
                 {productHomeCopy.secretSantaTitle}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {secretSanta.hasAssignment && secretSanta.assignedUser ? (
-                <div className="canhoes-list-item space-y-2 px-3 py-3">
-                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
+                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
                     Pessoa atribuida
                   </p>
-                  <p className="text-base font-semibold text-[var(--text-primary)]">
+                  <p className="text-base font-semibold text-[var(--text-ink)]">
                     {secretSanta.assignedUser.name}
                   </p>
-                  <p className="text-sm text-[var(--text-muted)]">
+                  <p className="text-sm text-[var(--bark)]">
                     {secretSanta.assignedWishlistItemCount} itens na wishlist.
                   </p>
                 </div>
               ) : (
-                <div className="canhoes-list-item space-y-2 px-3 py-3">
-                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
+                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
                     Estado
                   </p>
-                  <p className="text-sm text-[var(--text-primary)]">
+                  <p className="text-sm text-[var(--text-ink)]">
                     {secretSanta.hasDraw
                       ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
                       : "O sorteio desta edicao ainda nao foi gerado."}
@@ -428,10 +431,11 @@ export function CanhoesEventHomeModule() {
             </CardContent>
           </Card>
 
-          <Card className="border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_34%),var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          {/* Checklist do membro – paper surface */}
+          <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2">
-                <Vote className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+              <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+                <Vote className="h-4 w-4 text-[var(--moss)]" />
                 {productHomeCopy.checklistTitle}
               </CardTitle>
             </CardHeader>
