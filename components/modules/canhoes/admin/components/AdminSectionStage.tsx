@@ -26,11 +26,27 @@ export function AdminSectionStage({
   tone = "default",
   children,
 }: Readonly<Props>) {
-  const toneStyles = {
-    default: "text-[var(--text-ink)]",
-    destructive: "text-[var(--text-error)]",
-    neutral: "text-[var(--beige)]",
-    primary: "text-[var(--text-ink)]",
+  const toneStyles: Record<Tone, { badge: string; label: string }> = {
+    default: {
+      badge:
+        "border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.14)] text-[var(--moss)]",
+      label: "text-[var(--moss)]",
+    },
+    destructive: {
+      badge:
+        "border-[rgba(220,38,38,0.24)] bg-[rgba(220,38,38,0.12)] text-[var(--text-error)]",
+      label: "text-[var(--text-error)]",
+    },
+    neutral: {
+      badge:
+        "border-[rgba(107,76,42,0.18)] bg-[rgba(107,76,42,0.08)] text-[var(--bark)]",
+      label: "text-[var(--bark)]",
+    },
+    primary: {
+      badge:
+        "border-[rgba(177,140,255,0.28)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-deep)]",
+      label: "text-[var(--accent-purple-deep)]",
+    },
   };
 
   return (
@@ -41,25 +57,25 @@ export function AdminSectionStage({
             <p
               className={cn(
                 "font-[var(--font-mono)] text-[0.7rem] font-semibold uppercase tracking-[0.18em]",
-                tone === "purple"
-                  ? "text-[var(--accent-purple-deep)]"
-                  : "text-[var(--moss)]"
+                toneStyles[tone].label
               )}
             >
-              {kicker}
+              Secao ativa
             </p>
             <div className="space-y-1">
               <h3 className="text-lg font-semibold text-[var(--text-ink)]">
                 {title}
               </h3>
-              <p className="max-w-3xl text-sm leading-6 text-[var(--bark)]/80">
-                {description}
-              </p>
+              {description ? (
+                <p className="max-w-3xl text-sm leading-6 text-[var(--bark)]/80">
+                  {description}
+                </p>
+              ) : null}
             </div>
           </div>
 
-          {count > 0 ? (
-            <Badge className="border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.14)] text-[var(--moss)] shadow-none">
+          {typeof count === "number" && count > 0 ? (
+            <Badge className={cn("shadow-none", toneStyles[tone].badge)}>
               {count}
             </Badge>
           ) : null}

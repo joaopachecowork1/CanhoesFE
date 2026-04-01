@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { adminCopy } from "@/lib/canhoesCopy";
 import type { EventAdminStateDto, EventPhaseDto } from "@/lib/api/types";
 
 function getPhaseLabel(phaseType?: string | null) {
@@ -36,7 +37,7 @@ function formatPhaseWindow(phase: EventPhaseDto) {
 }
 
 function getPhaseBadge(phase: EventPhaseDto) {
-  return phase.isActive ? "Ativa" : undefined;
+  return phase.isActive ? adminCopy.state.activeBadge : undefined;
 }
 
 type EventConfigurationPanelProps = {
@@ -57,11 +58,11 @@ export function EventConfigurationPanel({
       <CardHeader className="space-y-2">
         <div className="flex items-center gap-2 text-[var(--neon-green)]">
           <TimerReset className="h-4 w-4" />
-          <span className="label">{state.configurationKicker}</span>
+          <span className="label">{adminCopy.state.configurationKicker}</span>
         </div>
-        <CardTitle>{state.configurationTitle}</CardTitle>
+        <CardTitle>{adminCopy.state.configurationTitle}</CardTitle>
         <p className="body-small text-[var(--beige)]/72">
-          {state.configurationDescription}
+          {adminCopy.state.configurationDescription}
         </p>
       </CardHeader>
 
@@ -69,7 +70,7 @@ export function EventConfigurationPanel({
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="space-y-2">
             <p className="label text-[var(--beige)]/68">
-              {state.phaseLabel}
+              {adminCopy.state.phaseLabel}
             </p>
             <Select
               value={state.activePhase?.type ?? ""}
@@ -94,24 +95,24 @@ export function EventConfigurationPanel({
           <div className="grid grid-cols-2 gap-3">
             <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
               <p className="label text-[var(--bark)]/62">
-                {state.visibleModulesLabel}
+                {adminCopy.state.visibleModulesLabel}
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                 {visibleModulesCount}
               </p>
               <p className="mt-1 text-xs text-[var(--bark)]/72">
-                {state.visibleModulesDescription}
+                {adminCopy.state.visibleModulesDescription}
               </p>
             </div>
             <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
               <p className="label text-[var(--bark)]/62">
-                {state.pendingLabel}
+                {adminCopy.state.pendingLabel}
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                 {state.counts.pendingProposalCount}
               </p>
               <p className="mt-1 text-xs text-[var(--bark)]/72">
-                {state.pendingDescription}
+                {adminCopy.state.pendingDescription}
               </p>
             </div>
           </div>
@@ -136,7 +137,7 @@ export function EventConfigurationPanel({
                 )}
               </div>
               <p className="mt-2 text-xs text-[var(--bark)]/72">
-                {state.phaseClosesPrefix} {formatPhaseWindow(phase)}
+                {adminCopy.state.phaseClosesPrefix} {formatPhaseWindow(phase)}
               </p>
             </div>
           ))}

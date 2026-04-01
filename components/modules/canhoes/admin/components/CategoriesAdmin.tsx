@@ -5,7 +5,6 @@ import { FolderTree, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
-import { summarizeModerationStatuses } from "@/components/modules/canhoes/admin/moderationUtils";
 import { adminCopy } from "@/lib/canhoesCopy";
 import type {
   AwardCategoryDto,
@@ -47,8 +46,6 @@ type Draft = {
 export function CategoriesAdmin({
   eventId,
   categories,
-  categoryProposals: _categoryProposals,
-  measureProposals: _measureProposals,
   loading,
   onUpdate,
 }: Readonly<Props>) {

@@ -1,7 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-
 type Props = {
   kicker: string;
   title: string;
@@ -14,7 +12,6 @@ export function AdminCollapsibleSection({
   kicker,
   title,
   count,
-  defaultOpen,
   children,
 }: Readonly<Props>) {
   return (
