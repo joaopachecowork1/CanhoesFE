@@ -80,3 +80,7 @@ Thumbs.db
 .vs/
 .vscode/
 
+# Local agent / automation config
+.claude/
+.github/
+
