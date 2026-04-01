@@ -158,6 +158,43 @@ export function useHubFeed() {
       window.removeEventListener("hub:postCreated", handlePostCreated);
   }, []);
 
+  useEffect(() => {
+    const postIdsNeedingPreview = safePosts
+      .filter(
+        (post) =>
+          (post.commentCount ?? 0) > 0 && typeof comments[post.id] === "undefined"
+      )
+      .map((post) => post.id);
+
+    if (postIdsNeedingPreview.length === 0) return;
+
+    let cancelled = false;
+
+    void Promise.allSettled(
+      postIdsNeedingPreview.map(async (postId) => {
+        try {
+          const list = await hubRepo.getComments(postId);
+          if (cancelled) return;
+
+          setComments((currentComments) =>
+            typeof currentComments[postId] !== "undefined"
+              ? currentComments
+              : {
+                  ...currentComments,
+                  [postId]: (list ?? []).filter(Boolean),
+                }
+          );
+        } catch {
+          // Inline previews fail silently; the post should still render.
+        }
+      })
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [comments, safePosts]);
+
   const toggleReaction = useCallback(
     async (postId: string, emoji: string) => {
       setPosts((currentPosts) =>
@@ -245,6 +282,7 @@ export function useHubFeed() {
         const createdComment = await hubRepo.createComment(postId, { text: draft });
 
         setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: "" }));
+        setOpenComments((currentState) => ({ ...currentState, [postId]: true }));
         setComments((currentComments) => ({
           ...currentComments,
           [postId]: [

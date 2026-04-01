@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import type { AdminSectionId, AdminSectionItem } from "../adminSections";
+import { Button } from "@/components/ui/button";
 
 type AdminTabsProps = {
   activeId: AdminSectionId;
@@ -25,7 +26,7 @@ export function AdminTabs({
             const isActive = item.id === activeId;
 
             return (
-              <button
+              <Button
                 key={item.id}
                 type="button"
                 onClick={() => onSelect(item.id)}
@@ -53,7 +54,7 @@ export function AdminTabs({
                     {item.count}
                   </Badge>
                 ) : null}
-              </button>
+              </Button>
             );
           })}
         </div>

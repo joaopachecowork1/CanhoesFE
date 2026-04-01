@@ -4,16 +4,20 @@ import React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  CommentThread,
+  type CommentType,
+} from "@/components/ui/reddit-nested-thread-reply";
 import { BlurFade } from "@/components/animations/BlurFade";
 import { NumberTicker } from "@/components/animations/NumberTicker";
 import { feedCopy } from "@/lib/canhoesCopy";
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 
-import { CommentsSection } from "./components/CommentsSection";
 import { HUB_EMOJIS } from "./components/ReactionRail";
 import { MediaCarousel } from "./components/MediaCarousel";
 import { PollBox } from "./components/PollBox";
 import { PostHeader } from "./components/PostHeader";
+import { formatDateTime } from "./components/hubUtils";
 
 const HUB_EMOJI_LABELS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02"] as const;
 
@@ -24,6 +28,8 @@ interface HubPostCardProps {
   openComments: boolean;
   commentDraft: string;
   comments?: HubCommentDto[];
+  currentUserName: string;
+  currentUserImage?: string | null;
   onToggleReaction: (postId: string, emoji: string) => void;
   onToggleComments: (postId: string) => void;
   onVotePoll: (postId: string, optionId: string) => void;
@@ -45,6 +51,8 @@ export function HubPostCard({
   openComments,
   commentDraft,
   comments = [],
+  currentUserName,
+  currentUserImage,
   onToggleReaction,
   onToggleComments,
   onVotePoll,
@@ -69,6 +77,19 @@ export function HubPostCard({
           0
         )
       : (post.likeCount ?? 0);
+  const threadedComments: CommentType[] = comments.map((comment) => ({
+    id: comment.id,
+    author: comment.userName,
+    content: comment.text,
+    timestamp: formatDateTime(comment.createdAtUtc),
+    avatarSrc:
+      comment.userName === currentUserName ? (currentUserImage ?? null) : null,
+    reactionCounts: comment.reactionCounts ?? {},
+    myReactions: comment.myReactions ?? [],
+    replies: [],
+    isOp: comment.userName === post.authorName,
+    persisted: true,
+  }));
 
   return (
     <BlurFade delay={index * 50}>
@@ -84,18 +105,16 @@ export function HubPostCard({
             onAdminDelete={() => onAdminDelete(post.id)}
           />
 
+          {mediaUrls.length > 0 ? (
+            <MediaCarousel urls={mediaUrls} aspect="portrait" />
+          ) : null}
+
           {post.text ? (
             <p className="body-base whitespace-pre-wrap break-words text-[var(--text-ink)]">
               {post.text}
             </p>
           ) : null}
         </div>
-
-        {mediaUrls.length > 0 ? (
-          <div className="px-4 pb-4 sm:px-5">
-            <MediaCarousel urls={mediaUrls} />
-          </div>
-        ) : null}
 
         {post.poll ? (
           <div className="px-4 pb-4 sm:px-5">
@@ -133,24 +152,6 @@ export function HubPostCard({
                   </Button>
                 );
               })}
-
-              <Button
-                type="button"
-                variant={openComments ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => onToggleComments(post.id)}
-                className="rounded-full px-3"
-              >
-                <span className="text-sm leading-none">
-                  {"\uD83D\uDCAC"}
-                </span>
-                <NumberTicker value={post.commentCount ?? 0} className="text-xs" />
-                <span className="text-xs font-semibold">
-                  {openComments
-                    ? feedCopy.post.closeComments
-                    : feedCopy.post.openComments}
-                </span>
-              </Button>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
@@ -166,19 +167,25 @@ export function HubPostCard({
             </div>
           </div>
 
-          {openComments ? (
-            <div className="mt-4">
-              <CommentsSection
-                comments={comments}
-                draft={commentDraft}
-                onDraftChange={(text) => onCommentDraftChange(post.id, text)}
-                onSubmit={() => onAddComment(post.id)}
-                onToggleReaction={(commentId, emoji) =>
-                  onToggleCommentReaction(post.id, commentId, emoji)
-                }
-              />
-            </div>
-          ) : null}
+          <div className="mt-4">
+            <CommentThread
+              initialComments={threadedComments}
+              totalCount={post.commentCount ?? threadedComments.length}
+              expanded={openComments}
+              onToggleExpanded={() => onToggleComments(post.id)}
+              draft={commentDraft}
+              onDraftChange={(text) => onCommentDraftChange(post.id, text)}
+              onSubmit={() => onAddComment(post.id)}
+              currentUserName={currentUserName}
+              currentUserImage={currentUserImage}
+              composerPlaceholder={feedCopy.comments.placeholder}
+              composerSubmitLabel={feedCopy.comments.submit}
+              emptyStateLabel={feedCopy.comments.empty}
+              onToggleReaction={(commentId, emoji) =>
+                onToggleCommentReaction(post.id, commentId, emoji)
+              }
+            />
+          </div>
         </div>
       </article>
     </BlurFade>
