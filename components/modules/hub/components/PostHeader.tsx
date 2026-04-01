@@ -56,12 +56,13 @@ export function PostHeader({
 
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+            {/* text-ink = dark brown, readable on the paper-surface post card */}
+            <p className="truncate text-sm font-semibold text-[var(--text-ink)]">
               {authorName}
             </p>
             {isPinned ? <Badge variant="secondary">Fixado</Badge> : null}
           </div>
-          <p className="text-xs text-[var(--color-text-muted)]">
+          <p className="text-xs text-[var(--bark)]">
             {formatDateTime(createdAtUtc)}
           </p>
         </div>
