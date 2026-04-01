@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,37 +8,21 @@ import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
+import { countVisibleModules } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import type { EventPhaseDto } from "@/lib/api/types";
 
 import {
   type AdminSectionId,
   buildAdminSectionItems,
-  getAdminSection,
   getDefaultAdminSection,
 } from "./adminSections";
-import { AdminControlStrip } from "./components/AdminControlStrip";
-import { AdminSectionNav } from "./components/AdminSectionNav";
-import { AdminSectionStage } from "./components/AdminSectionStage";
-import { AdminControlCenter } from "./components/AdminControlCenter";
-import { CategoriesAdmin } from "./components/CategoriesAdmin";
-import { ModerationWorkspace } from "./components/ModerationWorkspace";
-import { UsersAdmin } from "./components/UsersAdmin";
-import { VotesAudit } from "./components/VotesAudit";
-
-function getActivePhaseLabel(phaseType?: string | null) {
-  switch (phaseType) {
-    case "DRAW":
-      return "Sorteio";
-    case "PROPOSALS":
-      return "Propostas";
-    case "VOTING":
-      return "Votacao";
-    case "RESULTS":
-      return "Resultados";
-    default:
-      return "Sem fase ativa";
-  }
-}
+import { AdminCategoriesSection } from "./components/AdminCategoriesSection";
+import { AdminMembersSection } from "./components/AdminMembersSection";
+import { AdminModulesSection } from "./components/AdminModulesSection";
+import { AdminOverviewSection } from "./components/AdminOverviewSection";
+import { AdminPhaseSection } from "./components/AdminPhaseSection";
+import { AdminTabs } from "./components/AdminTabs";
 
 export default function CanhoesAdminModule() {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
@@ -57,6 +41,8 @@ export default function CanhoesAdminModule() {
     refresh,
   } = useAdminBootstrap(activeEvent?.id ?? null);
 
+  const [activeTab, setActiveTab] = useState<AdminSectionId>(getDefaultAdminSection());
+
   const pendingNominees = useMemo(
     () => allNominees.filter((nominee) => nominee.status === "pending"),
     [allNominees]
@@ -67,8 +53,7 @@ export default function CanhoesAdminModule() {
     [allCategoryProposals]
   );
   const pendingMeasureProposals = useMemo(
-    () =>
-      measureProposals.filter((proposal) => proposal.status === "pending"),
+    () => measureProposals.filter((proposal) => proposal.status === "pending"),
     [measureProposals]
   );
 
@@ -76,20 +61,6 @@ export default function CanhoesAdminModule() {
     pendingNominees.length +
     pendingCategoryProposals.length +
     pendingMeasureProposals.length;
-
-  const initialSectionResolved = useRef(false);
-  const [activeTab, setActiveTab] = useState<AdminSectionId>(
-    getDefaultAdminSection({ pendingReviewCount })
-  );
-
-  useEffect(() => {
-    if (loading || initialSectionResolved.current) return;
-
-    // The admin should land on the most urgent queue once the first real
-    // counts arrive, but should stop auto-switching after that initial load.
-    setActiveTab(getDefaultAdminSection({ pendingReviewCount }));
-    initialSectionResolved.current = true;
-  }, [loading, pendingReviewCount]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -99,9 +70,7 @@ export default function CanhoesAdminModule() {
 
   const handleActivateEvent = useCallback(
     async (eventId: string) => {
-      if (!eventId || eventId === activeEvent?.id) {
-        return;
-      }
+      if (!eventId || eventId === activeEvent?.id) return;
 
       try {
         await canhoesEventsRepo.adminActivateEvent(eventId);
@@ -116,70 +85,89 @@ export default function CanhoesAdminModule() {
     [activeEvent?.id, refreshOverview]
   );
 
+  const handleUpdatePhase = useCallback(
+    async (phaseType: EventPhaseDto["type"]) => {
+      if (!activeEvent?.id) return;
+
+      try {
+        await canhoesEventsRepo.updateAdminPhase(activeEvent.id, { phaseType });
+        await handleRefresh();
+        toast.success("Fase da edicao atualizada");
+      } catch (nextError) {
+        console.error("Admin update phase error:", nextError);
+        toast.error("Nao foi possivel mudar a fase");
+      }
+    },
+    [activeEvent?.id, handleRefresh]
+  );
+
   const dashboardError = error instanceof Error ? error.message : null;
 
-  const adminCountsContext = useMemo(
-    () => ({
-      nomineePendingCount: pendingNominees.length,
-      pendingReviewCount,
-      voteCount: voteAuditRows.length,
-    }),
-    [pendingNominees.length, pendingReviewCount, voteAuditRows.length]
-  );
-
   const adminTabs = useMemo(
-    () => buildAdminSectionItems(adminCountsContext),
-    [adminCountsContext]
-  );
-
-  const activeCategories = useMemo(
-    () => categories.filter((category) => category.isActive).length,
-    [categories]
+    () =>
+      buildAdminSectionItems({
+        memberCount: eventMembers.length,
+        pendingReviewCount,
+        visibleModuleCount: countVisibleModules(eventState?.effectiveModules),
+      }),
+    [eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
   );
 
   const activeSectionContent = useMemo(() => {
     switch (activeTab) {
-      case "control-center":
+      case "overview":
         return (
-          <AdminControlCenter
+          <AdminOverviewSection
             activeEventName={activeEvent?.name ?? null}
-            eventId={activeEvent?.id ?? null}
-            events={events}
-            eventState={eventState}
-            secretSantaState={secretSanta}
-            loading={loading}
-            onActivateEvent={handleActivateEvent}
-            onRefresh={handleRefresh}
-          />
-        );
-      case "moderation":
-        return (
-          <ModerationWorkspace
-            eventId={activeEvent?.id ?? null}
-            nominees={allNominees}
+            allNominees={allNominees}
             categories={categories}
-            categoryProposals={allCategoryProposals}
-            measureProposals={measureProposals}
             loading={loading}
-            onUpdate={handleRefresh}
+            members={eventMembers}
+            pendingCategoryProposals={pendingCategoryProposals}
+            pendingMeasureProposals={pendingMeasureProposals}
+            pendingNominees={pendingNominees}
+            secretSantaState={secretSanta}
+            state={eventState}
+            totalVotes={voteAuditRows.length}
           />
         );
       case "categories":
         return (
-          <CategoriesAdmin
-            eventId={activeEvent?.id ?? null}
+          <AdminCategoriesSection
             categories={categories}
             categoryProposals={allCategoryProposals}
-            measureProposals={measureProposals}
+            eventId={activeEvent?.id ?? null}
             loading={loading}
+            measureProposals={measureProposals}
+            nominees={allNominees}
             onUpdate={handleRefresh}
+            votes={voteAuditRows}
           />
         );
       case "members":
-        return <UsersAdmin members={eventMembers} loading={loading} />;
-      case "audit":
+        return <AdminMembersSection loading={loading} members={eventMembers} />;
+      case "modules":
         return (
-          <VotesAudit votes={voteAuditRows} categories={categories} loading={loading} />
+          <AdminModulesSection
+            activeEventName={activeEvent?.name ?? null}
+            eventId={activeEvent?.id ?? null}
+            loading={loading}
+            onUpdate={handleRefresh}
+            secretSantaState={secretSanta}
+            state={eventState}
+          />
+        );
+      case "phase":
+        return (
+          <AdminPhaseSection
+            activeEventName={activeEvent?.name ?? null}
+            eventId={activeEvent?.id ?? null}
+            events={events}
+            onActivateEvent={handleActivateEvent}
+            onRefresh={handleRefresh}
+            onUpdatePhase={handleUpdatePhase}
+            state={eventState}
+          />
         );
       default:
         return null;
@@ -191,45 +179,23 @@ export default function CanhoesAdminModule() {
     allCategoryProposals,
     allNominees,
     categories,
+    eventMembers,
     events,
     handleActivateEvent,
     handleRefresh,
+    handleUpdatePhase,
     loading,
-    eventMembers,
+    measureProposals,
+    pendingCategoryProposals,
+    pendingMeasureProposals,
+    pendingNominees,
     secretSanta,
     eventState,
     voteAuditRows,
-    measureProposals,
   ]);
-
-  const activeSection = useMemo(() => getAdminSection(activeTab), [activeTab]);
-  const activeSectionCount = useMemo(
-    () => activeSection?.count(adminCountsContext) ?? 0,
-    [activeSection, adminCountsContext]
-  );
 
   return (
     <div className="space-y-4">
-      <AdminControlStrip
-        activeEventName={activeEvent?.name ?? null}
-        loading={loading}
-        memberCount={eventMembers.length}
-        pendingReviewCount={pendingReviewCount}
-        phaseLabel={getActivePhaseLabel(eventState?.activePhase?.type)}
-        totalVotes={voteAuditRows.length}
-        visibleCategoryCount={activeCategories}
-        onRefresh={() => void handleRefresh()}
-        onSelectSection={setActiveTab}
-      />
-
-      <div className="sticky top-[5.75rem] z-20">
-        <AdminSectionNav
-          activeId={activeTab}
-          items={adminTabs}
-          onSelect={setActiveTab}
-        />
-      </div>
-
       {dashboardError ? (
         <div className="flex flex-wrap gap-2">
           <Badge variant="destructive">Erro: {dashboardError}</Badge>
@@ -237,16 +203,11 @@ export default function CanhoesAdminModule() {
         </div>
       ) : null}
 
-      <AdminSectionStage
-        title={activeSection?.label ?? "Painel"}
-        description={
-          activeSection?.description ?? "Controlos ativos desta edicao."
-        }
-        count={activeSectionCount}
-        tone="default"
-      >
-        {activeSectionContent}
-      </AdminSectionStage>
+      <div className="sticky top-[5.75rem] z-20">
+        <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
+      </div>
+
+      {activeSectionContent}
     </div>
   );
 }
