@@ -113,6 +113,9 @@ export function useHubFeed() {
   const [posts, setPosts] = useState<HubPostDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  const [openCommentComposer, setOpenCommentComposer] = useState<
+    Record<string, boolean>
+  >({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
@@ -283,6 +286,10 @@ export function useHubFeed() {
 
         setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: "" }));
         setOpenComments((currentState) => ({ ...currentState, [postId]: true }));
+        setOpenCommentComposer((currentState) => ({
+          ...currentState,
+          [postId]: true,
+        }));
         setComments((currentComments) => ({
           ...currentComments,
           [postId]: [
@@ -362,11 +369,16 @@ export function useHubFeed() {
     setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: text }));
   }, []);
 
+  const openCommentInput = useCallback((postId: string) => {
+    setOpenCommentComposer((currentState) => ({ ...currentState, [postId]: true }));
+  }, []);
+
   return {
     posts: safePosts,
     loading,
     comments,
     openComments,
+    openCommentComposer,
     commentDrafts,
     showParticles,
     setShowParticles,
@@ -379,5 +391,6 @@ export function useHubFeed() {
     adminPin,
     adminDelete,
     setCommentDraft,
+    openCommentInput,
   };
 }

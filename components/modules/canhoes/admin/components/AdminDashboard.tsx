@@ -28,6 +28,12 @@ type AdminDashboardProps = {
   totalVotes: number;
 };
 
+const PENDING_BADGE_LABELS = [
+  { key: "nominees", suffix: "nomeacoes pendentes" },
+  { key: "categories", suffix: "propostas de categoria" },
+  { key: "measures", suffix: "medidas propostas" },
+] as const;
+
 function MetricSkeleton() {
   return (
     <div className="canhoes-paper-card min-w-[148px] rounded-[var(--radius-md-token)] p-4">
@@ -35,6 +41,34 @@ function MetricSkeleton() {
       <Skeleton className="mb-2 h-7 w-16 rounded" />
       <Skeleton className="h-4 w-24 rounded" />
     </div>
+  );
+}
+
+function PendingReviewBadges({
+  nomineesCount,
+  categoryProposalsCount,
+  measureProposalsCount,
+}: Readonly<{
+  nomineesCount: number;
+  categoryProposalsCount: number;
+  measureProposalsCount: number;
+}>) {
+  const items = {
+    nominees: nomineesCount,
+    categories: categoryProposalsCount,
+    measures: measureProposalsCount,
+  } as const;
+
+  return (
+    <>
+      {PENDING_BADGE_LABELS.map((item) =>
+        items[item.key] > 0 ? (
+          <Badge key={item.key} variant="secondary">
+            {items[item.key]} {item.suffix}
+          </Badge>
+        ) : null
+      )}
+    </>
   );
 }
 
@@ -143,21 +177,11 @@ export function AdminDashboard({
                 {adminCopy.dashboard.queueTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {safePendingNominees.length > 0 ? (
-                  <Badge variant="secondary">
-                    {safePendingNominees.length} nomeacoes pendentes
-                  </Badge>
-                ) : null}
-                {safePendingCategoryProposals.length > 0 ? (
-                  <Badge variant="secondary">
-                    {safePendingCategoryProposals.length} propostas de categoria
-                  </Badge>
-                ) : null}
-                {safePendingMeasureProposals.length > 0 ? (
-                  <Badge variant="secondary">
-                    {safePendingMeasureProposals.length} medidas propostas
-                  </Badge>
-                ) : null}
+                <PendingReviewBadges
+                  nomineesCount={safePendingNominees.length}
+                  categoryProposalsCount={safePendingCategoryProposals.length}
+                  measureProposalsCount={safePendingMeasureProposals.length}
+                />
               </div>
             </div>
           </div>
