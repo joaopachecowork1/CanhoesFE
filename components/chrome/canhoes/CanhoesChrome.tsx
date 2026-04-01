@@ -5,11 +5,11 @@ import { LogOut, Menu, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
-import { adminCopy } from "@/lib/canhoesCopy";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
@@ -46,15 +46,14 @@ export function CanhoesChrome({
     bottomLeftEntries,
     bottomRightEntries,
     isEventHomePath,
-    isMoreActive,
     moreSheetPrimaryIds,
     pageTitle,
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
     isLocalMode,
-    isMoreSheetOpen: false,
-    onOpenMoreSheet: () => {},
+    isMoreSheetOpen: isMenuOpen,
+    onOpenMoreSheet: () => setIsMenuOpen(true),
     overview: eventOverview.overview,
     pathname,
     router,
@@ -108,19 +107,18 @@ export function CanhoesChrome({
                   </Button>
                 ) : null}
 
-                <FloatingActionMenu
-                  isOpen={isMenuOpen}
-                  onOpenChange={setIsMenuOpen}
-                  isAdmin={isAdmin}
-                  isLocalMode={isLocalMode}
-                  overview={eventOverview.overview}
-                  primaryIds={moreSheetPrimaryIds}
-                  onNavigate={(href) => {
-                    setIsMenuOpen(false);
-                    router.push(href);
-                  }}
-                  anchorRef
-                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                  onClick={() => setIsMenuOpen((current) => !current)}
+                  aria-expanded={isMenuOpen}
+                  aria-label="Abrir menu"
+                >
+                  <Menu className="h-4 w-4" />
+                  <span className="hidden sm:inline">Menu</span>
+                </Button>
               </div>
             </div>
 
