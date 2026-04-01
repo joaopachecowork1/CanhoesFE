@@ -11,15 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { adminCopy } from "@/lib/canhoesCopy";
 import type { EventAdminStateDto, EventPhaseDto } from "@/lib/api/types";
-
-type EventConfigurationPanelProps = {
-  busy: boolean;
-  onUpdatePhase: (phaseType: EventPhaseDto["type"]) => void;
-  state: EventAdminStateDto;
-  visibleModulesCount: number;
-};
 
 function getPhaseLabel(phaseType?: string | null) {
   switch (phaseType) {
@@ -43,6 +35,17 @@ function formatPhaseWindow(phase: EventPhaseDto) {
   }).format(new Date(phase.endDate));
 }
 
+function getPhaseBadge(phase: EventPhaseDto) {
+  return phase.isActive ? "Ativa" : undefined;
+}
+
+type EventConfigurationPanelProps = {
+  busy: boolean;
+  onUpdatePhase: (phaseType: EventPhaseDto["type"]) => void;
+  state: EventAdminStateDto;
+  visibleModulesCount: number;
+};
+
 export function EventConfigurationPanel({
   busy,
   onUpdatePhase,
@@ -54,11 +57,11 @@ export function EventConfigurationPanel({
       <CardHeader className="space-y-2">
         <div className="flex items-center gap-2 text-[var(--neon-green)]">
           <TimerReset className="h-4 w-4" />
-          <span className="label">{adminCopy.state.configurationKicker}</span>
+          <span className="label">{state.configurationKicker}</span>
         </div>
-        <CardTitle>{adminCopy.state.configurationTitle}</CardTitle>
+        <CardTitle>{state.configurationTitle}</CardTitle>
         <p className="body-small text-[var(--beige)]/72">
-          {adminCopy.state.configurationDescription}
+          {state.configurationDescription}
         </p>
       </CardHeader>
 
@@ -66,7 +69,7 @@ export function EventConfigurationPanel({
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="space-y-2">
             <p className="label text-[var(--beige)]/68">
-              {adminCopy.state.phaseLabel}
+              {state.phaseLabel}
             </p>
             <Select
               value={state.activePhase?.type ?? ""}
@@ -91,24 +94,24 @@ export function EventConfigurationPanel({
           <div className="grid grid-cols-2 gap-3">
             <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
               <p className="label text-[var(--bark)]/62">
-                {adminCopy.state.visibleModulesLabel}
+                {state.visibleModulesLabel}
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                 {visibleModulesCount}
               </p>
               <p className="mt-1 text-xs text-[var(--bark)]/72">
-                {adminCopy.state.visibleModulesDescription}
+                {state.visibleModulesDescription}
               </p>
             </div>
             <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
               <p className="label text-[var(--bark)]/62">
-                {adminCopy.state.pendingLabel}
+                {state.pendingLabel}
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">
                 {state.counts.pendingProposalCount}
               </p>
               <p className="mt-1 text-xs text-[var(--bark)]/72">
-                {adminCopy.state.pendingDescription}
+                {state.pendingDescription}
               </p>
             </div>
           </div>
@@ -128,12 +131,12 @@ export function EventConfigurationPanel({
                 <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-ink)]">
                   {getPhaseLabel(phase.type)}
                 </p>
-                {phase.isActive ? (
-                  <Badge variant="secondary">{adminCopy.state.activeBadge}</Badge>
-                ) : null}
+                {getPhaseBadge(phase) && (
+                  <Badge variant="secondary">{getPhaseBadge(phase)}</Badge>
+                )}
               </div>
               <p className="mt-2 text-xs text-[var(--bark)]/72">
-                {adminCopy.state.phaseClosesPrefix} {formatPhaseWindow(phase)}
+                {state.phaseClosesPrefix} {formatPhaseWindow(phase)}
               </p>
             </div>
           ))}

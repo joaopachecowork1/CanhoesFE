@@ -47,7 +47,7 @@ export function EventContextPanel({
             {adminCopy.state.activeEventLabel}
           </p>
           <Select
-            value={eventId ?? ""}
+            value={eventId && events.some((e) => e.id === eventId) ? eventId : ""}
             onValueChange={onActivateEvent}
             disabled={busy || events.length === 0}
           >
