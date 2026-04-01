@@ -62,7 +62,7 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         aria-label={ariaLabel ?? label}
         title={label}
         className={cn(
-          "group relative rounded-lg p-3 transition-colors hover:bg-secondary",
+          "group relative inline-flex items-center justify-center rounded-lg p-3 transition-colors hover:bg-secondary",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           buttonClassName
         )}
