@@ -37,8 +37,8 @@ function resolveUserLabel(user?: {
 export function useCanhoesShellNavigation({
   isAdmin,
   isLocalMode,
-  isMoreSheetOpen,
-  onOpenMoreSheet,
+  isMenuOpen,
+  onOpenMenu,
   overview,
   pathname,
   router,
@@ -46,8 +46,8 @@ export function useCanhoesShellNavigation({
 }: Readonly<{
   isAdmin: boolean;
   isLocalMode: boolean;
-  isMoreSheetOpen: boolean;
-  onOpenMoreSheet: () => void;
+  isMenuOpen: boolean;
+  onOpenMenu: () => void;
   overview?: EventOverviewDto | null;
   pathname: string | null;
   router: AppRouterInstance;
@@ -108,14 +108,14 @@ export function useCanhoesShellNavigation({
       },
       {
         item: MORE_NAV_ITEM,
-        isActive: isMoreSheetOpen || isMoreActive,
-        onClick: onOpenMoreSheet,
+        isActive: isMenuOpen || isMoreActive,
+        onClick: onOpenMenu,
       },
     ],
-    [isMoreActive, isMoreSheetOpen, onOpenMoreSheet, pathname, primaryRightItem, router]
+    [isMenuOpen, isMoreActive, onOpenMenu, pathname, primaryRightItem, router]
   );
 
-  const moreSheetPrimaryIds = useMemo(
+  const menuPrimaryIds = useMemo(
     () => [
       ...BOTTOM_LEFT_NAV_ITEMS.map((item) => item.id),
       primaryRightItem.id,
@@ -132,6 +132,6 @@ export function useCanhoesShellNavigation({
     pageTitle,
     primaryRightItem,
     userLabel,
-    moreSheetPrimaryIds,
+    menuPrimaryIds,
   };
 }

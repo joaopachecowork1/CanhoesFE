@@ -46,14 +46,14 @@ export function CanhoesChrome({
     bottomLeftEntries,
     bottomRightEntries,
     isEventHomePath,
-    moreSheetPrimaryIds,
+    menuPrimaryIds,
     pageTitle,
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
     isLocalMode,
-    isMoreSheetOpen: isMenuOpen,
-    onOpenMoreSheet: () => setIsMenuOpen(true),
+    isMenuOpen,
+    onOpenMenu: () => setIsMenuOpen(true),
     overview: eventOverview.overview,
     pathname,
     router,
@@ -168,7 +168,7 @@ export function CanhoesChrome({
         isAdmin={isAdmin}
         isLocalMode={isLocalMode}
         overview={eventOverview.overview}
-        primaryIds={moreSheetPrimaryIds}
+        primaryIds={menuPrimaryIds}
         onNavigate={(href) => {
           setIsMenuOpen(false);
           router.push(href);
