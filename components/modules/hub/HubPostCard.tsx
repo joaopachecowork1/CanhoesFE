@@ -74,7 +74,7 @@ export function HubPostCard({
   return (
     <BlurFade delay={index * 50}>
       <article className="canhoes-paper-panel overflow-hidden rounded-[var(--radius-lg-token)]">
-        <div className="space-y-3 px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="space-y-3 px-4 py-4 sm:px-5">
           <PostHeader
             authorName={post.authorName}
             createdAtUtc={post.createdAtUtc}
@@ -104,7 +104,7 @@ export function HubPostCard({
           </div>
         ) : null}
 
-        <div className="px-4 pb-3.5 sm:px-5 sm:pb-4">
+        <div className="px-4 pb-4 sm:px-5">
           <div className="h-px w-full bg-[rgba(107,76,42,0.14)]" />
           <div className="mt-3 space-y-3">
             <HubPostActions

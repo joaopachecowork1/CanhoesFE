@@ -17,7 +17,7 @@ import {
 interface CommentThreadProps {
   initialComments: CommentType[];
   totalCount?: number;
-  previewCount?: number;
+  previewCommentCount?: number;
   expanded?: boolean;
   showComposer?: boolean;
   onToggleExpanded?: () => void;
@@ -35,7 +35,7 @@ interface CommentThreadProps {
 export function CommentThread({
   initialComments,
   totalCount,
-  previewCount = 1,
+  previewCommentCount = 2,
   expanded = false,
   showComposer = true,
   onToggleExpanded,
@@ -60,9 +60,9 @@ export function CommentThread({
   const totalComments = Math.max(totalCount ?? 0, threadComments.length);
   const visibleComments = expanded
     ? threadComments
-    : threadComments.slice(0, Math.max(1, previewCount));
+    : threadComments.slice(0, Math.max(1, previewCommentCount));
   const hiddenCount = Math.max(totalComments - visibleComments.length, 0);
-  const showExpandButton = totalComments > Math.max(1, previewCount);
+  const showExpandButton = totalComments > Math.max(1, previewCommentCount);
 
   const handleReplyDraftChange = (commentId: string, value: string) => {
     setReplyDrafts((currentDrafts) => ({ ...currentDrafts, [commentId]: value }));

@@ -23,8 +23,6 @@ type HubPostCommentsProps = {
   onToggleCommentReaction: (postId: string, commentId: string, emoji: string) => void;
 };
 
-const PREVIEW_COMMENT_COUNT = 2;
-
 function toThreadComment(
   comment: HubCommentDto,
   currentUserName: string,
@@ -68,7 +66,6 @@ export function HubPostComments({
   return (
     <CommentThread
       initialComments={threadedComments}
-      previewCount={PREVIEW_COMMENT_COUNT}
       totalCount={commentCount}
       expanded={openComments}
       showComposer={showComposer}
