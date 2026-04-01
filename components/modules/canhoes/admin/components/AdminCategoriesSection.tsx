@@ -157,8 +157,6 @@ export function AdminCategoriesSection({
         <CategoriesAdmin
           eventId={eventId}
           categories={categories}
-          categoryProposals={categoryProposals}
-          measureProposals={measureProposals}
           loading={loading}
           onUpdate={onUpdate}
         />

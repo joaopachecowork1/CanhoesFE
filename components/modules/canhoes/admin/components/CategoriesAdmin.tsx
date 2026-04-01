@@ -8,8 +8,6 @@ import { AdminStateMessage } from "@/components/modules/canhoes/admin/components
 import { adminCopy } from "@/lib/canhoesCopy";
 import type {
   AwardCategoryDto,
-  CategoryProposalDto,
-  MeasureProposalDto,
 } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -29,8 +27,6 @@ import { Switch } from "@/components/ui/switch";
 type Props = {
   eventId: string | null;
   categories: AwardCategoryDto[];
-  categoryProposals: CategoryProposalDto[];
-  measureProposals: MeasureProposalDto[];
   loading: boolean;
   onUpdate: () => Promise<void>;
 };
