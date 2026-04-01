@@ -37,10 +37,25 @@ type AdminSectionDefinition = {
   quickActionTone?: "primary" | "secondary";
 };
 
+/**
+ * Central registry that defines every admin section available in the panel.
+ *
+ * Each entry declares:
+ *   - `id`              Stable identifier used for routing between sections.
+ *   - `label`           Short Portuguese label shown in the nav tab strip.
+ *   - `description`     One-line description shown in the section stage header.
+ *   - `group`           "primary" sections always appear in the horizontal tab
+ *                       strip; "secondary" sections appear after them.
+ *   - `icon`            Lucide icon shown next to the label.
+ *   - `quickActionTone` When set, the section is also shown as a quick-action
+ *                       card in AdminControlStrip (primary = green, secondary = purple).
+ *   - `count`           Returns a live badge count derived from AdminSectionCountContext.
+ *                       Return 0 when no badge is needed.
+ */
 const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
     id: "control-center",
-    label: "Control Center",
+    label: "Controlo",
     description: "Evento ativo, fase atual, calendario e modulos desta edicao.",
     group: "primary",
     icon: ShieldCheck,
@@ -49,7 +64,7 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
   {
     id: "moderation",
-    label: "Moderation",
+    label: "Moderacao",
     description: "Fila de moderacao para nomeacoes, categorias e medidas.",
     group: "primary",
     icon: Award,
@@ -58,7 +73,7 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
   {
     id: "categories",
-    label: "Categories",
+    label: "Categorias",
     description: "CRUD e configuracao das categorias desta edicao.",
     group: "primary",
     icon: FolderTree,
@@ -67,7 +82,7 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
   {
     id: "members",
-    label: "Members",
+    label: "Membros",
     description: "Participantes, admins e composicao da edicao.",
     group: "primary",
     icon: Users,
@@ -76,7 +91,7 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
   {
     id: "audit",
-    label: "Audit",
+    label: "Auditoria",
     description: "Auditoria de votos e registo do que ja foi submetido.",
     group: "secondary",
     icon: BarChart3,
