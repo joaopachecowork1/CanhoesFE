@@ -12,6 +12,14 @@ type AdminSectionStageProps = {
   tone?: "default" | "purple";
 };
 
+/**
+ * AdminSectionStage – header + content wrapper for each admin section.
+ *
+ * Sits on the paper surface (canhoes-paper-card) so that the kicker, title,
+ * and description are always legible. The `tone` prop shifts the accent from
+ * moss-green (default) to purple for sections with special urgency (e.g. the
+ * moderation queue).
+ */
 export function AdminSectionStage({
   children,
   count = 0,
@@ -22,38 +30,31 @@ export function AdminSectionStage({
 }: Readonly<AdminSectionStageProps>) {
   return (
     <div className="space-y-4">
-      <section
-        className={cn(
-          "rounded-[var(--radius-lg-token)] border px-4 py-4 shadow-[var(--shadow-panel)] sm:px-5",
-          tone === "purple"
-            ? "border-[rgba(176,129,255,0.24)] bg-[linear-gradient(180deg,rgba(24,18,33,0.94),rgba(12,16,9,0.98))] [box-shadow:var(--shadow-panel),var(--glow-purple-sm)]"
-            : "border-[var(--border-subtle)] bg-[linear-gradient(180deg,rgba(13,19,9,0.94),rgba(9,13,7,0.98))]"
-        )}
-      >
+      <section className="canhoes-paper-card rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 space-y-2">
             <p
               className={cn(
-                "editorial-kicker",
+                "font-[var(--font-mono)] text-[0.7rem] font-semibold uppercase tracking-[0.18em]",
                 tone === "purple"
-                  ? "text-[var(--accent-purple-soft)]"
-                  : "text-[var(--neon-green)]"
+                  ? "text-[var(--accent-purple-deep)]"
+                  : "text-[var(--moss)]"
               )}
             >
               {kicker}
             </p>
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-[var(--bg-paper)]">
+              <h3 className="text-lg font-semibold text-[var(--text-ink)]">
                 {title}
               </h3>
-              <p className="max-w-3xl text-sm leading-6 text-[rgba(245,237,224,0.72)]">
+              <p className="max-w-3xl text-sm leading-6 text-[var(--bark)]/80">
                 {description}
               </p>
             </div>
           </div>
 
           {count > 0 ? (
-            <Badge className="border-[var(--border-purple)] bg-[rgba(138,92,255,0.12)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)]">
+            <Badge className="border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.14)] text-[var(--moss)] shadow-none">
               {count}
             </Badge>
           ) : null}
