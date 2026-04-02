@@ -1,4 +1,4 @@
-// [antes: 252 linhas → depois: 131 linhas]
+// [antes: 252 linhas → depois: 148 linhas]
 "use client";
 
 import type { ReactNode } from "react";

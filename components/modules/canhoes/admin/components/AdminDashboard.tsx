@@ -1,4 +1,4 @@
-// [antes: 235 linhas → depois: 153 linhas]
+// [antes: 235 linhas → depois: 155 linhas]
 "use client";
 
 import { AlertTriangle } from "lucide-react";

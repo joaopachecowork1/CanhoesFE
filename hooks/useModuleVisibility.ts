@@ -1,4 +1,4 @@
-// [antes: 130 linhas → depois: 148 linhas]
+// [antes: 130 linhas → depois: 165 linhas]
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -47,7 +47,7 @@ export function useModuleVisibility({
       CANHOES_MEMBER_MODULES.map((moduleDefinition) => {
         const key = moduleDefinition.key;
         const serverChecked = state?.moduleVisibility[key] ?? false;
-        const checked = key in optimisticOverrides ? (optimisticOverrides[key] ?? serverChecked) : serverChecked;
+        const checked = key in optimisticOverrides ? optimisticOverrides[key]! : serverChecked;
         return {
           ...moduleDefinition,
           checked,
@@ -55,6 +55,19 @@ export function useModuleVisibility({
         };
       }),
     [state, optimisticOverrides]
+  );
+
+  const clearModuleOverrides = useCallback(
+    (visibility: EventAdminModuleVisibilityDto) => {
+      setOptimisticOverrides((prev) => {
+        const next = { ...prev };
+        for (const key of Object.keys(visibility)) {
+          delete next[key as keyof EventAdminModuleVisibilityDto];
+        }
+        return next;
+      });
+    },
+    []
   );
 
   const persistState = useCallback(
@@ -73,38 +86,22 @@ export function useModuleVisibility({
       try {
         await canhoesEventsRepo.updateAdminState(eventId, patch);
         await onUpdate();
+        // Clear overrides only after server state is refreshed (no flicker)
+        if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
         toast.success(successMessage);
       } catch (err) {
         console.error("[Admin] fetch error:", {
           endpoint: `admin/state (${busyStateKey})`,
-          err,
+          details: err,
         });
+        // Revert optimistic overrides so UI shows old server state
+        if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
         toast.error("Nao foi possivel guardar a configuracao");
-        // Revert optimistic overrides for this key
-        if (patch.moduleVisibility) {
-          setOptimisticOverrides((prev) => {
-            const next = { ...prev };
-            for (const key of Object.keys(patch.moduleVisibility!)) {
-              delete next[key as keyof EventAdminModuleVisibilityDto];
-            }
-            return next;
-          });
-        }
       } finally {
         setSavingKey(null);
-        // Clear overrides so server state takes over
-        if (patch.moduleVisibility) {
-          setOptimisticOverrides((prev) => {
-            const next = { ...prev };
-            for (const key of Object.keys(patch.moduleVisibility!)) {
-              delete next[key as keyof EventAdminModuleVisibilityDto];
-            }
-            return next;
-          });
-        }
       }
     },
-    [eventId, onUpdate, state]
+    [eventId, onUpdate, state, clearModuleOverrides]
   );
 
   const toggleModule = useCallback(

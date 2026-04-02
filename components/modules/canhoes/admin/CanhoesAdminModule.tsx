@@ -1,4 +1,4 @@
-// [antes: 213 linhas → depois: 204 linhas]
+// [antes: 213 linhas → depois: 223 linhas]
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -109,7 +109,7 @@ export default function CanhoesAdminModule() {
       console.error("[Admin] fetch error:", {
         endpoint: "admin-bootstrap",
         status: error.status,
-        body: error.details,
+        details: error.details,
       });
       return `${error.status}: ${error.message}`;
     }
