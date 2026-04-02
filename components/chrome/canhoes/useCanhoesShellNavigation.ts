@@ -7,9 +7,10 @@ import type { EventOverviewDto } from "@/lib/api/types";
 
 import type { CanhoesBottomTabEntry } from "./CanhoesBottomTabs";
 import {
-  BOTTOM_LEFT_NAV_ITEMS,
+  ADMIN_NAV_ITEM,
+  getPromotedNavItems,
   getPageTitle,
-  getPrimaryRightNavItem,
+  HOME_NAV_ITEM,
   isMoreSectionActive,
   MORE_NAV_ITEM,
 } from "./canhoesNavigation";
@@ -60,9 +61,9 @@ export function useCanhoesShellNavigation({
   const isEventHomePath = useMemo(() => isHomePath(pathname), [pathname]);
   const userLabel = useMemo(() => resolveUserLabel(user), [user]);
 
-  const primaryRightItem = useMemo(
+  const promotedItems = useMemo(
     () =>
-      getPrimaryRightNavItem({
+      getPromotedNavItems({
         isAdmin,
         isLocalMode,
         overview,
@@ -70,58 +71,81 @@ export function useCanhoesShellNavigation({
     [isAdmin, isLocalMode, overview]
   );
 
+  const fixedRightItem = isAdmin ? ADMIN_NAV_ITEM : MORE_NAV_ITEM;
+
   const isMoreActive = useMemo(
     () =>
+      fixedRightItem.id === MORE_NAV_ITEM.id &&
       Boolean(pathname) &&
       isMoreSectionActive({
         isAdmin,
         isLocalMode,
         overview,
         pathname: pathname ?? "",
-        primaryRightItem,
+        promotedItems,
       }),
-    [isAdmin, isLocalMode, overview, pathname, primaryRightItem]
+    [fixedRightItem.id, isAdmin, isLocalMode, overview, pathname, promotedItems]
   );
 
-  const bottomLeftEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
-    () => [
-      {
-        item: BOTTOM_LEFT_NAV_ITEMS[0],
-        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[0].href),
-        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[0].href),
-      },
-      {
-        item: BOTTOM_LEFT_NAV_ITEMS[1],
-        isActive: isTabActive(pathname, BOTTOM_LEFT_NAV_ITEMS[1].href),
-        onClick: () => router.push(BOTTOM_LEFT_NAV_ITEMS[1].href),
-      },
-    ],
-    [pathname, router]
+  const bottomLeftEntries = useMemo<readonly CanhoesBottomTabEntry[]>(
+    () => {
+      const entries: CanhoesBottomTabEntry[] = [
+        {
+          item: HOME_NAV_ITEM,
+          isActive: isTabActive(pathname, HOME_NAV_ITEM.href),
+          onClick: () => router.push(HOME_NAV_ITEM.href),
+        },
+      ];
+
+      if (promotedItems[0]) {
+        entries.push({
+          item: promotedItems[0],
+          isActive: isTabActive(pathname, promotedItems[0].href),
+          onClick: () => router.push(promotedItems[0].href),
+        });
+      }
+
+      return entries;
+    },
+    [pathname, promotedItems, router]
   );
 
-  const bottomRightEntries = useMemo<readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry]>(
-    () => [
-      {
-        item: primaryRightItem,
-        isActive: isTabActive(pathname, primaryRightItem.href),
-        onClick: () => router.push(primaryRightItem.href),
-      },
-      {
-        item: MORE_NAV_ITEM,
-        isActive: isMenuOpen || isMoreActive,
-        onClick: onOpenMenu,
-      },
-    ],
-    [isMenuOpen, isMoreActive, onOpenMenu, pathname, primaryRightItem, router]
+  const bottomRightEntries = useMemo<readonly CanhoesBottomTabEntry[]>(
+    () => {
+      const entries: CanhoesBottomTabEntry[] = [];
+
+      if (promotedItems[1]) {
+        entries.push({
+          item: promotedItems[1],
+          isActive: isTabActive(pathname, promotedItems[1].href),
+          onClick: () => router.push(promotedItems[1].href),
+        });
+      }
+
+      entries.push({
+        item: fixedRightItem,
+        isActive:
+          fixedRightItem.id === MORE_NAV_ITEM.id
+            ? isMenuOpen || isMoreActive
+            : isTabActive(pathname, fixedRightItem.href),
+        onClick:
+          fixedRightItem.id === MORE_NAV_ITEM.id
+            ? onOpenMenu
+            : () => router.push(fixedRightItem.href),
+      });
+
+      return entries;
+    },
+    [fixedRightItem, isMenuOpen, isMoreActive, onOpenMenu, pathname, promotedItems, router]
   );
 
   const menuPrimaryIds = useMemo(
     () => [
-      ...BOTTOM_LEFT_NAV_ITEMS.map((item) => item.id),
-      primaryRightItem.id,
-      MORE_NAV_ITEM.id,
+      HOME_NAV_ITEM.id,
+      ...promotedItems.map((item) => item.id),
+      fixedRightItem.id,
     ],
-    [primaryRightItem.id]
+    [fixedRightItem.id, promotedItems]
   );
 
   return {
@@ -130,7 +154,7 @@ export function useCanhoesShellNavigation({
     isEventHomePath,
     isMoreActive,
     pageTitle,
-    primaryRightItem,
+    promotedItems,
     userLabel,
     menuPrimaryIds,
   };

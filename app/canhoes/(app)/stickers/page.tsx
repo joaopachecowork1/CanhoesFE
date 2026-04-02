@@ -1,12 +1,11 @@
-"use client";
-
+import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { CanhoesStickerSubmitModule } from "@/components/modules/canhoes/CanhoesStickerSubmitModule";
 import { ModuleAccessGuard } from "@/components/modules/canhoes/ModuleAccessGuard";
 
 export default function StickersPage() {
   return (
-    <ModuleAccessGuard moduleKey="stickers">
+    <EventModuleGate moduleKey="stickers">
       <CanhoesStickerSubmitModule />
-    </ModuleAccessGuard>
+    </EventModuleGate>
   );
 }

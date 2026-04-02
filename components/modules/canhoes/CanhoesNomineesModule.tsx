@@ -57,7 +57,7 @@ export function CanhoesNomineesModule() {
       const [nextState, nextCategories, nextNominees] = await Promise.all([
         canhoesRepo.getState(),
         canhoesRepo.getCategories(),
-        canhoesRepo.getNominees(),
+        canhoesRepo.getNominees(undefined, "nominees"),
       ]);
 
       setCanhoesState(nextState);
@@ -110,6 +110,7 @@ export function CanhoesNomineesModule() {
     try {
       const createdNominee = await canhoesRepo.createNominee({
         categoryId: selectedCategoryId === NO_CATEGORY ? null : selectedCategoryId,
+        kind: "nominees",
         title: nomineeTitle.trim(),
       });
 

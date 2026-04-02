@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flame, Trophy } from "lucide-react";
 
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import type { AwardCategoryDto, CanhoesStateDto } from "@/lib/api/types";
+import type { EventCategoryDto, EventPhaseDto } from "@/lib/api/types";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,69 +13,70 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeações";
-    case "voting":
-      return "Votação";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
+function formatPhaseLabel(phaseType?: EventPhaseDto["type"]) {
+  switch (phaseType) {
+    case "DRAW":
+      return "Sorteio";
+    case "PROPOSALS":
+      return "Propostas";
+    case "VOTING":
+      return "Votacao";
+    case "RESULTS":
+      return "Resultados";
     default:
       return "Desconhecida";
   }
 }
 
 export function CanhoesCategoriesModule() {
-  const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
-  const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
+  const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
+  const [categoryList, setCategoryList] = useState<EventCategoryDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
+    if (!event) {
+      setCategoryList([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const [nextState, nextCategories] = await Promise.all([
-        canhoesRepo.getState(),
-        canhoesRepo.getCategories(),
-      ]);
-
-      setCanhoesState(nextState);
-      setCategoryList(nextCategories);
+      setCategoryList(await canhoesEventsRepo.getCategories(event.id));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [event]);
 
   useEffect(() => {
     void loadCategories();
-  }, []);
+  }, [loadCategories]);
 
-  const isNominationPhase = canhoesState?.phase === "nominations";
-  const canSubmitProposal = categoryName.trim().length >= 3 && isNominationPhase;
-  const submitButtonLabel = isNominationPhase
+  const canSubmitProposal =
+    categoryName.trim().length >= 3 && Boolean(overview?.permissions.canSubmitProposal);
+  const submitButtonLabel = overview?.permissions.canSubmitProposal
     ? isSubmitting
       ? "A enviar..."
       : "Propor"
     : "Propostas fechadas";
 
   const handleProposalSubmit = async () => {
-    if (!canSubmitProposal) return;
+    if (!canSubmitProposal || !event) return;
 
     setIsSubmitting(true);
     try {
-      await canhoesRepo.createCategoryProposal({
+      await canhoesEventsRepo.createProposal(event.id, {
         description: categoryDescription.trim() || null,
         name: categoryName.trim(),
       });
 
       setCategoryName("");
       setCategoryDescription("");
+      await loadCategories();
     } catch (error) {
       console.error(error);
     } finally {
@@ -95,7 +97,9 @@ export function CanhoesCategoriesModule() {
           </p>
         </div>
 
-        {canhoesState ? <Badge variant="outline">Fase: {formatPhaseLabel(canhoesState.phase)}</Badge> : null}
+        {overview ? (
+          <Badge variant="outline">Fase: {formatPhaseLabel(overview.activePhase?.type)}</Badge>
+        ) : null}
       </div>
 
       <Card>
@@ -142,18 +146,24 @@ export function CanhoesCategoriesModule() {
         </CardHeader>
 
         <CardContent className="space-y-3">
-          {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
+          {isLoading || isOverviewLoading ? (
+            <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+          ) : null}
 
-          {!isLoading && categoryList.length === 0 ? (
+          {!isLoading && !isOverviewLoading && categoryList.length === 0 ? (
             <p className="body-small text-[var(--color-text-muted)]">Ainda não há categorias.</p>
           ) : null}
 
-          {!isLoading
+          {!isLoading && !isOverviewLoading
             ? categoryList.map((category) => (
                 <div key={category.id} className="canhoes-list-item flex items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-[var(--color-text-primary)]">{category.name}</p>
-                    <p className="body-small text-[var(--color-text-muted)]">Ordem: {category.sortOrder}</p>
+                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
+                      {category.title}
+                    </p>
+                    <p className="body-small text-[var(--color-text-muted)]">
+                      {category.description || "Sem descricao adicional."}
+                    </p>
                   </div>
                   <Badge variant="secondary">{category.isActive ? "Ativa" : "Inativa"}</Badge>
                 </div>

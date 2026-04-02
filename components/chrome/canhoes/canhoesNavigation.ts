@@ -15,7 +15,11 @@ import {
 } from "lucide-react";
 
 import type { EventModulesDto, EventOverviewDto } from "@/lib/api/types";
-import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
+import {
+  CANHOES_MEMBER_MODULE_MAP,
+  CANHOES_MEMBER_NAV_ORDER,
+  type CanhoesMemberModuleKey,
+} from "@/lib/modules";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 
 export type CanhoesNavItem = {
@@ -28,72 +32,105 @@ export type CanhoesNavItem = {
   requiresAdmin?: boolean;
 };
 
-const SECRET_SANTA_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.secretSanta.description,
-  href: "/canhoes/amigo-secreto",
-  icon: Gift,
-  id: "secret-santa",
-  label: CANHOES_MEMBER_MODULE_MAP.secretSanta.navLabel ?? "Amigo",
+export const HOME_NAV_ITEM: CanhoesNavItem = {
+  href: "/canhoes",
+  icon: House,
+  id: "home",
+  label: "Evento",
 };
 
-const WISHLIST_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.wishlist.description,
-  href: "/canhoes/wishlist",
-  icon: Gift,
-  id: "wishlist",
-  label: CANHOES_MEMBER_MODULE_MAP.wishlist.navLabel ?? "Wishlist",
+const MODULE_ITEM_ID_BY_KEY: Record<CanhoesMemberModuleKey, string> = {
+  feed: "feed",
+  secretSanta: "secret-santa",
+  wishlist: "wishlist",
+  categories: "categories",
+  voting: "voting",
+  gala: "gala",
+  stickers: "stickers",
+  measures: "measures",
+  nominees: "nominees",
 };
 
-const CATEGORIES_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.categories.description,
-  href: "/canhoes/categorias",
-  icon: Trophy,
-  id: "categories",
-  label: CANHOES_MEMBER_MODULE_MAP.categories.navLabel ?? "Categorias",
+const MODULE_KEY_BY_ITEM_ID = Object.fromEntries(
+  Object.entries(MODULE_ITEM_ID_BY_KEY).map(([moduleKey, itemId]) => [itemId, moduleKey])
+) as Partial<Record<string, keyof EventModulesDto>>;
+
+const MODULE_NAV_ITEMS: Record<CanhoesMemberModuleKey, CanhoesNavItem> = {
+  feed: {
+    description: CANHOES_MEMBER_MODULE_MAP.feed.description,
+    href: CANHOES_MEMBER_MODULE_MAP.feed.href,
+    icon: ScrollText,
+    id: MODULE_ITEM_ID_BY_KEY.feed,
+    label: CANHOES_MEMBER_MODULE_MAP.feed.navLabel ?? CANHOES_MEMBER_MODULE_MAP.feed.label,
+  },
+  secretSanta: {
+    description: CANHOES_MEMBER_MODULE_MAP.secretSanta.description,
+    href: CANHOES_MEMBER_MODULE_MAP.secretSanta.href,
+    icon: Gift,
+    id: MODULE_ITEM_ID_BY_KEY.secretSanta,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.secretSanta.navLabel ??
+      CANHOES_MEMBER_MODULE_MAP.secretSanta.label,
+  },
+  wishlist: {
+    description: CANHOES_MEMBER_MODULE_MAP.wishlist.description,
+    href: CANHOES_MEMBER_MODULE_MAP.wishlist.href,
+    icon: Gift,
+    id: MODULE_ITEM_ID_BY_KEY.wishlist,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.wishlist.navLabel ?? CANHOES_MEMBER_MODULE_MAP.wishlist.label,
+  },
+  categories: {
+    description: CANHOES_MEMBER_MODULE_MAP.categories.description,
+    href: CANHOES_MEMBER_MODULE_MAP.categories.href,
+    icon: Trophy,
+    id: MODULE_ITEM_ID_BY_KEY.categories,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.categories.navLabel ??
+      CANHOES_MEMBER_MODULE_MAP.categories.label,
+  },
+  voting: {
+    description: CANHOES_MEMBER_MODULE_MAP.voting.description,
+    href: CANHOES_MEMBER_MODULE_MAP.voting.href,
+    icon: Flame,
+    id: MODULE_ITEM_ID_BY_KEY.voting,
+    label: CANHOES_MEMBER_MODULE_MAP.voting.navLabel ?? CANHOES_MEMBER_MODULE_MAP.voting.label,
+  },
+  gala: {
+    description: CANHOES_MEMBER_MODULE_MAP.gala.description,
+    hideInLocalMode: true,
+    href: CANHOES_MEMBER_MODULE_MAP.gala.href,
+    icon: Medal,
+    id: MODULE_ITEM_ID_BY_KEY.gala,
+    label: CANHOES_MEMBER_MODULE_MAP.gala.navLabel ?? CANHOES_MEMBER_MODULE_MAP.gala.label,
+  },
+  stickers: {
+    description: CANHOES_MEMBER_MODULE_MAP.stickers.description,
+    href: CANHOES_MEMBER_MODULE_MAP.stickers.href,
+    icon: Sticker,
+    id: MODULE_ITEM_ID_BY_KEY.stickers,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.stickers.navLabel ?? CANHOES_MEMBER_MODULE_MAP.stickers.label,
+  },
+  measures: {
+    description: CANHOES_MEMBER_MODULE_MAP.measures.description,
+    href: CANHOES_MEMBER_MODULE_MAP.measures.href,
+    icon: Ruler,
+    id: MODULE_ITEM_ID_BY_KEY.measures,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.measures.navLabel ?? CANHOES_MEMBER_MODULE_MAP.measures.label,
+  },
+  nominees: {
+    description: CANHOES_MEMBER_MODULE_MAP.nominees.description,
+    href: CANHOES_MEMBER_MODULE_MAP.nominees.href,
+    icon: ScrollText,
+    id: MODULE_ITEM_ID_BY_KEY.nominees,
+    label:
+      CANHOES_MEMBER_MODULE_MAP.nominees.navLabel ?? CANHOES_MEMBER_MODULE_MAP.nominees.label,
+  },
 };
 
-const VOTING_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.voting.description,
-  href: "/canhoes/votacao",
-  icon: Flame,
-  id: "voting",
-  label: CANHOES_MEMBER_MODULE_MAP.voting.navLabel ?? "Votos",
-};
-
-const GALA_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.gala.description,
-  hideInLocalMode: true,
-  href: "/canhoes/gala",
-  icon: Medal,
-  id: "gala",
-  label: CANHOES_MEMBER_MODULE_MAP.gala.navLabel ?? "Gala",
-};
-
-const STICKERS_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.stickers.description,
-  href: "/canhoes/stickers",
-  icon: Sticker,
-  id: "stickers",
-  label: CANHOES_MEMBER_MODULE_MAP.stickers.navLabel ?? "Stickers",
-};
-
-const MEASURES_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.measures.description,
-  href: "/canhoes/medidas",
-  icon: Ruler,
-  id: "measures",
-  label: CANHOES_MEMBER_MODULE_MAP.measures.navLabel ?? "Medidas",
-};
-
-const NOMINEES_NAV_ITEM: CanhoesNavItem = {
-  description: CANHOES_MEMBER_MODULE_MAP.nominees.description,
-  href: "/canhoes/nomeacoes",
-  icon: ScrollText,
-  id: "nominees",
-  label: CANHOES_MEMBER_MODULE_MAP.nominees.navLabel ?? "Nomeacoes",
-};
-
-const ADMIN_NAV_ITEM: CanhoesNavItem = {
+export const ADMIN_NAV_ITEM: CanhoesNavItem = {
   description: "Moderacao, fases, pendentes e estado do evento.",
   href: "/canhoes/admin",
   icon: Shield,
@@ -110,62 +147,13 @@ export const MORE_NAV_ITEM: CanhoesNavItem = {
   label: "Mais",
 };
 
-const ITEM_BY_ID: Record<string, CanhoesNavItem> = {
-  [SECRET_SANTA_NAV_ITEM.id]: SECRET_SANTA_NAV_ITEM,
-  [WISHLIST_NAV_ITEM.id]: WISHLIST_NAV_ITEM,
-  [CATEGORIES_NAV_ITEM.id]: CATEGORIES_NAV_ITEM,
-  [VOTING_NAV_ITEM.id]: VOTING_NAV_ITEM,
-  [GALA_NAV_ITEM.id]: GALA_NAV_ITEM,
-  [STICKERS_NAV_ITEM.id]: STICKERS_NAV_ITEM,
-  [MEASURES_NAV_ITEM.id]: MEASURES_NAV_ITEM,
-  [NOMINEES_NAV_ITEM.id]: NOMINEES_NAV_ITEM,
-  [ADMIN_NAV_ITEM.id]: ADMIN_NAV_ITEM,
-};
-
-const MODULE_KEY_BY_ITEM_ID = {
-  "secret-santa": "secretSanta",
-  wishlist: "wishlist",
-  categories: "categories",
-  voting: "voting",
-  gala: "gala",
-  stickers: "stickers",
-  measures: "measures",
-  nominees: "nominees",
-  admin: "admin",
-} as const satisfies Partial<Record<string, keyof EventModulesDto>>;
-
-export const BOTTOM_LEFT_NAV_ITEMS: readonly CanhoesNavItem[] = [
-  {
-    href: "/canhoes",
-    icon: House,
-    id: "home",
-    label: "Evento",
-  },
-  {
-    href: "/canhoes/feed",
-    icon: ScrollText,
-    id: "feed",
-    label: "Feed",
-  },
-] as const;
-
-export const MORE_NAV_ITEMS: readonly CanhoesNavItem[] = [
-  CATEGORIES_NAV_ITEM,
-  STICKERS_NAV_ITEM,
-  WISHLIST_NAV_ITEM,
-  GALA_NAV_ITEM,
-  MEASURES_NAV_ITEM,
-  NOMINEES_NAV_ITEM,
-] as const;
+const ORDERED_MEMBER_NAV_ITEMS = CANHOES_MEMBER_NAV_ORDER.map(
+  (moduleKey) => MODULE_NAV_ITEMS[moduleKey]
+);
 
 const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
-  ...BOTTOM_LEFT_NAV_ITEMS,
-  SECRET_SANTA_NAV_ITEM,
-  WISHLIST_NAV_ITEM,
-  CATEGORIES_NAV_ITEM,
-  VOTING_NAV_ITEM,
-  GALA_NAV_ITEM,
-  ...MORE_NAV_ITEMS,
+  HOME_NAV_ITEM,
+  ...ORDERED_MEMBER_NAV_ITEMS,
   ADMIN_NAV_ITEM,
 ];
 
@@ -180,39 +168,18 @@ function isNavItemAvailable({
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
 }>) {
-  if (itemId === "admin") return isAdmin;
-  if (itemId === "gala" && isLocalMode) return false;
+  if (itemId === HOME_NAV_ITEM.id || itemId === MORE_NAV_ITEM.id) return true;
+  if (itemId === ADMIN_NAV_ITEM.id) return isAdmin;
+  if (itemId === MODULE_ITEM_ID_BY_KEY.gala && isLocalMode) return false;
 
   const modules = overview?.modules;
-  if (!modules) return true;
+  if (!modules) return false;
 
   const moduleKey = MODULE_KEY_BY_ITEM_ID[itemId as keyof typeof MODULE_KEY_BY_ITEM_ID];
-  return moduleKey ? modules[moduleKey] : true;
+  return moduleKey ? modules[moduleKey] : false;
 }
 
-function pickFirstVisibleItem(
-  itemIds: readonly string[],
-  options: Readonly<{
-    excludedIds?: string[];
-    isAdmin: boolean;
-    isLocalMode?: boolean;
-    overview?: EventOverviewDto | null;
-  }>
-) {
-  const excludedIds = new Set(options.excludedIds ?? []);
-
-  for (const itemId of itemIds) {
-    if (excludedIds.has(itemId)) continue;
-    if (!isNavItemAvailable({ itemId, ...options })) continue;
-
-    const item = ITEM_BY_ID[itemId];
-    if (item) return item;
-  }
-
-  return null;
-}
-
-export function getPrimaryRightNavItem({
+export function getPromotedNavItems({
   isAdmin,
   isLocalMode = IS_LOCAL_MODE,
   overview,
@@ -221,25 +188,23 @@ export function getPrimaryRightNavItem({
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
 }>) {
-  // The first right-hand slot stays stable and favors the phase-adjacent module
-  // users are most likely to need throughout the event.
-  return (
-    pickFirstVisibleItem(["secret-santa", "wishlist", "categories"], {
+  return ORDERED_MEMBER_NAV_ITEMS.filter((item) =>
+    isNavItemAvailable({
+      itemId: item.id,
       isAdmin,
       isLocalMode,
       overview,
-    }) ?? SECRET_SANTA_NAV_ITEM
-  );
+    })
+  ).slice(0, 2);
 }
 
 export function getPageTitle(pathname: string | null) {
-  if (!pathname) return "Evento";
+  if (!pathname) return HOME_NAV_ITEM.label;
 
   const matchedStaticPage = STATIC_PAGE_TITLES.find(({ href }) => pathname.startsWith(href));
   if (matchedStaticPage) return matchedStaticPage.label;
-  if (pathname.startsWith("/canhoes/amigo-secreto")) return "Amigo";
 
-  return "Evento";
+  return HOME_NAV_ITEM.label;
 }
 
 export function getVisibleMoreNavItems({
@@ -253,10 +218,7 @@ export function getVisibleMoreNavItems({
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
 }>) {
-  // The More sheet only shows modules that are not already promoted to the
-  // bottom navigation for the current user and phase. Admin access is kept
-  // separate so non-admin users never depend on filtering a mixed list.
-  return MORE_NAV_ITEMS.filter((item) => {
+  return ORDERED_MEMBER_NAV_ITEMS.filter((item) => {
     if (excludedIds.includes(item.id)) return false;
 
     return isNavItemAvailable({
@@ -299,19 +261,19 @@ export function isMoreSectionActive({
   isLocalMode = IS_LOCAL_MODE,
   overview,
   pathname,
-  primaryRightItem,
+  promotedItems,
 }: Readonly<{
   isAdmin: boolean;
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
   pathname: string;
-  primaryRightItem?: CanhoesNavItem | null;
+  promotedItems: readonly CanhoesNavItem[];
 }>) {
   const primaryIds = [
-    ...BOTTOM_LEFT_NAV_ITEMS.map((item) => item.id),
-    primaryRightItem?.id,
+    HOME_NAV_ITEM.id,
+    ...promotedItems.map((item) => item.id),
     MORE_NAV_ITEM.id,
-  ].filter(Boolean) as string[];
+  ];
 
   return getVisibleMoreNavItems({
     excludedIds: primaryIds,

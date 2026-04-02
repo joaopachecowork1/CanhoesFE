@@ -448,7 +448,8 @@ export const MOCK_EVENT_PROPOSALS: EventProposalDto[] = MOCK_CATEGORY_PROPOSALS.
   id: proposal.id,
   eventId: MOCK_EVENT_SUMMARY.id,
   userId: "mock-admin-001",
-  content: [proposal.name, proposal.description].filter(Boolean).join("\n\n"),
+  name: proposal.name,
+  description: proposal.description ?? null,
   status: proposal.status,
   createdAt: proposal.createdAtUtc,
 }));

@@ -5,6 +5,7 @@ import { Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import CanhoesAdminModule from "@/components/modules/canhoes/admin/CanhoesAdminModule";
+import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
@@ -89,5 +90,9 @@ export default function AdminPage() {
     );
   }
 
-  return <CanhoesAdminModule />;
+  return (
+    <EventModuleGate moduleKey="admin">
+      <CanhoesAdminModule />
+    </EventModuleGate>
+  );
 }

@@ -27,6 +27,7 @@ export function CanhoesChrome({
   const eventOverview = useEventOverview();
   const isAdmin =
     Boolean(user?.isAdmin) || Boolean(eventOverview.overview?.permissions.isAdmin);
+  const canCompose = Boolean(eventOverview.overview?.modules.feed);
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,10 +38,20 @@ export function CanhoesChrome({
   }, [pathname]);
 
   useEffect(() => {
-    const handleOpenCompose = () => setIsComposeSheetOpen(true);
+    if (!canCompose) {
+      setIsComposeSheetOpen(false);
+    }
+  }, [canCompose]);
+
+  useEffect(() => {
+    const handleOpenCompose = () => {
+      if (!canCompose) return;
+      setIsComposeSheetOpen(true);
+    };
+
     window.addEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
     return () => window.removeEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
-  }, []);
+  }, [canCompose]);
 
   const {
     bottomLeftEntries,
@@ -160,6 +171,7 @@ export function CanhoesChrome({
         leftItems={bottomLeftEntries}
         onCompose={() => setIsComposeSheetOpen(true)}
         rightItems={bottomRightEntries}
+        showCompose={canCompose}
       />
 
       <CanhoesFloatingActionMenu

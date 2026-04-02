@@ -17,9 +17,10 @@ export type CanhoesBottomTabEntry = {
 
 type CanhoesBottomTabsProps = {
   isComposeOpen: boolean;
-  leftItems: readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry];
+  leftItems: readonly CanhoesBottomTabEntry[];
   onCompose: () => void;
-  rightItems: readonly [CanhoesBottomTabEntry, CanhoesBottomTabEntry];
+  rightItems: readonly CanhoesBottomTabEntry[];
+  showCompose?: boolean;
 };
 
 export function CanhoesBottomTabs({
@@ -27,25 +28,28 @@ export function CanhoesBottomTabs({
   leftItems,
   onCompose,
   rightItems,
+  showCompose = true,
 }: Readonly<CanhoesBottomTabsProps>) {
+  const composeItem = {
+    ariaLabel: "Criar post",
+    buttonClassName: cn(
+      "h-16 w-16 rounded-[1.35rem] border border-[rgba(212,184,150,0.18)] bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.22),transparent_45%),linear-gradient(180deg,rgba(39,48,24,0.96),rgba(18,23,11,0.98))] text-[var(--bg-paper)] shadow-[0_14px_24px_rgba(12,15,8,0.22)]",
+      "hover:bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.28),transparent_45%),linear-gradient(180deg,rgba(44,55,28,0.98),rgba(20,26,12,0.98))]",
+      isComposeOpen &&
+        "border-[rgba(0,255,136,0.28)] bg-[radial-gradient(circle_at_30%_25%,rgba(0,255,136,0.26),transparent_45%),linear-gradient(180deg,rgba(45,68,29,0.96),rgba(21,33,16,0.96))] shadow-[var(--glow-green-sm),0_14px_24px_rgba(12,15,8,0.22)]"
+    ),
+    icon: Plus,
+    iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--neon-green)]"),
+    isActive: isComposeOpen,
+    label: "Post",
+    onClick: onCompose,
+    tooltipClassName:
+      "bg-[rgba(15,18,9,0.96)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
+  } as const satisfies DockItem;
+
   const items = [
     ...leftItems.map((entry) => toDockItem(entry)),
-    {
-      ariaLabel: "Criar post",
-      buttonClassName: cn(
-        "h-16 w-16 rounded-[1.35rem] border border-[rgba(212,184,150,0.18)] bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.22),transparent_45%),linear-gradient(180deg,rgba(39,48,24,0.96),rgba(18,23,11,0.98))] text-[var(--bg-paper)] shadow-[0_14px_24px_rgba(12,15,8,0.22)]",
-        "hover:bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.28),transparent_45%),linear-gradient(180deg,rgba(44,55,28,0.98),rgba(20,26,12,0.98))]",
-        isComposeOpen &&
-          "border-[rgba(0,255,136,0.28)] bg-[radial-gradient(circle_at_30%_25%,rgba(0,255,136,0.26),transparent_45%),linear-gradient(180deg,rgba(45,68,29,0.96),rgba(21,33,16,0.96))] shadow-[var(--glow-green-sm),0_14px_24px_rgba(12,15,8,0.22)]"
-      ),
-      icon: Plus,
-      iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--neon-green)]"),
-      isActive: isComposeOpen,
-      label: "Post",
-      onClick: onCompose,
-      tooltipClassName:
-        "bg-[rgba(15,18,9,0.96)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
-    },
+    ...(showCompose ? [composeItem] : []),
     ...rightItems.map((entry) => toDockItem(entry)),
   ] as const satisfies readonly DockItem[];
 

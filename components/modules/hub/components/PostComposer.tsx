@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   ImagePlus,
@@ -25,14 +25,14 @@ export interface PostComposerSubmitData {
   pollOptions: string[];
 }
 
-interface PostComposerProps {
-  onSubmit: (data: PostComposerSubmitData) => Promise<void>;
-}
-
 const MAX_MEDIA_FILES = 10;
 const MAX_POLL_OPTIONS = 6;
 
-export function PostComposer({ onSubmit }: Readonly<PostComposerProps>) {
+export function PostComposer({
+  onSubmit,
+}: Readonly<{
+  onSubmit: (data: PostComposerSubmitData) => void | Promise<void>;
+}>) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [pollOn, setPollOn] = useState(false);

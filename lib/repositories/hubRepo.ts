@@ -50,6 +50,11 @@ export const hubRepo = {
       body: JSON.stringify(payload),
     }),
 
+  deleteComment: (postId: string, commentId: string) =>
+    canhoesFetch<void>(`/hub/posts/${postId}/comments/${commentId}`, {
+      method: "DELETE",
+    }),
+
   toggleCommentReaction: (postId: string, commentId: string, emoji: string) =>
     canhoesFetch<{ emoji: string; active: boolean }>(`/hub/posts/${postId}/comments/${commentId}/reactions`, {
       method: "POST",
