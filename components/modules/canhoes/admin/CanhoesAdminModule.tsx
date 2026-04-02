@@ -1,3 +1,4 @@
+// [antes: 213 linhas → depois: 223 linhas]
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -10,6 +11,7 @@ import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { countVisibleModules } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { ApiError } from "@/lib/api/canhoesClient";
 import type { EventPhaseDto } from "@/lib/api/types";
 
 import {
@@ -101,7 +103,19 @@ export default function CanhoesAdminModule() {
     [activeEvent?.id, handleRefresh]
   );
 
-  const dashboardError = error instanceof Error ? error.message : null;
+  const dashboardError = useMemo(() => {
+    if (!error) return null;
+    if (error instanceof ApiError) {
+      console.error("[Admin] fetch error:", {
+        endpoint: "admin-bootstrap",
+        status: error.status,
+        details: error.details,
+      });
+      return `${error.status}: ${error.message}`;
+    }
+    if (error instanceof Error) return error.message;
+    return "Erro desconhecido";
+  }, [error]);
 
   const adminTabs = useMemo(
     () =>
@@ -120,15 +134,11 @@ export default function CanhoesAdminModule() {
           <AdminOverviewSection
             activeEventName={activeEvent?.name ?? null}
             allNominees={allNominees}
-            categories={categories}
             loading={loading}
-            members={eventMembers}
             pendingCategoryProposals={pendingCategoryProposals}
             pendingMeasureProposals={pendingMeasureProposals}
             pendingNominees={pendingNominees}
-            secretSantaState={secretSanta}
             state={eventState}
-            totalVotes={voteAuditRows.length}
           />
         );
       case "categories":

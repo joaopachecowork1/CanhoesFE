@@ -202,7 +202,7 @@ export function MediaCarousel({
               className="absolute bottom-3 right-3 z-10 h-8 rounded-full bg-stone-100 px-3 text-xs font-medium text-stone-900 shadow-md hover:bg-stone-200"
               onClick={() => setIsImageExpanded((currentValue) => !currentValue)}
             >
-              {isImageExpanded ? "Fechar imagem" : "Ver imagem completa"}
+              {isImageExpanded ? "Compactar" : "Ver imagem completa"}
             </Button>
           </div>
         </div>
