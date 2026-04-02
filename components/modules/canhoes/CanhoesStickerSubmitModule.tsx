@@ -76,7 +76,7 @@ export function CanhoesStickerSubmitModule() {
       const [nextState, nextCategories, nextNominees] = await Promise.all([
         canhoesRepo.getState(),
         canhoesRepo.getCategories(),
-        canhoesRepo.getNominees(),
+        canhoesRepo.getNominees(undefined, "stickers"),
       ]);
 
       setCanhoesState(nextState);
@@ -145,6 +145,7 @@ export function CanhoesStickerSubmitModule() {
     try {
       const createdNominee = await canhoesRepo.createNominee({
         categoryId: selectedCategoryId || null,
+        kind: "stickers",
         title: stickerTitle.trim(),
       });
 

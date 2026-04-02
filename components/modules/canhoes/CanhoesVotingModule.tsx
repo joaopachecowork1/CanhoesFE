@@ -1,144 +1,75 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Flame, Trophy } from "lucide-react";
 
-import { absMediaUrl } from "@/lib/media";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type {
-  AwardCategoryDto,
-  CanhoesStateDto,
-  NomineeDto,
-  PublicUserDto,
-  UserVoteDto,
-  VoteDto,
+  EventPhaseDto,
+  EventVotingBoardDto,
+  EventVotingCategoryDto,
 } from "@/lib/api/types";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
+import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeações";
-    case "voting":
-      return "Votação";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
+function formatPhaseLabel(phaseType?: EventPhaseDto["type"]) {
+  switch (phaseType) {
+    case "DRAW":
+      return "Sorteio";
+    case "PROPOSALS":
+      return "Propostas";
+    case "VOTING":
+      return "Votacao";
+    case "RESULTS":
+      return "Resultados";
     default:
       return "Desconhecida";
   }
 }
 
 export function CanhoesVotingModule() {
-  const { user } = useAuth();
-
-  const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
-  const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
-  const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
-  const [memberList, setMemberList] = useState<PublicUserDto[]>([]);
-  const [myNomineeVotes, setMyNomineeVotes] = useState<VoteDto[]>([]);
-  const [myMemberVotes, setMyMemberVotes] = useState<UserVoteDto[]>([]);
+  const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
+  const [votingBoard, setVotingBoard] = useState<EventVotingBoardDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingVoteKey, setSavingVoteKey] = useState<string | null>(null);
 
   const loadVotingData = useCallback(async () => {
+    if (!event) {
+      setVotingBoard(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const [nextState, nextCategories, nextNominees, nextVotes, nextMembers, nextMemberVotes] = await Promise.all([
-        canhoesRepo.getState(),
-        canhoesRepo.getCategories(),
-        canhoesRepo.getNominees(),
-        canhoesRepo.myVotes(),
-        canhoesRepo.getMembers(),
-        canhoesRepo.myUserVotes(),
-      ]);
-
-      setCanhoesState(nextState);
-      setCategoryList(nextCategories);
-      setNomineeList(nextNominees.filter((nominee) => nominee.status === "approved"));
-      setMyNomineeVotes(nextVotes);
-      setMemberList(nextMembers.filter((member) => member.id !== user?.id));
-      setMyMemberVotes(nextMemberVotes);
+      setVotingBoard(await canhoesEventsRepo.getVotingBoard(event.id));
     } catch (error) {
       console.error(error);
-      setCanhoesState(null);
-      setCategoryList([]);
-      setNomineeList([]);
-      setMyNomineeVotes([]);
-      setMemberList([]);
-      setMyMemberVotes([]);
+      setVotingBoard(null);
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [event]);
 
   useEffect(() => {
     void loadVotingData();
   }, [loadVotingData]);
 
-  const nomineesByCategory = useMemo(() => {
-    const nomineesMap = new Map<string, NomineeDto[]>();
+  const isVotingOpen = Boolean(votingBoard?.canVote);
 
-    for (const nominee of nomineeList) {
-      if (!nominee.categoryId) continue;
+  const handleVote = async (categoryId: string, optionId: string) => {
+    if (!event || !isVotingOpen) return;
 
-      const nomineesForCategory = nomineesMap.get(nominee.categoryId) ?? [];
-      nomineesForCategory.push(nominee);
-      nomineesMap.set(nominee.categoryId, nomineesForCategory);
-    }
-
-    return nomineesMap;
-  }, [nomineeList]);
-
-  const selectedNomineeByCategory = useMemo(() => {
-    const selectedVotes = new Map<string, string>();
-
-    for (const vote of myNomineeVotes) {
-      selectedVotes.set(vote.categoryId, vote.nomineeId);
-    }
-
-    return selectedVotes;
-  }, [myNomineeVotes]);
-
-  const selectedMemberByCategory = useMemo(() => {
-    const selectedVotes = new Map<string, string>();
-
-    for (const vote of myMemberVotes) {
-      selectedVotes.set(vote.categoryId, vote.targetUserId);
-    }
-
-    return selectedVotes;
-  }, [myMemberVotes]);
-
-  const isVotingPhase = canhoesState?.phase === "voting";
-
-  const handleNomineeVote = async (categoryId: string, nomineeId: string) => {
-    if (!isVotingPhase) return;
-
-    setSavingVoteKey(`${categoryId}:${nomineeId}`);
+    setSavingVoteKey(`${categoryId}:${optionId}`);
     try {
-      await canhoesRepo.castVote({ categoryId, nomineeId });
-      setMyNomineeVotes(await canhoesRepo.myVotes());
+      await canhoesEventsRepo.castVote(event.id, { categoryId, optionId });
+      await loadVotingData();
     } catch (error) {
       console.error(error);
-    } finally {
-      setSavingVoteKey(null);
-    }
-  };
-
-  const handleMemberVote = async (categoryId: string, targetUserId: string) => {
-    if (!isVotingPhase || targetUserId === user?.id) return;
-
-    setSavingVoteKey(`member:${categoryId}:${targetUserId}`);
-    try {
-      await canhoesRepo.castUserVote({ categoryId, targetUserId });
-      setMyMemberVotes(await canhoesRepo.myUserVotes());
     } finally {
       setSavingVoteKey(null);
     }
@@ -150,159 +81,103 @@ export function CanhoesVotingModule() {
         <div className="space-y-1">
           <h1 className="canhoes-section-title flex items-center gap-2">
             <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
-            Votação
+            Votacao
           </h1>
           <p className="body-small text-[var(--color-text-muted)]">
-            Escolhe um sticker ou um membro por categoria com controlos claros em mobile.
+            O boletim desta fase usa o mesmo overview do evento para decidir se a
+            votacao esta aberta e que categorias podes fechar.
           </p>
         </div>
 
-        {canhoesState ? <Badge variant="outline">Fase: {formatPhaseLabel(canhoesState.phase)}</Badge> : null}
+        {overview ? (
+          <Badge variant="outline">Fase: {formatPhaseLabel(overview.activePhase?.type)}</Badge>
+        ) : null}
       </div>
 
-      {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
+      {isLoading || isOverviewLoading ? (
+        <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+      ) : null}
 
-      {!isLoading ? (
+      {!isLoading && !isOverviewLoading && !votingBoard ? (
+        <p className="body-small text-[var(--color-text-muted)]">
+          Nao foi possivel carregar o boletim desta edicao.
+        </p>
+      ) : null}
+
+      {!isLoading && !isOverviewLoading && votingBoard ? (
         <div className="space-y-4">
-          {categoryList.map((category) => {
-            if (category.kind === "Sticker") {
-              const nomineesForCategory = nomineesByCategory.get(category.id) ?? [];
-              if (nomineesForCategory.length === 0) return null;
-
-              return (
-                <Card key={category.id}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <Cigarette className="h-4 w-4 text-[var(--color-fire)]" />
-                      {category.name}
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="space-y-3">
-                    {nomineesForCategory.map((nominee) => (
-                      <NomineeVoteOption
-                        key={nominee.id}
-                        isDisabled={!isVotingPhase || Boolean(savingVoteKey)}
-                        isSaving={savingVoteKey === `${category.id}:${nominee.id}`}
-                        isSelected={selectedNomineeByCategory.get(category.id) === nominee.id}
-                        nominee={nominee}
-                        onClick={() => void handleNomineeVote(category.id, nominee.id)}
-                      />
-                    ))}
-
-                    <p className="body-small text-[var(--color-text-muted)]">
-                      Podes alterar o voto até a fase de votação fechar.
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            return (
-              <Card key={category.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-[var(--color-fire)]" />
-                    {category.name}
-                  </CardTitle>
-                </CardHeader>
-
-                <CardContent className="space-y-3">
-                  {memberList.map((member) => (
-                    <MemberVoteOption
-                      key={member.id}
-                      isDisabled={!isVotingPhase || Boolean(savingVoteKey)}
-                      isSaving={savingVoteKey === `member:${category.id}:${member.id}`}
-                      isSelected={selectedMemberByCategory.get(category.id) === member.id}
-                      member={member}
-                      onClick={() => void handleMemberVote(category.id, member.id)}
-                    />
-                  ))}
-
-                  <p className="body-small text-[var(--color-text-muted)]">
-                    O voto é anónimo, mas os admins conseguem ver a auditoria.
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {votingBoard.categories.map((category) => (
+            <VotingCategoryCard
+              key={category.id}
+              category={category}
+              isSavingKey={savingVoteKey}
+              onVote={handleVote}
+              votingOpen={isVotingOpen}
+            />
+          ))}
         </div>
       ) : null}
     </div>
   );
 }
 
-function NomineeVoteOption({
-  isDisabled,
-  isSaving,
-  isSelected,
-  nominee,
-  onClick,
+function VotingCategoryCard({
+  category,
+  isSavingKey,
+  onVote,
+  votingOpen,
 }: Readonly<{
-  isDisabled: boolean;
-  isSaving: boolean;
-  isSelected: boolean;
-  nominee: NomineeDto;
-  onClick: () => void;
+  category: EventVotingCategoryDto;
+  isSavingKey: string | null;
+  onVote: (categoryId: string, optionId: string) => void;
+  votingOpen: boolean;
 }>) {
-  const actionLabel = isSaving ? "A guardar..." : isSelected ? "Selecionado" : "Votar";
+  const Icon = category.kind === "Sticker" ? Cigarette : Flame;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={isDisabled}
-      className={cn(
-        "canhoes-tap canhoes-list-item flex w-full items-center gap-3 p-3 text-left",
-        isSelected && "border-[var(--color-beige)]/35 bg-[rgba(107,124,69,0.16)]",
-        isDisabled && "cursor-not-allowed opacity-55"
-      )}
-    >
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
-        {nominee.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={absMediaUrl(nominee.imageUrl)}
-            alt={nominee.title}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-[var(--color-fire)]" />
+          {category.title}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {category.description ? (
+          <p className="body-small text-[var(--color-text-muted)]">{category.description}</p>
         ) : null}
-      </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-[var(--color-text-primary)]">{nominee.title}</p>
+        {category.options.map((option) => (
+          <VoteOption
+            key={option.id}
+            isDisabled={!votingOpen || Boolean(isSavingKey)}
+            isSaving={isSavingKey === `${category.id}:${option.id}`}
+            isSelected={category.myOptionId === option.id}
+            label={option.label}
+            onClick={() => onVote(category.id, option.id)}
+          />
+        ))}
+
         <p className="body-small text-[var(--color-text-muted)]">
-          {isSelected ? "Este é o teu voto actual." : "Toca para votar neste sticker."}
+          Podes alterar o voto enquanto a fase de votacao continuar aberta.
         </p>
-      </div>
-
-      <span
-        className={cn(
-          "rounded-full px-3 py-1 text-xs font-semibold",
-          isSelected
-            ? "bg-[var(--color-moss)] text-[var(--color-text-primary)]"
-            : "bg-white/10 text-[var(--color-beige)]"
-        )}
-      >
-        {actionLabel}
-      </span>
-    </button>
+      </CardContent>
+    </Card>
   );
 }
 
-function MemberVoteOption({
+function VoteOption({
   isDisabled,
   isSaving,
   isSelected,
-  member,
+  label,
   onClick,
 }: Readonly<{
   isDisabled: boolean;
   isSaving: boolean;
   isSelected: boolean;
-  member: PublicUserDto;
+  label: string;
   onClick: () => void;
 }>) {
   const actionLabel = isSaving ? "A guardar..." : isSelected ? "Selecionado" : "Votar";
@@ -319,15 +194,17 @@ function MemberVoteOption({
       )}
     >
       <div className="min-w-0">
-        <p className="truncate font-semibold text-[var(--color-text-primary)]">{member.displayName ?? member.email}</p>
-        <p className="body-small truncate text-[var(--color-text-muted)]">{member.email}</p>
+        <p className="truncate font-semibold text-[var(--color-text-primary)]">{label}</p>
+        <p className="body-small text-[var(--color-text-muted)]">
+          {isSelected ? "Este e o teu voto atual." : "Toca para votar nesta opcao."}
+        </p>
       </div>
 
       <span
         className={cn(
           "rounded-full px-3 py-1 text-xs font-semibold",
           isSelected
-            ? "bg-[var(--color-brown)] text-[var(--color-text-primary)]"
+            ? "bg-[var(--color-moss)] text-[var(--color-text-primary)]"
             : "bg-white/10 text-[var(--color-beige)]"
         )}
       >

@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/animations/NumberTicker";
 import { feedCopy } from "@/lib/canhoesCopy";
 
-import { HUB_EMOJIS } from "./ReactionRail";
-
+const HUB_EMOJIS = ["❤️", "🔥", "😂"] as const;
 const HUB_EMOJI_LABELS = ["❤️", "🔥", "😂"] as const;
 
 const reactionButtonGroupClassName =

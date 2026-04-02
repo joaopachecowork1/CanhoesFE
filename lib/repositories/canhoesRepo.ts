@@ -24,10 +24,15 @@ export const canhoesRepo = {
   // PUBLIC - Nominees
   // ==========================================
 
-  getNominees: (categoryId?: string) =>
-    canhoesFetch<T.NomineeDto[]>(
-      `/canhoes/nominees${categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : ""}`
-    ),
+  getNominees: (categoryId?: string, kind?: "nominees" | "stickers") => {
+    const query = new URLSearchParams();
+    if (categoryId) query.set("categoryId", categoryId);
+    if (kind) query.set("kind", kind);
+
+    return canhoesFetch<T.NomineeDto[]>(
+      `/canhoes/nominees${query.toString() ? `?${query.toString()}` : ""}`
+    );
+  },
 
   createNominee: (payload: T.CreateNomineeRequest) =>
     canhoesFetch<T.NomineeDto>("/canhoes/nominees", {

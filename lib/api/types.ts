@@ -96,6 +96,7 @@ export type NomineeDto = {
 export type CreateNomineeRequest = {
   categoryId?: string | null;
   title: string;
+  kind?: "nominees" | "stickers" | null;
 };
 
 export type CategoryProposalDto = {
@@ -576,13 +577,15 @@ export type EventProposalDto = {
   id: string;
   eventId: string;
   userId: string;
-  content: string;
+  name: string;
+  description?: string | null;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
 };
 
 export type CreateEventProposalRequest = {
-  content: string;
+  name: string;
+  description?: string | null;
 };
 
 export type UpdateEventProposalRequest = {

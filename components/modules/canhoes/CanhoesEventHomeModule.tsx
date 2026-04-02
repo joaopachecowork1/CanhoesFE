@@ -17,7 +17,6 @@ import type {
   EventFeedPostDto,
   EventOverviewDto,
   EventSecretSantaOverviewDto,
-  EventSummaryDto,
   EventVotingOverviewDto,
 } from "@/lib/api/types";
 import {
@@ -25,28 +24,32 @@ import {
   getPhaseLabel,
   getPhaseSummary,
   openComposeSheet,
-  pickActiveEvent,
 } from "@/lib/canhoesEvent";
 import { homeCopy as productHomeCopy } from "@/lib/canhoesCopy";
 import { absMediaUrl } from "@/lib/media";
 import { IS_LOCAL_MODE } from "@/lib/mock";
+import {
+  CANHOES_MEMBER_MODULE_MAP,
+  CANHOES_MEMBER_NAV_ORDER,
+  type CanhoesMemberModuleKey,
+} from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
+import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type HomeState =
+type HomeExtrasState =
+  | { status: "idle" }
   | { status: "loading" }
   | { status: "error" }
   | {
       status: "ready";
-      event: EventSummaryDto;
-      overview: EventOverviewDto;
+      recentPosts: EventFeedPostDto[];
       secretSanta: EventSecretSantaOverviewDto;
       voting: EventVotingOverviewDto;
-      recentPosts: EventFeedPostDto[];
     };
 
 type ActionLink = {
@@ -55,6 +58,66 @@ type ActionLink = {
   onClick?: () => void;
   tone?: "default" | "outline" | "secondary";
 };
+
+function pickFallbackAction(overview: EventOverviewDto): ActionLink {
+  for (const moduleKey of CANHOES_MEMBER_NAV_ORDER) {
+    if (!overview.modules[moduleKey]) continue;
+
+    return {
+      href: CANHOES_MEMBER_MODULE_MAP[moduleKey].href,
+      label: `Abrir ${CANHOES_MEMBER_MODULE_MAP[moduleKey].label}`,
+    };
+  }
+
+  return { href: "/canhoes", label: "Voltar ao evento" };
+}
+
+function buildModuleAction(
+  overview: EventOverviewDto,
+  moduleKey: CanhoesMemberModuleKey,
+  label: string,
+  tone?: ActionLink["tone"]
+): ActionLink {
+  if (overview.modules[moduleKey]) {
+    return {
+      href: CANHOES_MEMBER_MODULE_MAP[moduleKey].href,
+      label,
+      tone,
+    };
+  }
+
+  return {
+    ...pickFallbackAction(overview),
+    tone,
+  };
+}
+
+function buildSecretSantaFallbackState(
+  eventId: string,
+  myWishlistItemCount: number
+): EventSecretSantaOverviewDto {
+  return {
+    eventId,
+    hasDraw: false,
+    hasAssignment: false,
+    assignedUser: null,
+    assignedWishlistItemCount: 0,
+    drawEventCode: null,
+    myWishlistItemCount,
+  };
+}
+
+function buildVotingFallbackState(overview: EventOverviewDto): EventVotingOverviewDto {
+  return {
+    eventId: overview.event.id,
+    phaseId: overview.activePhase?.id ?? null,
+    canVote: false,
+    endsAt: overview.activePhase?.endDate ?? null,
+    categoryCount: overview.votingCategoryCount,
+    submittedVoteCount: overview.myVoteCount,
+    remainingVoteCount: 0,
+  };
+}
 
 function buildHomeActions({
   overview,
@@ -71,36 +134,46 @@ function buildHomeActions({
     switch (phaseType) {
       case "DRAW":
         if (secretSanta.hasAssignment) {
-          return { href: "/canhoes/amigo-secreto", label: "Ver amigo secreto" };
+          return buildModuleAction(overview, "secretSanta", "Ver amigo secreto");
         }
         if (overview.permissions.canManage && !secretSanta.hasDraw) {
-          return { href: "/canhoes/admin", label: "Abrir sorteio" };
+          return overview.modules.admin
+            ? { href: "/canhoes/admin", label: "Abrir sorteio" }
+            : pickFallbackAction(overview);
         }
-        return { href: "/canhoes/wishlist", label: "Abrir wishlists" };
+        return buildModuleAction(overview, "wishlist", "Abrir wishlists");
       case "PROPOSALS":
-        return {
-          href: "/canhoes/categorias",
-          label: overview.permissions.canSubmitProposal ? "Propor categoria" : "Ver categorias",
-        };
+        return buildModuleAction(
+          overview,
+          "categories",
+          overview.permissions.canSubmitProposal ? "Propor categoria" : "Ver categorias"
+        );
       case "VOTING":
-        return {
-          href: "/canhoes/votacao",
-          label: voting.remainingVoteCount > 0 ? "Votar agora" : "Rever votacao",
-        };
+        return buildModuleAction(
+          overview,
+          "voting",
+          voting.remainingVoteCount > 0 ? "Votar agora" : "Rever votacao"
+        );
       case "RESULTS":
-        return {
-          href: IS_LOCAL_MODE ? "/canhoes/categorias" : "/canhoes/gala",
-          label: IS_LOCAL_MODE ? "Ver ranking" : "Abrir gala",
-        };
+        if (IS_LOCAL_MODE) {
+          return buildModuleAction(overview, "categories", "Ver ranking");
+        }
+
+        return buildModuleAction(overview, "gala", "Abrir gala");
       default:
-        return { href: "/canhoes/categorias", label: "Entrar nas categorias" };
+        return buildModuleAction(overview, "categories", "Entrar nas categorias");
     }
   })();
 
   const secondaryAction: ActionLink =
     phaseType === "DRAW"
-      ? { href: "/canhoes/wishlist", label: "Abrir wishlist", tone: "outline" }
-      : { label: "Publicar no feed", onClick: openComposeSheet, tone: "outline" };
+      ? buildModuleAction(overview, "wishlist", "Abrir wishlist", "outline")
+      : overview.modules.feed
+        ? { label: "Publicar no feed", onClick: openComposeSheet, tone: "outline" }
+        : {
+            ...pickFallbackAction(overview),
+            tone: "outline",
+          };
 
   return { primaryAction, secondaryAction };
 }
@@ -115,88 +188,106 @@ function buildHomeAlerts({
   voting: EventVotingOverviewDto;
 }>) {
   return [
-    !secretSanta.hasDraw ? "O sorteio desta edicao ainda nao foi gerado." : null,
-    secretSanta.hasDraw && !secretSanta.hasAssignment
+    overview.modules.secretSanta && !secretSanta.hasDraw
+      ? "O sorteio desta edicao ainda nao foi gerado."
+      : null,
+    overview.modules.secretSanta && secretSanta.hasDraw && !secretSanta.hasAssignment
       ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
       : null,
     overview.permissions.canSubmitProposal && overview.myProposalCount === 0
       ? "Ainda nao submeteste nenhuma proposta nesta fase."
       : null,
-    voting.remainingVoteCount > 0
+    overview.modules.voting && voting.remainingVoteCount > 0
       ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
       : null,
-    secretSanta.myWishlistItemCount === 0
+    overview.modules.wishlist && secretSanta.myWishlistItemCount === 0
       ? "A tua wishlist ainda esta vazia. Deixa pistas antes de o sorteio fechar."
       : null,
   ].filter(Boolean) as string[];
 }
 
-async function loadHomeState(): Promise<HomeState> {
-  const events = await canhoesEventsRepo.listEvents();
-  const activeEvent = pickActiveEvent(events);
-
-  if (!activeEvent) {
-    return { status: "error" };
-  }
-
-  const [overview, secretSanta, voting, feedPosts] = await Promise.all([
-    canhoesEventsRepo.getEventOverview(activeEvent.id),
-    canhoesEventsRepo.getSecretSantaOverview(activeEvent.id),
-    canhoesEventsRepo.getVotingOverview(activeEvent.id),
-    canhoesEventsRepo.getFeedPosts(activeEvent.id),
-  ]);
-
-  return {
-    status: "ready",
-    event: activeEvent,
-    overview,
-    recentPosts: feedPosts.slice(0, 3),
-    secretSanta,
-    voting,
-  };
-}
-
 export function CanhoesEventHomeModule() {
-  const [homeState, setHomeState] = useState<HomeState>({ status: "loading" });
+  const { event, error, isLoading: isOverviewLoading, overview } = useEventOverview();
+  const [homeExtras, setHomeExtras] = useState<HomeExtrasState>({ status: "idle" });
 
   useEffect(() => {
+    if (!event || !overview) {
+      if (!isOverviewLoading) {
+        setHomeExtras({ status: "idle" });
+      }
+      return;
+    }
+
+    const activeEvent = event;
+    const activeOverview = overview;
     let isCancelled = false;
 
-    async function hydrateHome() {
+    async function loadHomeExtras() {
+      setHomeExtras({ status: "loading" });
+
       try {
-        // The home preloads the lightweight overview endpoints together so the
-        // first screen can answer "what should I do now?" without extra hops.
-        const nextHomeState = await loadHomeState();
-        if (!isCancelled) setHomeState(nextHomeState);
+        const [secretSanta, voting, recentPosts] = await Promise.all([
+          activeOverview.modules.secretSanta
+            ? canhoesEventsRepo.getSecretSantaOverview(activeEvent.id)
+            : Promise.resolve(
+                buildSecretSantaFallbackState(
+                  activeEvent.id,
+                  activeOverview.myWishlistItemCount
+                )
+              ),
+          activeOverview.modules.voting
+            ? canhoesEventsRepo.getVotingOverview(activeEvent.id)
+            : Promise.resolve(buildVotingFallbackState(activeOverview)),
+          activeOverview.modules.feed
+            ? canhoesEventsRepo.getFeedPosts(activeEvent.id)
+            : Promise.resolve([]),
+        ]);
+
+        if (!isCancelled) {
+          setHomeExtras({
+            status: "ready",
+            recentPosts: recentPosts.slice(0, 3),
+            secretSanta,
+            voting,
+          });
+        }
       } catch {
-        if (!isCancelled) setHomeState({ status: "error" });
+        if (!isCancelled) {
+          setHomeExtras({ status: "error" });
+        }
       }
     }
 
-    void hydrateHome();
+    void loadHomeExtras();
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [event, isOverviewLoading, overview]);
 
   const homeCopy = useMemo(() => {
-    if (homeState.status !== "ready") return null;
+    if (!overview || homeExtras.status !== "ready") return null;
 
-    const { overview, secretSanta, voting } = homeState;
     const { primaryAction, secondaryAction } = buildHomeActions({
       overview,
-      secretSanta,
-      voting,
+      secretSanta: homeExtras.secretSanta,
+      voting: homeExtras.voting,
     });
 
     return {
-      alerts: buildHomeAlerts({ overview, secretSanta, voting }),
+      alerts: buildHomeAlerts({
+        overview,
+        secretSanta: homeExtras.secretSanta,
+        voting: homeExtras.voting,
+      }),
       primaryAction,
       secondaryAction,
     };
-  }, [homeState]);
+  }, [homeExtras, overview]);
 
-  if (homeState.status === "loading") {
+  const isLoading =
+    isOverviewLoading || (Boolean(event && overview) && homeExtras.status === "loading");
+
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
@@ -213,7 +304,7 @@ export function CanhoesEventHomeModule() {
     );
   }
 
-  if (homeState.status === "error" || !homeCopy) {
+  if (error || !event || !overview || homeExtras.status !== "ready" || !homeCopy) {
     return (
       <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
         <CardContent className="space-y-3 py-8 text-center">
@@ -227,14 +318,19 @@ export function CanhoesEventHomeModule() {
     );
   }
 
-  const { event, overview, recentPosts, secretSanta, voting } = homeState;
+  const { recentPosts, secretSanta, voting } = homeExtras;
   const phaseLabel = getPhaseLabel(overview.activePhase?.type);
   const phaseSummary = getPhaseSummary(overview.activePhase?.type);
   const phaseDeadline = formatPhaseWindow(overview.activePhase);
+  const secretSantaAction = buildModuleAction(
+    overview,
+    "secretSanta",
+    "Abrir area do sorteio"
+  );
+  const wishlistAction = buildModuleAction(overview, "wishlist", "Gerir wishlist", "secondary");
 
   return (
     <div className="space-y-4">
-      {/* Hero panel: keeps the dark/neon aesthetic for event branding at the top */}
       <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <div className="space-y-4 px-4 py-5 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
@@ -336,102 +432,108 @@ export function CanhoesEventHomeModule() {
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        {/* Feed da edicao – paper surface for readable post previews */}
-        <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-              <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
-              Feed da edicao
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentPosts.length === 0 ? (
-              <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[rgba(255,255,255,0.35)] px-3 py-4 text-sm text-[var(--bark)]">
-                {productHomeCopy.emptyFeed}
-              </div>
-            ) : (
-              recentPosts.map((post) => (
-                <div key={post.id} className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                      {post.userName}
-                    </p>
-                    <span className="text-xs text-[var(--bark)]/72">
-                      {new Date(post.createdAt).toLocaleDateString("pt-PT")}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-6 text-[var(--text-ink)]">{post.content}</p>
-                  {(post.mediaUrls?.[0] || post.imageUrl) ? (
-                    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
-                        alt={`Media do post de ${post.userName}`}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-44 w-full object-cover"
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              ))
-            )}
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={openComposeSheet}>
-                Publicar no feed
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          {/* Amigo Secreto – paper surface */}
+        {overview.modules.feed ? (
           <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-                <Gift className="h-4 w-4 text-[var(--moss)]" />
-                {productHomeCopy.secretSantaTitle}
+                <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
+                Feed da edicao
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {secretSanta.hasAssignment && secretSanta.assignedUser ? (
-                <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
-                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                    Pessoa atribuida
-                  </p>
-                  <p className="text-base font-semibold text-[var(--text-ink)]">
-                    {secretSanta.assignedUser.name}
-                  </p>
-                  <p className="text-sm text-[var(--bark)]">
-                    {secretSanta.assignedWishlistItemCount} itens na wishlist.
-                  </p>
+              {recentPosts.length === 0 ? (
+                <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[rgba(255,255,255,0.35)] px-3 py-4 text-sm text-[var(--bark)]">
+                  {productHomeCopy.emptyFeed}
                 </div>
               ) : (
-                <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
-                  <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                    Estado
-                  </p>
-                  <p className="text-sm text-[var(--text-ink)]">
-                    {secretSanta.hasDraw
-                      ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
-                      : "O sorteio desta edicao ainda nao foi gerado."}
-                  </p>
-                </div>
+                recentPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
+                        {post.userName}
+                      </p>
+                      <span className="text-xs text-[var(--bark)]/72">
+                        {new Date(post.createdAt).toLocaleDateString("pt-PT")}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-6 text-[var(--text-ink)]">{post.content}</p>
+                    {post.mediaUrls?.[0] || post.imageUrl ? (
+                      <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
+                          alt={`Media do post de ${post.userName}`}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-44 w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ))
               )}
-
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Button variant="outline" asChild>
-                  <Link href="/canhoes/amigo-secreto">Abrir area do sorteio</Link>
-                </Button>
-                <Button variant="secondary" asChild>
-                  <Link href="/canhoes/wishlist">Gerir wishlist</Link>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={openComposeSheet}>
+                  Publicar no feed
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
+        ) : null}
 
-          {/* Checklist do membro – paper surface */}
+        <div className="space-y-4">
+          {overview.modules.secretSanta ? (
+            <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+                  <Gift className="h-4 w-4 text-[var(--moss)]" />
+                  {productHomeCopy.secretSantaTitle}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {secretSanta.hasAssignment && secretSanta.assignedUser ? (
+                  <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
+                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
+                      Pessoa atribuida
+                    </p>
+                    <p className="text-base font-semibold text-[var(--text-ink)]">
+                      {secretSanta.assignedUser.name}
+                    </p>
+                    <p className="text-sm text-[var(--bark)]">
+                      {secretSanta.assignedWishlistItemCount} itens na wishlist.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
+                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
+                      Estado
+                    </p>
+                    <p className="text-sm text-[var(--text-ink)]">
+                      {secretSanta.hasDraw
+                        ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
+                        : "O sorteio desta edicao ainda nao foi gerado."}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button variant="outline" asChild>
+                    <Link href={secretSantaAction.href ?? "/canhoes"}>
+                      {secretSantaAction.label}
+                    </Link>
+                  </Button>
+                  <Button variant="secondary" asChild>
+                    <Link href={wishlistAction.href ?? "/canhoes"}>{wishlistAction.label}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
@@ -441,8 +543,13 @@ export function CanhoesEventHomeModule() {
             </CardHeader>
             <CardContent className="space-y-3">
               <ChecklistItem
-                done={secretSanta.myWishlistItemCount > 0}
-                label="Tens wishlist preenchida"
+                done={!overview.modules.wishlist || secretSanta.myWishlistItemCount > 0}
+                label="Estado da tua wishlist"
+                hint={
+                  overview.modules.wishlist
+                    ? `${secretSanta.myWishlistItemCount} itens visiveis`
+                    : "Wishlist indisponivel nesta fase"
+                }
               />
               <ChecklistItem
                 done={overview.myProposalCount > 0 || !overview.permissions.canSubmitProposal}
@@ -454,10 +561,10 @@ export function CanhoesEventHomeModule() {
                 }
               />
               <ChecklistItem
-                done={voting.remainingVoteCount === 0}
+                done={!overview.modules.voting || voting.remainingVoteCount === 0}
                 label="Votacao deste ciclo"
                 hint={
-                  voting.categoryCount > 0
+                  overview.modules.voting && voting.categoryCount > 0
                     ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias`
                     : "Sem votacoes abertas"
                 }

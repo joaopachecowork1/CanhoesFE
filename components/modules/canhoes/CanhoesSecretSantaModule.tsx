@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Gift, ImageOff, Link as LinkIcon, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/useAuth";
-import { pickActiveEvent } from "@/lib/canhoesEvent";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { absMediaUrl } from "@/lib/media";
 import type {
   EventSecretSantaOverviewDto,
-  EventSummaryDto,
   EventWishlistItemDto,
 } from "@/lib/api/types";
+import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,75 +21,85 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 type SecretSantaState =
+  | { status: "idle" }
   | { status: "loading" }
   | { status: "error" }
   | {
       status: "ready";
-      event: EventSummaryDto;
       overview: EventSecretSantaOverviewDto;
       wishlistItems: EventWishlistItemDto[];
     };
 
-function buildDefaultEventCode(event?: EventSummaryDto | null) {
-  if (event?.id) return event.id;
+function buildDefaultEventCode(eventId?: string | null) {
+  if (eventId) return eventId;
   return `canhoes${new Date().getFullYear()}`;
-}
-
-async function loadSecretSantaState(): Promise<SecretSantaState> {
-  const events = await canhoesEventsRepo.listEvents();
-  const activeEvent = pickActiveEvent(events);
-
-  if (!activeEvent) {
-    return { status: "error" };
-  }
-
-  const [overview, wishlistItems] = await Promise.all([
-    canhoesEventsRepo.getSecretSantaOverview(activeEvent.id),
-    canhoesEventsRepo.getWishlist(activeEvent.id),
-  ]);
-
-  return {
-    status: "ready",
-    event: activeEvent,
-    overview,
-    wishlistItems,
-  };
 }
 
 export function CanhoesSecretSantaModule() {
   const { user } = useAuth();
-  const isAdmin = Boolean(user?.isAdmin);
+  const eventOverview = useEventOverview();
+  const {
+    event,
+    overview,
+    refresh: refreshOverview,
+    isLoading: isOverviewLoading,
+  } = eventOverview;
+  const isAdmin =
+    Boolean(user?.isAdmin) || Boolean(eventOverview.overview?.permissions.isAdmin);
 
-  const [screenState, setScreenState] = useState<SecretSantaState>({ status: "loading" });
+  const [screenState, setScreenState] = useState<SecretSantaState>({ status: "idle" });
   const [isDrawing, setIsDrawing] = useState(false);
-  const [drawEventCode, setDrawEventCode] = useState<string>(buildDefaultEventCode(null));
-
-  const refresh = useCallback(async () => {
-    setScreenState({ status: "loading" });
-
-    try {
-      const nextState = await loadSecretSantaState();
-      setScreenState(nextState);
-
-      if (nextState.status === "ready") {
-        setDrawEventCode(nextState.overview.drawEventCode || buildDefaultEventCode(nextState.event));
-      }
-    } catch {
-      setScreenState({ status: "error" });
-    }
-  }, []);
+  const [drawEventCode, setDrawEventCode] = useState(buildDefaultEventCode(null));
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (!event) {
+      if (!isOverviewLoading) {
+        setScreenState({ status: "idle" });
+        setDrawEventCode(buildDefaultEventCode(null));
+      }
+      return;
+    }
+
+    const activeEvent = event;
+    let isCancelled = false;
+
+    async function loadSecretSantaState() {
+      setScreenState({ status: "loading" });
+
+      try {
+        const [nextOverview, wishlistItems] = await Promise.all([
+          canhoesEventsRepo.getSecretSantaOverview(activeEvent.id),
+          canhoesEventsRepo.getWishlist(activeEvent.id),
+        ]);
+
+        if (!isCancelled) {
+          setScreenState({
+            status: "ready",
+            overview: nextOverview,
+            wishlistItems,
+          });
+          setDrawEventCode(
+            nextOverview.drawEventCode || buildDefaultEventCode(activeEvent.id)
+          );
+        }
+      } catch {
+        if (!isCancelled) {
+          setScreenState({ status: "error" });
+        }
+      }
+    }
+
+    void loadSecretSantaState();
+    return () => {
+      isCancelled = true;
+    };
+  }, [event, isOverviewLoading]);
 
   const assignedWishlistItems = useMemo(() => {
     if (screenState.status !== "ready" || !screenState.overview.assignedUser) {
       return [];
     }
 
-    // The user only ever sees wishlist items from their assigned friend inside
-    // the active event context, never the full member wishlist catalogue.
     return screenState.wishlistItems.filter(
       (wishlistItem) => wishlistItem.userId === screenState.overview.assignedUser?.id
     );
@@ -100,23 +110,38 @@ export function CanhoesSecretSantaModule() {
     return screenState.wishlistItems.filter((wishlistItem) => wishlistItem.userId === user.id);
   }, [screenState, user?.id]);
 
+  const wishlistHref = overview?.modules.wishlist
+    ? CANHOES_MEMBER_MODULE_MAP.wishlist.href
+    : "/canhoes";
+  const wishlistLabel = overview?.modules.wishlist
+    ? "Abrir wishlist"
+    : "Voltar ao evento";
+
   const handleDraw = async () => {
-    if (screenState.status !== "ready") return;
+    if (!event || screenState.status !== "ready") return;
 
     setIsDrawing(true);
+    setScreenState({ status: "loading" });
     try {
-      await canhoesEventsRepo.adminDrawSecretSanta(screenState.event.id, {
+      await canhoesEventsRepo.adminDrawSecretSanta(event.id, {
         eventCode: drawEventCode.trim() || null,
       });
-      await refresh();
+      await refreshOverview();
       toast.success("Sorteio atualizado");
     } catch (error) {
       console.error("Secret santa draw error:", error);
+      setScreenState({ status: "error" });
       toast.error("Nao foi possivel gerar o sorteio");
     } finally {
       setIsDrawing(false);
     }
   };
+
+  const isBusy = isOverviewLoading || screenState.status === "loading";
+  const badgeLabel =
+    screenState.status === "ready"
+      ? screenState.overview.drawEventCode || buildDefaultEventCode(event?.id)
+      : buildDefaultEventCode(event?.id);
 
   return (
     <div className="space-y-4">
@@ -131,11 +156,7 @@ export function CanhoesSecretSantaModule() {
           </p>
         </div>
 
-        <Badge variant="outline">
-          {screenState.status === "ready"
-            ? screenState.overview.drawEventCode || buildDefaultEventCode(screenState.event)
-            : buildDefaultEventCode(null)}
-        </Badge>
+        <Badge variant="outline">{badgeLabel}</Badge>
       </div>
 
       {isAdmin ? (
@@ -147,7 +168,7 @@ export function CanhoesSecretSantaModule() {
           <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Input
               value={drawEventCode}
-              onChange={(event) => setDrawEventCode(event.target.value)}
+              onChange={(nextEvent) => setDrawEventCode(nextEvent.target.value)}
               placeholder="codigo do sorteio"
               className="sm:max-w-xs"
               disabled={screenState.status !== "ready"}
@@ -178,11 +199,13 @@ export function CanhoesSecretSantaModule() {
           </CardHeader>
 
           <CardContent className="space-y-3">
-            {screenState.status === "loading" ? (
+            {isBusy ? (
               <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
             ) : null}
 
-            {screenState.status === "ready" && screenState.overview.hasAssignment && screenState.overview.assignedUser ? (
+            {screenState.status === "ready" &&
+            screenState.overview.hasAssignment &&
+            screenState.overview.assignedUser ? (
               <div className="canhoes-list-item space-y-3 p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--color-text-primary)]">
@@ -203,10 +226,10 @@ export function CanhoesSecretSantaModule() {
 
                 <div className="flex flex-wrap gap-2">
                   <Button variant="secondary" asChild>
-                    <Link href="/canhoes/wishlist">Abrir wishlist</Link>
+                    <Link href={wishlistHref}>{wishlistLabel}</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/canhoes/wishlist">Gerir a tua wishlist</Link>
+                    <Link href={wishlistHref}>{wishlistLabel}</Link>
                   </Button>
                 </div>
               </div>
@@ -220,7 +243,9 @@ export function CanhoesSecretSantaModule() {
               </div>
             ) : null}
 
-            {screenState.status === "ready" && screenState.overview.hasDraw && !screenState.overview.hasAssignment ? (
+            {screenState.status === "ready" &&
+            screenState.overview.hasDraw &&
+            !screenState.overview.hasAssignment ? (
               <div className="canhoes-list-item p-4">
                 <p className="body-small text-[var(--color-text-muted)]">
                   O sorteio existe, mas ainda nao ha atribuicao disponivel para o teu perfil.
@@ -260,13 +285,15 @@ export function CanhoesSecretSantaModule() {
             </div>
 
             <Button className="w-full" asChild>
-              <Link href="/canhoes/wishlist">Atualizar wishlist</Link>
+              <Link href={wishlistHref}>{wishlistLabel}</Link>
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {screenState.status === "ready" && screenState.overview.hasAssignment && screenState.overview.assignedUser ? (
+      {screenState.status === "ready" &&
+      screenState.overview.hasAssignment &&
+      screenState.overview.assignedUser ? (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
