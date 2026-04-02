@@ -1,7 +1,12 @@
 "use client";
 
 import { CanhoesCategoriesModule } from "@/components/modules/canhoes/CanhoesCategoriesModule";
+import { ModuleAccessGuard } from "@/components/modules/canhoes/ModuleAccessGuard";
 
 export default function CategoriasPage() {
-  return <CanhoesCategoriesModule />;
+  return (
+    <ModuleAccessGuard moduleKey="categories">
+      <CanhoesCategoriesModule />
+    </ModuleAccessGuard>
+  );
 }

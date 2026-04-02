@@ -1,6 +1,9 @@
+"use client";
+
 import { redirect } from "next/navigation";
 
 import { CanhoesGalaModule } from "@/components/modules/canhoes/CanhoesGalaModule";
+import { ModuleAccessGuard } from "@/components/modules/canhoes/ModuleAccessGuard";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 
 export default function GalaPage() {
@@ -8,5 +11,9 @@ export default function GalaPage() {
     redirect("/canhoes");
   }
 
-  return <CanhoesGalaModule />;
+  return (
+    <ModuleAccessGuard moduleKey="gala">
+      <CanhoesGalaModule />
+    </ModuleAccessGuard>
+  );
 }
