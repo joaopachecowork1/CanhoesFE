@@ -60,7 +60,7 @@ export function MediaCarousel({
 }: Readonly<{
   urls: string[];
   className?: string;
-  aspect?: "square" | "portrait";
+  aspect?: "square" | "portrait" | "video";
 }>) {
   const media = useMemo(() => (urls ?? []).filter(Boolean), [urls]);
   const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
@@ -75,7 +75,8 @@ export function MediaCarousel({
 
   if (media.length === 0) return null;
 
-  const aspectClassName = aspect === "portrait" ? "aspect-[4/5]" : "aspect-square";
+  const aspectClassName =
+    aspect === "portrait" ? "aspect-[4/5]" : aspect === "video" ? "aspect-video" : "aspect-square";
   const markAsFailed = (url: string) => {
     setFailedMedia((previousState) =>
       previousState[url] ? previousState : { ...previousState, [url]: true }
