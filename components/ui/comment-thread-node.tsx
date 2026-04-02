@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Reply } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ReactionBar } from "@/components/ui/reaction-bar";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -140,31 +141,16 @@ export function CommentNode({
             </p>
 
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
-              {THREAD_EMOJIS.map((emoji) => {
-                const isActive = myReactions.includes(emoji);
-                const count = reactionCounts[emoji] ?? 0;
-
-                return (
-                  <Button
-                    key={`${commentId}-${emoji}`}
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "h-6 rounded-full border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.05)] px-2 text-[11px] text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.1)]",
-                      isActive && "border-[rgba(122,173,58,0.4)] bg-[rgba(122,173,58,0.12)]"
-                    )}
-                    onClick={() =>
-                      comment.persisted === false
-                        ? onToggleLocalReaction(commentId, emoji)
-                        : onToggleReaction?.(commentId, emoji)
-                    }
-                  >
-                    <span>{emoji}</span>
-                    <span className="tabular-nums">{count}</span>
-                  </Button>
-                );
-              })}
+              <ReactionBar
+                emojis={THREAD_EMOJIS}
+                reactionCounts={reactionCounts}
+                myReactions={myReactions}
+                onToggle={(emoji) =>
+                  comment.persisted === false
+                    ? onToggleLocalReaction(commentId, emoji)
+                    : onToggleReaction?.(commentId, emoji)
+                }
+              />
 
               <Button
                 type="button"
