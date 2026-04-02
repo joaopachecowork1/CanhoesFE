@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import { BlurFade } from "@/components/animations/BlurFade";
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 
@@ -18,14 +16,14 @@ interface HubPostCardProps {
   openComments: boolean;
   commentDraft: string;
   comments?: HubCommentDto[];
+  currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
   onToggleReaction: (postId: string, emoji: string) => void;
   onToggleComments: (postId: string) => void;
   onVotePoll: (postId: string, optionId: string) => void;
   onAddComment: (postId: string) => void;
-  showCommentComposer: boolean;
-  onOpenCommentComposer: (postId: string) => void;
+  onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
   onToggleCommentReaction: (
     postId: string,
@@ -43,14 +41,14 @@ export function HubPostCard({
   openComments,
   commentDraft,
   comments = [],
+  currentUserId,
   currentUserName,
   currentUserImage,
   onToggleReaction,
   onToggleComments,
   onVotePoll,
   onAddComment,
-  showCommentComposer,
-  onOpenCommentComposer,
+  onDeleteComment,
   onCommentDraftChange,
   onToggleCommentReaction,
   onAdminPin,
@@ -64,13 +62,7 @@ export function HubPostCard({
     )
   );
   const reactionCounts = post.reactionCounts || {};
-  const reactionCountTotal =
-    Object.keys(reactionCounts).length > 0
-      ? Object.values(reactionCounts).reduce(
-          (total, currentValue) => total + currentValue,
-          0
-        )
-      : (post.likeCount ?? 0);
+
   return (
     <BlurFade delay={index * 50}>
       <article className="canhoes-feed-card overflow-hidden rounded-[var(--radius-lg-token)]">
@@ -110,7 +102,6 @@ export function HubPostCard({
             <HubPostActions
               postId={post.id}
               commentCount={post.commentCount ?? 0}
-              reactionCountTotal={reactionCountTotal}
               reactionCounts={reactionCounts}
               myReactions={post.myReactions ?? []}
               likeCount={post.likeCount ?? 0}
@@ -118,7 +109,6 @@ export function HubPostCard({
               commentsExpanded={openComments}
               onToggleReaction={onToggleReaction}
               onToggleComments={onToggleComments}
-              onOpenCommentComposer={() => onOpenCommentComposer(post.id)}
             />
           </div>
 
@@ -131,11 +121,12 @@ export function HubPostCard({
                 commentCount={post.commentCount ?? 0}
                 openComments={openComments}
                 commentDraft={commentDraft}
-                showComposer={showCommentComposer}
+                currentUserId={currentUserId}
                 currentUserName={currentUserName}
                 currentUserImage={currentUserImage}
                 onToggleComments={onToggleComments}
                 onAddComment={onAddComment}
+                onDeleteComment={onDeleteComment}
                 onCommentDraftChange={onCommentDraftChange}
                 onToggleCommentReaction={onToggleCommentReaction}
               />

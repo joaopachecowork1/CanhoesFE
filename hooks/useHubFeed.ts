@@ -113,9 +113,6 @@ export function useHubFeed() {
   const [posts, setPosts] = useState<HubPostDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
-  const [openCommentComposer, setOpenCommentComposer] = useState<
-    Record<string, boolean>
-  >({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
@@ -286,10 +283,6 @@ export function useHubFeed() {
 
         setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: "" }));
         setOpenComments((currentState) => ({ ...currentState, [postId]: true }));
-        setOpenCommentComposer((currentState) => ({
-          ...currentState,
-          [postId]: true,
-        }));
         setComments((currentComments) => ({
           ...currentComments,
           [postId]: [
@@ -337,6 +330,46 @@ export function useHubFeed() {
     []
   );
 
+  const deleteComment = useCallback(
+    async (postId: string, commentId: string) => {
+      const previousComments = comments[postId] ?? [];
+      const nextComments = previousComments.filter(
+        (comment) => comment.id !== commentId
+      );
+
+      if (nextComments.length === previousComments.length) return;
+
+      setComments((currentComments) => ({
+        ...currentComments,
+        [postId]: nextComments,
+      }));
+      setPosts((currentPosts) =>
+        updatePostById(currentPosts, postId, (post) => ({
+          ...post,
+          commentCount: Math.max(0, (post.commentCount ?? 0) - 1),
+        }))
+      );
+
+      try {
+        await hubRepo.deleteComment(postId, commentId);
+        toast.success("Comentario removido");
+      } catch {
+        setComments((currentComments) => ({
+          ...currentComments,
+          [postId]: previousComments,
+        }));
+        setPosts((currentPosts) =>
+          updatePostById(currentPosts, postId, (post) => ({
+            ...post,
+            commentCount: (post.commentCount ?? 0) + 1,
+          }))
+        );
+        toast.error("Erro ao remover comentario");
+      }
+    },
+    [comments]
+  );
+
   const adminPin = useCallback(async (postId: string) => {
     try {
       const result = await hubRepo.adminTogglePin(postId);
@@ -369,16 +402,11 @@ export function useHubFeed() {
     setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: text }));
   }, []);
 
-  const openCommentInput = useCallback((postId: string) => {
-    setOpenCommentComposer((currentState) => ({ ...currentState, [postId]: true }));
-  }, []);
-
   return {
     posts: safePosts,
     loading,
     comments,
     openComments,
-    openCommentComposer,
     commentDrafts,
     showParticles,
     setShowParticles,
@@ -387,10 +415,10 @@ export function useHubFeed() {
     votePoll,
     toggleComments,
     addComment,
+    deleteComment,
     toggleCommentReaction,
     adminPin,
     adminDelete,
     setCommentDraft,
-    openCommentInput,
   };
 }

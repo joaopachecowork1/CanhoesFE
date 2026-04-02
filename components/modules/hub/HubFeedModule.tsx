@@ -15,6 +15,7 @@ import {
     EmptyHeader,
 } from "@/components/ui/empty";
 import { useHubFeed } from "@/hooks/useHubFeed";
+import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 
@@ -33,6 +34,7 @@ export function HubFeedModule({
     showComposer?: boolean;
 }>) {
     const { data: session, status } = useSession();
+    const { user } = useAuth();
     const isAdmin = useIsAdmin();
 
     const {
@@ -41,15 +43,14 @@ export function HubFeedModule({
         comments,
         openComments,
         commentDrafts,
-        openCommentComposer,
         showParticles,
         setShowParticles,
         toggleReaction,
         votePoll,
         toggleComments,
         addComment,
+        deleteComment,
         setCommentDraft,
-        openCommentInput,
         toggleCommentReaction,
         adminPin,
         adminDelete,
@@ -58,6 +59,7 @@ export function HubFeedModule({
         session?.user?.name?.trim() ||
         session?.user?.email?.trim() ||
         "Tu";
+    const currentUserId = user?.id ?? null;
     const currentUserImage = session?.user?.image ?? null;
 
     useEffect(() => {
@@ -120,15 +122,15 @@ export function HubFeedModule({
                                 openComments={openComments[post.id] ?? false}
                                 commentDraft={commentDrafts[post.id] ?? ""}
                                 comments={comments[post.id] ?? []}
+                                currentUserId={currentUserId}
                                 currentUserName={currentUserName}
                                 currentUserImage={currentUserImage}
                                 onToggleReaction={toggleReaction}
                                 onToggleComments={toggleComments}
                                 onVotePoll={votePoll}
                                 onAddComment={addComment}
+                                onDeleteComment={deleteComment}
                                 onCommentDraftChange={setCommentDraft}
-                                showCommentComposer={openCommentComposer[post.id] ?? false}
-                                onOpenCommentComposer={openCommentInput}
                                 onToggleCommentReaction={toggleCommentReaction}
                                 onAdminPin={adminPin}
                                 onAdminDelete={adminDelete}

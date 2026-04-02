@@ -1,7 +1,5 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/animations/NumberTicker";
@@ -16,7 +14,6 @@ const reactionButtonGroupClassName =
 type HubPostActionsProps = {
   postId: string;
   commentCount: number;
-  reactionCountTotal: number;
   reactionCounts: Record<string, number>;
   myReactions: string[];
   likeCount: number;
@@ -24,7 +21,6 @@ type HubPostActionsProps = {
   commentsExpanded: boolean;
   onToggleReaction: (postId: string, emoji: string) => void;
   onToggleComments: (postId: string) => void;
-  onOpenCommentComposer: () => void;
 };
 
 export function HubPostActions({
@@ -37,7 +33,6 @@ export function HubPostActions({
   commentsExpanded,
   onToggleReaction,
   onToggleComments,
-  onOpenCommentComposer,
 }: Readonly<HubPostActionsProps>) {
   return (
     <div className={reactionButtonGroupClassName}>
@@ -67,14 +62,14 @@ export function HubPostActions({
         type="button"
         variant={commentsExpanded ? "secondary" : "outline"}
         size="sm"
-        className="rounded-full px-2.5"
-        onClick={() => {
-          onOpenCommentComposer();
-          if (!commentsExpanded) onToggleComments(postId);
-        }}
+        className="rounded-full px-3 text-stone-100 hover:text-white"
+        onClick={() => onToggleComments(postId)}
       >
-        <MessageSquare className="h-3.5 w-3.5" />
-        <span className="text-xs">{commentCount}</span>
+        <span className="text-xs font-medium">
+          {commentsExpanded
+            ? "✕ Fechar comentarios"
+            : `💬 Ver comentarios (${commentCount})`}
+        </span>
       </Button>
 
       {isPinned ? <Badge variant="secondary">{feedCopy.post.pinned}</Badge> : null}
