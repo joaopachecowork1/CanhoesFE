@@ -115,7 +115,7 @@ export function CommentThread({
   };
 
   return (
-    <section className="space-y-3 rounded-[28px] border border-[rgba(20,26,18,0.1)] bg-[rgba(255,255,255,0.56)] p-3 backdrop-blur-[10px]">
+    <section className="space-y-3 rounded-[20px] border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.04)] p-3 backdrop-blur-[6px]">
       <div className="space-y-2">
         {totalComments === 0 ? (
           <p className="px-1 text-xs text-[var(--text-muted)]">{emptyStateLabel}</p>
@@ -151,7 +151,7 @@ export function CommentThread({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 rounded-full px-2 text-xs font-medium text-[var(--text-muted)] hover:bg-white/70"
+            className="h-8 rounded-full px-2 text-xs font-medium text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)]"
             onClick={onToggleExpanded}
           >
             {expanded ? (
@@ -167,13 +167,13 @@ export function CommentThread({
       </div>
 
       {showComposer ? (
-        <div className="rounded-2xl border border-[rgba(20,26,18,0.1)] bg-white/72 p-2.5">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.04)] p-2.5">
           <div className="flex items-start gap-2.5">
-            <Avatar className="mt-0.5 h-7 w-7 border border-[rgba(20,26,18,0.1)] bg-white/70">
+            <Avatar className="mt-0.5 h-7 w-7 border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)]">
               {currentUserImage ? (
                 <AvatarImage src={currentUserImage} alt={currentUserName} />
               ) : null}
-              <AvatarFallback className="bg-white/80 text-[10px] font-semibold text-[var(--text-dark)]">
+              <AvatarFallback className="bg-[rgba(255,255,255,0.08)] text-[10px] font-semibold text-[var(--text-primary)]">
                 {getInitials(currentUserName)}
               </AvatarFallback>
             </Avatar>
@@ -183,7 +183,7 @@ export function CommentThread({
                 value={draft}
                 onChange={(event) => onDraftChange(event.target.value)}
                 placeholder={composerPlaceholder}
-                className="min-h-[76px] resize-none border-[rgba(20,26,18,0.1)] bg-white text-sm"
+                className="min-h-[76px] resize-none border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
               />
 
               <div className="flex justify-end gap-2">

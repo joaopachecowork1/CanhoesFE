@@ -40,29 +40,28 @@ export function PostHeader({
   const accent = accentForName(authorName);
 
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-3">
+    <div className="flex items-start justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <div
           aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-bold"
           style={{
-            background: `linear-gradient(180deg, ${accent}18, rgba(255,255,255,0.72))`,
-            borderColor: `${accent}55`,
+            background: `linear-gradient(180deg, ${accent}28, rgba(255,255,255,0.08))`,
+            borderColor: `${accent}44`,
             color: accent,
           }}
         >
           {initials(authorName)}
         </div>
 
-        <div className="min-w-0 space-y-1">
+        <div className="min-w-0 space-y-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            {/* text-ink = dark brown, readable on the paper-surface post card */}
-            <p className="truncate text-sm font-semibold text-[var(--text-ink)]">
+            <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
               {authorName}
             </p>
             {isPinned ? <Badge variant="secondary">Fixado</Badge> : null}
           </div>
-          <p className="text-xs text-[var(--bark)]">
+          <p className="text-xs text-[var(--text-muted)]">
             {formatDateTime(createdAtUtc)}
           </p>
         </div>
@@ -73,20 +72,20 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 w-9 rounded-full p-0 text-[var(--color-brown)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             onClick={onAdminPin}
             title="Fixar ou desafixar"
           >
-            <Pin className="h-4 w-4" />
+            <Pin className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 w-9 rounded-full p-0 text-[var(--color-danger)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--color-danger)]"
             onClick={onAdminDelete}
             title="Eliminar"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ) : null}
