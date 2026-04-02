@@ -3,9 +3,10 @@
 import type { HubCommentDto } from "@/lib/api/types";
 import { feedCopy } from "@/lib/canhoesCopy";
 
-import { CommentThread, type CommentType } from "@/components/ui/reddit-nested-thread-reply";
 
 import { formatDateTime } from "./hubUtils";
+import { CommentThread } from "@/components/ui/reddit-nested-thread-reply";
+import { CommentType } from "@/components/ui/comment-thread-node";
 
 type HubPostCommentsProps = {
   postId: string;
