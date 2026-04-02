@@ -1,3 +1,4 @@
+// [antes: 130 linhas → depois: 148 linhas]
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -31,6 +32,10 @@ export function useModuleVisibility({
   state,
 }: Readonly<UseModuleVisibilityOptions>) {
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  // Optimistic overrides: key → checked value, cleared after server confirms
+  const [optimisticOverrides, setOptimisticOverrides] = useState<
+    Partial<EventAdminModuleVisibilityDto>
+  >({});
 
   const visibleCount = useMemo(
     () => countVisibleModules(state?.effectiveModules),
@@ -39,12 +44,17 @@ export function useModuleVisibility({
 
   const moduleItems = useMemo(
     () =>
-      CANHOES_MEMBER_MODULES.map((moduleDefinition) => ({
-        ...moduleDefinition,
-        checked: state?.moduleVisibility[moduleDefinition.key] ?? false,
-        effective: state?.effectiveModules[moduleDefinition.key] ?? false,
-      })),
-    [state]
+      CANHOES_MEMBER_MODULES.map((moduleDefinition) => {
+        const key = moduleDefinition.key;
+        const serverChecked = state?.moduleVisibility[key] ?? false;
+        const checked = key in optimisticOverrides ? (optimisticOverrides[key] ?? serverChecked) : serverChecked;
+        return {
+          ...moduleDefinition,
+          checked,
+          effective: state?.effectiveModules[key] ?? false,
+        };
+      }),
+    [state, optimisticOverrides]
   );
 
   const persistState = useCallback(
@@ -64,10 +74,34 @@ export function useModuleVisibility({
         await canhoesEventsRepo.updateAdminState(eventId, patch);
         await onUpdate();
         toast.success(successMessage);
-      } catch {
+      } catch (err) {
+        console.error("[Admin] fetch error:", {
+          endpoint: `admin/state (${busyStateKey})`,
+          err,
+        });
         toast.error("Nao foi possivel guardar a configuracao");
+        // Revert optimistic overrides for this key
+        if (patch.moduleVisibility) {
+          setOptimisticOverrides((prev) => {
+            const next = { ...prev };
+            for (const key of Object.keys(patch.moduleVisibility!)) {
+              delete next[key as keyof EventAdminModuleVisibilityDto];
+            }
+            return next;
+          });
+        }
       } finally {
         setSavingKey(null);
+        // Clear overrides so server state takes over
+        if (patch.moduleVisibility) {
+          setOptimisticOverrides((prev) => {
+            const next = { ...prev };
+            for (const key of Object.keys(patch.moduleVisibility!)) {
+              delete next[key as keyof EventAdminModuleVisibilityDto];
+            }
+            return next;
+          });
+        }
       }
     },
     [eventId, onUpdate, state]
@@ -76,6 +110,9 @@ export function useModuleVisibility({
   const toggleModule = useCallback(
     async (key: keyof EventAdminModuleVisibilityDto, checked: boolean) => {
       if (!state) return;
+
+      // Apply optimistic override immediately
+      setOptimisticOverrides((prev) => ({ ...prev, [key]: checked }));
 
       await persistState(
         key,
@@ -93,11 +130,12 @@ export function useModuleVisibility({
 
   const setAllModules = useCallback(
     async (checked: boolean) => {
+      const allOverrides = buildModuleVisibilityState(checked);
+      setOptimisticOverrides(allOverrides);
+
       await persistState(
         checked ? "all-enabled" : "all-disabled",
-        {
-          moduleVisibility: buildModuleVisibilityState(checked),
-        },
+        { moduleVisibility: allOverrides },
         checked
           ? "Todos os modulos ficaram disponiveis"
           : "Todos os modulos ficaram ocultos"

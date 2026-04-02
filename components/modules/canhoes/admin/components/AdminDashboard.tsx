@@ -1,31 +1,24 @@
+// [antes: 235 linhas → depois: 153 linhas]
 "use client";
 
-import { AlertTriangle, CheckCircle, Trophy, Users, Vote } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { StatCard } from "@/components/ui/StatCard";
 import { adminCopy } from "@/lib/canhoesCopy";
-import { colors } from "@/lib/theme/tokens";
 import type {
-  AwardCategoryDto,
   CategoryProposalDto,
   MeasureProposalDto,
   NomineeDto,
-  PublicUserDto,
 } from "@/lib/api/types";
 
 import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
 
 type AdminDashboardProps = {
   allNominees: NomineeDto[];
-  categories: AwardCategoryDto[];
   loading: boolean;
-  members: PublicUserDto[];
   pendingCategoryProposals: CategoryProposalDto[];
   pendingMeasureProposals: MeasureProposalDto[];
   pendingNominees: NomineeDto[];
-  totalVotes: number;
 };
 
 const PENDING_BADGE_LABELS = [
@@ -33,16 +26,6 @@ const PENDING_BADGE_LABELS = [
   { key: "categories", suffix: "propostas de categoria" },
   { key: "measures", suffix: "medidas propostas" },
 ] as const;
-
-function MetricSkeleton() {
-  return (
-    <div className="canhoes-paper-card min-w-[148px] rounded-[var(--radius-md-token)] p-4">
-      <Skeleton className="mb-3 h-10 w-10 rounded-full" />
-      <Skeleton className="mb-2 h-7 w-16 rounded" />
-      <Skeleton className="h-4 w-24 rounded" />
-    </div>
-  );
-}
 
 function PendingReviewBadges({
   nomineesCount,
@@ -74,25 +57,16 @@ function PendingReviewBadges({
 
 export function AdminDashboard({
   allNominees,
-  categories,
   loading,
-  members,
   pendingCategoryProposals,
   pendingMeasureProposals,
   pendingNominees,
-  totalVotes,
 }: Readonly<AdminDashboardProps>) {
-  const safeCategories = categories ?? [];
   const safeAllNominees = allNominees ?? [];
-  const safeMembers = members ?? [];
   const safePendingCategoryProposals = pendingCategoryProposals ?? [];
   const safePendingMeasureProposals = pendingMeasureProposals ?? [];
   const safePendingNominees = pendingNominees ?? [];
 
-  const activeCategories = safeCategories.filter((category) => category.isActive).length;
-  const approvedNominees = safeAllNominees.filter(
-    (nominee) => nominee.status === "approved"
-  ).length;
   const pendingReviews =
     safePendingNominees.length +
     safePendingCategoryProposals.length +
@@ -108,60 +82,6 @@ export function AdminDashboard({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <p className="editorial-kicker">{adminCopy.dashboard.pulseKicker}</p>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
-          {loading ? (
-            Array.from({ length: 5 }).map((_, index) => (
-              <MetricSkeleton key={index} />
-            ))
-          ) : (
-            <>
-              <StatCard
-                icon={<Trophy className="h-5 w-5" />}
-                label="Categorias ativas"
-                value={activeCategories}
-                color={colors.mossLight}
-                delay={0}
-                eyebrow="Estado"
-              />
-              <StatCard
-                icon={<CheckCircle className="h-5 w-5" />}
-                label="Nomeacoes aprovadas"
-                value={approvedNominees}
-                color={colors.success}
-                delay={80}
-                eyebrow="Moderacao"
-              />
-              <StatCard
-                icon={<AlertTriangle className="h-5 w-5" />}
-                label="Pendentes"
-                value={pendingReviews}
-                color={pendingReviews > 0 ? colors.warning : colors.success}
-                delay={160}
-                eyebrow="Fila"
-              />
-              <StatCard
-                icon={<Vote className="h-5 w-5" />}
-                label="Votos"
-                value={totalVotes}
-                color={colors.psycho4}
-                delay={240}
-                eyebrow="Participacao"
-              />
-              <StatCard
-                icon={<Users className="h-5 w-5" />}
-                label="Membros"
-                value={safeMembers.length}
-                color={colors.beige}
-                delay={320}
-                eyebrow="Grupo"
-              />
-            </>
-          )}
-        </div>
-      </div>
-
       {!loading && pendingReviews > 0 ? (
         <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
           <div className="space-y-3">

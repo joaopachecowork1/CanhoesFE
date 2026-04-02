@@ -1,3 +1,4 @@
+// [antes: 64 linhas → depois: 65 linhas]
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,7 @@ export function AdminTabs({
                 onClick={() => onSelect(item.id)}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "canhoes-tap inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,border-color,color,box-shadow]",
+                  "canhoes-tap inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,border-color,color,box-shadow]",
                   isActive
                     ? "border-[var(--border-purple)] bg-[linear-gradient(180deg,rgba(31,40,20,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
                     : "border-[rgba(107,76,42,0.16)] bg-[rgba(255,255,255,0.48)] text-[var(--text-ink)] hover:bg-[rgba(255,255,255,0.72)]"
