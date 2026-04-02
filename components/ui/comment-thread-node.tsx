@@ -103,23 +103,23 @@ export function CommentNode({
     <div
       className={cn(
         "space-y-2",
-        depth > 0 && "ml-4 border-l border-[rgba(20,26,18,0.12)] pl-3 sm:ml-5"
+        depth > 0 && "ml-4 border-l border-[var(--border-subtle)] pl-3 sm:ml-5"
       )}
     >
       <article className="space-y-2">
         <div className="flex items-start gap-2.5">
-          <Avatar className="mt-0.5 h-7 w-7 border border-[rgba(20,26,18,0.1)] bg-white/70">
+          <Avatar className="mt-0.5 h-7 w-7 border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)]">
             {comment.avatarSrc ? (
               <AvatarImage src={comment.avatarSrc} alt={comment.author} />
             ) : null}
-            <AvatarFallback className="bg-white/80 text-[10px] font-semibold text-[var(--text-dark)]">
+            <AvatarFallback className="bg-[rgba(255,255,255,0.08)] text-[10px] font-semibold text-[var(--text-primary)]">
               {getInitials(comment.author)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="text-[13px] font-semibold text-[var(--text-dark)]">
+              <span className="text-[13px] font-semibold text-[var(--text-primary)]">
                 {comment.author}
               </span>
               <span className="text-[11px] text-[var(--text-muted)]">
@@ -135,7 +135,7 @@ export function CommentNode({
               ) : null}
             </div>
 
-            <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--text-ink)]">
+            <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--text-primary)]">
               {comment.content}
             </p>
 
@@ -151,8 +151,8 @@ export function CommentNode({
                     variant="ghost"
                     size="sm"
                     className={cn(
-                      "h-6 rounded-full border border-[rgba(20,26,18,0.1)] bg-white/65 px-2 text-[11px] text-[var(--text-dark)] hover:bg-white",
-                      isActive && "border-[rgba(80,98,59,0.28)] bg-[rgba(110,140,78,0.14)]"
+                      "h-6 rounded-full border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.05)] px-2 text-[11px] text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.1)]",
+                      isActive && "border-[rgba(122,173,58,0.4)] bg-[rgba(122,173,58,0.12)]"
                     )}
                     onClick={() =>
                       comment.persisted === false
@@ -170,7 +170,7 @@ export function CommentNode({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 rounded-full px-2 text-[11px] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.7)]"
+                className="h-6 rounded-full px-2 text-[11px] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)]"
                 onClick={() =>
                   onDraftChange(commentId, showReplyBox ? "" : `@${comment.author} `)
                 }
@@ -184,7 +184,7 @@ export function CommentNode({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 rounded-full px-2 text-[11px] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.7)]"
+                  className="h-6 rounded-full px-2 text-[11px] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)]"
                   onClick={() => onToggleReplies(commentId)}
                 >
                   {repliesExpanded ? (
@@ -198,12 +198,12 @@ export function CommentNode({
             </div>
 
             {showReplyBox ? (
-              <div className="mt-2 flex gap-2 rounded-2xl border border-[rgba(20,26,18,0.1)] bg-white/65 p-2.5">
-                <Avatar className="mt-0.5 h-6 w-6 border border-[rgba(20,26,18,0.1)] bg-white/70">
+              <div className="mt-2 flex gap-2 rounded-xl border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.04)] p-2.5">
+                <Avatar className="mt-0.5 h-6 w-6 border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)]">
                   {currentUserImage ? (
                     <AvatarImage src={currentUserImage} alt={currentUserName} />
                   ) : null}
-                  <AvatarFallback className="bg-white/80 text-[10px] font-semibold text-[var(--text-dark)]">
+                  <AvatarFallback className="bg-[rgba(255,255,255,0.08)] text-[10px] font-semibold text-[var(--text-primary)]">
                     {getInitials(currentUserName)}
                   </AvatarFallback>
                 </Avatar>
@@ -213,7 +213,7 @@ export function CommentNode({
                     value={replyDrafts[commentId] ?? ""}
                     onChange={(event) => onDraftChange(commentId, event.target.value)}
                     placeholder={`Responder a ${comment.author}`}
-                    className="min-h-[72px] resize-none border-[rgba(20,26,18,0.1)] bg-white text-sm"
+                    className="min-h-[72px] resize-none border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   />
                   <div className="flex justify-end gap-2">
                     <Button

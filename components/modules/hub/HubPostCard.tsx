@@ -73,8 +73,8 @@ export function HubPostCard({
       : (post.likeCount ?? 0);
   return (
     <BlurFade delay={index * 50}>
-      <article className="canhoes-paper-panel overflow-hidden rounded-[var(--radius-lg-token)]">
-        <div className="space-y-3 px-4 py-4 sm:px-5">
+      <article className="canhoes-feed-card overflow-hidden rounded-[var(--radius-lg-token)]">
+        <div className="space-y-2 px-3 pt-3 sm:px-4">
           <PostHeader
             authorName={post.authorName}
             createdAtUtc={post.createdAtUtc}
@@ -85,18 +85,18 @@ export function HubPostCard({
           />
 
           {post.text ? (
-            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-ink)]">
+            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)]">
               {post.text}
             </p>
           ) : null}
 
           {mediaUrls.length > 0 ? (
-            <MediaCarousel urls={mediaUrls} aspect="portrait" />
+            <MediaCarousel urls={mediaUrls} aspect="video" />
           ) : null}
         </div>
 
         {post.poll ? (
-          <div className="px-4 pb-3 sm:px-5 sm:pb-4">
+          <div className="px-3 pb-2 pt-1 sm:px-4">
             <PollBox
               poll={post.poll}
               onVote={(optionId) => onVotePoll(post.id, optionId)}
@@ -104,9 +104,9 @@ export function HubPostCard({
           </div>
         ) : null}
 
-        <div className="px-4 pb-4 sm:px-5">
-          <div className="h-px w-full bg-[rgba(107,76,42,0.14)]" />
-          <div className="mt-3 space-y-3">
+        <div className="px-3 pb-3 sm:px-4">
+          <div className="mt-2 h-px w-full bg-[var(--border-subtle)]" />
+          <div className="mt-2">
             <HubPostActions
               postId={post.id}
               commentCount={post.commentCount ?? 0}
@@ -120,23 +120,27 @@ export function HubPostCard({
               onToggleComments={onToggleComments}
               onOpenCommentComposer={() => onOpenCommentComposer(post.id)}
             />
-
-            <HubPostComments
-              postId={post.id}
-              postAuthorName={post.authorName}
-              comments={comments}
-              commentCount={post.commentCount ?? 0}
-              openComments={openComments}
-              commentDraft={commentDraft}
-              showComposer={showCommentComposer}
-              currentUserName={currentUserName}
-              currentUserImage={currentUserImage}
-              onToggleComments={onToggleComments}
-              onAddComment={onAddComment}
-              onCommentDraftChange={onCommentDraftChange}
-              onToggleCommentReaction={onToggleCommentReaction}
-            />
           </div>
+
+          {openComments ? (
+            <div className="mt-2">
+              <HubPostComments
+                postId={post.id}
+                postAuthorName={post.authorName}
+                comments={comments}
+                commentCount={post.commentCount ?? 0}
+                openComments={openComments}
+                commentDraft={commentDraft}
+                showComposer={showCommentComposer}
+                currentUserName={currentUserName}
+                currentUserImage={currentUserImage}
+                onToggleComments={onToggleComments}
+                onAddComment={onAddComment}
+                onCommentDraftChange={onCommentDraftChange}
+                onToggleCommentReaction={onToggleCommentReaction}
+              />
+            </div>
+          ) : null}
         </div>
       </article>
     </BlurFade>
