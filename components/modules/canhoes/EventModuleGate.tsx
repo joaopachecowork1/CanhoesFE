@@ -7,6 +7,7 @@ import {
   useEventModuleAccess,
   type EventRouteModuleKey,
 } from "@/hooks/useEventModuleAccess";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { EventModuleUnavailableState } from "./EventModuleUnavailableState";
@@ -22,9 +23,9 @@ export function EventModuleGate({
 
   if (access.isLoading) {
     return (
-      <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+      <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
         <CardContent className="flex min-h-[14rem] items-center justify-center">
-          <div className="flex items-center gap-3 text-[var(--bark)]/76">
+          <div className="flex items-center gap-3 text-[rgba(245,237,224,0.76)]">
             <Loader2 className="h-5 w-5 animate-spin text-[var(--moss)]" />
             <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
               A validar acesso
@@ -37,12 +38,19 @@ export function EventModuleGate({
 
   if (access.error || !access.event || !access.overview) {
     return (
-      <EventModuleUnavailableState
-        title={`Sem acesso a ${access.module.label}`}
-        description="Nao foi possivel confirmar o estado do evento agora. Recarrega a pagina ou volta ao inicio do evento."
-        fallbackHref={access.fallbackHref}
-        fallbackLabel={access.fallbackLabel}
-      />
+      <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          <ErrorAlert
+            title={`Erro ao abrir ${access.module.label}`}
+            description={
+              access.error?.message ??
+              "Nao foi possivel confirmar o estado do evento agora."
+            }
+            actionLabel="Tentar novamente"
+            onAction={() => void access.refresh()}
+          />
+        </CardContent>
+      </Card>
     );
   }
 

@@ -1,4 +1,3 @@
-// [antes: 130 linhas → depois: 165 linhas]
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -8,6 +7,7 @@ import type {
   EventAdminModuleVisibilityDto,
   EventAdminStateDto,
 } from "@/lib/api/types";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import {
   CANHOES_MEMBER_MODULES,
   buildModuleVisibilityState,
@@ -32,7 +32,6 @@ export function useModuleVisibility({
   state,
 }: Readonly<UseModuleVisibilityOptions>) {
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  // Optimistic overrides: key → checked value, cleared after server confirms
   const [optimisticOverrides, setOptimisticOverrides] = useState<
     Partial<EventAdminModuleVisibilityDto>
   >({});
@@ -86,17 +85,16 @@ export function useModuleVisibility({
       try {
         await canhoesEventsRepo.updateAdminState(eventId, patch);
         await onUpdate();
-        // Clear overrides only after server state is refreshed (no flicker)
         if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
         toast.success(successMessage);
       } catch (err) {
-        console.error("[Admin] fetch error:", {
+        logFrontendError("Admin.useModuleVisibility", err, {
           endpoint: `admin/state (${busyStateKey})`,
-          details: err,
         });
-        // Revert optimistic overrides so UI shows old server state
         if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
-        toast.error("Nao foi possivel guardar a configuracao");
+        toast.error(
+          getErrorMessage(err, "Nao foi possivel guardar a configuracao dos modulos.")
+        );
       } finally {
         setSavingKey(null);
       }
@@ -108,7 +106,6 @@ export function useModuleVisibility({
     async (key: keyof EventAdminModuleVisibilityDto, checked: boolean) => {
       if (!state) return;
 
-      // Apply optimistic override immediately
       setOptimisticOverrides((prev) => ({ ...prev, [key]: checked }));
 
       await persistState(

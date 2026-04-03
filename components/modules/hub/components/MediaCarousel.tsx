@@ -77,12 +77,13 @@ export function MediaCarousel({
 
   if (media.length === 0) return null;
 
-  const compactHeightClassName =
-    aspect === "portrait" ? "max-h-64" : aspect === "video" ? "max-h-64" : "max-h-64";
+  const compactHeightClassName = aspect === "portrait" ? "max-h-80" : "max-h-64";
   const frameHeightClassName = isImageExpanded ? "max-h-[80vh]" : compactHeightClassName;
   const imageClassName = isImageExpanded
     ? "max-h-[80vh] w-full object-contain"
     : "h-64 w-full object-cover";
+  const navButtonClassName =
+    "canhoes-tap absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-stone-300/70 bg-stone-100/95 p-1.5 text-stone-900 shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35";
   const currentImageUrl = media[currentIndex] ?? media[0];
 
   const markAsFailed = (url: string) => {
@@ -167,7 +168,7 @@ export function MediaCarousel({
                     setCurrentIndex((previousIndex) => Math.max(0, previousIndex - 1))
                   }
                   aria-label="Imagem anterior"
-                  className="canhoes-tap absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-stone-300/70 bg-stone-100/95 p-1.5 text-stone-900 shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+                  className={cn("left-2", navButtonClassName)}
                   disabled={currentIndex === 0}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -181,7 +182,7 @@ export function MediaCarousel({
                     )
                   }
                   aria-label="Proxima imagem"
-                  className="canhoes-tap absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-stone-300/70 bg-stone-100/95 p-1.5 text-stone-900 shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
+                  className={cn("right-2", navButtonClassName)}
                   disabled={currentIndex === media.length - 1}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -199,7 +200,7 @@ export function MediaCarousel({
               type="button"
               size="sm"
               variant="secondary"
-              className="absolute bottom-3 right-3 z-10 h-8 rounded-full bg-stone-100 px-3 text-xs font-medium text-stone-900 shadow-md hover:bg-stone-200"
+              className="absolute bottom-3 right-3 z-10 h-8 rounded-full border border-stone-200 bg-stone-100 px-3 text-xs font-medium text-stone-900 shadow-md hover:bg-stone-200"
               onClick={() => setIsImageExpanded((currentValue) => !currentValue)}
             >
               {isImageExpanded ? "Compactar" : "Ver imagem completa"}
@@ -218,8 +219,8 @@ export function MediaCarousel({
               className={cn(
                 "canhoes-tap h-1.5 rounded-full transition-all",
                 index === currentIndex
-                  ? "w-5 bg-green-400"
-                  : "w-1.5 bg-stone-500/40"
+                  ? "w-6 bg-green-400 shadow-[0_0_14px_rgba(74,222,128,0.5)]"
+                  : "w-2 bg-stone-400/50 hover:bg-stone-300/70"
               )}
               onClick={() => setCurrentIndex(index)}
             />

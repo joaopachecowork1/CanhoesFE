@@ -115,23 +115,12 @@ export const CANHOES_MEMBER_MODULE_MAP = Object.fromEntries(
 export function buildModuleVisibilityState(
   enabled: boolean
 ): EventAdminModuleVisibilityDto {
-  return CANHOES_MEMBER_MODULES.reduce<EventAdminModuleVisibilityDto>(
-    (nextState, moduleDefinition) => ({
-      ...nextState,
-      [moduleDefinition.key]: enabled,
-    }),
-    {
-      feed: enabled,
-      secretSanta: enabled,
-      wishlist: enabled,
-      categories: enabled,
-      voting: enabled,
-      gala: enabled,
-      stickers: enabled,
-      measures: enabled,
-      nominees: enabled,
-    }
-  );
+  return Object.fromEntries(
+    CANHOES_MEMBER_MODULES.map((moduleDefinition) => [
+      moduleDefinition.key,
+      enabled,
+    ])
+  ) as EventAdminModuleVisibilityDto;
 }
 
 export function countVisibleModules(

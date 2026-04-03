@@ -10,6 +10,10 @@ export async function GET(
   context: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await context.params;
+  if (!Array.isArray(path) || path.length === 0) {
+    return NextResponse.json({ message: "Missing upload path" }, { status: 400 });
+  }
+
   const filePath = path.join("/");
   const url = `${backend}/uploads/${filePath}`;
 

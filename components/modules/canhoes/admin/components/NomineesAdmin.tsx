@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { AwardCategoryDto, NomineeDto } from "@/lib/api/types";
 
@@ -70,7 +71,8 @@ export function NomineesAdmin({
 
   const withProcessing = async (
     nomineeId: string,
-    action: () => Promise<unknown>
+    action: () => Promise<unknown>,
+    errorFallback = "Nao foi possivel processar a nomeacao."
   ) => {
     setProcessingIds((previousIds) => new Set(previousIds).add(nomineeId));
 
@@ -79,8 +81,8 @@ export function NomineesAdmin({
       await onUpdate();
       toast.success("Acao concluida");
     } catch (error) {
-      console.error("Nominee action error:", error);
-      toast.error("Erro ao processar a nomeacao");
+      logFrontendError("Admin.Nominees.withProcessing", error, { nomineeId });
+      toast.error(getErrorMessage(error, errorFallback));
     } finally {
       setProcessingIds((previousIds) => {
         const nextIds = new Set(previousIds);
@@ -94,21 +96,26 @@ export function NomineesAdmin({
     withProcessing(nomineeId, () =>
       canhoesEventsRepo.adminSetNomineeCategory(eventId!, nomineeId, {
         categoryId: categoryId && categoryId !== "__none__" ? categoryId : null,
-      })
+      }),
+      "Nao foi possivel atualizar a categoria da nomeacao."
     );
 
   const approveNominee = (nomineeId: string) =>
-    withProcessing(nomineeId, () =>
-      canhoesEventsRepo.adminApproveNominee(eventId!, nomineeId)
+    withProcessing(
+      nomineeId,
+      () => canhoesEventsRepo.adminApproveNominee(eventId!, nomineeId),
+      "Nao foi possivel aprovar a nomeacao."
     );
 
   const rejectNominee = (nomineeId: string) =>
-    withProcessing(nomineeId, () =>
-      canhoesEventsRepo.adminRejectNominee(eventId!, nomineeId)
+    withProcessing(
+      nomineeId,
+      () => canhoesEventsRepo.adminRejectNominee(eventId!, nomineeId),
+      "Nao foi possivel rejeitar a nomeacao."
     );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <AdminSectionSummary
         kicker="Moderacao"
         title="Nomeacoes em revisao"
@@ -137,12 +144,12 @@ export function NomineesAdmin({
         ]}
       />
 
-      <Card className="border-[var(--color-moss)]/20">
+      <Card className="border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_34%),linear-gradient(180deg,rgba(18,24,11,0.94),rgba(11,14,8,0.96))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
         <CardHeader className="space-y-3">
           <div className="space-y-1">
-            <p className="editorial-kicker">Fila ativa</p>
-            <CardTitle>Rever nomeacoes</CardTitle>
-            <p className="body-small text-[var(--color-text-muted)]">
+            <p className="editorial-kicker text-[var(--neon-green)]">Fila ativa</p>
+            <CardTitle className="text-[var(--bg-paper)]">Rever nomeacoes</CardTitle>
+            <p className="body-small text-[rgba(245,237,224,0.76)]">
               Filtra o estado atual e fecha cada registo com categoria e decisao clara.
             </p>
           </div>
@@ -219,11 +226,11 @@ export function NomineesAdmin({
                     </>
                   }
                 >
-                  <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
-                    <span className="rounded-full bg-[var(--bg-paper-olive)] px-2.5 py-1 text-[var(--text-ink)]">
+                  <div className="flex flex-wrap gap-2 text-xs text-[rgba(245,237,224,0.72)]">
+                    <span className="rounded-full border border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.86)] px-2.5 py-1 text-[var(--bg-paper)]">
                       {categoryName ?? "Sem categoria"}
                     </span>
-                    <span className="rounded-full bg-[var(--bg-paper-olive)] px-2.5 py-1 text-[var(--text-ink)]">
+                    <span className="rounded-full border border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.86)] px-2.5 py-1 text-[var(--bg-paper)]">
                       {nominee.status === "pending" ? "Em revisao" : "Ja tratado"}
                     </span>
                   </div>
@@ -240,13 +247,13 @@ export function NomineesAdmin({
                           onValueChange={(value) => setNomineeCategory(nominee.id, value)}
                           disabled={isBusy || controlsDisabled}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.92)] text-[var(--bg-paper)] data-[placeholder]:text-[rgba(245,237,224,0.56)] [&_svg:not([class*='text-'])]:text-[rgba(245,237,224,0.62)] focus-visible:bg-[rgba(18,23,12,0.92)]">
                             <SelectValue placeholder="Escolhe uma categoria" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="__none__">(sem categoria)</SelectItem>
+                          <SelectContent className="border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.98)] text-[var(--bg-paper)]">
+                            <SelectItem className="text-[var(--bg-paper)] focus:bg-[rgba(177,140,255,0.2)] focus:text-[var(--bg-paper)]" value="__none__">(sem categoria)</SelectItem>
                             {categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
+                              <SelectItem className="text-[var(--bg-paper)] focus:bg-[rgba(177,140,255,0.2)] focus:text-[var(--bg-paper)]" key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
                             ))}
@@ -254,11 +261,11 @@ export function NomineesAdmin({
                         </Select>
                       </div>
 
-                      {!nominee.categoryId ? (
-                        <div className="rounded-[var(--radius-sm-token)] bg-[var(--bg-paper-olive)] px-3 py-2 text-xs text-[var(--text-ink)] lg:self-end">
+                      {nominee.categoryId ? null : (
+                        <div className="rounded-[var(--radius-sm-token)] border border-[rgba(224,90,58,0.26)] bg-[rgba(101,30,26,0.3)] px-3 py-2 text-xs text-[rgba(255,225,220,0.95)] lg:self-end">
                           Categoria obrigatoria para aprovar.
                         </div>
-                      ) : null}
+                      )}
                     </div>
                   ) : null}
                 </AdminReviewCard>

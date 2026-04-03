@@ -77,15 +77,15 @@ export function AdminModulesSection({
     savingKey === "all-enabled" || savingKey === "all-disabled";
 
   return (
-    <div className="space-y-4">
-      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
-        <div className="space-y-4">
+    <div className="space-y-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_34%),linear-gradient(180deg,rgba(18,24,11,0.96),rgba(12,16,8,0.98))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+        <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--bark)]">Modules</p>
-            <h2 className="text-lg font-semibold text-[var(--text-ink)]">
+            <p className="editorial-kicker text-[var(--neon-green)]">Modules</p>
+            <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
               Module visibility
             </h2>
-            <p className="text-sm leading-6 text-[var(--bark)]/76">
+            <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
               Este e o unico sitio onde a mesa decide o que o grupo ve em cada
               modulo.
             </p>
@@ -93,24 +93,25 @@ export function AdminModulesSection({
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">
+              <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(16,20,11,0.88)] text-[var(--bg-paper)] shadow-none">
                 {visibleCount}/{moduleItems.length} modulos visiveis
               </Badge>
-              <Badge variant="outline">
+              <Badge className="border-[rgba(177,140,255,0.28)] bg-[rgba(177,140,255,0.16)] text-[var(--bg-paper)] shadow-none">
                 {state.nominationsVisible ? "Nomeacoes abertas" : "Nomeacoes fechadas"}
               </Badge>
-              <Badge variant="outline">
+              <Badge className="border-[rgba(177,140,255,0.28)] bg-[rgba(177,140,255,0.16)] text-[var(--bg-paper)] shadow-none">
                 {state.resultsVisible ? "Resultados abertos" : "Resultados fechados"}
               </Badge>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
               <Button
                 type="button"
                 size="sm"
-                variant="secondary"
+                variant="outline"
                 disabled={allEnabled || isSavingBulk}
                 onClick={() => void setAllModules(true)}
+                className="w-full border-[rgba(122,173,58,0.3)] bg-[rgba(31,44,18,0.92)] text-[var(--bg-paper)] hover:bg-[rgba(42,58,24,0.95)] sm:w-auto"
               >
                 {savingKey === "all-enabled"
                   ? adminCopy.state.saving
@@ -122,6 +123,7 @@ export function AdminModulesSection({
                 variant="outline"
                 disabled={allDisabled || isSavingBulk}
                 onClick={() => void setAllModules(false)}
+                className="w-full border-[rgba(212,184,150,0.2)] bg-[rgba(18,23,12,0.92)] text-[var(--bg-paper)] hover:bg-[rgba(28,36,18,0.96)] sm:w-auto"
               >
                 {savingKey === "all-disabled"
                   ? adminCopy.state.saving
@@ -130,7 +132,7 @@ export function AdminModulesSection({
             </div>
           </div>
 
-          <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(251,244,232,0.72)] px-4 py-1">
+          <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.7)] px-4 py-1">
             <VisibilityRow
               checked={state.nominationsVisible}
               description={adminCopy.state.nominationsDescription}
@@ -158,23 +160,17 @@ export function AdminModulesSection({
         return (
           <section
             key={groupKey}
-            className="canhoes-paper-card rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5"
+            className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top,rgba(122,173,58,0.1),transparent_40%),linear-gradient(180deg,rgba(18,24,11,0.94),rgba(11,14,8,0.96))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5"
           >
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                {groupKey === "core" ? (
-                  <Layers3 className="h-4 w-4 text-[var(--moss)]" />
-                ) : groupKey === "community" ? (
-                  <Sparkles className="h-4 w-4 text-[var(--accent-purple-soft)]" />
-                ) : (
-                  <Trophy className="h-4 w-4 text-[var(--bark)]" />
-                )}
-                <p className="editorial-kicker text-[var(--bark)]">
+                <GroupIcon groupKey={groupKey} />
+                <p className="editorial-kicker text-[var(--neon-green)]">
                   {GROUP_LABELS[groupKey]}
                 </p>
               </div>
 
-              <div className="divide-y divide-[rgba(107,76,42,0.12)]">
+              <div className="divide-y divide-[rgba(212,184,150,0.14)]">
                 {items.map((item) => (
                   <VisibilityRow
                     key={item.key}
@@ -209,6 +205,16 @@ function getModuleStatusLabel(item: ModuleVisibilityItem) {
   return "Fase";
 }
 
+function GroupIcon({ groupKey }: Readonly<{ groupKey: ModuleVisibilityItem["group"] }>) {
+  if (groupKey === "core") {
+    return <Layers3 className="h-4 w-4 text-[var(--moss)]" />;
+  }
+  if (groupKey === "community") {
+    return <Sparkles className="h-4 w-4 text-[var(--accent-purple-soft)]" />;
+  }
+  return <Trophy className="h-4 w-4 text-[var(--neon-amber)]" />;
+}
+
 function VisibilityRow({
   checked,
   description,
@@ -225,24 +231,24 @@ function VisibilityRow({
   statusLabel: string;
 }>) {
   return (
-    <div className="flex items-start justify-between gap-3 py-3">
-      <div className="min-w-0 space-y-1">
+    <div className="flex items-start justify-between gap-4 py-3.5">
+      <div className="min-w-0 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--text-ink)]">
+          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bg-paper)]">
             {label}
           </p>
           <Badge
-            variant={checked ? "secondary" : "outline"}
+            variant={checked ? "default" : "secondary"}
             className={cn(
               "shadow-none",
               checked &&
-                "border-[var(--border-purple)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-deep)]"
+                "border-[rgba(122,173,58,0.35)] bg-[rgba(45,68,24,0.92)] text-[var(--bg-paper)]"
             )}
           >
             {statusLabel}
           </Badge>
         </div>
-        <p className="text-sm leading-6 text-[var(--bark)]/76">{description}</p>
+        <p className="text-sm leading-6 text-[rgba(245,237,224,0.76)]">{description}</p>
       </div>
 
       <Switch
@@ -252,7 +258,7 @@ function VisibilityRow({
         className={
           checked
             ? "border-[var(--border-purple)] bg-[rgba(122,173,58,0.92)] shadow-[var(--glow-purple-sm)]"
-            : "border-[var(--border-subtle)] bg-[rgba(62,53,78,0.72)]"
+            : "border-[rgba(212,184,150,0.22)] bg-[rgba(62,53,78,0.82)]"
         }
       />
     </div>

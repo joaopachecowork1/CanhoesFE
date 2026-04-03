@@ -39,6 +39,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }, method: string) {
   try {
+    if (!Array.isArray(params?.path) || params.path.length === 0) {
+      return NextResponse.json({ message: "Missing proxy path" }, { status: 400 });
+    }
+
     // Try to get idToken from JWT
     const token = await getToken({ req: request });
     let idToken = token?.idToken;
@@ -62,9 +66,9 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       });
     }
 
-    const path = params.path.join("/");
+    const proxyPath = params.path.join("/");
     const backendBase = process.env.CANHOES_API_URL || "http://localhost:5000";
-    const backendUrl = `${backendBase}/api/${path}${request.nextUrl.search}`;
+    const backendUrl = `${backendBase}/api/${proxyPath}${request.nextUrl.search}`;
 
     // Build headers
     const headers = new Headers();
@@ -88,7 +92,7 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
 
     console.log(`[Proxy] ${method} ${backendUrl}`, {
       hasToken: !!idToken,
-      path,
+      path: proxyPath,
       isAdmin: token?.isAdmin,
     });
 
@@ -98,7 +102,7 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       body: body ?? undefined,
     });
 
-    console.log(`[Proxy] Response ${response.status} for ${path}`);
+    console.log(`[Proxy] Response ${response.status} for ${proxyPath}`);
 
     // 204 has no body by definition; passing a body causes NextResponse to throw.
     if (response.status === 204) {

@@ -11,9 +11,7 @@ function getPostMediaCount(post: {
   mediaUrl?: string | null;
   mediaUrls?: string[] | null;
 }) {
-  return Array.from(
-    new Set([...(post.mediaUrls ?? []), post.mediaUrl].filter(Boolean))
-  ).length;
+  return new Set([...(post.mediaUrls ?? []), post.mediaUrl].filter(Boolean)).size;
 }
 
 export function FeedInsightsPanel({
@@ -75,12 +73,12 @@ function FeedInsightCard({
       : "border-[rgba(0,255,136,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]";
 
   return (
-    <Card className="canhoes-paper-card rounded-[var(--radius-lg-token)] text-[var(--text-dark)]">
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
       <CardContent className="space-y-3 px-4 py-4 sm:px-5">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--text-muted)]">{label}</p>
-            <p className="heading-2 text-[var(--text-dark)]">{value}</p>
+            <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{label}</p>
+            <p className="heading-2 text-[var(--bg-paper)]">{value}</p>
           </div>
           <span
             className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-[var(--shadow-card)] ${iconClassName}`}
@@ -88,7 +86,7 @@ function FeedInsightCard({
             {icon}
           </span>
         </div>
-        <p className="body-small text-[var(--text-muted)]">{description}</p>
+        <p className="body-small text-[rgba(245,237,224,0.72)]">{description}</p>
       </CardContent>
     </Card>
   );

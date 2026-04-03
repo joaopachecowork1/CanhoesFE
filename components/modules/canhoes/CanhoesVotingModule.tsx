@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Flame, Trophy } from "lucide-react";
+import { toast } from "sonner";
 
 import type {
   EventPhaseDto,
   EventVotingBoardDto,
   EventVotingCategoryDto,
 } from "@/lib/api/types";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { useEventOverview } from "@/hooks/useEventOverview";
@@ -33,23 +36,31 @@ function formatPhaseLabel(phaseType?: EventPhaseDto["type"]) {
 export function CanhoesVotingModule() {
   const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
   const [votingBoard, setVotingBoard] = useState<EventVotingBoardDto | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingVoteKey, setSavingVoteKey] = useState<string | null>(null);
 
   const loadVotingData = useCallback(async () => {
     if (!event) {
       setVotingBoard(null);
+      setErrorMessage(null);
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       setVotingBoard(await canhoesEventsRepo.getVotingBoard(event.id));
     } catch (error) {
-      console.error(error);
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar o boletim desta edicao."
+      );
+      logFrontendError("CanhoesVoting.loadVotingData", error, { eventId: event.id });
       setVotingBoard(null);
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +80,13 @@ export function CanhoesVotingModule() {
       await canhoesEventsRepo.castVote(event.id, { categoryId, optionId });
       await loadVotingData();
     } catch (error) {
-      console.error(error);
+      const message = getErrorMessage(error, "Nao foi possivel registar o teu voto.");
+      logFrontendError("CanhoesVoting.handleVote", error, {
+        categoryId,
+        eventId: event.id,
+        optionId,
+      });
+      toast.error(message);
     } finally {
       setSavingVoteKey(null);
     }
@@ -98,10 +115,13 @@ export function CanhoesVotingModule() {
         <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
       ) : null}
 
-      {!isLoading && !isOverviewLoading && !votingBoard ? (
-        <p className="body-small text-[var(--color-text-muted)]">
-          Nao foi possivel carregar o boletim desta edicao.
-        </p>
+      {!isLoading && !isOverviewLoading && !votingBoard && errorMessage ? (
+        <ErrorAlert
+          title="Erro ao carregar votacao"
+          description={errorMessage}
+          actionLabel="Tentar novamente"
+          onAction={() => void loadVotingData()}
+        />
       ) : null}
 
       {!isLoading && !isOverviewLoading && votingBoard ? (

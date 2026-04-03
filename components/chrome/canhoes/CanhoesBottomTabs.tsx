@@ -33,7 +33,7 @@ export function CanhoesBottomTabs({
   const composeItem = {
     ariaLabel: "Criar post",
     buttonClassName: cn(
-      "h-16 w-16 rounded-[1.35rem] border border-[rgba(212,184,150,0.18)] bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.22),transparent_45%),linear-gradient(180deg,rgba(39,48,24,0.96),rgba(18,23,11,0.98))] text-[var(--bg-paper)] shadow-[0_14px_24px_rgba(12,15,8,0.22)]",
+      "h-[4.6rem] w-[4.9rem] rounded-[1.35rem] border border-[rgba(212,184,150,0.18)] bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.22),transparent_45%),linear-gradient(180deg,rgba(39,48,24,0.96),rgba(18,23,11,0.98))] text-[var(--bg-paper)] shadow-[0_14px_24px_rgba(12,15,8,0.22)]",
       "hover:bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.28),transparent_45%),linear-gradient(180deg,rgba(44,55,28,0.98),rgba(20,26,12,0.98))]",
       isComposeOpen &&
         "border-[rgba(0,255,136,0.28)] bg-[radial-gradient(circle_at_30%_25%,rgba(0,255,136,0.26),transparent_45%),linear-gradient(180deg,rgba(45,68,29,0.96),rgba(21,33,16,0.96))] shadow-[var(--glow-green-sm),0_14px_24px_rgba(12,15,8,0.22)]"
@@ -62,9 +62,9 @@ export function CanhoesBottomTabs({
         <Dock
           items={items}
           className="h-auto p-0"
-          containerClassName="h-auto w-full max-w-none justify-center"
+          containerClassName="h-auto w-full max-w-none justify-start sm:justify-center"
           dockClassName={cn(
-            "min-h-[5.35rem] w-fit max-w-full items-center gap-1.5 rounded-[2rem] border px-2 py-2",
+            "min-h-[5.45rem] w-max min-w-fit max-w-full items-center gap-1.5 rounded-[2rem] border px-2 py-2",
             "border-[rgba(212,184,150,0.14)] bg-[radial-gradient(circle_at_top_center,rgba(0,255,136,0.12),transparent_34%),radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_28%),linear-gradient(180deg,rgba(18,22,11,0.94),rgba(10,13,8,0.96))]",
             "shadow-[0_20px_46px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-[18px]"
           )}
@@ -82,21 +82,21 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      "h-16 w-16 rounded-[1.35rem] border border-transparent bg-transparent text-[rgba(245,237,224,0.76)] shadow-none",
-      "hover:bg-[rgba(245,237,224,0.06)]",
+      "h-[4.7rem] w-[5rem] rounded-[1.45rem] border border-transparent bg-transparent text-[rgba(245,237,224,0.92)] shadow-none",
+      "hover:bg-[rgba(245,237,224,0.1)]",
       isMoreItem &&
-        "border-[rgba(177,140,255,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_42%),linear-gradient(180deg,rgba(28,24,36,0.9),rgba(18,15,24,0.94))] text-[var(--accent-purple-soft)]",
+        "border-[rgba(177,140,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_42%),linear-gradient(180deg,rgba(28,24,36,0.92),rgba(18,15,24,0.96))] text-[var(--accent-purple-soft)]",
       isActive &&
-        "border-[rgba(177,140,255,0.28)] bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.1),transparent_55%),linear-gradient(180deg,rgba(42,55,28,0.94),rgba(20,27,13,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm),0_12px_24px_rgba(0,0,0,0.18)]"
+        "border-[rgba(177,140,255,0.3)] bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.14),transparent_55%),linear-gradient(180deg,rgba(42,55,28,0.96),rgba(20,27,13,0.99))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm),0_12px_24px_rgba(0,0,0,0.18)]"
     ),
     icon: Icon,
     iconClassName: cn(
-      "h-[1.08rem] w-[1.08rem]",
+      "h-[1.05rem] w-[1.05rem]",
       isActive
         ? "text-[var(--neon-green)]"
         : isMoreItem
           ? "text-[var(--accent-purple-soft)]"
-          : "text-[rgba(245,237,224,0.76)]"
+          : "text-[rgba(245,237,224,0.92)]"
     ),
     isActive,
     label: entry.item.label,

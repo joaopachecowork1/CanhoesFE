@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
 
 import { feedCopy } from "@/lib/canhoesCopy";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 import { cn } from "@/lib/utils";
 
@@ -215,10 +216,11 @@ export function CanhoesComposeSheet({
       onDone?.();
       onOpenChange(false);
     } catch (error) {
-      console.error(error);
-      const errorSuffix =
-        error instanceof Error && error.message ? `: ${error.message.slice(0, 160)}` : "";
-      toast.error(`${composeCopy.publishError}${errorSuffix}`);
+      const message = getErrorMessage(error, composeCopy.publishError, {
+        413: "As imagens escolhidas sao demasiado pesadas para publicar.",
+      });
+      logFrontendError("CanhoesComposeSheet.createPost", error);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -227,6 +229,9 @@ export function CanhoesComposeSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="pb-safe">
+        <div className="flex justify-center pt-2">
+          <span className="h-1.5 w-14 rounded-full bg-[rgba(245,237,224,0.24)]" />
+        </div>
         <SheetHeader className="pb-3">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--color-text-primary)]">
@@ -290,8 +295,8 @@ export function CanhoesComposeSheet({
                   className={cn(
                     "canhoes-tap relative flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
                     selectedFiles.length > 0
-                      ? "border-[var(--color-moss)] bg-[var(--color-moss)] text-[var(--color-text-primary)]"
-                      : "border-[var(--color-beige-dark)]/25 bg-transparent text-[var(--color-brown)]"
+                      ? "border-[var(--color-moss)] bg-[var(--color-moss)] text-[var(--color-text-primary)] shadow-[var(--glow-green-sm)]"
+                      : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)]"
                   )}
                 >
                   <ImagePlus className="h-4 w-4" />
@@ -310,8 +315,8 @@ export function CanhoesComposeSheet({
                   className={cn(
                     "canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
                     isPollEnabled
-                      ? "border-[var(--color-brown)] bg-[var(--color-brown)] text-[var(--color-text-primary)]"
-                      : "border-[var(--color-beige-dark)]/25 bg-transparent text-[var(--color-brown)]"
+                      ? "border-[var(--color-brown)] bg-[var(--color-brown)] text-[var(--color-text-primary)] shadow-[var(--shadow-card)]"
+                      : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)]"
                   )}
                 >
                   <BarChart3 className="h-4 w-4" />

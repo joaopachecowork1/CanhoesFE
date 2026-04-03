@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ImageOff, Medal, Trophy } from "lucide-react";
 
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { CanhoesCategoryResultDto } from "@/lib/api/types";
@@ -21,16 +23,31 @@ function getPlacementIcon(position: number) {
 
 export function CanhoesGalaModule() {
   const [resultsByCategory, setResultsByCategory] = useState<CanhoesCategoryResultDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const loadResults = useCallback(() => {
     setIsLoading(true);
+    setErrorMessage(null);
 
-    canhoesRepo
+    return canhoesRepo
       .getResults()
       .then(setResultsByCategory)
+      .catch((error: unknown) => {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel carregar os resultados da gala."
+        );
+        logFrontendError("CanhoesGala.loadResults", error);
+        setResultsByCategory([]);
+        setErrorMessage(message);
+      })
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    void loadResults();
+  }, [loadResults]);
 
   const totalVotes = useMemo(
     () => resultsByCategory.reduce((voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0), 0),
@@ -53,7 +70,16 @@ export function CanhoesGalaModule() {
 
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar resultados...</p> : null}
 
-      {!isLoading && resultsByCategory.length === 0 ? (
+      {!isLoading && errorMessage ? (
+        <ErrorAlert
+          title="Erro ao carregar resultados"
+          description={errorMessage}
+          actionLabel="Tentar novamente"
+          onAction={() => void loadResults()}
+        />
+      ) : null}
+
+      {!isLoading && !errorMessage && resultsByCategory.length === 0 ? (
         <p className="body-small text-[var(--color-text-muted)]">Sem resultados ainda.</p>
       ) : null}
 

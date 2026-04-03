@@ -1,4 +1,3 @@
-// [antes: 235 linhas → depois: 155 linhas]
 "use client";
 
 import { AlertTriangle } from "lucide-react";
@@ -26,6 +25,12 @@ const PENDING_BADGE_LABELS = [
   { key: "categories", suffix: "propostas de categoria" },
   { key: "measures", suffix: "medidas propostas" },
 ] as const;
+
+function getNomineeBadgeVariant(status: NomineeDto["status"]) {
+  if (status === "approved") return "default" as const;
+  if (status === "rejected") return "destructive" as const;
+  return "outline" as const;
+}
 
 function PendingReviewBadges({
   nomineesCount,
@@ -81,19 +86,19 @@ export function AdminDashboard({
     .slice(0, 5);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {!loading && pendingReviews > 0 ? (
-        <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(224,90,58,0.12),transparent_34%),linear-gradient(180deg,rgba(30,18,12,0.94),rgba(17,11,8,0.96))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[var(--bark)]">
+            <div className="flex items-center gap-2 text-[var(--neon-amber)]">
               <AlertTriangle className="h-4 w-4" />
-              <span className="editorial-kicker text-[var(--bark)]">
+              <span className="editorial-kicker text-[var(--neon-amber)]">
                 {adminCopy.dashboard.queueKicker}
               </span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="heading-3 text-[var(--text-ink)]">
+              <h3 className="heading-3 text-[var(--bg-paper)]">
                 {adminCopy.dashboard.queueTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -117,14 +122,14 @@ export function AdminDashboard({
           {recentNominees.map((nominee) => (
             <article
               key={nominee.id}
-              className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
+              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
-                  <p className="truncate font-semibold text-[var(--text-ink)]">
+                  <p className="truncate font-semibold text-[var(--bg-paper)]">
                     {nominee.title}
                   </p>
-                  <p className="text-xs text-[var(--bark)]/68">
+                  <p className="text-xs text-[rgba(245,237,224,0.66)]">
                     {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
                       day: "numeric",
                       hour: "2-digit",
@@ -135,13 +140,7 @@ export function AdminDashboard({
                 </div>
 
                 <Badge
-                  variant={
-                    nominee.status === "approved"
-                      ? "default"
-                      : nominee.status === "rejected"
-                        ? "destructive"
-                        : "outline"
-                  }
+                  variant={getNomineeBadgeVariant(nominee.status)}
                 >
                   {nominee.status}
                 </Badge>

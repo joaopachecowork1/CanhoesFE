@@ -25,7 +25,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "canhoes-paper-card relative flex min-w-[148px] flex-col gap-3 overflow-hidden rounded-[var(--radius-md-token)] px-4 py-4 text-[var(--text-ink)]",
+        "relative flex min-w-[148px] flex-col gap-3 overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.72)] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
         className
       )}
       style={{ animationDelay: `${delay}ms` }}
@@ -45,16 +45,16 @@ export function StatCard({
         >
           {icon}
         </div>
-        <span className="rounded-full border border-[rgba(107,76,42,0.12)] bg-[rgba(107,76,42,0.05)] px-2 py-1 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--bark)]/72">
+        <span className="rounded-full border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-2 py-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.72)]">
           {eyebrow}
         </span>
       </div>
 
       <div className="space-y-1">
-        <div className="text-3xl font-semibold leading-none text-[var(--text-ink)] [text-shadow:0_1px_0_rgba(255,255,255,0.24)]">
+        <div className="text-3xl font-semibold leading-none text-[var(--bg-paper)]">
           {value}
         </div>
-        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--bark)]/72">
+        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[rgba(245,237,224,0.72)]">
           {label}
         </div>
       </div>

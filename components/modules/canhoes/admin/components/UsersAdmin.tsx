@@ -25,7 +25,7 @@ function getMemberInitials(member: PublicUserDto) {
 
 function MemberRowSkeleton() {
   return (
-    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-3">
+    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-3">
       <div className="flex items-center gap-3">
         <Skeleton className="h-9 w-9 rounded-full" />
         <div className="flex-1 space-y-2">
@@ -39,24 +39,24 @@ function MemberRowSkeleton() {
 
 function MemberRow({ member }: Readonly<{ member: PublicUserDto }>) {
   return (
-    <article className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4">
+    <article className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]">
       <div className="flex items-center gap-3">
         <div
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
             member.isAdmin
-              ? "border-[rgba(74,92,47,0.28)] bg-[rgba(74,92,47,0.12)] text-[var(--moss)]"
-              : "border-[rgba(107,76,42,0.16)] bg-[rgba(107,76,42,0.06)] text-[var(--bark)]"
+              ? "border-[rgba(122,173,58,0.32)] bg-[rgba(122,173,58,0.18)] text-[var(--bg-paper)]"
+              : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.86)]"
           )}
         >
           {getMemberInitials(member) || "?"}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-[var(--text-ink)]">
+          <p className="truncate font-semibold text-[var(--bg-paper)]">
             {member.displayName ?? "Sem nome"}
           </p>
-          <p className="body-small truncate text-[var(--bark)]/68">{member.email}</p>
+          <p className="body-small truncate text-[rgba(245,237,224,0.66)]">{member.email}</p>
         </div>
 
         {member.isAdmin ? <Badge variant="secondary">Admin</Badge> : null}
@@ -70,18 +70,18 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
   const regularMembers = members.filter((member) => !member.isAdmin);
 
   return (
-    <div className="space-y-4">
-      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
+    <div className="space-y-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(74,92,47,0.2)] bg-[rgba(74,92,47,0.08)] text-[var(--moss)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.16)] text-[var(--bg-paper)]">
             <Users className="h-5 w-5" />
           </div>
 
           <div>
-            <p className="heading-3 text-[var(--text-ink)]">
+            <p className="heading-3 text-[var(--bg-paper)]">
               {adminCopy.users.title} ({loading ? "..." : members.length})
             </p>
-            <p className="body-small text-[var(--bark)]/68">
+            <p className="body-small text-[rgba(245,237,224,0.66)]">
               {loading
                 ? adminCopy.users.loading
                 : `${adminMembers.length} admins · ${regularMembers.length} membros`}
@@ -92,8 +92,8 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
 
       {loading ? (
         <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <MemberRowSkeleton key={index} />
+          {["one", "two", "three", "four"].map((slot) => (
+            <MemberRowSkeleton key={slot} />
           ))}
         </div>
       ) : null}
@@ -124,7 +124,7 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
       ) : null}
 
       {!loading && members.length === 0 ? (
-        <p className="body-small py-10 text-center text-[var(--bark)]/68">
+        <p className="body-small py-10 text-center text-[rgba(245,237,224,0.66)]">
           {adminCopy.users.empty}
         </p>
       ) : null}

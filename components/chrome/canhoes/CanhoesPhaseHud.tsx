@@ -17,7 +17,7 @@ export function CanhoesPhaseHud({
 }>) {
   if (isLoading) {
     return (
-      <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[rgba(245,237,224,0.78)]">
+      <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[rgba(245,237,224,0.92)]">
         <Loader2 className="h-4 w-4 animate-spin text-[var(--neon-green)]" />
         <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
           A abrir edicao
@@ -46,13 +46,13 @@ export function CanhoesPhaseHud({
       </span>
 
       <span className="min-w-0">
-        <span className="block font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.62)]">
+        <span className="block font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.86)]">
           {event.name}
         </span>
         <span className="block text-sm font-semibold text-[var(--bg-paper)]">
           {phaseLabel}
         </span>
-        <span className="block text-xs text-[rgba(245,237,224,0.74)]">{subtitle}</span>
+        <span className="block text-xs text-[rgba(245,237,224,0.9)]">{subtitle}</span>
       </span>
     </div>
   );

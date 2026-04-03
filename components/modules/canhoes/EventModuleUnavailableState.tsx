@@ -18,20 +18,20 @@ export function EventModuleUnavailableState({
   title: string;
 }>) {
   return (
-    <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
+        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
           <Lock className="h-4 w-4 text-[var(--accent-purple-deep)]" />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="body-small text-[var(--bark)]/78">{description}</p>
+        <p className="body-small text-[rgba(245,237,224,0.78)]">{description}</p>
         <div className="flex flex-wrap gap-2">
           <Button asChild>
             <Link href={fallbackHref}>Ir para {fallbackLabel}</Link>
           </Button>
-          <Button variant="outline" onClick={() => window.location.reload()}>
+          <Button variant="outline" onClick={() => globalThis.location.reload()}>
             <RefreshCw className="h-4 w-4" />
             Recarregar
           </Button>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
 import { REFRESH_EVENT_OVERVIEW_EVENT, pickActiveEvent } from "@/lib/canhoesEvent";
+import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 type EventOverviewState = {
@@ -55,7 +56,15 @@ export function useEventOverview() {
       });
     } catch (error) {
       setState({
-        error: error instanceof Error ? error : new Error("Failed to load event overview."),
+        error: new Error(
+          getErrorMessage(
+            error,
+            "Nao foi possivel carregar o contexto do evento.",
+            {
+              404: "Nao existe um evento ativo para abrir agora.",
+            }
+          )
+        ),
         event: null,
         isLoading: false,
         overview: null,

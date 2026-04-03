@@ -5,12 +5,14 @@ import { Cigarette, ImageOff, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { absMediaUrl } from "@/lib/media";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { AwardCategoryDto, CanhoesStateDto, NomineeDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -41,6 +43,7 @@ export function CanhoesNomineesModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,6 +55,7 @@ export function CanhoesNomineesModule() {
 
   const loadNominees = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const [nextState, nextCategories, nextNominees] = await Promise.all([
@@ -63,6 +67,16 @@ export function CanhoesNomineesModule() {
       setCanhoesState(nextState);
       setCategoryList(nextCategories);
       setNomineeList(nextNominees);
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar as nomeacoes desta edicao."
+      );
+      logFrontendError("CanhoesNominees.loadNominees", error);
+      setCanhoesState(null);
+      setCategoryList([]);
+      setNomineeList([]);
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -124,8 +138,12 @@ export function CanhoesNomineesModule() {
       await loadNominees();
       toast.success("Nomeação submetida com sucesso.");
     } catch (error) {
-      console.error(error);
-      toast.error("Não foi possível submeter a nomeação.");
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel submeter a nomeacao."
+      );
+      logFrontendError("CanhoesNominees.handleSubmit", error);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -202,9 +220,18 @@ export function CanhoesNomineesModule() {
         </CardContent>
       </Card>
 
+      {errorMessage ? (
+        <ErrorAlert
+          title="Erro ao carregar nomeacoes"
+          description={errorMessage}
+          actionLabel="Tentar novamente"
+          onAction={() => void loadNominees()}
+        />
+      ) : null}
+
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar nomeações...</p> : null}
 
-      {!isLoading ? (
+      {!isLoading && !errorMessage ? (
         <div className="space-y-4">
           {categoryList.map((category) => {
             const nomineesForCategory = nomineesByCategory.get(category.id) ?? [];

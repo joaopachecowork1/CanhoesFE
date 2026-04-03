@@ -93,22 +93,22 @@ export function AdminPhaseSection({
   };
 
   return (
-    <div className="space-y-4">
-      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
-        <div className="space-y-4">
+    <div className="space-y-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+        <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--bark)]">Phase</p>
-            <h2 className="text-lg font-semibold text-[var(--text-ink)]">
+            <p className="editorial-kicker text-[var(--neon-green)]">Phase</p>
+            <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
               Evento ativo e mudanca de fase
             </h2>
-            <p className="text-sm leading-6 text-[var(--bark)]/76">
+            <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
               As decisoes globais da edicao ficam aqui: escolher a mesa ativa e
               avancar o ritual entre fases.
             </p>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <div className="canhoes-paper-card rounded-[var(--radius-lg-token)] px-4 py-4">
+            <div className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.7)] px-4 py-4">
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-[var(--accent-purple-soft)]">
                   <CalendarClock className="h-4 w-4" />
@@ -123,23 +123,23 @@ export function AdminPhaseSection({
                     onValueChange={(value) => void handleActivateEvent(value)}
                     disabled={busyKey === "event" || events.length === 0}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.92)] text-[var(--bg-paper)] data-[placeholder]:text-[rgba(245,237,224,0.56)] [&_svg:not([class*='text-'])]:text-[rgba(245,237,224,0.62)] focus-visible:bg-[rgba(18,23,12,0.92)]">
                       <SelectValue placeholder="Escolher evento" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.98)] text-[var(--bg-paper)]">
                       {events.map((event) => (
-                        <SelectItem key={event.id} value={event.id}>
+                        <SelectItem className="text-[var(--bg-paper)] focus:bg-[rgba(177,140,255,0.2)] focus:text-[var(--bg-paper)]" key={event.id} value={event.id}>
                           {event.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
 
-                  <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(251,244,232,0.72)] px-3 py-3">
-                    <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
+                  <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] px-3 py-3">
+                    <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.66)]">
                       Edicao em curso
                     </p>
-                    <p className="mt-2 text-base font-semibold text-[var(--text-ink)]">
+                    <p className="mt-2 text-base font-semibold text-[var(--bg-paper)]">
                       {activeEventName ?? adminCopy.controlStrip.activeEventFallback}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export function AdminPhaseSection({
               </div>
             </div>
 
-            <div className="canhoes-paper-card rounded-[var(--radius-lg-token)] px-4 py-4">
+            <div className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.7)] px-4 py-4">
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-[var(--moss)]">
                   <TimerReset className="h-4 w-4" />
@@ -195,7 +195,7 @@ export function AdminPhaseSection({
                             "canhoes-tap rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-[background-color,border-color,color,box-shadow]",
                             isActive
                               ? "border-[var(--border-purple)] bg-[linear-gradient(180deg,rgba(31,40,20,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
-                              : "border-[rgba(107,76,42,0.16)] bg-[rgba(251,244,232,0.72)] text-[var(--text-ink)] hover:bg-[rgba(255,255,255,0.82)]"
+                              : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)] hover:bg-[rgba(28,36,18,0.92)]"
                           )}
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -207,7 +207,7 @@ export function AdminPhaseSection({
                           <p
                             className={cn(
                               "mt-2 text-xs",
-                              isActive ? "text-[rgba(245,237,224,0.76)]" : "text-[var(--bark)]/68"
+                              isActive ? "text-[rgba(245,237,224,0.76)]" : "text-[rgba(245,237,224,0.66)]"
                             )}
                           >
                             Fecha a {formatPhaseWindow(phase)}

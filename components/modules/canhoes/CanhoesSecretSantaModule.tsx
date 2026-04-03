@@ -12,12 +12,14 @@ import type {
   EventSecretSantaOverviewDto,
   EventWishlistItemDto,
 } from "@/lib/api/types";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 
 type SecretSantaState =
@@ -48,6 +50,7 @@ export function CanhoesSecretSantaModule() {
     Boolean(user?.isAdmin) || Boolean(eventOverview.overview?.permissions.isAdmin);
 
   const [screenState, setScreenState] = useState<SecretSantaState>({ status: "idle" });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawEventCode, setDrawEventCode] = useState(buildDefaultEventCode(null));
 
@@ -55,6 +58,7 @@ export function CanhoesSecretSantaModule() {
     if (!event) {
       if (!isOverviewLoading) {
         setScreenState({ status: "idle" });
+        setErrorMessage(null);
         setDrawEventCode(buildDefaultEventCode(null));
       }
       return;
@@ -65,6 +69,7 @@ export function CanhoesSecretSantaModule() {
 
     async function loadSecretSantaState() {
       setScreenState({ status: "loading" });
+      setErrorMessage(null);
 
       try {
         const [nextOverview, wishlistItems] = await Promise.all([
@@ -82,9 +87,17 @@ export function CanhoesSecretSantaModule() {
             nextOverview.drawEventCode || buildDefaultEventCode(activeEvent.id)
           );
         }
-      } catch {
+      } catch (error) {
         if (!isCancelled) {
+          const message = getErrorMessage(
+            error,
+            "Nao foi possivel carregar o contexto do amigo secreto."
+          );
+          logFrontendError("CanhoesSecretSanta.loadSecretSantaState", error, {
+            eventId: activeEvent.id,
+          });
           setScreenState({ status: "error" });
+          setErrorMessage(message);
         }
       }
     }
@@ -129,9 +142,13 @@ export function CanhoesSecretSantaModule() {
       await refreshOverview();
       toast.success("Sorteio atualizado");
     } catch (error) {
-      console.error("Secret santa draw error:", error);
+      const message = getErrorMessage(error, "Nao foi possivel gerar o sorteio.");
+      logFrontendError("CanhoesSecretSanta.handleDraw", error, {
+        eventId: event.id,
+      });
       setScreenState({ status: "error" });
-      toast.error("Nao foi possivel gerar o sorteio");
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setIsDrawing(false);
     }
@@ -254,11 +271,14 @@ export function CanhoesSecretSantaModule() {
             ) : null}
 
             {screenState.status === "error" ? (
-              <div className="canhoes-list-item p-4">
-                <p className="body-small text-[var(--color-text-muted)]">
-                  Nao foi possivel carregar o contexto do amigo secreto.
-                </p>
-              </div>
+              <ErrorAlert
+                title="Erro ao carregar o amigo secreto"
+                description={
+                  errorMessage ?? "Nao foi possivel carregar o contexto do amigo secreto."
+                }
+                actionLabel="Tentar novamente"
+                onAction={() => void refreshOverview()}
+              />
             ) : null}
           </CardContent>
         </Card>

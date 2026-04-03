@@ -11,7 +11,7 @@ const badgeVariants = cva(
         default:
           "border-[rgba(0,255,136,0.18)] bg-[linear-gradient(180deg,rgba(66,88,38,0.96),rgba(38,54,24,0.96))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]",
         secondary:
-          "border-[rgba(107,76,42,0.18)] bg-[linear-gradient(180deg,var(--bg-paper-soft),var(--bg-paper-alt))] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]",
+          "border-[rgba(212,184,150,0.16)] bg-[rgba(24,30,15,0.9)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
         destructive:
           "border-[rgba(224,90,58,0.22)] bg-[linear-gradient(180deg,var(--color-danger),var(--color-danger-hover))] text-white shadow-sm hover:opacity-90",
         outline:

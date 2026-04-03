@@ -28,6 +28,15 @@ export interface PostComposerSubmitData {
 const MAX_MEDIA_FILES = 10;
 const MAX_POLL_OPTIONS = 6;
 
+function buildPollOptionKey(options: string[], option: string, optionIndex: number): string {
+  const normalizedOption = option.trim().toLowerCase() || "vazio";
+  const duplicateCount = options.filter(
+    (entry, index) => index <= optionIndex && entry === option
+  ).length;
+
+  return `poll-option-${normalizedOption}-${duplicateCount}`;
+}
+
 export function PostComposer({
   onSubmit,
 }: Readonly<{
@@ -189,13 +198,13 @@ export function PostComposer({
         </div>
 
         {files.length > 0 ? (
-          <div className="canhoes-paper-card rounded-[var(--radius-lg-token)] p-4 sm:p-5">
+          <div className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] p-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:p-5">
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="editorial-kicker text-[var(--text-muted)]">
+                <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">
                   {feedCopy.composer.mediaSelected}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-[rgba(245,237,224,0.62)]">
                   {files.length}/{MAX_MEDIA_FILES}
                 </p>
               </div>
@@ -204,7 +213,7 @@ export function PostComposer({
                 {files.map((file, fileIndex) => (
                   <div
                     key={`${file.name}-${file.size}-${fileIndex}`}
-                    className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.16)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper-soft)]"
+                    className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] shadow-[var(--shadow-panel)]"
                   >
                     <div className="aspect-square">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,7 +227,7 @@ export function PostComposer({
                     <button
                       type="button"
                       onClick={() => removeFile(fileIndex)}
-                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(107,76,42,0.16)] bg-[rgba(255,248,239,0.96)] text-[var(--text-dark)] shadow-[var(--shadow-paper-soft)] transition-transform active:scale-95"
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(212,184,150,0.16)] bg-[rgba(12,16,8,0.9)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)] transition-transform active:scale-95"
                       aria-label="Remover imagem"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -266,7 +275,7 @@ export function PostComposer({
                 <div className="space-y-2">
                   {pollOptions.map((option, optionIndex) => (
                     <div
-                      key={`poll-option-${optionIndex}`}
+                      key={buildPollOptionKey(pollOptions, option, optionIndex)}
                       className="flex items-center gap-2"
                     >
                       <Input

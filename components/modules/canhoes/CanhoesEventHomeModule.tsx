@@ -26,6 +26,8 @@ import {
   openComposeSheet,
 } from "@/lib/canhoesEvent";
 import { homeCopy as productHomeCopy } from "@/lib/canhoesCopy";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { absMediaUrl } from "@/lib/media";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import {
@@ -57,6 +59,12 @@ type ActionLink = {
   label: string;
   onClick?: () => void;
   tone?: "default" | "outline" | "secondary";
+};
+
+type HomeCopyData = {
+  alerts: string[];
+  primaryAction: ActionLink;
+  secondaryAction: ActionLink;
 };
 
 function pickFallbackAction(overview: EventOverviewDto): ActionLink {
@@ -165,15 +173,18 @@ function buildHomeActions({
     }
   })();
 
-  const secondaryAction: ActionLink =
-    phaseType === "DRAW"
-      ? buildModuleAction(overview, "wishlist", "Abrir wishlist", "outline")
-      : overview.modules.feed
-        ? { label: "Publicar no feed", onClick: openComposeSheet, tone: "outline" }
-        : {
-            ...pickFallbackAction(overview),
-            tone: "outline",
-          };
+  let secondaryAction: ActionLink;
+
+  if (phaseType === "DRAW") {
+    secondaryAction = buildModuleAction(overview, "wishlist", "Abrir wishlist", "outline");
+  } else if (overview.modules.feed) {
+    secondaryAction = { label: "Publicar no feed", onClick: openComposeSheet, tone: "outline" };
+  } else {
+    secondaryAction = {
+      ...pickFallbackAction(overview),
+      tone: "outline",
+    };
+  }
 
   return { primaryAction, secondaryAction };
 }
@@ -209,11 +220,13 @@ function buildHomeAlerts({
 export function CanhoesEventHomeModule() {
   const { event, error, isLoading: isOverviewLoading, overview } = useEventOverview();
   const [homeExtras, setHomeExtras] = useState<HomeExtrasState>({ status: "idle" });
+  const [homeExtrasError, setHomeExtrasError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!event || !overview) {
       if (!isOverviewLoading) {
         setHomeExtras({ status: "idle" });
+        setHomeExtrasError(null);
       }
       return;
     }
@@ -224,6 +237,7 @@ export function CanhoesEventHomeModule() {
 
     async function loadHomeExtras() {
       setHomeExtras({ status: "loading" });
+      setHomeExtrasError(null);
 
       try {
         const [secretSanta, voting, recentPosts] = await Promise.all([
@@ -251,9 +265,17 @@ export function CanhoesEventHomeModule() {
             voting,
           });
         }
-      } catch {
+      } catch (nextError) {
         if (!isCancelled) {
+          const message = getErrorMessage(
+            nextError,
+            "Nao foi possivel carregar os atalhos e resumos desta edicao."
+          );
+          logFrontendError("CanhoesEventHome.loadHomeExtras", nextError, {
+            eventId: activeEvent.id,
+          });
           setHomeExtras({ status: "error" });
+          setHomeExtrasError(message);
         }
       }
     }
@@ -289,10 +311,10 @@ export function CanhoesEventHomeModule() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+      <div className="space-y-5">
+        <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
           <CardContent className="flex min-h-[16rem] items-center justify-center">
-            <div className="flex items-center gap-3 text-[var(--bark)]/76">
+            <div className="flex items-center gap-3 text-[rgba(245,237,224,0.9)]">
               <Loader2 className="h-5 w-5 animate-spin text-[var(--moss)]" />
               <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
                 {productHomeCopy.loading}
@@ -306,13 +328,16 @@ export function CanhoesEventHomeModule() {
 
   if (error || !event || !overview || homeExtras.status !== "ready" || !homeCopy) {
     return (
-      <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
+      <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
         <CardContent className="space-y-3 py-8 text-center">
-          <p className="heading-3 text-[var(--text-ink)]">{productHomeCopy.errorTitle}</p>
-          <p className="body-small text-[var(--bark)]/76">{productHomeCopy.errorDescription}</p>
-          <div className="flex justify-center">
-            <Button onClick={() => window.location.reload()}>Tentar outra vez</Button>
-          </div>
+          <ErrorAlert
+            title={productHomeCopy.errorTitle}
+            description={
+              error?.message ?? homeExtrasError ?? productHomeCopy.errorDescription
+            }
+            actionLabel="Tentar outra vez"
+            onAction={() => globalThis.location.reload()}
+          />
         </CardContent>
       </Card>
     );
@@ -321,259 +346,376 @@ export function CanhoesEventHomeModule() {
   const { recentPosts, secretSanta, voting } = homeExtras;
   const phaseLabel = getPhaseLabel(overview.activePhase?.type);
   const phaseSummary = getPhaseSummary(overview.activePhase?.type);
-  const phaseDeadline = formatPhaseWindow(overview.activePhase);
+  const phaseDeadline = formatPhaseWindow(overview.activePhase) ?? "S/A definir";
   const secretSantaAction = buildModuleAction(
     overview,
     "secretSanta",
     "Abrir area do sorteio"
   );
   const wishlistAction = buildModuleAction(overview, "wishlist", "Gerir wishlist", "secondary");
+  return (
+    <CanhoesEventHomeContent
+      event={event}
+      homeCopy={homeCopy}
+      overview={overview}
+      phaseDeadline={phaseDeadline}
+      phaseLabel={phaseLabel}
+      phaseSummary={phaseSummary}
+      recentPosts={recentPosts}
+      secretSanta={secretSanta}
+      secretSantaAction={secretSantaAction}
+      voting={voting}
+      wishlistAction={wishlistAction}
+    />
+  );
+}
 
+function CanhoesEventHomeContent({
+  event,
+  homeCopy,
+  overview,
+  phaseDeadline,
+  phaseLabel,
+  phaseSummary,
+  recentPosts,
+  secretSanta,
+  secretSantaAction,
+  voting,
+  wishlistAction,
+}: Readonly<{
+  event: EventOverviewDto["event"];
+  homeCopy: HomeCopyData;
+  overview: EventOverviewDto;
+  phaseDeadline: string;
+  phaseLabel: string;
+  phaseSummary: string;
+  recentPosts: EventFeedPostDto[];
+  secretSanta: EventSecretSantaOverviewDto;
+  secretSantaAction: ActionLink;
+  voting: EventVotingOverviewDto;
+  wishlistAction: ActionLink;
+}>) {
   return (
     <div className="space-y-4">
-      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-        <div className="space-y-4 px-4 py-5 sm:px-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
-              {phaseLabel}
-            </Badge>
-            {overview.nextPhase ? (
-              <Badge
-                variant="outline"
-                className="border-[var(--border-purple)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)]"
-              >
-                Proxima: {getPhaseLabel(overview.nextPhase.type)}
-              </Badge>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[var(--beige)]/68">
-              {event.name}
-            </p>
-            <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm),var(--glow-purple-sm)]">
-              {productHomeCopy.heroTitle}
-            </h1>
-            <p className="body-base max-w-3xl text-[var(--beige)]/82">{phaseSummary}</p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              label="Votacao"
-              value={`${voting.submittedVoteCount}/${voting.categoryCount}`}
-              tone="purple"
-              hint={
-                voting.categoryCount > 0
-                  ? `${voting.remainingVoteCount} por fechar`
-                  : "Sem categorias abertas nesta fase"
-              }
-            />
-            <MetricCard
-              label="Wishlist"
-              value={String(secretSanta.myWishlistItemCount)}
-              hint={
-                secretSanta.hasAssignment
-                  ? "Ligada ao teu amigo secreto"
-                  : "Prepara antes do sorteio"
-              }
-            />
-            <MetricCard
-              label="Feed"
-              value={String(overview.counts.feedPostCount)}
-              tone="purple"
-              hint="Posts ja publicados nesta edicao"
-            />
-            <MetricCard
-              label="Membros"
-              value={String(overview.counts.memberCount)}
-              hint={`${overview.counts.pendingProposalCount} itens em revisao`}
-            />
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <ActionButton action={homeCopy.primaryAction} />
-            <ActionButton action={homeCopy.secondaryAction} />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(212,184,150,0.12)] pt-4 text-sm text-[var(--beige)]/76">
-            <span className="inline-flex items-center gap-2">
-              <Clock3 className="h-4 w-4 text-[var(--accent-purple-soft)]" />
-              {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
-              {overview.permissions.canManage
-                ? productHomeCopy.manageLabel
-                : productHomeCopy.memberLabel}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {homeCopy.alerts.length > 0 ? (
-        <Card className="canhoes-paper-panel border-[var(--border-purple)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-              <Clock3 className="h-4 w-4 text-[var(--accent-purple-deep)]" />
-              {productHomeCopy.alertsTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {homeCopy.alerts.map((alert) => (
-              <div
-                key={alert}
-                className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.14),transparent_34%),rgba(248,240,226,0.78)] px-3 py-3 text-sm text-[var(--bark)]/82"
-              >
-                {alert}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
-
+      <HomeHeroSection
+        event={event}
+        homeCopy={homeCopy}
+        overview={overview}
+        phaseDeadline={phaseDeadline}
+        phaseLabel={phaseLabel}
+        phaseSummary={phaseSummary}
+        secretSanta={secretSanta}
+        voting={voting}
+      />
+      <HomeAlertsCard homeCopy={homeCopy} />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        {overview.modules.feed ? (
-          <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-                <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
-                Feed da edicao
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recentPosts.length === 0 ? (
-                <div className="rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.14)] bg-[rgba(255,255,255,0.35)] px-3 py-4 text-sm text-[var(--bark)]">
-                  {productHomeCopy.emptyFeed}
-                </div>
-              ) : (
-                recentPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                        {post.userName}
-                      </p>
-                      <span className="text-xs text-[var(--bark)]/72">
-                        {new Date(post.createdAt).toLocaleDateString("pt-PT")}
-                      </span>
-                    </div>
-                    <p className="text-sm leading-6 text-[var(--text-ink)]">{post.content}</p>
-                    {post.mediaUrls?.[0] || post.imageUrl ? (
-                      <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
-                          alt={`Media do post de ${post.userName}`}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-44 w-full object-cover"
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                ))
-              )}
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={openComposeSheet}>
-                  Publicar no feed
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
-
+        <HomeFeedCard overview={overview} recentPosts={recentPosts} />
         <div className="space-y-4">
-          {overview.modules.secretSanta ? (
-            <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-                  <Gift className="h-4 w-4 text-[var(--moss)]" />
-                  {productHomeCopy.secretSantaTitle}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {secretSanta.hasAssignment && secretSanta.assignedUser ? (
-                  <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
-                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                      Pessoa atribuida
-                    </p>
-                    <p className="text-base font-semibold text-[var(--text-ink)]">
-                      {secretSanta.assignedUser.name}
-                    </p>
-                    <p className="text-sm text-[var(--bark)]">
-                      {secretSanta.assignedWishlistItemCount} itens na wishlist.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(107,76,42,0.12)] bg-[rgba(255,255,255,0.4)] px-3 py-3">
-                    <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[var(--bark)]">
-                      Estado
-                    </p>
-                    <p className="text-sm text-[var(--text-ink)]">
-                      {secretSanta.hasDraw
-                        ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
-                        : "O sorteio desta edicao ainda nao foi gerado."}
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <Button variant="outline" asChild>
-                    <Link href={secretSantaAction.href ?? "/canhoes"}>
-                      {secretSantaAction.label}
-                    </Link>
-                  </Button>
-                  <Button variant="secondary" asChild>
-                    <Link href={wishlistAction.href ?? "/canhoes"}>{wishlistAction.label}</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          <Card className="canhoes-paper-card border-[rgba(107,76,42,0.16)] text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)]">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-[var(--text-ink)]">
-                <Vote className="h-4 w-4 text-[var(--moss)]" />
-                {productHomeCopy.checklistTitle}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <ChecklistItem
-                done={!overview.modules.wishlist || secretSanta.myWishlistItemCount > 0}
-                label="Estado da tua wishlist"
-                hint={
-                  overview.modules.wishlist
-                    ? `${secretSanta.myWishlistItemCount} itens visiveis`
-                    : "Wishlist indisponivel nesta fase"
-                }
-              />
-              <ChecklistItem
-                done={overview.myProposalCount > 0 || !overview.permissions.canSubmitProposal}
-                label="Estado das tuas propostas"
-                hint={
-                  overview.permissions.canSubmitProposal
-                    ? `${overview.myProposalCount} propostas feitas`
-                    : "Sem propostas abertas nesta fase"
-                }
-              />
-              <ChecklistItem
-                done={!overview.modules.voting || voting.remainingVoteCount === 0}
-                label="Votacao deste ciclo"
-                hint={
-                  overview.modules.voting && voting.categoryCount > 0
-                    ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias`
-                    : "Sem votacoes abertas"
-                }
-              />
-            </CardContent>
-          </Card>
+          <HomeSecretSantaCard
+            overview={overview}
+            secretSanta={secretSanta}
+            secretSantaAction={secretSantaAction}
+            wishlistAction={wishlistAction}
+          />
+          <HomeChecklistCard overview={overview} secretSanta={secretSanta} voting={voting} />
         </div>
       </div>
     </div>
+  );
+}
+
+function HomeHeroSection({
+  event,
+  homeCopy,
+  overview,
+  phaseDeadline,
+  phaseLabel,
+  phaseSummary,
+  secretSanta,
+  voting,
+}: Readonly<{
+  event: EventOverviewDto["event"];
+  homeCopy: HomeCopyData;
+  overview: EventOverviewDto;
+  phaseDeadline: string;
+  phaseLabel: string;
+  phaseSummary: string;
+  secretSanta: EventSecretSantaOverviewDto;
+  voting: EventVotingOverviewDto;
+}>) {
+  return (
+    <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <div className="space-y-4 px-4 py-5 sm:px-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
+            {phaseLabel}
+          </Badge>
+          {overview.nextPhase ? (
+            <Badge
+              variant="outline"
+              className="border-[var(--border-purple)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)]"
+            >
+              Proxima: {getPhaseLabel(overview.nextPhase.type)}
+            </Badge>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.88)]">
+            {event.name}
+          </p>
+          <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+            {productHomeCopy.heroTitle}
+          </h1>
+          <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">{phaseSummary}</p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            label="Votacao"
+            value={`${voting.submittedVoteCount}/${voting.categoryCount}`}
+            tone="purple"
+            hint={
+              voting.categoryCount > 0
+                ? `${voting.remainingVoteCount} por fechar`
+                : "Sem categorias abertas nesta fase"
+            }
+          />
+          <MetricCard
+            label="Wishlist"
+            value={String(secretSanta.myWishlistItemCount)}
+            hint={
+              secretSanta.hasAssignment
+                ? "Ligada ao teu amigo secreto"
+                : "Prepara antes do sorteio"
+            }
+          />
+          <MetricCard
+            label="Feed"
+            value={String(overview.counts.feedPostCount)}
+            tone="purple"
+            hint="Posts ja publicados nesta edicao"
+          />
+          <MetricCard
+            label="Membros"
+            value={String(overview.counts.memberCount)}
+            hint={`${overview.counts.pendingProposalCount} itens em revisao`}
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <ActionButton action={homeCopy.primaryAction} />
+          <ActionButton action={homeCopy.secondaryAction} />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(212,184,150,0.12)] pt-4 text-sm text-[rgba(245,237,224,0.9)]">
+          <span className="inline-flex items-center gap-2">
+            <Clock3 className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+            {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
+            {overview.permissions.canManage ? productHomeCopy.manageLabel : productHomeCopy.memberLabel}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HomeAlertsCard({ homeCopy }: Readonly<{ homeCopy: HomeCopyData }>) {
+  if (homeCopy.alerts.length === 0) return null;
+
+  return (
+    <Card className="rounded-[var(--radius-lg-token)] border border-[var(--border-purple)] bg-[rgba(93,67,138,0.18)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
+          <Clock3 className="h-4 w-4 text-[var(--accent-purple-deep)]" />
+          {productHomeCopy.alertsTitle}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {homeCopy.alerts.map((alert) => (
+          <div
+            key={alert}
+            className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[rgba(93,67,138,0.28)] px-3 py-3 text-sm text-[var(--bg-paper)]"
+          >
+            {alert}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function HomeFeedCard({
+  overview,
+  recentPosts,
+}: Readonly<{
+  overview: EventOverviewDto;
+  recentPosts: EventFeedPostDto[];
+}>) {
+  if (!overview.modules.feed) return null;
+
+  return (
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
+          <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
+          Feed da edicao
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {recentPosts.length === 0 ? (
+          <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-4 text-sm text-[rgba(245,237,224,0.88)]">
+            {productHomeCopy.emptyFeed}
+          </div>
+        ) : (
+          recentPosts.map((post) => (
+            <div
+              key={post.id}
+              className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.8)]">
+                  {post.userName}
+                </p>
+                <span className="text-xs text-[rgba(245,237,224,0.74)]">
+                  {new Date(post.createdAt).toLocaleDateString("pt-PT")}
+                </span>
+              </div>
+              <p className="text-sm leading-6 text-[var(--bg-paper)]">{post.content}</p>
+              {post.mediaUrls?.[0] || post.imageUrl ? (
+                <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
+                    alt={`Media do post de ${post.userName}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-44 w-full object-cover"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ))
+        )}
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={openComposeSheet}>
+            Publicar no feed
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function HomeSecretSantaCard({
+  overview,
+  secretSanta,
+  secretSantaAction,
+  wishlistAction,
+}: Readonly<{
+  overview: EventOverviewDto;
+  secretSanta: EventSecretSantaOverviewDto;
+  secretSantaAction: ActionLink;
+  wishlistAction: ActionLink;
+}>) {
+  if (!overview.modules.secretSanta) return null;
+
+  return (
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+      <CardHeader className="space-y-3">
+        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
+          <Gift className="h-4 w-4 text-[var(--moss)]" />
+          {productHomeCopy.secretSantaTitle}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {secretSanta.hasAssignment && secretSanta.assignedUser ? (
+          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3">
+            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.78)]">
+              Pessoa atribuida
+            </p>
+            <p className="text-base font-semibold text-[var(--bg-paper)]">{secretSanta.assignedUser.name}</p>
+            <p className="text-sm text-[rgba(245,237,224,0.84)]">
+              {secretSanta.assignedWishlistItemCount} itens na wishlist.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3">
+            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.78)]">
+              Estado
+            </p>
+            <p className="text-sm text-[var(--bg-paper)]">
+              {secretSanta.hasDraw
+                ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
+                : "O sorteio desta edicao ainda nao foi gerado."}
+            </p>
+          </div>
+        )}
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button variant="outline" asChild>
+            <Link href={secretSantaAction.href ?? "/canhoes"}>{secretSantaAction.label}</Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link href={wishlistAction.href ?? "/canhoes"}>{wishlistAction.label}</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function HomeChecklistCard({
+  overview,
+  secretSanta,
+  voting,
+}: Readonly<{
+  overview: EventOverviewDto;
+  secretSanta: EventSecretSantaOverviewDto;
+  voting: EventVotingOverviewDto;
+}>) {
+  return (
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
+          <Vote className="h-4 w-4 text-[var(--moss)]" />
+          {productHomeCopy.checklistTitle}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <ChecklistItem
+          done={!overview.modules.wishlist || secretSanta.myWishlistItemCount > 0}
+          label="Estado da tua wishlist"
+          hint={
+            overview.modules.wishlist
+              ? `${secretSanta.myWishlistItemCount} itens visiveis`
+              : "Wishlist indisponivel nesta fase"
+          }
+        />
+        <ChecklistItem
+          done={overview.myProposalCount > 0 || !overview.permissions.canSubmitProposal}
+          label="Estado das tuas propostas"
+          hint={
+            overview.permissions.canSubmitProposal
+              ? `${overview.myProposalCount} propostas feitas`
+              : "Sem propostas abertas nesta fase"
+          }
+        />
+        <ChecklistItem
+          done={!overview.modules.voting || voting.remainingVoteCount === 0}
+          label="Votacao deste ciclo"
+          hint={
+            overview.modules.voting && voting.categoryCount > 0
+              ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias`
+              : "Sem votacoes abertas"
+          }
+        />
+      </CardContent>
+    </Card>
   );
 }
 
@@ -591,16 +733,16 @@ function MetricCard({
   return (
     <div
       className={cn(
-        "canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3",
+        "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3 text-[var(--bg-paper)]",
         tone === "purple" &&
-          "border-[var(--border-purple)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_38%),linear-gradient(180deg,rgba(250,244,233,0.98),rgba(236,228,212,0.98))] shadow-[var(--glow-purple-sm)]"
+          "border-[var(--border-purple)] bg-[rgba(93,67,138,0.18)] shadow-[var(--glow-purple-sm)]"
       )}
     >
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.76)]">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-[var(--text-ink)]">{value}</p>
-      <p className="mt-1 text-xs text-[var(--bark)]/72">{hint}</p>
+      <p className="mt-2 text-2xl font-semibold text-[var(--bg-paper)]">{value}</p>
+      <p className="mt-1 text-xs text-[rgba(245,237,224,0.8)]">{hint}</p>
     </div>
   );
 }
@@ -644,7 +786,7 @@ function ChecklistItem({
   label: string;
 }>) {
   return (
-    <div className="canhoes-paper-card flex items-start gap-3 rounded-[var(--radius-md-token)] px-3 py-3">
+    <div className="flex items-start gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3 text-[var(--bg-paper)]">
       <span
         className={cn(
           "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
@@ -656,11 +798,11 @@ function ChecklistItem({
         <CheckCircle2 className="h-4 w-4" />
       </span>
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--text-ink)]">
+        <span className="block text-sm font-semibold text-[var(--bg-paper)]">
           {label}
         </span>
         {hint ? (
-          <span className="mt-1 block text-xs text-[var(--bark)]/72">{hint}</span>
+          <span className="mt-1 block text-xs text-[rgba(245,237,224,0.8)]">{hint}</span>
         ) : null}
       </span>
     </div>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import type {
   AwardCategoryDto,
 } from "@/lib/api/types";
@@ -124,8 +125,8 @@ export function CategoriesAdmin({
       toast.success("Categoria atualizada");
       await onUpdate();
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao guardar categoria");
+      logFrontendError("Admin.Categories.saveCategory", error, { categoryId, eventId });
+      toast.error(getErrorMessage(error, "Nao foi possivel guardar a categoria."));
     }
   };
 
@@ -149,8 +150,8 @@ export function CategoriesAdmin({
       toast.success("Categoria criada");
       await onUpdate();
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao criar categoria");
+      logFrontendError("Admin.Categories.createCategory", error, { eventId });
+      toast.error(getErrorMessage(error, "Nao foi possivel criar a categoria."));
     } finally {
       setIsCreating(false);
     }
@@ -158,15 +159,18 @@ export function CategoriesAdmin({
 
   const deleteCategory = async (categoryId: string, categoryName: string) => {
     if (!eventId) return;
-    if (!window.confirm(`Eliminar a categoria "${categoryName}"?`)) return;
+    if (!globalThis.confirm(`Eliminar a categoria "${categoryName}"?`)) return;
 
     try {
       await canhoesEventsRepo.adminDeleteCategory(eventId, categoryId);
       toast.success("Categoria removida");
       await onUpdate();
     } catch (error) {
-      console.error(error);
-      toast.error("Nao foi possivel eliminar a categoria");
+      logFrontendError("Admin.Categories.deleteCategory", error, {
+        categoryId,
+        eventId,
+      });
+      toast.error(getErrorMessage(error, "Nao foi possivel eliminar a categoria."));
     }
   };
 
@@ -237,23 +241,25 @@ export function CategoriesAdmin({
           {rows.map((row) => (
             <article
               key={row.id}
-              className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4"
+              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]"
             >
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_110px_220px_auto]">
                 <div className="space-y-2">
-                  <label className="editorial-kicker flex items-center gap-2">
+                  <label htmlFor={`category-name-${row.id}`} className="editorial-kicker flex items-center gap-2">
                     <FolderTree className="h-3.5 w-3.5" />
                     Nome
                   </label>
                   <Input
+                    id={`category-name-${row.id}`}
                     value={row.name}
                     onChange={(event) => setDraft(row.id, { name: event.target.value })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="editorial-kicker">Ordem</label>
+                  <label htmlFor={`category-order-${row.id}`} className="editorial-kicker">Ordem</label>
                   <Input
+                    id={`category-order-${row.id}`}
                     value={row.sortOrder}
                     onChange={(event) => setDraft(row.id, { sortOrder: event.target.value })}
                     inputMode="numeric"
@@ -261,12 +267,12 @@ export function CategoriesAdmin({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="editorial-kicker">Tipo</label>
+                  <label htmlFor={`category-kind-${row.id}`} className="editorial-kicker">Tipo</label>
                   <Select
                     value={row.kind}
                     onValueChange={(value) => setDraft(row.id, { kind: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id={`category-kind-${row.id}`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -277,8 +283,8 @@ export function CategoriesAdmin({
                 </div>
 
                 <div className="flex flex-col gap-3 lg:justify-end">
-                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--color-beige-dark)]/20 bg-[var(--bg-paper-olive)] px-3 py-2">
-                    <span className="text-sm font-medium text-[var(--text-ink)]">
+                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-2">
+                    <span className="text-sm font-medium text-[var(--bg-paper)]">
                       Ativa
                     </span>
                     <Switch

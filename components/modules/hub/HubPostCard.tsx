@@ -1,5 +1,7 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+
 import { BlurFade } from "@/components/animations/BlurFade";
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 
@@ -112,26 +114,35 @@ export function HubPostCard({
             />
           </div>
 
-          {openComments ? (
-            <div className="mt-2">
-              <HubPostComments
-                postId={post.id}
-                postAuthorName={post.authorName}
-                comments={comments}
-                commentCount={post.commentCount ?? 0}
-                openComments={openComments}
-                commentDraft={commentDraft}
-                currentUserId={currentUserId}
-                currentUserName={currentUserName}
-                currentUserImage={currentUserImage}
-                onToggleComments={onToggleComments}
-                onAddComment={onAddComment}
-                onDeleteComment={onDeleteComment}
-                onCommentDraftChange={onCommentDraftChange}
-                onToggleCommentReaction={onToggleCommentReaction}
-              />
-            </div>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {openComments ? (
+              <motion.div
+                key={`${post.id}-comments`}
+                initial={{ opacity: 0, height: 0, y: -6 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-2 overflow-hidden"
+              >
+                <HubPostComments
+                  postId={post.id}
+                  postAuthorName={post.authorName}
+                  comments={comments}
+                  commentCount={post.commentCount ?? 0}
+                  openComments={openComments}
+                  commentDraft={commentDraft}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  currentUserImage={currentUserImage}
+                  onToggleComments={onToggleComments}
+                  onAddComment={onAddComment}
+                  onDeleteComment={onDeleteComment}
+                  onCommentDraftChange={onCommentDraftChange}
+                  onToggleCommentReaction={onToggleCommentReaction}
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </article>
     </BlurFade>

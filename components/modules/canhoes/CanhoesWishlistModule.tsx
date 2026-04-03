@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Gift, ImageOff, Link as LinkIcon, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { PublicUserDto, WishlistItemDto } from "@/lib/api/types";
@@ -35,6 +38,7 @@ export function CanhoesWishlistModule() {
 
   const [memberList, setMemberList] = useState<PublicUserDto[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItemDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -49,6 +53,7 @@ export function CanhoesWishlistModule() {
 
   const loadWishlist = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const [nextMembers, nextWishlistItems] = await Promise.all([
@@ -58,6 +63,15 @@ export function CanhoesWishlistModule() {
 
       setMemberList(Array.isArray(nextMembers) ? nextMembers : []);
       setWishlistItems(Array.isArray(nextWishlistItems) ? nextWishlistItems : []);
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar a wishlist desta edicao."
+      );
+      logFrontendError("CanhoesWishlist.loadWishlist", error);
+      setMemberList([]);
+      setWishlistItems([]);
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +101,14 @@ export function CanhoesWishlistModule() {
       setWishlistNotes("");
       setSelectedFile(null);
       await loadWishlist();
+      toast.success("Item adicionado");
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel guardar este item da wishlist."
+      );
+      logFrontendError("CanhoesWishlist.handleCreate", error);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -98,6 +120,14 @@ export function CanhoesWishlistModule() {
     try {
       await canhoesRepo.deleteWishlistItem(wishlistItemId);
       setWishlistItems((currentItems) => currentItems.filter((wishlistItem) => wishlistItem.id !== wishlistItemId));
+      toast.success("Item removido");
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel remover este item da wishlist."
+      );
+      logFrontendError("CanhoesWishlist.handleDelete", error, { wishlistItemId });
+      toast.error(message);
     } finally {
       setDeletingItemId(null);
     }
@@ -173,9 +203,18 @@ export function CanhoesWishlistModule() {
         </CardContent>
       </Card>
 
+      {errorMessage ? (
+        <ErrorAlert
+          title="Erro ao carregar wishlist"
+          description={errorMessage}
+          actionLabel="Tentar novamente"
+          onAction={() => void loadWishlist()}
+        />
+      ) : null}
+
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
 
-      {!isLoading ? (
+      {!isLoading && !errorMessage ? (
         <div className="space-y-4">
           {memberList.map((member) => {
             const itemsForMember = wishlistByUser.get(member.id) ?? [];

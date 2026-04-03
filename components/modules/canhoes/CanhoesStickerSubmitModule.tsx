@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Cigarette, ImageOff, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type {
@@ -49,6 +51,7 @@ export function CanhoesStickerSubmitModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,6 +74,7 @@ export function CanhoesStickerSubmitModule() {
 
   const loadStickerData = useCallback(async () => {
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const [nextState, nextCategories, nextNominees] = await Promise.all([
@@ -91,11 +95,16 @@ export function CanhoesStickerSubmitModule() {
         (currentCategoryId) => currentCategoryId || defaultStickerCategory?.id || ""
       );
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao carregar stickers");
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar os stickers desta edicao."
+      );
+      logFrontendError("CanhoesStickerSubmit.loadStickerData", error);
+      toast.error(message);
       setCanhoesState(null);
       setCategoryList([]);
       setNomineeList([]);
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -158,8 +167,12 @@ export function CanhoesStickerSubmitModule() {
       await loadStickerData();
       toast.success("Sticker submetido");
     } catch (error) {
-      console.error(error);
-      toast.error("Nao foi possivel submeter o sticker");
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel submeter o sticker."
+      );
+      logFrontendError("CanhoesStickerSubmit.handleSubmit", error);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -199,6 +212,15 @@ export function CanhoesStickerSubmitModule() {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {errorMessage ? (
+            <ErrorAlert
+              title="Erro ao carregar stickers"
+              description={errorMessage}
+              actionLabel="Tentar novamente"
+              onAction={() => void loadStickerData()}
+            />
+          ) : null}
+
           {isLoading ? (
             <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
           ) : null}
@@ -299,7 +321,7 @@ export function CanhoesStickerSubmitModule() {
           <Badge variant="secondary">{stickersWithImage.length}</Badge>
         </div>
 
-        {!isLoading && stickersWithImage.length === 0 ? (
+        {!isLoading && !errorMessage && stickersWithImage.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center">
               <p className="body-small text-[var(--color-text-muted)]">

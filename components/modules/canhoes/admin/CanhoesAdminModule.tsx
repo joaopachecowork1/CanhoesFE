@@ -1,14 +1,14 @@
-// [antes: 213 linhas → depois: 223 linhas]
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { countVisibleModules } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { ApiError } from "@/lib/api/canhoesClient";
@@ -24,7 +24,17 @@ import { AdminMembersSection } from "./components/AdminMembersSection";
 import { AdminModulesSection } from "./components/AdminModulesSection";
 import { AdminOverviewSection } from "./components/AdminOverviewSection";
 import { AdminPhaseSection } from "./components/AdminPhaseSection";
+import { AdminStateMessage } from "./components/AdminStateMessage";
 import { AdminTabs } from "./components/AdminTabs";
+
+function getAdminErrorMessage(error: unknown) {
+  if (!error) return null;
+  if (error instanceof ApiError) {
+    return getErrorMessage(error, "Nao foi possivel carregar o admin.");
+  }
+  if (error instanceof Error) return error.message || "Nao foi possivel carregar o admin.";
+  return "Nao foi possivel carregar o admin.";
+}
 
 export default function CanhoesAdminModule() {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
@@ -80,8 +90,10 @@ export default function CanhoesAdminModule() {
         refreshEventOverview();
         toast.success("Evento ativo atualizado");
       } catch (nextError) {
-        console.error("Admin activate event error:", nextError);
-        toast.error("Nao foi possivel mudar o evento ativo");
+        logFrontendError("Admin.handleActivateEvent", nextError, { eventId });
+        toast.error(
+          getErrorMessage(nextError, "Nao foi possivel mudar o evento ativo.")
+        );
       }
     },
     [activeEvent?.id, refreshOverview]
@@ -96,25 +108,27 @@ export default function CanhoesAdminModule() {
         await handleRefresh();
         toast.success("Fase da edicao atualizada");
       } catch (nextError) {
-        console.error("Admin update phase error:", nextError);
-        toast.error("Nao foi possivel mudar a fase");
+        logFrontendError("Admin.handleUpdatePhase", nextError, { phaseType });
+        toast.error(getErrorMessage(nextError, "Nao foi possivel mudar a fase."));
       }
     },
     [activeEvent?.id, handleRefresh]
   );
 
-  const dashboardError = useMemo(() => {
-    if (!error) return null;
+  const dashboardError = getAdminErrorMessage(error);
+
+  useEffect(() => {
+    if (!error) return;
+
     if (error instanceof ApiError) {
-      console.error("[Admin] fetch error:", {
+      logFrontendError("Admin.bootstrap", error, {
         endpoint: "admin-bootstrap",
         status: error.status,
         details: error.details,
       });
-      return `${error.status}: ${error.message}`;
+      return;
     }
-    if (error instanceof Error) return error.message;
-    return "Erro desconhecido";
+    logFrontendError("Admin.bootstrap", error);
   }, [error]);
 
   const adminTabs = useMemo(
@@ -205,12 +219,31 @@ export default function CanhoesAdminModule() {
   ]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {dashboardError ? (
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="destructive">Erro: {dashboardError}</Badge>
-          <Badge variant="outline">{adminCopy.shell.backendHint}</Badge>
-        </div>
+        <AdminStateMessage
+          variant="panel"
+          tone="error"
+          action={
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => void handleRefresh()}
+              className="border-[rgba(255,236,231,0.18)] bg-[rgba(30,18,12,0.92)] text-[rgba(255,236,231,0.92)] hover:bg-[rgba(44,24,16,0.96)]"
+            >
+              Tentar novamente
+            </Button>
+          }
+        >
+          <div className="space-y-1">
+            <p className="font-semibold text-[rgba(255,236,231,0.96)]">
+              Erro ao carregar o admin
+            </p>
+            <p>{dashboardError}</p>
+            <p className="text-[rgba(255,236,231,0.76)]">{adminCopy.shell.backendHint}</p>
+          </div>
+        </AdminStateMessage>
       ) : null}
 
       <div className="sticky top-[5.75rem] z-20">

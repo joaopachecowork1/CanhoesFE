@@ -86,25 +86,25 @@ export function AdminCategoriesSection({
   );
 
   return (
-    <div className="space-y-4">
-      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
-        <div className="space-y-4">
+    <div className="space-y-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+        <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--bark)]">Categories</p>
-            <h2 className="text-lg font-semibold text-[var(--text-ink)]">
+            <p className="editorial-kicker text-[var(--neon-green)]">Categories</p>
+            <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
               Curadoria e revisao de conteudo
             </h2>
-            <p className="text-sm leading-6 text-[var(--bark)]/76">
+            <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
               A gestao editorial da edicao fica concentrada aqui, com uma vista de
               cada vez para reduzir ruído no telemovel.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{categories.length} categorias</Badge>
-            <Badge variant="outline">{pendingNomineeCount} nomeacoes pendentes</Badge>
-            <Badge variant="outline">{pendingProposalCount} propostas pendentes</Badge>
-            <Badge variant="outline">{votes.length} votos registados</Badge>
+            <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(16,20,11,0.88)] text-[var(--bg-paper)] shadow-none">{categories.length} categorias</Badge>
+            <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(16,20,11,0.88)] text-[var(--bg-paper)] shadow-none">{pendingNomineeCount} nomeacoes pendentes</Badge>
+            <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(16,20,11,0.88)] text-[var(--bg-paper)] shadow-none">{pendingProposalCount} propostas pendentes</Badge>
+            <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(16,20,11,0.88)] text-[var(--bg-paper)] shadow-none">{votes.length} votos registados</Badge>
           </div>
 
           {/* Keep content curation in one top-level tab while splitting the detail
@@ -126,7 +126,7 @@ export function AdminCategoriesSection({
                       "canhoes-tap inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,border-color,color,box-shadow]",
                       isActive
                         ? "border-[var(--border-purple)] bg-[linear-gradient(180deg,rgba(31,40,20,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
-                        : "border-[rgba(107,76,42,0.16)] bg-[rgba(255,255,255,0.48)] text-[var(--text-ink)] hover:bg-[rgba(255,255,255,0.72)]"
+                        : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)] hover:bg-[rgba(28,36,18,0.92)]"
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -137,7 +137,7 @@ export function AdminCategoriesSection({
                           "rounded-full px-1.5 text-[0.7rem] shadow-none",
                           isActive
                             ? "border-[rgba(255,255,255,0.24)] bg-[rgba(255,255,255,0.16)] text-[var(--bg-paper)]"
-                            : "border-[rgba(122,173,58,0.22)] bg-[rgba(122,173,58,0.12)] text-[var(--moss)]"
+                            : "border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.18)] text-[var(--bg-paper)]"
                         )}
                       >
                         {viewCounts[viewId]}
@@ -149,7 +149,7 @@ export function AdminCategoriesSection({
             </div>
           </div>
 
-          <p className="text-sm text-[var(--bark)]/72">{VIEW_META[activeView].description}</p>
+          <p className="text-sm text-[rgba(245,237,224,0.72)]">{VIEW_META[activeView].description}</p>
         </div>
       </section>
 

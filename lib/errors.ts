@@ -1,0 +1,92 @@
+"use client";
+
+import { ApiError } from "@/lib/api/canhoesClient";
+
+const DEFAULT_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: "O pedido nao e valido.",
+  401: "A tua sessao expirou. Entra novamente para continuar.",
+  403: "Nao tens permissao para fazer esta acao.",
+  404: "O recurso pedido ja nao existe.",
+  409: "O estado mudou entretanto. Atualiza a pagina e tenta outra vez.",
+  422: "Os dados enviados nao sao validos.",
+  500: "O servidor falhou a processar o pedido.",
+  502: "O backend nao respondeu a tempo.",
+  503: "O backend esta temporariamente indisponivel.",
+};
+
+function readErrorDetail(details: unknown) {
+  if (typeof details === "string") {
+    const normalized = details.trim();
+    return normalized || null;
+  }
+
+  if (!details || typeof details !== "object") {
+    return null;
+  }
+
+  for (const key of ["message", "detail", "title", "error"]) {
+    const value = (details as Record<string, unknown>)[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
+function isGenericErrorMessage(message: string) {
+  return /^(request failed|failed to fetch|internal server error)$/i.test(
+    message.trim()
+  );
+}
+
+function joinMessages(base: string, detail: string | null) {
+  if (!detail || detail === base || isGenericErrorMessage(detail)) {
+    return base;
+  }
+
+  if (base.endsWith(".") || base.endsWith("!") || base.endsWith("?")) {
+    return `${base} ${detail}`;
+  }
+
+  return `${base}: ${detail}`;
+}
+
+export function getErrorMessage(
+  error: unknown,
+  fallback: string,
+  statusMessages?: Partial<Record<number, string>>
+) {
+  if (error instanceof ApiError) {
+    const baseMessage =
+      statusMessages?.[error.status] ??
+      DEFAULT_STATUS_MESSAGES[error.status] ??
+      fallback;
+
+    return joinMessages(
+      baseMessage,
+      readErrorDetail(error.details) ??
+        (isGenericErrorMessage(error.message) ? null : error.message)
+    );
+  }
+
+  if (error instanceof Error) {
+    if (/failed to fetch/i.test(error.message)) {
+      return `${fallback} Verifica a ligacao ao servidor.`;
+    }
+
+    const message = error.message.trim();
+    return message || fallback;
+  }
+
+  return fallback;
+}
+
+export function logFrontendError(context: string, error: unknown, details?: unknown) {
+  if (typeof details === "undefined") {
+    console.error(`[${context}]`, error);
+    return;
+  }
+
+  console.error(`[${context}]`, error, details);
+}

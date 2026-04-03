@@ -61,7 +61,7 @@ export function PostHeader({
             </p>
             {isPinned ? <Badge variant="secondary">Fixado</Badge> : null}
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-[rgba(242,234,216,0.74)]">
             {formatDateTime(createdAtUtc)}
           </p>
         </div>
@@ -72,7 +72,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
             onClick={onAdminPin}
             title="Fixar ou desafixar"
           >
@@ -81,7 +81,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--color-danger)]"
+            className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--color-danger)]"
             onClick={onAdminDelete}
             title="Eliminar"
           >

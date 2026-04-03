@@ -44,10 +44,10 @@ export function ReactionBar({
             type="button"
             onClick={() => onToggle(emoji)}
             className={cn(
-              "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[11px] font-medium transition-colors",
+              "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[11px] font-medium transition-[transform,background-color,border-color,color,box-shadow] hover:-translate-y-[1px]",
               isActive
-                ? "border-[rgba(122,173,58,0.5)] bg-[rgba(122,173,58,0.15)] text-[var(--text-primary)]"
-                : "border-[var(--border-subtle)] bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.1)] hover:text-[var(--text-primary)]"
+                ? "border-[rgba(122,173,58,0.52)] bg-[rgba(122,173,58,0.18)] text-[var(--bg-paper)] [box-shadow:var(--glow-green-sm)]"
+                : "border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] text-[rgba(242,234,216,0.8)] hover:bg-[rgba(255,255,255,0.12)] hover:text-[var(--bg-paper)]"
             )}
           >
             <span>{emoji}</span>
@@ -62,7 +62,7 @@ export function ReactionBar({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 rounded-full border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.04)] p-0 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.1)] hover:text-[var(--text-primary)]"
+            className="h-6 w-6 rounded-full border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] p-0 text-[rgba(242,234,216,0.76)] hover:bg-[rgba(255,255,255,0.12)] hover:text-[var(--bg-paper)]"
             aria-label="Adicionar reação"
           >
             <Smile className="h-3.5 w-3.5" />

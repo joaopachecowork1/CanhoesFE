@@ -60,7 +60,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--radius-xl-token)] border border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] p-6 text-[var(--text-ink)] shadow-[var(--shadow-paper-soft)] outline-none duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.96),rgba(11,14,8,0.98))] p-6 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] outline-none duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
           className
         )}
         {...props}
@@ -69,7 +69,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[rgba(107,76,42,0.16)] bg-[rgba(255,248,239,0.92)] p-2 text-[var(--text-ink)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[rgba(212,184,150,0.16)] bg-[rgba(12,16,8,0.9)] p-2 text-[var(--bg-paper)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>
@@ -110,7 +110,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("heading-3 text-[var(--text-ink)]", className)}
+      className={cn("heading-3 text-[var(--bg-paper)]", className)}
       {...props}
     />
   )
@@ -123,7 +123,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("body-small text-[var(--bark)]/72", className)}
+      className={cn("body-small text-[rgba(245,237,224,0.72)]", className)}
       {...props}
     />
   )

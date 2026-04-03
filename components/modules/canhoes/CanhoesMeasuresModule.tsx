@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Flame, Gavel } from "lucide-react";
+import { toast } from "sonner";
 
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { CanhoesStateDto, GalaMeasureDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { Textarea } from "@/components/ui/textarea";
 
 function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
@@ -29,12 +32,14 @@ function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
 export function CanhoesMeasuresModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
   const [measureList, setMeasureList] = useState<GalaMeasureDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [proposalText, setProposalText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadMeasures = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
       const [nextState, nextMeasures] = await Promise.all([
@@ -44,6 +49,15 @@ export function CanhoesMeasuresModule() {
 
       setCanhoesState(nextState);
       setMeasureList(nextMeasures);
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar as medidas desta edicao."
+      );
+      logFrontendError("CanhoesMeasures.loadMeasures", error);
+      setCanhoesState(null);
+      setMeasureList([]);
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +82,14 @@ export function CanhoesMeasuresModule() {
     try {
       await canhoesRepo.createMeasureProposal({ text: proposalText.trim() });
       setProposalText("");
+      toast.success("Medida proposta");
     } catch (error) {
-      console.error(error);
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel submeter a medida."
+      );
+      logFrontendError("CanhoesMeasures.handleProposalSubmit", error);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -124,9 +144,18 @@ export function CanhoesMeasuresModule() {
         </CardHeader>
 
         <CardContent className="space-y-3">
+          {errorMessage ? (
+            <ErrorAlert
+              title="Erro ao carregar medidas"
+              description={errorMessage}
+              actionLabel="Tentar novamente"
+              onAction={() => void loadMeasures()}
+            />
+          ) : null}
+
           {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
 
-          {!isLoading && measureList.length === 0 ? (
+          {!isLoading && !errorMessage && measureList.length === 0 ? (
             <p className="body-small text-[var(--color-text-muted)]">Ainda não há medidas.</p>
           ) : null}
 

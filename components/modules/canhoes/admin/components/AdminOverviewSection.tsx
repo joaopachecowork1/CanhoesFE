@@ -1,4 +1,3 @@
-// [antes: 252 linhas → depois: 148 linhas]
 "use client";
 
 import type { ReactNode } from "react";
@@ -58,15 +57,15 @@ export function AdminOverviewSection({
   const visibleModuleCount = countVisibleModules(state?.effectiveModules);
 
   return (
-    <div className="space-y-4">
-      <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5">
-        <div className="space-y-4">
+    <div className="space-y-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+        <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--bark)]">Overview</p>
-            <h2 className="text-lg font-semibold text-[var(--text-ink)]">
+            <p className="editorial-kicker text-[var(--neon-green)]">Overview</p>
+            <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
               Painel de leitura da edicao
             </h2>
-            <p className="text-sm leading-6 text-[var(--bark)]/76">
+            <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
               Estado atual, ritmo da fila e sinais principais da edicao sem misturar
               controlos no topo.
             </p>
@@ -98,9 +97,9 @@ export function AdminOverviewSection({
         </div>
       </section>
 
-      {!state ? (
+      {state ? null : (
         <AdminStateMessage variant="panel">{adminCopy.state.noState}</AdminStateMessage>
-      ) : null}
+      )}
 
       <AdminDashboard
         allNominees={allNominees}
@@ -125,22 +124,22 @@ function OverviewMetric({
   value: string;
 }>) {
   return (
-    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-4 py-4">
+    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.68)] px-4 py-4">
       <div className="flex items-center justify-between gap-3">
         <span
           className={
             tone === "highlight"
-              ? "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(177,140,255,0.26)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
-              : "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(74,92,47,0.2)] bg-[rgba(74,92,47,0.08)] text-[var(--moss)]"
+              ? "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(177,140,255,0.34)] bg-[rgba(177,140,255,0.2)] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
+              : "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(122,173,58,0.26)] bg-[rgba(122,173,58,0.16)] text-[var(--bg-paper)]"
           }
         >
           {icon}
         </span>
-        <p className="max-w-[11rem] text-right text-base font-semibold text-[var(--text-ink)]">
+        <p className="max-w-[11rem] text-right text-base font-semibold text-[var(--bg-paper)]">
           {value}
         </p>
       </div>
-      <p className="mt-3 font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[var(--bark)]/64">
+      <p className="mt-3 font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.66)]">
         {label}
       </p>
     </div>

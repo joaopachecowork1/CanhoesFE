@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 
 const HEART_REACTION = "\u2764\uFE0F";
@@ -111,6 +112,7 @@ function applyCommentReaction(comment: HubCommentDto, emoji: string) {
 
 export function useHubFeed() {
   const [posts, setPosts] = useState<HubPostDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
@@ -127,11 +129,18 @@ export function useHubFeed() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setErrorMessage(null);
+
     try {
       const data = await hubRepo.getPosts(50);
       setPosts(sanitizePosts(data));
-    } catch {
-      toast.error("Erro ao carregar o feed");
+    } catch (error) {
+      const message = getErrorMessage(error, "Nao foi possivel carregar o feed.", {
+        404: "O feed desta edicao ainda nao esta disponivel.",
+      });
+      logFrontendError("HubFeed.load", error);
+      setErrorMessage(message);
+      toast.error(message);
       setPosts([]);
     } finally {
       setLoading(false);
@@ -223,8 +232,13 @@ export function useHubFeed() {
         }
 
         await hubRepo.toggleReaction(postId, emoji);
-      } catch {
-        toast.error("Erro ao atualizar reacao");
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel atualizar a reacao do post."
+        );
+        logFrontendError("HubFeed.toggleReaction", error, { emoji, postId });
+        toast.error(message);
         void load();
       }
     },
@@ -243,8 +257,13 @@ export function useHubFeed() {
 
       try {
         await hubRepo.votePoll(postId, optionId);
-      } catch {
-        toast.error("Erro ao votar");
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel registar o teu voto."
+        );
+        logFrontendError("HubFeed.votePoll", error, { optionId, postId });
+        toast.error(message);
         void load();
       }
     },
@@ -266,8 +285,13 @@ export function useHubFeed() {
           ...currentComments,
           [postId]: (list ?? []).filter(Boolean),
         }));
-      } catch {
-        toast.error("Erro ao carregar comentarios");
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel carregar os comentarios deste post."
+        );
+        logFrontendError("HubFeed.toggleComments", error, { postId });
+        toast.error(message);
       }
     },
     [comments]
@@ -296,8 +320,13 @@ export function useHubFeed() {
             commentCount: (post.commentCount ?? 0) + 1,
           }))
         );
-      } catch {
-        toast.error("Erro ao comentar");
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel publicar o comentario."
+        );
+        logFrontendError("HubFeed.addComment", error, { postId });
+        toast.error(message);
       }
     },
     [commentDrafts]
@@ -314,8 +343,17 @@ export function useHubFeed() {
 
       try {
         await hubRepo.toggleCommentReaction(postId, commentId, emoji);
-      } catch {
-        toast.error("Erro ao atualizar reacao do comentario");
+      } catch (error) {
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel atualizar a reacao do comentario."
+        );
+        logFrontendError("HubFeed.toggleCommentReaction", error, {
+          commentId,
+          emoji,
+          postId,
+        });
+        toast.error(message);
         try {
           const list = await hubRepo.getComments(postId);
           setComments((currentComments) => ({
@@ -353,7 +391,7 @@ export function useHubFeed() {
       try {
         await hubRepo.deleteComment(postId, commentId);
         toast.success("Comentario removido");
-      } catch {
+      } catch (error) {
         setComments((currentComments) => ({
           ...currentComments,
           [postId]: previousComments,
@@ -364,7 +402,12 @@ export function useHubFeed() {
             commentCount: (post.commentCount ?? 0) + 1,
           }))
         );
-        toast.error("Erro ao remover comentario");
+        const message = getErrorMessage(
+          error,
+          "Nao foi possivel remover o comentario."
+        );
+        logFrontendError("HubFeed.deleteComment", error, { commentId, postId });
+        toast.error(message);
       }
     },
     [comments]
@@ -381,8 +424,10 @@ export function useHubFeed() {
           }))
         )
       );
-    } catch {
-      toast.error("Erro ao fixar post");
+    } catch (error) {
+      const message = getErrorMessage(error, "Nao foi possivel atualizar o destaque do post.");
+      logFrontendError("HubFeed.adminPin", error, { postId });
+      toast.error(message);
     }
   }, []);
 
@@ -393,8 +438,10 @@ export function useHubFeed() {
         currentPosts.filter((post) => post.id !== postId)
       );
       toast.success("Post removido");
-    } catch {
-      toast.error("Erro ao remover post");
+    } catch (error) {
+      const message = getErrorMessage(error, "Nao foi possivel remover o post.");
+      logFrontendError("HubFeed.adminDelete", error, { postId });
+      toast.error(message);
     }
   }, []);
 
@@ -404,6 +451,7 @@ export function useHubFeed() {
 
   return {
     posts: safePosts,
+    errorMessage,
     loading,
     comments,
     openComments,

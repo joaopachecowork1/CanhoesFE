@@ -17,8 +17,10 @@ import {
 import { useHubFeed } from "@/hooks/useHubFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { HubPostCard } from "./HubPostCard";
 import { FeedInsightsPanel } from "./components/FeedInsightsPanel";
 import {
@@ -39,6 +41,7 @@ export function HubFeedModule({
 
     const {
         posts,
+        errorMessage,
         loading,
         comments,
         openComments,
@@ -54,6 +57,7 @@ export function HubFeedModule({
         toggleCommentReaction,
         adminPin,
         adminDelete,
+        refresh,
     } = useHubFeed();
     const currentUserName =
         session?.user?.name?.trim() ||
@@ -100,8 +104,9 @@ export function HubFeedModule({
 
             toast.success("Post publicado");
         } catch (error) {
-            console.error(error);
-            toast.error("Nao foi possivel publicar");
+            const message = getErrorMessage(error, "Nao foi possivel publicar no feed.");
+            logFrontendError("HubFeedModule.createPost", error);
+            toast.error(message);
             throw error;
         }
     };
@@ -110,6 +115,15 @@ export function HubFeedModule({
         <div className="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
             <div className="space-y-3">
                 {showComposer ? <PostComposer onSubmit={handleCreatePost} /> : null}
+
+                {errorMessage ? (
+                    <ErrorAlert
+                        title="Erro ao carregar o feed"
+                        description={errorMessage}
+                        actionLabel="Tentar novamente"
+                        onAction={() => void refresh()}
+                    />
+                ) : null}
 
                 {loading ? <FeedSkeleton count={3} /> : (
                     <div className="space-y-3">

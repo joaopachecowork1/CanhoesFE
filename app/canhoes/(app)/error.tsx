@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 
 export default function CanhoesError({
   error,
@@ -11,15 +14,19 @@ export default function CanhoesError({
   reset: () => void;
 }>) {
   useEffect(() => {
-    console.error("[CanhoesErrorBoundary]", error);
+    logFrontendError("CanhoesErrorBoundary", error);
   }, [error]);
 
   return (
     <div className="p-6 md:p-8 rounded-2xl canhoes-glass canhoes-neon-border space-y-4">
       <div className="text-2xl font-semibold canhoes-title">Canhoes do Ano</div>
-      <div className="text-sm md:text-base text-foreground/90 canhoes-label">
-        Houve um erro ao carregar esta secao. Podes tentar novamente ou recarregar a pagina.
-      </div>
+      <ErrorAlert
+        title="Erro ao carregar esta secao"
+        description={getErrorMessage(
+          error,
+          "Houve um erro ao carregar esta secao. Podes tentar novamente ou recarregar a pagina."
+        )}
+      />
       <div className="flex gap-2 flex-wrap">
         <Button className="canhoes-tap canhoes-neon-border" onClick={() => reset()}>
           Tentar novamente

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type {
   CategoryProposalDto,
@@ -119,7 +120,8 @@ export function PendingProposals({
   const withProcessing = async (
     proposalId: string,
     action: () => Promise<unknown>,
-    successMessage = "Acao concluida"
+    successMessage = "Acao concluida",
+    errorFallback = "Nao foi possivel processar a proposta."
   ) => {
     setProcessingIds((previousIds) => new Set(previousIds).add(proposalId));
 
@@ -128,8 +130,10 @@ export function PendingProposals({
       await onUpdate();
       toast.success(successMessage);
     } catch (error) {
-      console.error("Proposal action error:", error);
-      toast.error("Erro ao processar proposta");
+      logFrontendError("Admin.PendingProposals.withProcessing", error, {
+        proposalId,
+      });
+      toast.error(getErrorMessage(error, errorFallback));
     } finally {
       setProcessingIds((previousIds) => {
         const nextIds = new Set(previousIds);
@@ -180,7 +184,8 @@ export function PendingProposals({
     await withProcessing(
       proposal.id,
       () => canhoesEventsRepo.adminUpdateCategoryProposal(eventId, proposal.id, patch),
-      "Proposta de categoria atualizada"
+      "Proposta de categoria atualizada",
+      "Nao foi possivel atualizar a proposta de categoria."
     );
   };
 
@@ -202,7 +207,12 @@ export function PendingProposals({
         ? "Proposta aprovada"
         : status === "rejected"
           ? "Proposta rejeitada"
-          : "Proposta reaberta"
+          : "Proposta reaberta",
+      status === "approved"
+        ? "Nao foi possivel aprovar a proposta."
+        : status === "rejected"
+          ? "Nao foi possivel rejeitar a proposta."
+          : "Nao foi possivel reabrir a proposta."
     );
   };
 
@@ -213,7 +223,8 @@ export function PendingProposals({
     await withProcessing(
       proposal.id,
       () => canhoesEventsRepo.adminDeleteCategoryProposal(eventId, proposal.id),
-      "Proposta removida"
+      "Proposta removida",
+      "Nao foi possivel apagar a proposta de categoria."
     );
   };
 

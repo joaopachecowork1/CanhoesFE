@@ -5,6 +5,7 @@ import { Gift, RefreshCw, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
 import { adminCopy } from "@/lib/canhoesCopy";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import type { EventAdminSecretSantaStateDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -35,6 +36,12 @@ export function SecretSantaAdmin({
 }: Readonly<SecretSantaAdminProps>) {
   const [eventCode, setEventCode] = useState(() => buildDefaultEventCode(eventId));
   const [busy, setBusy] = useState<"draw" | "refresh" | null>(null);
+  let drawButtonLabel: string = adminCopy.secretSanta.draw;
+  if (busy === "draw") {
+    drawButtonLabel = adminCopy.secretSanta.drawing;
+  } else if (state?.hasDraw) {
+    drawButtonLabel = adminCopy.secretSanta.redraw;
+  }
 
   useEffect(() => {
     setEventCode(state?.eventCode || buildDefaultEventCode(eventId));
@@ -52,8 +59,8 @@ export function SecretSantaAdmin({
       await onUpdate();
       toast.success(hadDrawBefore ? "Sorteio atualizado" : "Sorteio criado");
     } catch (error) {
-      console.error("Admin secret santa draw error:", error);
-      toast.error("Nao foi possivel gerar o sorteio");
+      logFrontendError("Admin.SecretSanta.draw", error, { eventId });
+      toast.error(getErrorMessage(error, "Nao foi possivel gerar o sorteio."));
     } finally {
       setBusy(null);
     }
@@ -64,8 +71,10 @@ export function SecretSantaAdmin({
     try {
       await onUpdate();
     } catch (error) {
-      console.error("Admin secret santa refresh error:", error);
-      toast.error("Nao foi possivel atualizar o estado do sorteio");
+      logFrontendError("Admin.SecretSanta.refresh", error, { eventId });
+      toast.error(
+        getErrorMessage(error, "Nao foi possivel atualizar o estado do sorteio.")
+      );
     } finally {
       setBusy(null);
     }
@@ -80,7 +89,7 @@ export function SecretSantaAdmin({
             <span className="label">{adminCopy.secretSanta.kicker}</span>
           </div>
           <CardTitle>{adminCopy.secretSanta.title}</CardTitle>
-          <p className="body-small text-[var(--beige)]/72">
+          <p className="body-small text-[rgba(245,237,224,0.82)]">
             {adminCopy.secretSanta.description}
           </p>
         </CardHeader>
@@ -112,11 +121,7 @@ export function SecretSantaAdmin({
               className="gap-2"
             >
               <Shuffle className="h-4 w-4" />
-              {busy === "draw"
-                ? adminCopy.secretSanta.drawing
-                : state?.hasDraw
-                  ? adminCopy.secretSanta.redraw
-                  : adminCopy.secretSanta.draw}
+              {drawButtonLabel}
             </Button>
           </div>
 
@@ -183,12 +188,12 @@ function StatusMetric({
   value: string;
 }>) {
   return (
-    <div className="canhoes-paper-card rounded-[var(--radius-md-token)] px-3 py-3">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--bark)]/62">
+    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3 text-[var(--bg-paper)]">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.62)]">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-[var(--text-ink)]">{value}</p>
-      <p className="mt-1 text-xs text-[var(--bark)]/72">{hint}</p>
+      <p className="mt-2 text-lg font-semibold text-[var(--bg-paper)]">{value}</p>
+      <p className="mt-1 text-xs text-[rgba(245,237,224,0.72)]">{hint}</p>
     </div>
   );
 }

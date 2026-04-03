@@ -60,11 +60,11 @@ function SheetContent({
         className={cn(
           "fixed z-50 flex flex-col gap-4 border shadow-[var(--shadow-modal)] transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:duration-300",
           side === "right" &&
-            "inset-y-0 right-0 h-full w-[85vw] border-l border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+            "inset-y-0 right-0 h-full w-[85vw] border-l border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.96),rgba(11,14,8,0.98))] text-[var(--bg-paper)] data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
           side === "left" &&
-            "inset-y-0 left-0 h-full w-[85vw] border-r border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+            "inset-y-0 left-0 h-full w-[85vw] border-r border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.96),rgba(11,14,8,0.98))] text-[var(--bg-paper)] data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
           side === "top" &&
-            "inset-x-0 top-0 h-auto border-b border-[rgba(107,76,42,0.16)] bg-[linear-gradient(180deg,rgba(248,240,226,0.98),rgba(236,228,212,0.98))] text-[var(--text-ink)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+            "inset-x-0 top-0 h-auto border-b border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.96),rgba(11,14,8,0.98))] text-[var(--bg-paper)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
           side === "bottom" &&
             "canhoes-sheet inset-x-0 bottom-0 h-auto rounded-t-[1.75rem] border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           className
@@ -72,7 +72,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetClose className="absolute right-4 top-4 rounded-full border border-[rgba(107,76,42,0.16)] p-2 text-[var(--text-ink)] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none">
+        <SheetClose className="absolute right-4 top-4 rounded-full border border-[rgba(212,184,150,0.18)] bg-[rgba(22,28,14,0.72)] p-2 text-[var(--bg-paper)] opacity-80 transition-[opacity,transform,background-color] hover:scale-[1.02] hover:bg-[rgba(30,38,18,0.92)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetClose>
@@ -121,7 +121,7 @@ function SheetDescription({
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={cn("body-small text-[var(--bark)]/72", className)}
+      className={cn("body-small text-[rgba(245,237,224,0.82)]", className)}
       {...props}
     />
   )

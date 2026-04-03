@@ -9,7 +9,7 @@ const HUB_EMOJIS = ["❤️", "🔥", "😂"] as const;
 const HUB_EMOJI_LABELS = ["❤️", "🔥", "😂"] as const;
 
 const reactionButtonGroupClassName =
-  "flex flex-wrap gap-1.5 [&>button]:border-[rgba(74,92,47,0.28)] [&>button]:bg-[rgba(255,255,255,0.06)] [&>button]:text-[var(--text-primary)] [&>button:hover]:bg-[rgba(255,255,255,0.12)]";
+  "flex flex-wrap gap-1.5 [&>button]:border-[rgba(74,92,47,0.3)] [&>button]:bg-[rgba(255,255,255,0.07)] [&>button]:text-[var(--bg-paper)] [&>button]:shadow-[0_8px_18px_rgba(0,0,0,0.14)] [&>button:hover]:bg-[rgba(255,255,255,0.12)]";
 
 type HubPostActionsProps = {
   postId: string;
@@ -53,7 +53,7 @@ export function HubPostActions({
             <span className="text-sm leading-none">
               {HUB_EMOJI_LABELS[emojiIndex]}
             </span>
-            <NumberTicker value={reactionCount} className="text-xs" />
+            <NumberTicker value={reactionCount} className="text-xs text-current" />
           </Button>
         );
       })}
@@ -62,7 +62,7 @@ export function HubPostActions({
         type="button"
         variant={commentsExpanded ? "secondary" : "outline"}
         size="sm"
-        className="rounded-full px-3 text-stone-100 hover:text-white"
+        className="rounded-full px-3 text-[var(--bg-paper)] hover:text-white"
         onClick={() => onToggleComments(postId)}
       >
         <span className="text-xs font-medium">
