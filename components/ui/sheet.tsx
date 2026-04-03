@@ -36,9 +36,10 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(177,140,255,0.14),transparent_28%),rgba(17,21,13,0.74)] backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(177,140,255,0.14),transparent_28%),rgba(17,21,13,0.74)] backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:before:absolute data-[state=open]:before:inset-0 data-[state=open]:before:bg-[radial-gradient(circle_at_top,rgba(177,140,255,0.06),transparent_40%)] data-[state=open]:before:transition-opacity data-[state=open]:before:duration-700 data-[state=open]:before:opacity-100 data-[state=closed]:before:opacity-0",
         className
       )}
+      style={{ willChange: "opacity" }}
       {...props}
     />
   )

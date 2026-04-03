@@ -74,6 +74,30 @@ export default function CanhoesAdminModule() {
     pendingCategoryProposals.length +
     pendingMeasureProposals.length;
 
+  const stats = useMemo(
+    () => ({
+      totalNominees: allNominees.length,
+      pendingNominees: pendingNominees.length,
+      approvedNominees: allNominees.filter((n) => n.status === "approved").length,
+      totalCategories: categories.length,
+      pendingCategories: pendingCategoryProposals.length,
+      totalMeasures: measureProposals.length,
+      pendingMeasures: pendingMeasureProposals.length,
+      memberCount: eventMembers.length,
+      visibleModules: eventState?.effectiveModules?.length ?? 0,
+    }),
+    [
+      allNominees.length,
+      pendingNominees.length,
+      categories.length,
+      pendingCategoryProposals.length,
+      measureProposals.length,
+      pendingMeasureProposals.length,
+      eventMembers.length,
+      eventState?.effectiveModules?.length,
+    ]
+  );
+
   const handleRefresh = useCallback(async () => {
     await refresh();
     refreshEventOverview();
@@ -245,6 +269,46 @@ export default function CanhoesAdminModule() {
           </div>
         </AdminStateMessage>
       ) : null}
+
+      {!loading && activeEvent && (
+        <div className="space-y-2 sm:hidden">
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
+              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+                Candidatos
+              </p>
+              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+                {stats.totalNominees} total
+              </p>
+              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+                {stats.pendingNominees} pendentes
+              </p>
+            </div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
+              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+                Categorias
+              </p>
+              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+                {stats.totalCategories} total
+              </p>
+              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+                {stats.pendingCategories} pendentes
+              </p>
+            </div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
+              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+                Membros
+              </p>
+              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+                {stats.memberCount}
+              </p>
+              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+                {stats.visibleModules} módulos
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="sticky top-[5.75rem] z-20">
         <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />

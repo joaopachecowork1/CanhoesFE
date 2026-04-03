@@ -42,9 +42,10 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md",
+          "bg-[linear-gradient(180deg,rgba(22,28,12,0.92),rgba(10,12,6,0.98))] text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] before:absolute before:inset-0 before:rounded-[var(--radius-md-token)] before:bg-[radial-gradient(ellipse_at_top,rgba(42,24,16,0.0),transparent_30%)] before:transition-opacity before:duration-500 before:opacity-0 before:group-hover:opacity-40 before:group-hover:before:bg-[radial-gradient(ellipse_at_top,rgba(177,140,255,0.12),transparent_40%)] shadow-[0_8px_30px_rgba(0,0,0,0.2),inset_0_1px_0_1px_rgba(255,255,255,0.04)] backdrop-blur-sm group-hover:shadow-[0_8px_30px_rgba(177,140,255,0.06),inset_0_1px_0_1px_rgba(255,255,255,0.06)] ring-1 ring-black/5",
           className
         )}
+        style={{ willChange: "opacity,transform,box-shadow" }}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -230,7 +231,7 @@ function DropdownMenuSubContent({
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
       className={cn(
-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg",
+        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-[var(--radius-sm-token)] border border-[rgba(212,184,150,0.12)] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.16)] backdrop-blur-sm",
         className
       )}
       {...props}

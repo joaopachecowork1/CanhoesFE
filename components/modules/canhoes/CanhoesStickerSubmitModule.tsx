@@ -1,12 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Cigarette, ImageOff, Upload } from "lucide-react";
+import { Cigarette } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  CanhoesFileTrigger,
+  CanhoesMediaThumb,
+  CanhoesModuleHeader,
+  formatCanhoesPhaseLabel,
+  getNomineeStatusBadgeVariant,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type {
   AwardCategoryDto,
@@ -25,27 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeacoes";
-    case "voting":
-      return "Votacao";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
-    default:
-      return "Desconhecida";
-  }
-}
-
-function getNomineeBadgeVariant(status: NomineeDto["status"]) {
-  if (status === "approved") return "secondary";
-  if (status === "rejected") return "destructive";
-  return "outline";
-}
 
 export function CanhoesStickerSubmitModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
@@ -181,27 +166,19 @@ export function CanhoesStickerSubmitModule() {
   return (
     <div className="space-y-4">
       <section className="page-hero px-4 py-4 sm:px-5 sm:py-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-[var(--color-title)]">
-              <Cigarette className="h-4 w-4 text-[var(--color-fire)]" />
-              <span className="editorial-kicker">Sticker do ano</span>
-            </div>
-            <div className="space-y-1">
-              <h1 className="canhoes-section-title">Arquivo de stickers</h1>
-              <p className="body-small max-w-2xl text-[var(--color-text-muted)]">
-                O fluxo de upload agora segue a mesma logica do feed: preview
-                real, validacao explicita e URLs de imagem normalizadas para
-                funcionar em mobile, Vercel e backend remoto.
-              </p>
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-[var(--color-title)]">
+            <Cigarette className="h-4 w-4 text-[var(--color-fire)]" />
+            <span className="editorial-kicker">Sticker do ano</span>
           </div>
-
-          {canhoesState ? (
-            <Badge variant="outline">
-              Fase: {formatPhaseLabel(canhoesState.phase)}
-            </Badge>
-          ) : null}
+          <CanhoesModuleHeader
+            icon={Cigarette}
+            title="Arquivo de stickers"
+            description="O fluxo de upload agora segue a mesma logica do feed: preview real, validacao explicita e URLs de imagem normalizadas para funcionar em mobile, Vercel e backend remoto."
+            badgeLabel={
+              canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+            }
+          />
         </div>
       </section>
 
@@ -255,20 +232,13 @@ export function CanhoesStickerSubmitModule() {
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div className="space-y-3">
               <p className="canhoes-field-label">Imagem</p>
-              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-                <Upload className="h-4 w-4 text-[var(--neon-cyan)]" />
-                <span className="truncate">
-                  {selectedFile?.name ?? "Adicionar imagem (opcional)"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
-                />
-              </label>
+              <CanhoesFileTrigger
+                className="gap-3 rounded-[var(--radius-md-token)] border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-panel)]"
+                fileName={selectedFile?.name}
+                iconClassName="text-[var(--neon-cyan)]"
+                onChange={handleFileChange}
+                placeholder="Adicionar imagem (opcional)"
+              />
               <p className="canhoes-helper-text">
                 Preview local antes do submit. O sticker fica pendente ate um
                 admin aprovar.
@@ -276,20 +246,14 @@ export function CanhoesStickerSubmitModule() {
             </div>
 
             <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-panel)]">
-              <div className="aspect-square overflow-hidden rounded-[calc(var(--radius-md-token)-4px)] bg-[var(--color-bg-surface)]">
-                {selectedFilePreviewUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={selectedFilePreviewUrl}
-                    alt={selectedFile?.name ?? "Preview do sticker"}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-[var(--color-text-muted)]">
-                    <ImageOff className="h-6 w-6" />
-                  </div>
-                )}
-              </div>
+              <CanhoesMediaThumb
+                alt={selectedFile?.name ?? "Preview do sticker"}
+                src={selectedFilePreviewUrl}
+                normalizeSrc={false}
+                frameClassName="aspect-square h-auto w-full rounded-[calc(var(--radius-md-token)-4px)] bg-[var(--color-bg-surface)]"
+                imageClassName="h-full w-full object-cover"
+                iconClassName="h-6 w-6"
+              />
             </div>
           </div>
 
@@ -334,22 +298,12 @@ export function CanhoesStickerSubmitModule() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {stickersWithImage.map((nominee) => (
             <Card key={nominee.id} className="overflow-hidden">
-              <div className="aspect-square bg-[var(--color-bg-surface)]">
-                {nominee.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={absMediaUrl(nominee.imageUrl)}
-                    alt={nominee.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-[var(--color-text-muted)]">
-                    <ImageOff className="h-6 w-6" />
-                  </div>
-                )}
-              </div>
+              <CanhoesMediaThumb
+                alt={nominee.title}
+                src={nominee.imageUrl}
+                frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
+                iconClassName="h-6 w-6"
+              />
 
               <CardContent className="space-y-3 pt-4">
                 <div className="space-y-1">
@@ -361,7 +315,7 @@ export function CanhoesStickerSubmitModule() {
                   </p>
                 </div>
 
-                <Badge variant={getNomineeBadgeVariant(nominee.status)}>
+                <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
                   {nominee.status}
                 </Badge>
               </CardContent>

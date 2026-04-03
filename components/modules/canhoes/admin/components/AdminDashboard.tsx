@@ -3,6 +3,7 @@
 import { AlertTriangle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { adminCopy } from "@/lib/canhoesCopy";
 import type {
   CategoryProposalDto,
@@ -25,12 +26,6 @@ const PENDING_BADGE_LABELS = [
   { key: "categories", suffix: "propostas de categoria" },
   { key: "measures", suffix: "medidas propostas" },
 ] as const;
-
-function getNomineeBadgeVariant(status: NomineeDto["status"]) {
-  if (status === "approved") return "default" as const;
-  if (status === "rejected") return "destructive" as const;
-  return "outline" as const;
-}
 
 function PendingReviewBadges({
   nomineesCount,
@@ -140,7 +135,11 @@ export function AdminDashboard({
                 </div>
 
                 <Badge
-                  variant={getNomineeBadgeVariant(nominee.status)}
+                  variant={
+                    nominee.status === "approved"
+                      ? "default"
+                      : getNomineeStatusBadgeVariant(nominee.status)
+                  }
                 >
                   {nominee.status}
                 </Badge>

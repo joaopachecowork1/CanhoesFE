@@ -243,31 +243,33 @@ export function CategoriesAdmin({
               key={row.id}
               className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]"
             >
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_110px_220px_auto]">
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_110px_220px_auto]">
                 <div className="space-y-2">
-                  <label htmlFor={`category-name-${row.id}`} className="editorial-kicker flex items-center gap-2">
-                    <FolderTree className="h-3.5 w-3.5" />
+                  <label htmlFor={`category-name-${row.id}`} className="editorial-kicker text-xs font-medium flex items-center gap-2">
+                    <FolderTree className="h-3 w-3" />
                     Nome
                   </label>
                   <Input
                     id={`category-name-${row.id}`}
                     value={row.name}
                     onChange={(event) => setDraft(row.id, { name: event.target.value })}
+                    className="h-8"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor={`category-order-${row.id}`} className="editorial-kicker">Ordem</label>
+                  <label htmlFor={`category-order-${row.id}`} className="editorial-kicker text-xs font-medium">Ordem</label>
                   <Input
                     id={`category-order-${row.id}`}
                     value={row.sortOrder}
                     onChange={(event) => setDraft(row.id, { sortOrder: event.target.value })}
                     inputMode="numeric"
+                    className="h-8"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor={`category-kind-${row.id}`} className="editorial-kicker">Tipo</label>
+                  <label htmlFor={`category-kind-${row.id}`} className="editorial-kicker text-xs font-medium">Tipo</label>
                   <Select
                     value={row.kind}
                     onValueChange={(value) => setDraft(row.id, { kind: value })}
@@ -282,7 +284,7 @@ export function CategoriesAdmin({
                   </Select>
                 </div>
 
-                <div className="flex flex-col gap-3 lg:justify-end">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-2">
                     <span className="text-sm font-medium text-[var(--bg-paper)]">
                       Ativa
@@ -292,24 +294,33 @@ export function CategoriesAdmin({
                       onCheckedChange={(checked) => setDraft(row.id, { isActive: checked })}
                     />
                   </div>
+                </div>
 
-                  <Button
-                    type="button"
-                    onClick={() => void saveCategory(row.id)}
-                    disabled={loading}
-                  >
-                    Guardar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => void deleteCategory(row.id, row.name)}
-                    disabled={loading}
-                    className="gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Eliminar
-                  </Button>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[rgba(212,184,150,0.14)] pt-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {row.kind === "Sticker" ? "Sticker" : "Votação"}
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => void saveCategory(row.id)}
+                      disabled={loading}
+                    >
+                      Guardar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => void deleteCategory(row.id, row.name)}
+                      disabled={loading}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               </div>
             </article>

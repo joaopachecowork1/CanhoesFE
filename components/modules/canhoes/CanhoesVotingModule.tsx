@@ -4,34 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Flame, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
-import type {
-  EventPhaseDto,
-  EventVotingBoardDto,
-  EventVotingCategoryDto,
-} from "@/lib/api/types";
+import type { EventVotingBoardDto, EventVotingCategoryDto } from "@/lib/api/types";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import {
+  CanhoesModuleHeader,
+  formatEventPhaseLabel,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-function formatPhaseLabel(phaseType?: EventPhaseDto["type"]) {
-  switch (phaseType) {
-    case "DRAW":
-      return "Sorteio";
-    case "PROPOSALS":
-      return "Propostas";
-    case "VOTING":
-      return "Votacao";
-    case "RESULTS":
-      return "Resultados";
-    default:
-      return "Desconhecida";
-  }
-}
 
 export function CanhoesVotingModule() {
   const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
@@ -94,22 +78,14 @@ export function CanhoesVotingModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
-            Votacao
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">
-            O boletim desta fase usa o mesmo overview do evento para decidir se a
-            votacao esta aberta e que categorias podes fechar.
-          </p>
-        </div>
-
-        {overview ? (
-          <Badge variant="outline">Fase: {formatPhaseLabel(overview.activePhase?.type)}</Badge>
-        ) : null}
-      </div>
+      <CanhoesModuleHeader
+        icon={Trophy}
+        title="Votacao"
+        description="O boletim desta fase usa o mesmo overview do evento para decidir se a votacao esta aberta e que categorias podes fechar."
+        badgeLabel={
+          overview ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}` : undefined
+        }
+      />
 
       {isLoading || isOverviewLoading ? (
         <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>

@@ -4,30 +4,18 @@ import { useEffect, useState } from "react";
 import { Flame, Gavel } from "lucide-react";
 import { toast } from "sonner";
 
+import type { CanhoesStateDto, GalaMeasureDto } from "@/lib/api/types";
+import {
+  CanhoesModuleHeader,
+  formatCanhoesPhaseLabel,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import type { CanhoesStateDto, GalaMeasureDto } from "@/lib/api/types";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Textarea } from "@/components/ui/textarea";
-
-function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeações";
-    case "voting":
-      return "Votação";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
-    default:
-      return "Desconhecida";
-  }
-}
 
 export function CanhoesMeasuresModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
@@ -97,19 +85,14 @@ export function CanhoesMeasuresModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Flame className="h-4 w-4 text-[var(--color-fire)]" />
-            Medidas
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">
-            Junta regras e castigos para a gala sem partir o layout em mobile.
-          </p>
-        </div>
-
-        {canhoesState ? <Badge variant="outline">Fase: {formatPhaseLabel(canhoesState.phase)}</Badge> : null}
-      </div>
+      <CanhoesModuleHeader
+        icon={Flame}
+        title="Medidas"
+        description="Junta regras e castigos para a gala sem partir o layout em mobile."
+        badgeLabel={
+          canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+        }
+      />
 
       <Card>
         <CardHeader className="pb-2">

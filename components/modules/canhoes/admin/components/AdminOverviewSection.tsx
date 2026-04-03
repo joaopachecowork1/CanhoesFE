@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { CalendarClock, Eye, TimerReset, Vote } from "lucide-react";
 
+import { formatEventPhaseLabel } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { countVisibleModules } from "@/lib/modules";
 import type {
@@ -24,21 +25,6 @@ type AdminOverviewSectionProps = {
   pendingNominees: NomineeDto[];
   state: EventAdminStateDto | null;
 };
-
-function getPhaseLabel(phaseType?: string | null) {
-  switch (phaseType) {
-    case "DRAW":
-      return "Sorteio";
-    case "PROPOSALS":
-      return "Propostas";
-    case "VOTING":
-      return "Votacao";
-    case "RESULTS":
-      return "Resultados";
-    default:
-      return "Sem fase ativa";
-  }
-}
 
 export function AdminOverviewSection({
   activeEventName,
@@ -80,7 +66,11 @@ export function AdminOverviewSection({
             <OverviewMetric
               icon={<TimerReset className="h-4 w-4" />}
               label="Fase atual"
-              value={getPhaseLabel(state?.activePhase?.type)}
+              value={
+                state?.activePhase?.type
+                  ? formatEventPhaseLabel(state.activePhase.type)
+                  : "Sem fase ativa"
+              }
             />
             <OverviewMetric
               icon={<Eye className="h-4 w-4" />}

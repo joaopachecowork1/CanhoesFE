@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Gift, ImageOff, Link as LinkIcon, Trash2, Upload } from "lucide-react";
+import { Gift, Link as LinkIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  CanhoesFileTrigger,
+  CanhoesMediaThumb,
+  CanhoesModuleHeader,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
+import { useAuth } from "@/hooks/useAuth";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { PublicUserDto, WishlistItemDto } from "@/lib/api/types";
-import { useAuth } from "@/hooks/useAuth";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -135,19 +139,13 @@ export function CanhoesWishlistModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Gift className="h-4 w-4 text-[var(--color-fire)]" />
-            Wishlist
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">
-            Toda a gente vê a wishlist de toda a gente. Só tu vês o teu amigo secreto.
-          </p>
-        </div>
-
-        <Badge variant="secondary">{wishlistItems.length} itens</Badge>
-      </div>
+      <CanhoesModuleHeader
+        icon={Gift}
+        title="Wishlist"
+        description="Toda a gente ve a wishlist de toda a gente. So tu ves o teu amigo secreto."
+        badgeLabel={`${wishlistItems.length} itens`}
+        badgeVariant="secondary"
+      />
 
       <Card>
         <CardHeader className="pb-2">
@@ -185,16 +183,12 @@ export function CanhoesWishlistModule() {
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-moss)]/20 px-4 py-3 text-sm font-semibold text-[var(--color-text-primary)]">
-              <Upload className="h-4 w-4 text-[var(--color-beige)]" />
-              <span className="truncate">{selectedFile?.name ?? "Adicionar imagem (opcional)"}</span>
-              <input
-                type="file"
-                accept="image/png,image/jpeg"
-                className="sr-only"
-                onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
-              />
-            </label>
+            <CanhoesFileTrigger
+              accept="image/png,image/jpeg"
+              fileName={selectedFile?.name}
+              onChange={setSelectedFile}
+              placeholder="Adicionar imagem (opcional)"
+            />
 
             <Button disabled={!canSubmit || isSaving} onClick={() => void handleCreate()}>
               {isSaving ? "A guardar..." : "Adicionar"}
@@ -238,20 +232,7 @@ export function CanhoesWishlistModule() {
 
                   {itemsForMember.map((wishlistItem) => (
                     <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-3">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
-                        {wishlistItem.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={absMediaUrl(wishlistItem.imageUrl)}
-                            alt={wishlistItem.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <ImageOff className="h-4 w-4 text-[var(--color-text-muted)]" />
-                        )}
-                      </div>
+                      <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
 
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-[var(--color-text-primary)]">{wishlistItem.title}</p>

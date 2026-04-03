@@ -65,9 +65,13 @@ export function HubPostCard({
   );
   const reactionCounts = post.reactionCounts || {};
 
+  const hasMedia = mediaUrls.length > 0;
+  const hasPoll = !!post.poll;
+  const hasText = !!(post.text?.trim());
+
   return (
     <BlurFade delay={index * 50}>
-      <article className="canhoes-feed-card overflow-hidden rounded-[var(--radius-lg-token)]">
+      <article className="canhoes-feed-card overflow-hidden rounded-[var(--radius-lg-token)] transition-shadow hover:shadow-[var(--glow-green-sm)] hover:shadow-lg">
         <div className="space-y-2 px-3 pt-3 sm:px-4">
           <PostHeader
             authorName={post.authorName}
@@ -78,25 +82,23 @@ export function HubPostCard({
             onAdminDelete={() => onAdminDelete(post.id)}
           />
 
-          {post.text ? (
-            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)]">
+          {hasText && (
+            <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
               {post.text}
             </p>
-          ) : null}
+          )}
 
-          {mediaUrls.length > 0 ? (
-            <MediaCarousel urls={mediaUrls} aspect="video" />
-          ) : null}
+          {hasMedia && <MediaCarousel urls={mediaUrls} aspect="video" />}
         </div>
 
-        {post.poll ? (
+        {hasPoll && (
           <div className="px-3 pb-2 pt-1 sm:px-4">
             <PollBox
               poll={post.poll}
               onVote={(optionId) => onVotePoll(post.id, optionId)}
             />
           </div>
-        ) : null}
+        )}
 
         <div className="px-3 pb-3 sm:px-4">
           <div className="mt-2 h-px w-full bg-[var(--border-subtle)]" />

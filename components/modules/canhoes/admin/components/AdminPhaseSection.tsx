@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CalendarClock, RefreshCw, TimerReset } from "lucide-react";
 
+import { formatEventPhaseLabel } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,21 +28,6 @@ type AdminPhaseSectionProps = {
   onUpdatePhase: (phaseType: EventPhaseDto["type"]) => Promise<void>;
   state: EventAdminStateDto | null;
 };
-
-function getPhaseLabel(phaseType?: string | null) {
-  switch (phaseType) {
-    case "DRAW":
-      return "Sorteio";
-    case "PROPOSALS":
-      return "Propostas";
-    case "VOTING":
-      return "Votacao";
-    case "RESULTS":
-      return "Resultados";
-    default:
-      return "Sem fase";
-  }
-}
 
 function formatPhaseWindow(phase: EventPhaseDto) {
   return new Intl.DateTimeFormat("pt-PT", {
@@ -171,7 +157,9 @@ export function AdminPhaseSection({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">
-                    {getPhaseLabel(state?.activePhase?.type)}
+                    {state?.activePhase?.type
+                      ? formatEventPhaseLabel(state.activePhase.type)
+                      : "Sem fase"}
                   </Badge>
                   {state?.activePhase ? (
                     <Badge variant="outline">
@@ -200,7 +188,7 @@ export function AdminPhaseSection({
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
-                              {getPhaseLabel(phase.type)}
+                              {formatEventPhaseLabel(phase.type)}
                             </span>
                             {isActive ? <Badge variant="secondary">Atual</Badge> : null}
                           </div>

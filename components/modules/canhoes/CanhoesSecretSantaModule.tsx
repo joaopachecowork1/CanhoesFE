@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Gift, ImageOff, Link as LinkIcon, Shuffle, User } from "lucide-react";
+import { Gift, Link as LinkIcon, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  CanhoesMediaThumb,
+  CanhoesModuleHeader,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
-import { absMediaUrl } from "@/lib/media";
 import type {
   EventSecretSantaOverviewDto,
   EventWishlistItemDto,
@@ -162,19 +165,12 @@ export function CanhoesSecretSantaModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Gift className="h-4 w-4 text-[var(--color-fire)]" />
-            Amigo Secreto
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">
-            O sorteio, a pessoa que te calhou e a wishlist certa vivem no mesmo fluxo.
-          </p>
-        </div>
-
-        <Badge variant="outline">{badgeLabel}</Badge>
-      </div>
+      <CanhoesModuleHeader
+        icon={Gift}
+        title="Amigo Secreto"
+        description="O sorteio, a pessoa que te calhou e a wishlist certa vivem no mesmo fluxo."
+        badgeLabel={badgeLabel}
+      />
 
       {isAdmin ? (
         <Card>
@@ -242,9 +238,6 @@ export function CanhoesSecretSantaModule() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" asChild>
-                    <Link href={wishlistHref}>{wishlistLabel}</Link>
-                  </Button>
                   <Button variant="outline" asChild>
                     <Link href={wishlistHref}>{wishlistLabel}</Link>
                   </Button>
@@ -331,20 +324,7 @@ export function CanhoesSecretSantaModule() {
 
             {assignedWishlistItems.map((wishlistItem) => (
               <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-3">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
-                  {wishlistItem.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={absMediaUrl(wishlistItem.imageUrl)}
-                      alt={wishlistItem.title}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <ImageOff className="h-4 w-4 text-[var(--color-text-muted)]" />
-                  )}
-                </div>
+                <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
 
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="truncate font-semibold text-[var(--color-text-primary)]">

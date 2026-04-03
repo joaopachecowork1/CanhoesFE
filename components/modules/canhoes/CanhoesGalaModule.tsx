@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ImageOff, Medal, Trophy } from "lucide-react";
+import { Medal, Trophy } from "lucide-react";
 
+import {
+  CanhoesMediaThumb,
+  CanhoesModuleHeader,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { absMediaUrl } from "@/lib/media";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { CanhoesCategoryResultDto } from "@/lib/api/types";
 
@@ -56,17 +59,12 @@ export function CanhoesGalaModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
-            Gala
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">Resultados finais por categoria, em formato legível em mobile.</p>
-        </div>
-
-        <Badge variant="outline">Total votos: {totalVotes}</Badge>
-      </div>
+      <CanhoesModuleHeader
+        icon={Trophy}
+        title="Gala"
+        description="Resultados finais por categoria, em formato legivel em mobile."
+        badgeLabel={`Total votos: ${totalVotes}`}
+      />
 
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar resultados...</p> : null}
 
@@ -102,20 +100,7 @@ export function CanhoesGalaModule() {
                 <div className="space-y-3">
                   {categoryResult.top.map((nominee, index) => (
                     <div key={nominee.nomineeId} className="canhoes-list-item flex items-center gap-3 p-3">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
-                        {nominee.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={absMediaUrl(nominee.imageUrl)}
-                            alt={nominee.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <ImageOff className="h-4 w-4 text-[var(--color-text-muted)]" />
-                        )}
-                      </div>
+                      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

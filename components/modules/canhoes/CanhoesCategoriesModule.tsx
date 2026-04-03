@@ -4,10 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { Flame, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
-import type { EventCategoryDto, EventPhaseDto } from "@/lib/api/types";
+import type { EventCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import {
+    CanhoesModuleHeader,
+    formatEventPhaseLabel,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,21 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-function formatPhaseLabel(phaseType?: EventPhaseDto["type"]) {
-    switch (phaseType) {
-        case "DRAW":
-            return "Sorteio";
-        case "PROPOSALS":
-            return "Propostas";
-        case "VOTING":
-            return "Votacao";
-        case "RESULTS":
-            return "Resultados";
-        default:
-            return "Desconhecida";
-    }
-}
 
 export function CanhoesCategoriesModule() {
     const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
@@ -108,21 +97,16 @@ export function CanhoesCategoriesModule() {
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-1">
-                    <h1 className="canhoes-section-title flex items-center gap-2">
-                        <Flame className="h-4 w-4 text-[var(--color-fire)]" />
-                        Categorias
-                    </h1>
-                    <p className="body-small text-[var(--color-text-muted)]">
-                        Propõe novas categorias enquanto as nomeações estiverem abertas.
-                    </p>
-                </div>
-
-                {overview ? (
-                    <Badge variant="outline">Fase: {formatPhaseLabel(overview.activePhase?.type)}</Badge>
-                ) : null}
-            </div>
+            <CanhoesModuleHeader
+                icon={Flame}
+                title="Categorias"
+                description="Propoe novas categorias enquanto as nomeacoes estiverem abertas."
+                badgeLabel={
+                    overview
+                        ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}`
+                        : undefined
+                }
+            />
 
             <Card>
                 <CardHeader className="pb-2">

@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Cigarette, ImageOff, Upload } from "lucide-react";
+import { Cigarette } from "lucide-react";
 import { toast } from "sonner";
 
-import { absMediaUrl } from "@/lib/media";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { AwardCategoryDto, CanhoesStateDto, NomineeDto } from "@/lib/api/types";
+import {
+  CanhoesFileTrigger,
+  CanhoesMediaThumb,
+  CanhoesModuleHeader,
+  formatCanhoesPhaseLabel,
+  getNomineeStatusBadgeVariant,
+} from "@/components/modules/canhoes/CanhoesModuleParts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,27 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NO_CATEGORY = "__none__";
-
-function formatPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeações";
-    case "voting":
-      return "Votação";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
-    default:
-      return "Desconhecida";
-  }
-}
-
-function getNomineeStatusVariant(status: NomineeDto["status"]) {
-  if (status === "approved") return "secondary";
-  if (status === "rejected") return "destructive";
-  return "outline";
-}
 
 export function CanhoesNomineesModule() {
   const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
@@ -151,19 +136,14 @@ export function CanhoesNomineesModule() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="canhoes-section-title flex items-center gap-2">
-            <Cigarette className="h-4 w-4 text-[var(--color-fire)]" />
-            Canhões do Ano
-          </h1>
-          <p className="body-small text-[var(--color-text-muted)]">
-            Submete uma nomeação com layout simples e controlos legíveis em mobile.
-          </p>
-        </div>
-
-        {canhoesState ? <Badge variant="outline">Fase: {formatPhaseLabel(canhoesState.phase)}</Badge> : null}
-      </div>
+      <CanhoesModuleHeader
+        icon={Cigarette}
+        title="Canhoes do Ano"
+        description="Submete uma nomeacao com layout simples e controlos legiveis em mobile."
+        badgeLabel={
+          canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+        }
+      />
 
       <Card>
         <CardHeader className="pb-2">
@@ -200,16 +180,11 @@ export function CanhoesNomineesModule() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-moss)]/20 px-4 py-3 text-sm font-semibold text-[var(--color-text-primary)]">
-              <Upload className="h-4 w-4 text-[var(--color-beige)]" />
-              <span className="truncate">{selectedFile?.name ?? "Adicionar imagem (opcional)"}</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
-              />
-            </label>
+            <CanhoesFileTrigger
+              fileName={selectedFile?.name}
+              onChange={setSelectedFile}
+              placeholder="Adicionar imagem (opcional)"
+            />
 
             <Button disabled={!isNominationPhase || !canSubmit || isSubmitting} onClick={() => void handleSubmit()}>
               {submitButtonLabel}
@@ -246,20 +221,7 @@ export function CanhoesNomineesModule() {
                 <CardContent className="space-y-3">
                   {nomineesForCategory.map((nominee) => (
                     <div key={nominee.id} className="canhoes-list-item flex items-center gap-3 p-3">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
-                        {nominee.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={absMediaUrl(nominee.imageUrl)}
-                            alt={nominee.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <ImageOff className="h-4 w-4 text-[var(--color-text-muted)]" />
-                        )}
-                      </div>
+                      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
 
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-[var(--color-text-primary)]">{nominee.title}</p>
@@ -268,7 +230,7 @@ export function CanhoesNomineesModule() {
                         </p>
                       </div>
 
-                      <Badge variant={getNomineeStatusVariant(nominee.status)}>{nominee.status}</Badge>
+                      <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>{nominee.status}</Badge>
                     </div>
                   ))}
                 </CardContent>

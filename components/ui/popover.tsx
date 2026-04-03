@@ -30,7 +30,7 @@ function PopoverContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-md border p-4 shadow-md outline-hidden",
+          "data-[slot=popover-content]:bg-popover data-[slot=popover-content]:text-popover-foreground data-[slot=popover-content]:z-50 data-[slot=popover-content]:w-72 data-[slot=popover-content]:origin-(--radix-popover-content-transform-origin) data-[slot=popover-content]:rounded-lg data-[slot=popover-content]:border data-[slot=popover-content]:border-[rgba(212,184,150,0.08)] data-[slot=popover-content]:p-5 data-[slot=popover-content]:shadow-[0_4px_20px_rgba(0,0,0,0.16),inset_0_1px_0_1px_rgba(255,255,255,0.08)] data-[slot=popover-content]:outline-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
         {...props}
