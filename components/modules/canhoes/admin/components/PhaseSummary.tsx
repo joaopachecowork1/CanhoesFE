@@ -1,38 +1,39 @@
 /**
- * Summary section for displaying statistics and counts.
+ * Phase summary card for displaying phase statistics.
  * Matches the dark paper theme with moose-inspired border colors.
- * Used for proposal counts, phase summaries, and other admin metrics.
+ * Used for proposal counts by phase, status breakdown, and other admin metrics.
  *
- * @param description - Brief description of the summary section
- * @param items - Array of stat items with label, value, and optional tone styling
  * @param kicker - Short label above the title (editorial kicker style)
  * @param title - Main title for the summary section
+ * @param description - Brief description of the summary section
+ * @param stats - Array of stat items with label, value, tone, and optional icon
  * @example
  * ```tsx
- * <AdminSectionSummary
- *   kicker="Visao geral"
- *   title="Resumo da edicao"
- *   description="Acompanhe o progresso das propostas por fase."
- *   items={[
- *     { label: "Propostas aprovadas", value: 23, tone: "success" },
- *     { label: "Propostas pendentes", value: 8, tone: "warning" },
+ * <PhaseSummary
+ *   kicker="Distribuição por fase"
+ *   title="Propostas por fase de edicao"
+ *   description="Veja como as propostas se distribuem nas diferentes fases."
+ *   stats={[
+ *     { label: "Candidatura", value: 45, tone: "default", icon: <IconCandidatura /> },
+ *     { label: "Gala", value: 32, tone: "highlight", icon: <IconGala /> },
  *   ]}
  * />
  * ```
  */
-export function AdminSectionSummary({
+export function PhaseSummary({
   description,
-  items,
   kicker,
+  stats,
   title,
 }: Readonly<{
   description: string;
-  items: ReadonlyArray<{
-    label: string;
-    tone?: "default" | "highlight" | "muted" | "success" | "warning";
-    value: number | string;
-  }>;
   kicker: string;
+  stats: ReadonlyArray<{
+    icon?: React.ReactNode;
+    label: string;
+    value: number | string;
+    tone?: "default" | "highlight" | "muted" | "success" | "warning";
+  }>;
   title: string;
 }>) {
   return (
@@ -43,32 +44,35 @@ export function AdminSectionSummary({
         <p className="body-small text-[var(--color-text-muted)]">{description}</p>
       </CardHeader>
       <CardContent className="space-y-3">
-        {items.map((item, index) => (
+        {stats.map((stat, index) => (
           <div
-            key={item.label}
+            key={stat.label}
             className={`flex flex-wrap items-center justify-between gap-2 rounded-md border border-[rgba(212,184,150,0.12)] px-3 py-2 ${
-              item.tone === "highlight"
+              stat.tone === "highlight"
                 ? "bg-gradient-to-r from-[rgba(177,140,255,0.08)] to-transparent"
-                : item.tone === "success"
+                : stat.tone === "success"
                 ? "bg-[rgba(97,220,168,0.08)]"
-                : item.tone === "warning"
+                : stat.tone === "warning"
                 ? "bg-[rgba(253,224,71,0.08)]"
                 : ""
             }`}
           >
-            <span className="text-[var(--color-text-muted)]">{item.label}</span>
+            <div className="flex items-center gap-2">
+              {stat.icon && <div className="shrink-0">{stat.icon}</div>}
+              <span className="text-[var(--color-text-muted)]">{stat.label}</span>
+            </div>
             <span
               className={`heading-4 ${
-                item.tone === "highlight"
+                stat.tone === "highlight"
                   ? "text-[var(--color-accent)]"
-                  : item.tone === "success"
+                  : stat.tone === "success"
                   ? "text-[var(--color-success)]"
-                  : item.tone === "warning"
+                  : stat.tone === "warning"
                   ? "text-[var(--color-warning)]"
                   : "text-[var(--bg-paper)]"
               }`}
             >
-              {item.value}
+              {stat.value}
             </span>
           </div>
         ))}

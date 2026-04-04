@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";

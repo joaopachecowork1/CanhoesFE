@@ -32,6 +32,9 @@ export function useAdminBootstrap(eventId: string | null) {
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getAdminBootstrap(eventId!),
     queryKey: ["canhoes", "admin-bootstrap", eventId],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   const bootstrap = query.data ?? null;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { useEventOverview } from "@/hooks/useEventOverview";
 import {
@@ -9,7 +10,7 @@ import {
   getPhaseSummary,
   openComposeSheet,
 } from "@/lib/canhoesEvent";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { getErrorMessage } from "@/lib/errors";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import {
   CANHOES_MEMBER_MODULE_MAP,
@@ -23,17 +24,6 @@ import type {
   EventSecretSantaOverviewDto,
   EventVotingOverviewDto,
 } from "@/lib/api/types";
-
-type HomeExtrasState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error" }
-  | {
-      status: "ready";
-      recentPosts: EventFeedPostDto[];
-      secretSanta: EventSecretSantaOverviewDto;
-      voting: EventVotingOverviewDto;
-    };
 
 type ActionLink = {
   href?: string;
@@ -196,75 +186,44 @@ function buildHomeCopy(
 }
 
 export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
-  const { event, error, isLoading: isOverviewLoading, overview } = useEventOverview();
-  const [homeExtras, setHomeExtras] = useState<HomeExtrasState>({ status: "idle" });
-  const [homeExtrasError, setHomeExtrasError] = useState<string | null>(null);
+  const { event, error: overviewError, isLoading: isOverviewLoading, overview } = useEventOverview();
 
-  useEffect(() => {
-    if (!event || !overview) {
-      if (!isOverviewLoading) {
-        setHomeExtras({ status: "idle" });
-        setHomeExtrasError(null);
-      }
-      return;
-    }
+  const {
+    data: homeExtras,
+    isLoading: isExtrasLoading,
+    error: extrasError,
+  } = useQuery({
+    queryKey: ["canhoes", "home-extras", event?.id],
+    enabled: Boolean(event && overview),
+    staleTime: 1000 * 60 * 2, // Cache for 2 minutes to prevent immediate refetches
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      if (!event || !overview) return null;
 
-    const currentEvent = event;
-    const currentOverview = overview;
+      const [secretSanta, voting, recentPosts] = await Promise.all([
+        overview.modules.secretSanta
+          ? canhoesEventsRepo.getSecretSantaOverview(event.id)
+          : Promise.resolve(
+              buildSecretSantaFallbackState(event.id, overview.myWishlistItemCount)
+            ),
+        overview.modules.voting
+          ? canhoesEventsRepo.getVotingOverview(event.id)
+          : Promise.resolve(buildVotingFallbackState(overview)),
+        overview.modules.feed
+          ? canhoesEventsRepo.getFeedPosts(event.id)
+          : Promise.resolve([]),
+      ]);
 
-    let isCancelled = false;
-
-    async function loadHomeExtras() {
-      setHomeExtras({ status: "loading" });
-      setHomeExtrasError(null);
-
-      try {
-        const [secretSanta, voting, recentPosts] = await Promise.all([
-          currentOverview.modules.secretSanta
-            ? canhoesEventsRepo.getSecretSantaOverview(currentEvent.id)
-            : Promise.resolve(
-                buildSecretSantaFallbackState(currentEvent.id, currentOverview.myWishlistItemCount)
-              ),
-          currentOverview.modules.voting
-            ? canhoesEventsRepo.getVotingOverview(currentEvent.id)
-            : Promise.resolve(buildVotingFallbackState(currentOverview)),
-          currentOverview.modules.feed
-            ? canhoesEventsRepo.getFeedPosts(currentEvent.id)
-            : Promise.resolve([]),
-        ]);
-
-        if (!isCancelled) {
-          setHomeExtras({
-            status: "ready",
-            recentPosts: recentPosts.slice(0, 3),
-            secretSanta,
-            voting,
-          });
-        }
-      } catch (nextError) {
-        if (!isCancelled) {
-          setHomeExtras({ status: "error" });
-          setHomeExtrasError(
-            getErrorMessage(
-              nextError,
-              "Nao foi possivel carregar os atalhos e resumos desta edicao."
-            )
-          );
-          logFrontendError("CanhoesEventHome.loadHomeExtras", nextError, {
-            eventId: currentEvent.id,
-          });
-        }
-      }
-    }
-
-    void loadHomeExtras();
-    return () => {
-      isCancelled = true;
-    };
-  }, [event, isOverviewLoading, overview]);
+      return {
+        recentPosts: recentPosts.slice(0, 3),
+        secretSanta,
+        voting,
+      };
+    },
+  });
 
   const viewModel = useMemo<CanhoesEventHomeViewModel | null>(() => {
-    if (!event || !overview || homeExtras.status !== "ready") return null;
+    if (!event || !overview || !homeExtras) return null;
 
     return {
       event,
@@ -291,10 +250,8 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
   }, [event, homeExtras, overview]);
 
   return {
-    errorMessage: error?.message ?? homeExtrasError,
-    isLoading:
-      isOverviewLoading ||
-      (Boolean(event && overview) && homeExtras.status === "loading"),
+    errorMessage: overviewError?.message ?? (extrasError ? getErrorMessage(extrasError, "Nao foi possivel carregar os atalhos e resumos desta edicao.") : null),
+    isLoading: isOverviewLoading || isExtrasLoading,
     viewModel,
   };
 }

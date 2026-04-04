@@ -1,22 +1,35 @@
-"use client";
-
-import { Badge } from "@/components/ui/badge";
-
-type AdminReviewCardProps = {
-  actions?: React.ReactNode;
-  children?: React.ReactNode;
-  meta?: string;
-  status?: React.ReactNode;
-  title: string;
-};
-
+/**
+ * Reusable card component for proposal review pages.
+ * Provides a consistent layout with title, meta, status, actions, and optional content slots.
+ * Handles dark paper theme matching the app's aesthetic with subtle gradients.
+ *
+ * @example
+ * ```tsx
+ * <AdminReviewCard
+ *   title="Nova Categoria"
+ *   status={<Badge variant="primary">Nova</Badge>}
+ *   meta="Criada: 5 min atrs"
+ *   actions={<Button onClick={handleSave}>Salvar</Button>}
+ * >
+ *   <div>
+ *     <Input label="Nome" value={name} onChange={handleNameChange} />
+ *   </div>
+ * </AdminReviewCard>
+ * ```
+ */
 export function AdminReviewCard({
   actions,
   children,
   meta,
   status,
   title,
-}: Readonly<AdminReviewCardProps>) {
+}: Readonly<{
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
+  meta?: string;
+  status?: React.ReactNode;
+  title: string;
+}>) {
   return (
     <article className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-3.5 text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.12),transparent_32%)]" />

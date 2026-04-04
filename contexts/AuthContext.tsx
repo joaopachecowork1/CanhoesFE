@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 
 export type AuthUser = {
   id: string;
@@ -31,67 +32,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
-  const [backendUser, setBackendUser] = useState<AuthUser | null>(null);
-  const [isHydratingBackendUser, setIsHydratingBackendUser] = useState(false);
+  const isAuthenticated = status === "authenticated";
 
-  useEffect(() => {
-    if (status !== "authenticated") {
-      setBackendUser(null);
-      setIsHydratingBackendUser(false);
-      return;
-    }
+  const { data: backendUser, isLoading: isHydratingBackendUser } = useQuery<AuthUser | null>({
+    queryKey: ["auth", "me", session?.idToken],
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    gcTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
+    retry: false,
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/me", { signal });
+      if (response.status === 401 || response.status === 403) return null;
+      if (!response.ok) throw new Error(`Failed to load /api/me (${response.status})`);
+      
+      const payload = (await response.json()) as MeResponse;
+      const nextUser = payload.user;
 
-    const controller = new AbortController();
-    setBackendUser(null);
-    setIsHydratingBackendUser(true);
+      if (!nextUser) return null;
 
-    async function hydrateBackendUser() {
-      try {
-        const response = await fetch("/api/me", {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-
-        if (response.status === 401 || response.status === 403) {
-          setBackendUser(null);
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Failed to load /api/me (${response.status})`);
-        }
-
-        const payload = (await response.json()) as MeResponse;
-        const nextUser = payload.user;
-
-        setBackendUser(
-          nextUser
-            ? {
-                id: nextUser.id,
-                email: nextUser.email,
-                name: nextUser.displayName || nextUser.email,
-                isAdmin: Boolean(nextUser.isAdmin),
-              }
-            : null
-        );
-      } catch (error) {
-        if ((error as { name?: string }).name !== "AbortError") {
-          setBackendUser(null);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsHydratingBackendUser(false);
-        }
-      }
-    }
-
-    void hydrateBackendUser();
-
-    return () => controller.abort();
-  }, [session?.idToken, status]);
+      return {
+        id: nextUser.id,
+        email: nextUser.email,
+        name: nextUser.displayName || nextUser.email,
+        isAdmin: Boolean(nextUser.isAdmin),
+      };
+    },
+  });
 
   const user = useMemo<AuthUser | null>(() => {
-    if (status !== "authenticated") return null;
+    if (!isAuthenticated) return null;
 
     const sessionUser = session?.user as
       | {
@@ -112,17 +82,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         "",
       isAdmin: Boolean(backendUser?.isAdmin),
     };
-  }, [backendUser, session?.user, status]);
+  }, [backendUser, session?.user, isAuthenticated]);
 
   const value = useMemo<AuthContextType>(
     () => ({
       user,
-      isLogged: status === "authenticated",
-      loading: status === "loading" || (status === "authenticated" && isHydratingBackendUser),
+      isLogged: isAuthenticated,
+      loading: status === "loading" || (isAuthenticated && isHydratingBackendUser),
       loginGoogle: () => signIn("google"),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
     }),
-    [isHydratingBackendUser, status, user]
+    [isAuthenticated, status, isHydratingBackendUser, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
