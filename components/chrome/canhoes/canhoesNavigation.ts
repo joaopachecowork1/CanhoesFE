@@ -176,7 +176,15 @@ function isNavItemAvailable({
   if (!modules) return false;
 
   const moduleKey = MODULE_KEY_BY_ITEM_ID[itemId as keyof typeof MODULE_KEY_BY_ITEM_ID];
-  return moduleKey ? modules[moduleKey] : false;
+  if (!moduleKey || !modules[moduleKey]) return false;
+
+  if (isAdmin) return true;
+
+  const activePhaseType = overview?.activePhase?.type;
+  if (moduleKey === "nominees") return activePhaseType === "PROPOSALS";
+  if (moduleKey === "voting") return activePhaseType === "VOTING";
+
+  return true;
 }
 
 export function getPromotedNavItems({

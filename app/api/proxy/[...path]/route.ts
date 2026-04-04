@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
+import { IS_MOCK_MODE } from "@/lib/mock";
+import { getMockResponse } from "@/lib/mock/mockFetch";
 
 /**
  * Proxy to the backend (avoids CORS) + injects Google id_token.
@@ -43,6 +45,22 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       return NextResponse.json({ message: "Missing proxy path" }, { status: 400 });
     }
 
+    const proxyPath = params.path.join("/");
+
+    if (IS_MOCK_MODE) {
+      const mockProxyPath = `/${proxyPath}${request.nextUrl.search}`;
+      const mockBody = method !== "GET" && method !== "DELETE" ? await request.text() : null;
+
+      try {
+        const payload = await getMockResponse(mockProxyPath, method, { body: mockBody });
+        return NextResponse.json(payload ?? null, { status: 200 });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Mock request failed";
+        const status = message.includes("Ja submeteste") ? 409 : 500;
+        return NextResponse.json({ message }, { status });
+      }
+    }
+
     // Try to get idToken from JWT
     const token = await getToken({ req: request });
     let idToken = token?.idToken;
@@ -66,7 +84,6 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       });
     }
 
-    const proxyPath = params.path.join("/");
     const backendBase = process.env.CANHOES_API_URL || "http://localhost:5000";
     const backendUrl = `${backendBase}/api/${proxyPath}${request.nextUrl.search}`;
 

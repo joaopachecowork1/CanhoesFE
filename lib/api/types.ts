@@ -91,6 +91,19 @@ export type NomineeDto = {
   imageUrl?: string | null;
   status: "pending" | "approved" | "rejected";
   createdAtUtc: string;
+  submittedByMe?: boolean;
+};
+
+export type AdminNomineeDto = NomineeDto & {
+  submittedByUserId: string;
+  submittedByName: string;
+};
+
+export type MyNominationStatusDto = {
+  categoryId: string;
+  hasNominated: boolean;
+  nomineeId?: string;
+  nomineeTitle?: string;
 };
 
 export type CreateNomineeRequest = {
@@ -430,10 +443,12 @@ export type EventAdminBootstrapDto = {
   state: EventAdminStateDto;
   categories: AwardCategoryDto[];
   nominees: NomineeDto[];
+  adminNominees: AdminNomineeDto[];
   proposals: AdminProposalsHistoryDto;
   votes: AdminVotesDto;
   members: PublicUserDto[];
   secretSanta: EventAdminSecretSantaStateDto;
+  officialResults?: AdminOfficialResultsDto;
 };
 
 export type UpdateEventAdminStateRequest = {
@@ -558,6 +573,69 @@ export type EventVotingBoardDto = {
   phaseId?: string | null;
   canVote: boolean;
   categories: EventVotingCategoryDto[];
+};
+
+export type OfficialVotingOptionDto = {
+  id: string;
+  label: string;
+  imageUrl?: string | null;
+  voteCount?: number | null;
+};
+
+export type OfficialVotingCategoryDto = {
+  id: string;
+  title: string;
+  description?: string | null;
+  kind: "Sticker" | "UserVote";
+  nominees: OfficialVotingOptionDto[];
+  myNomineeId?: string | null;
+  totalVotes?: number | null;
+};
+
+export type OfficialVotingBoardDto = {
+  eventId: string;
+  phaseId?: string | null;
+  canVote: boolean;
+  endsAt?: string | null;
+  resultsVisible?: boolean;
+  categories: OfficialVotingCategoryDto[];
+};
+
+export type CastOfficialVoteRequest = {
+  categoryId: string;
+  nomineeId: string;
+};
+
+export type OfficialVoteDto = {
+  id: string;
+  userId: string;
+  categoryId: string;
+  nomineeId: string;
+  phaseId: string;
+  updatedAtUtc: string;
+};
+
+export type AdminNomineeVoteTallyDto = {
+  nomineeId: string;
+  nomineeTitle: string;
+  imageUrl?: string | null;
+  voteCount: number;
+  voterUserIds: string[];
+};
+
+export type AdminCategoryResultDto = {
+  categoryId: string;
+  categoryName: string;
+  totalVotes: number;
+  nominees: AdminNomineeVoteTallyDto[];
+  participationRate: number;
+};
+
+export type AdminOfficialResultsDto = {
+  eventId: string;
+  generatedAt: string;
+  totalMembers: number;
+  categories: AdminCategoryResultDto[];
 };
 
 export type CreateEventVoteRequest = {

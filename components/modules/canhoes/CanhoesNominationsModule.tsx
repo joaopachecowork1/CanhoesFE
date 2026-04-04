@@ -1,0 +1,264 @@
+"use client";
+
+import { useState } from "react";
+import { CheckCircle2, Clock, Lock, Trophy } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import type { AwardCategoryDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
+import { useEventOverview } from "@/hooks/useEventOverview";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { cn } from "@/lib/utils";
+import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { Input } from "@/components/ui/input";
+
+export function CanhoesNominationsModule() {
+  const queryClient = useQueryClient();
+  const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
+
+  const eventId = event?.id ?? null;
+  const isPhaseOpen = overview?.activePhase?.type === "PROPOSALS";
+
+  const categoriesQuery = useQuery({
+    queryKey: ["nominations", eventId, "categories"],
+    enabled: Boolean(eventId),
+    queryFn: async () => {
+      const categories = await canhoesEventsRepo.adminGetCategories(eventId!);
+      return categories.filter((category) => category.isActive);
+    },
+  });
+
+  const myStatusQuery = useQuery({
+    queryKey: ["nominations", eventId, "my-status"],
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.getMyNominationStatus(eventId!),
+  });
+
+  const approvedQuery = useQuery({
+    queryKey: ["nominations", eventId, "approved"],
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.getApprovedNominees(eventId!),
+  });
+
+  const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
+  const error = categoriesQuery.error ?? myStatusQuery.error ?? approvedQuery.error;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <CanhoesModuleHeader
+          icon={Trophy}
+          title="Nomeacoes"
+          description="Uma nomeacao por categoria durante a fase de propostas."
+        />
+        <FeedSkeleton />
+      </div>
+    );
+  }
+
+  if (!eventId || error) {
+    return (
+      <ErrorAlert
+        title="Erro ao carregar nomeacoes"
+        description={getErrorMessage(error, "Nao foi possivel carregar o modulo de nomeacoes.")}
+        actionLabel="Tentar novamente"
+        onAction={() => {
+          void categoriesQuery.refetch();
+          void myStatusQuery.refetch();
+          void approvedQuery.refetch();
+        }}
+      />
+    );
+  }
+
+  const categories = categoriesQuery.data ?? [];
+  const myStatus = myStatusQuery.data ?? [];
+  const approvedNominees = approvedQuery.data ?? [];
+
+  if (categories.length === 0) {
+    return (
+      <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl">
+        <CardContent className="py-8 text-center text-[var(--text-muted)]">
+          Ainda nao ha categorias abertas.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isPhaseOpen) {
+    return (
+      <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl opacity-80">
+        <CardContent className="py-10 text-center text-[var(--text-muted)] space-y-2">
+          <Lock className="mx-auto h-5 w-5" />
+          <p className="font-semibold">Nomeacoes fechadas</p>
+          <p className="text-sm">Esta area volta a abrir na fase de propostas.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <CanhoesModuleHeader
+        icon={Trophy}
+        title="Nomeacoes"
+        description="Cada membro pode submeter uma nomeacao por categoria."
+        badgeLabel={`Categorias: ${categories.length}`}
+      />
+
+      {categories.map((category) => (
+        <CategoryNominationCard
+          key={category.id}
+          category={category}
+          eventId={eventId}
+          isPhaseOpen={isPhaseOpen}
+          myStatus={myStatus.find((status) => status.categoryId === category.id)}
+          approvedNominees={approvedNominees.filter((nominee) => nominee.categoryId === category.id)}
+          onRefresh={async () => {
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: ["nominations", eventId, "my-status"] }),
+              queryClient.invalidateQueries({ queryKey: ["nominations", eventId, "approved"] }),
+            ]);
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function CategoryNominationCard({
+  category,
+  eventId,
+  myStatus,
+  approvedNominees,
+  isPhaseOpen,
+  onRefresh,
+}: {
+  category: AwardCategoryDto;
+  eventId: string;
+  myStatus: MyNominationStatusDto | undefined;
+  approvedNominees: NomineeDto[];
+  isPhaseOpen: boolean;
+  onRefresh: () => Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [pendingLabel, setPendingLabel] = useState<string | null>(null);
+
+  const titleTrimmed = title.trim();
+  const isValid = titleTrimmed.length >= 2 && titleTrimmed.length <= 120;
+  const alreadyNominated = Boolean(myStatus?.hasNominated || pendingLabel);
+  const nominatedTitle = pendingLabel ?? myStatus?.nomineeTitle;
+
+  const createNomination = useMutation({
+    mutationFn: () =>
+      canhoesEventsRepo.createNomination(eventId, {
+        categoryId: category.id,
+        title: titleTrimmed,
+      }),
+    onSuccess: async () => {
+      setPendingLabel(titleTrimmed);
+      setTitle("");
+      setFile(null);
+      toast.success("Nomeacao submetida. Aguarda aprovacao.");
+      await onRefresh();
+    },
+    onError: (error) => {
+      logFrontendError("CanhoesNominations.createNomination", error, { categoryId: category.id, eventId });
+      toast.error(getErrorMessage(error, "Nao foi possivel submeter a nomeacao."));
+    },
+  });
+
+  return (
+    <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl">
+      <CardHeader className="space-y-1 pb-3">
+        <CardTitle className="text-[var(--text-primary)]">{category.name}</CardTitle>
+        {category.description ? (
+          <p className="text-sm text-[var(--text-muted)]">{category.description}</p>
+        ) : null}
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {alreadyNominated ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="bg-[rgba(255,184,0,0.08)] border border-[var(--neon-amber)] text-[var(--neon-amber)]">
+              <Clock className="mr-1 h-3.5 w-3.5" />
+              Aguarda aprovacao
+            </Badge>
+            <span className="text-sm text-[var(--text-primary)]">{nominatedTitle || "Ja nomeaste nesta categoria"}</span>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <div className="space-y-2">
+              <Input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Ex.: Nome da pessoa ou item"
+                className="border-[var(--border-moss)] focus-visible:border-[var(--border-neon)]"
+                maxLength={120}
+                disabled={!isPhaseOpen || createNomination.isPending}
+              />
+              <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <span>2 a 120 caracteres.</span>
+                <span className="font-[var(--font-mono)]">{titleTrimmed.length}/120</span>
+              </div>
+              {file ? <p className="text-xs text-[var(--text-muted)]">Ficheiro selecionado: {file.name}</p> : null}
+              <label className="block text-xs text-[var(--text-muted)]">
+                Upload opcional
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="mt-1 block w-full text-xs"
+                  onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                  disabled={!isPhaseOpen || createNomination.isPending}
+                />
+              </label>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => createNomination.mutate()}
+              disabled={!isPhaseOpen || !isValid || createNomination.isPending}
+              className={cn(
+                "min-w-36",
+                isValid && !createNomination.isPending
+                  ? "bg-[rgba(0,255,136,0.12)] border border-[var(--border-neon)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                  : "opacity-50"
+              )}
+            >
+              {createNomination.isPending ? "A submeter..." : "Submeter"}
+            </Button>
+          </div>
+        )}
+
+        <div className="pt-1 space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-[var(--text-primary)]">Aprovadas</h4>
+            <span className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
+              {approvedNominees.length} nominee(s)
+            </span>
+          </div>
+
+          {approvedNominees.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria.</p>
+          ) : (
+            <ul className="space-y-2">
+              {approvedNominees.map((nominee) => (
+                <li key={nominee.id} className="canhoes-list-item px-3 py-2 text-sm text-[var(--text-primary)] flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[var(--neon-green)]" />
+                  <span>{nominee.title}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

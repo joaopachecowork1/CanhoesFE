@@ -1,8 +1,10 @@
 import {
+  BarChart2,
   FolderTree,
   LayoutDashboard,
   Layers3,
   TimerReset,
+  Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -10,12 +12,15 @@ import {
 export type AdminSectionId =
   | "overview"
   | "categories"
+  | "nominations"
+  | "results"
   | "members"
   | "modules"
   | "phase";
 
 export type AdminSectionCountContext = {
   memberCount: number;
+  pendingNominationsCount: number;
   pendingReviewCount: number;
   visibleModuleCount: number;
 };
@@ -50,6 +55,20 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
     description: "Curadoria de categorias e revisao de conteudo da edicao.",
     icon: FolderTree,
     count: (context) => context.pendingReviewCount,
+  },
+  {
+    id: "nominations",
+    label: "Nomeacoes",
+    description: "Moderacao de nomeacoes com autoria visivel apenas para admin.",
+    icon: Trophy,
+    count: (context) => context.pendingNominationsCount,
+  },
+  {
+    id: "results",
+    label: "Resultados",
+    description: "Ranking oficial por categoria, participacao e eleitores.",
+    icon: BarChart2,
+    count: () => 0,
   },
   {
     id: "members",

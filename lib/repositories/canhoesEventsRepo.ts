@@ -186,6 +186,22 @@ export const canhoesEventsRepo = {
       method: "POST",
     }),
 
+  getMyNominationStatus: (eventId: string) =>
+    canhoesFetch<T.MyNominationStatusDto[]>(`/v1/events/${eventId}/nominations/my-status`),
+
+  createNomination: (eventId: string, payload: T.CreateNomineeRequest) =>
+    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/nominations`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  getApprovedNominees: (eventId: string, categoryId?: string) =>
+    canhoesFetch<T.NomineeDto[]>(
+      `/v1/events/${eventId}/nominations/approved${
+        categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : ""
+      }`
+    ),
+
   getVotingBoard: (eventId: string) =>
     canhoesFetch<T.EventVotingBoardDto>(`/v1/events/${eventId}/voting`),
 
@@ -194,6 +210,57 @@ export const canhoesEventsRepo = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  getOfficialVotingBoard: (eventId: string) =>
+    canhoesFetch<T.OfficialVotingBoardDto>(`/v1/events/${eventId}/official-voting`),
+
+  castOfficialVote: (eventId: string, payload: T.CastOfficialVoteRequest) =>
+    canhoesFetch<T.OfficialVoteDto>(`/v1/events/${eventId}/official-votes`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  adminGetNominationsWithAuthors: (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    canhoesFetch<T.AdminNomineeDto[]>(
+      `/v1/events/${eventId}/admin/nominations${
+        status ? `?status=${encodeURIComponent(status)}` : ""
+      }`
+    ),
+
+  adminApproveNomination: (eventId: string, nomineeId: string) =>
+    canhoesFetch<T.AdminNomineeDto>(
+      `/v1/events/${eventId}/admin/nominations/${nomineeId}/approve`,
+      {
+        method: "POST",
+      }
+    ),
+
+  adminRejectNomination: (eventId: string, nomineeId: string) =>
+    canhoesFetch<T.AdminNomineeDto>(
+      `/v1/events/${eventId}/admin/nominations/${nomineeId}/reject`,
+      {
+        method: "POST",
+      }
+    ),
+
+  adminSetNominationCategory: (
+    eventId: string,
+    nomineeId: string,
+    payload: T.SetNomineeCategoryRequest
+  ) =>
+    canhoesFetch<T.AdminNomineeDto>(
+      `/v1/events/${eventId}/admin/nominations/${nomineeId}/set-category`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  adminGetOfficialResults: (eventId: string) =>
+    canhoesFetch<T.AdminOfficialResultsDto>(`/v1/events/${eventId}/admin/official-results`),
 
   getProposals: (eventId: string) =>
     canhoesFetch<T.EventProposalDto[]>(`/v1/events/${eventId}/proposals`),

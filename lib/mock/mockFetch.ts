@@ -10,6 +10,9 @@
  */
 
 import {
+  MOCK_ADMIN_NOMINEES,
+  MOCK_ADMIN_OFFICIAL_RESULTS,
+  MOCK_APPROVED_NOMINEES,
   MOCK_STATE,
   MOCK_CATEGORIES,
   MOCK_NOMINEES,
@@ -29,6 +32,8 @@ import {
   MOCK_EVENT_SUMMARY,
   MOCK_EVENT_VOTING_OVERVIEW,
   MOCK_EVENT_VOTING_BOARD,
+  MOCK_MY_NOMINATION_STATUS,
+  MOCK_OFFICIAL_VOTING_BOARD,
   MOCK_EVENT_WISHLIST,
 } from "./mockData";
 
@@ -47,7 +52,8 @@ function simulateNetworkDelay(): Promise<void> {
  */
 export async function getMockResponse<T>(
   proxyPath: string,
-  method: string
+  method: string,
+  options?: { body?: string | null }
 ): Promise<T> {
   await simulateNetworkDelay();
 
@@ -57,14 +63,77 @@ export async function getMockResponse<T>(
 
   // ── Write operations: return an optimistic success payload ──────────────────
   if (verb !== "GET") {
-    return handleWrite<T>(path);
+    return handleWrite<T>(path, options);
   }
 
   // ── Read operations ──────────────────────────────────────────────────────────
   return handleRead<T>(path);
 }
 
-function handleWrite<T>(path: string): T {
+function parseBody<TBody>(options?: { body?: string | null }) {
+  const raw = options?.body;
+  if (!raw) return {} as TBody;
+
+  try {
+    return JSON.parse(raw) as TBody;
+  } catch {
+    return {} as TBody;
+  }
+}
+
+function handleWrite<T>(path: string, options?: { body?: string | null }): T {
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/nominations`) {
+    const body = parseBody<{ categoryId?: string | null; title?: string }>(options);
+    const alreadyNominated = MOCK_MY_NOMINATION_STATUS.find(
+      (status) => status.categoryId === body.categoryId && status.hasNominated
+    );
+
+    if (alreadyNominated) {
+      throw new Error("Ja submeteste uma nomeacao para esta categoria.");
+    }
+
+    return {
+      id: `nom-mock-${Date.now()}`,
+      categoryId: body.categoryId ?? null,
+      title: body.title ?? "Nomeacao sem titulo",
+      status: "pending",
+      createdAtUtc: new Date().toISOString(),
+      submittedByMe: true,
+    } as unknown as T;
+  }
+
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/official-votes`) {
+    const body = parseBody<{ categoryId?: string; nomineeId?: string }>(options);
+
+    return {
+      id: `vote-${Date.now()}`,
+      userId: "mock-admin-001",
+      categoryId: body.categoryId ?? "",
+      nomineeId: body.nomineeId ?? "",
+      phaseId: "phase-voting",
+      updatedAtUtc: new Date().toISOString(),
+    } as unknown as T;
+  }
+
+  if (/^v1\/events\/.+\/admin\/nominations\/.+\/approve$/.test(path)) {
+    const nomineeId = path.split("/")[5];
+    const nominee = MOCK_ADMIN_NOMINEES.find((entry) => entry.id === nomineeId);
+    return { ...nominee, status: "approved" } as unknown as T;
+  }
+
+  if (/^v1\/events\/.+\/admin\/nominations\/.+\/reject$/.test(path)) {
+    const nomineeId = path.split("/")[5];
+    const nominee = MOCK_ADMIN_NOMINEES.find((entry) => entry.id === nomineeId);
+    return { ...nominee, status: "rejected" } as unknown as T;
+  }
+
+  if (/^v1\/events\/.+\/admin\/nominations\/.+\/set-category$/.test(path)) {
+    const nomineeId = path.split("/")[5];
+    const body = parseBody<{ categoryId?: string | null }>(options);
+    const nominee = MOCK_ADMIN_NOMINEES.find((entry) => entry.id === nomineeId);
+    return { ...nominee, categoryId: body.categoryId ?? null } as unknown as T;
+  }
+
   // nominees approve/reject
   if (/^canhoes\/admin\/nominees\/.+\/approve$/.test(path)) {
     const id = path.split("/")[3];
@@ -199,6 +268,83 @@ function handleWrite<T>(path: string): T {
 }
 
 function handleRead<T>(path: string): T {
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/nominations/my-status`) {
+    return MOCK_MY_NOMINATION_STATUS as unknown as T;
+  }
+
+  if (path.startsWith(`v1/events/${MOCK_EVENT_SUMMARY.id}/nominations/approved`)) {
+    return MOCK_APPROVED_NOMINEES as unknown as T;
+  }
+
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/official-voting`) {
+    return MOCK_OFFICIAL_VOTING_BOARD as unknown as T;
+  }
+
+  if (path.startsWith(`v1/events/${MOCK_EVENT_SUMMARY.id}/admin/nominations`)) {
+    return MOCK_ADMIN_NOMINEES as unknown as T;
+  }
+
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/admin/official-results`) {
+    return MOCK_ADMIN_OFFICIAL_RESULTS as unknown as T;
+  }
+
+  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/admin/bootstrap`) {
+    return {
+      events: [MOCK_EVENT_SUMMARY],
+      state: {
+        eventId: MOCK_EVENT_SUMMARY.id,
+        activePhase: MOCK_EVENT_CONTEXT.activePhase ?? null,
+        phases: MOCK_EVENT_CONTEXT.phases,
+        nominationsVisible: true,
+        resultsVisible: false,
+        moduleVisibility: {
+          feed: true,
+          secretSanta: true,
+          wishlist: true,
+          categories: true,
+          voting: true,
+          gala: false,
+          stickers: true,
+          measures: true,
+          nominees: true,
+        },
+        effectiveModules: {
+          ...MOCK_EVENT_OVERVIEW.modules,
+          voting: true,
+        },
+        counts: MOCK_EVENT_OVERVIEW.counts,
+      },
+      categories: MOCK_CATEGORIES,
+      nominees: MOCK_NOMINEES,
+      adminNominees: MOCK_ADMIN_NOMINEES,
+      proposals: {
+        categoryProposals: {
+          pending: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "pending"),
+          approved: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "approved"),
+          rejected: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "rejected"),
+        },
+        measureProposals: {
+          pending: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "pending"),
+          approved: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "approved"),
+          rejected: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "rejected"),
+        },
+      },
+      votes: MOCK_VOTES,
+      members: MOCK_MEMBERS,
+      secretSanta: {
+        eventId: MOCK_EVENT_SUMMARY.id,
+        eventCode: "canhoes2026",
+        hasDraw: true,
+        drawId: "draw-001",
+        createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
+        isLocked: false,
+        memberCount: MOCK_MEMBERS.length,
+        assignmentCount: MOCK_MEMBERS.length,
+      },
+      officialResults: MOCK_ADMIN_OFFICIAL_RESULTS,
+    } as unknown as T;
+  }
+
   // canhoes state
   if (path === "canhoes/state") return MOCK_STATE as unknown as T;
 

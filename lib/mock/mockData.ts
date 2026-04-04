@@ -6,9 +6,13 @@
  */
 
 import type {
+  AdminNomineeDto,
+  AdminOfficialResultsDto,
   AwardCategoryDto,
   CanhoesStateDto,
+  MyNominationStatusDto,
   NomineeDto,
+  OfficialVotingBoardDto,
   CategoryProposalDto,
   MeasureProposalDto,
   PublicUserDto,
@@ -220,6 +224,204 @@ export const MOCK_MEMBERS: PublicUserDto[] = [
     isAdmin: false,
   },
 ];
+
+export const MOCK_MEMBERS_EXTENDED = [
+  { id: "user-001", displayName: "Joao P.", email: "joao@canhoes.pt", isAdmin: true },
+  { id: "user-002", displayName: "Maria S.", email: "maria@canhoes.pt", isAdmin: false },
+  { id: "user-003", displayName: "Pedro L.", email: "pedro@canhoes.pt", isAdmin: false },
+  { id: "user-004", displayName: "Ana C.", email: "ana@canhoes.pt", isAdmin: false },
+  { id: "user-005", displayName: "Rui F.", email: "rui@canhoes.pt", isAdmin: false },
+];
+
+export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
+  {
+    id: "nom-001",
+    categoryId: "cat-001",
+    title: "SOS - ABBA",
+    status: "approved",
+    createdAtUtc: new Date(Date.now() - 86400000 * 5).toISOString(),
+    submittedByUserId: "user-002",
+    submittedByName: "Maria S.",
+    submittedByMe: false,
+  },
+  {
+    id: "nom-002",
+    categoryId: "cat-001",
+    title: "Midnights - Taylor Swift",
+    status: "approved",
+    createdAtUtc: new Date(Date.now() - 86400000 * 4).toISOString(),
+    submittedByUserId: "user-003",
+    submittedByName: "Pedro L.",
+    submittedByMe: false,
+  },
+  {
+    id: "nom-003",
+    categoryId: "cat-001",
+    title: "Un Verano Sin Ti - Bad Bunny",
+    status: "pending",
+    createdAtUtc: new Date(Date.now() - 3600000 * 6).toISOString(),
+    submittedByUserId: "user-004",
+    submittedByName: "Ana C.",
+    submittedByMe: false,
+  },
+  {
+    id: "nom-004",
+    categoryId: "cat-002",
+    title: "Flowers - Miley Cyrus",
+    status: "approved",
+    createdAtUtc: new Date(Date.now() - 86400000 * 3).toISOString(),
+    submittedByUserId: "user-005",
+    submittedByName: "Rui F.",
+    submittedByMe: false,
+  },
+  {
+    id: "nom-005",
+    categoryId: "cat-002",
+    title: "As It Was - Harry Styles",
+    status: "pending",
+    createdAtUtc: new Date(Date.now() - 3600000 * 3).toISOString(),
+    submittedByUserId: "user-002",
+    submittedByName: "Maria S.",
+    submittedByMe: false,
+  },
+  {
+    id: "nom-006",
+    categoryId: "cat-003",
+    title: "NOS Alive 2025",
+    status: "approved",
+    createdAtUtc: new Date(Date.now() - 86400000 * 2).toISOString(),
+    submittedByUserId: "user-001",
+    submittedByName: "Joao P.",
+    submittedByMe: true,
+  },
+  {
+    id: "nom-007",
+    categoryId: "cat-003",
+    title: "MEO Arena - Billie Eilish",
+    status: "pending",
+    createdAtUtc: new Date(Date.now() - 3600000 * 1).toISOString(),
+    submittedByUserId: "user-003",
+    submittedByName: "Pedro L.",
+    submittedByMe: false,
+  },
+];
+
+export const MOCK_MY_NOMINATION_STATUS: MyNominationStatusDto[] = [
+  { categoryId: "cat-001", hasNominated: false },
+  { categoryId: "cat-002", hasNominated: false },
+  {
+    categoryId: "cat-003",
+    hasNominated: true,
+    nomineeId: "nom-006",
+    nomineeTitle: "NOS Alive 2025",
+  },
+  { categoryId: "cat-004", hasNominated: false },
+  { categoryId: "cat-005", hasNominated: false },
+];
+
+export const MOCK_APPROVED_NOMINEES: NomineeDto[] = MOCK_ADMIN_NOMINEES
+  .filter((nominee) => nominee.status === "approved")
+  .map((nominee) => ({
+    id: nominee.id,
+    categoryId: nominee.categoryId,
+    title: nominee.title,
+    imageUrl: nominee.imageUrl,
+    status: nominee.status,
+    createdAtUtc: nominee.createdAtUtc,
+    submittedByMe: false,
+  }));
+
+export const MOCK_OFFICIAL_VOTING_BOARD: OfficialVotingBoardDto = {
+  eventId: "canhoes-do-ano",
+  phaseId: "phase-voting",
+  canVote: true,
+  endsAt: new Date(Date.now() + 86400000 * 7).toISOString(),
+  categories: [
+    {
+      id: "cat-001",
+      title: "Melhor Album",
+      description: "O album que mais marcou o ano",
+      kind: "Sticker",
+      myNomineeId: null,
+      nominees: [
+        { id: "nom-001", label: "SOS - ABBA" },
+        { id: "nom-002", label: "Midnights - Taylor Swift" },
+      ],
+    },
+    {
+      id: "cat-002",
+      title: "Melhor Faixa",
+      description: "A musica que esteve em loop durante o ano",
+      kind: "Sticker",
+      myNomineeId: "nom-004",
+      nominees: [{ id: "nom-004", label: "Flowers - Miley Cyrus" }],
+    },
+    {
+      id: "cat-003",
+      title: "Melhor Concerto",
+      description: "O concerto que ficou na memoria",
+      kind: "Sticker",
+      myNomineeId: null,
+      nominees: [{ id: "nom-006", label: "NOS Alive 2025" }],
+    },
+  ],
+};
+
+export const MOCK_ADMIN_OFFICIAL_RESULTS: AdminOfficialResultsDto = {
+  eventId: "canhoes-do-ano",
+  generatedAt: new Date().toISOString(),
+  totalMembers: 5,
+  categories: [
+    {
+      categoryId: "cat-001",
+      categoryName: "Melhor Album",
+      totalVotes: 4,
+      participationRate: 0.8,
+      nominees: [
+        {
+          nomineeId: "nom-001",
+          nomineeTitle: "SOS - ABBA",
+          voteCount: 3,
+          voterUserIds: ["user-002", "user-003", "user-005"],
+        },
+        {
+          nomineeId: "nom-002",
+          nomineeTitle: "Midnights - Taylor Swift",
+          voteCount: 1,
+          voterUserIds: ["user-004"],
+        },
+      ],
+    },
+    {
+      categoryId: "cat-002",
+      categoryName: "Melhor Faixa",
+      totalVotes: 3,
+      participationRate: 0.6,
+      nominees: [
+        {
+          nomineeId: "nom-004",
+          nomineeTitle: "Flowers - Miley Cyrus",
+          voteCount: 3,
+          voterUserIds: ["user-002", "user-003", "user-004"],
+        },
+      ],
+    },
+    {
+      categoryId: "cat-003",
+      categoryName: "Melhor Concerto",
+      totalVotes: 5,
+      participationRate: 1,
+      nominees: [
+        {
+          nomineeId: "nom-006",
+          nomineeTitle: "NOS Alive 2025",
+          voteCount: 5,
+          voterUserIds: ["user-001", "user-002", "user-003", "user-004", "user-005"],
+        },
+      ],
+    },
+  ],
+};
 
 // ─── Hub Posts ───────────────────────────────────────────────────────────────
 

@@ -4,6 +4,8 @@ import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import type {
+  AdminNomineeDto,
+  AdminOfficialResultsDto,
   AdminVoteAuditRowDto,
   AwardCategoryDto,
   CategoryProposalDto,
@@ -42,6 +44,8 @@ export function useAdminBootstrap(eventId: string | null) {
   const events: EventSummaryDto[] = bootstrap?.events ?? [];
   const categories: AwardCategoryDto[] = bootstrap?.categories ?? [];
   const allNominees: NomineeDto[] = bootstrap?.nominees ?? [];
+  const adminNominees: AdminNomineeDto[] = bootstrap?.adminNominees ?? [];
+  const officialResults: AdminOfficialResultsDto | undefined = bootstrap?.officialResults;
   const votes: AdminVoteAuditRowDto[] = bootstrap?.votes.votes ?? [];
   const members: PublicUserDto[] = bootstrap?.members ?? [];
   const secretSanta: EventAdminSecretSantaStateDto | null = bootstrap?.secretSanta ?? null;
@@ -64,12 +68,14 @@ export function useAdminBootstrap(eventId: string | null) {
     allCategoryProposals,
     allMeasureProposals,
     allNominees,
+    adminNominees,
     bootstrap,
     categories,
     error: query.error ?? null,
     events,
     loading: Boolean(eventId) && (query.isLoading || (query.isFetching && !bootstrap)),
     members,
+    officialResults,
     secretSanta,
     state,
     votes,

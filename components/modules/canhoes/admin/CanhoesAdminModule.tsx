@@ -22,6 +22,8 @@ import {
 import { AdminCategoriesSection } from "./components/AdminCategoriesSection";
 import { AdminMembersSection } from "./components/AdminMembersSection";
 import { AdminModulesSection } from "./components/AdminModulesSection";
+import { AdminNominationsSection } from "./components/AdminNominationsSection";
+import { AdminOfficialResultsSection } from "./components/AdminOfficialResultsSection";
 import { AdminOverviewSection } from "./components/AdminOverviewSection";
 import { AdminPhaseSection } from "./components/AdminPhaseSection";
 import { AdminStateMessage } from "./components/AdminStateMessage";
@@ -42,11 +44,13 @@ export default function CanhoesAdminModule() {
     allCategoryProposals,
     allMeasureProposals: measureProposals,
     allNominees,
+    adminNominees,
     categories,
     error,
     events,
     loading,
     members: eventMembers,
+    officialResults,
     secretSanta,
     state: eventState,
     votes: voteAuditRows,
@@ -159,10 +163,11 @@ export default function CanhoesAdminModule() {
     () =>
       buildAdminSectionItems({
         memberCount: eventMembers.length,
+        pendingNominationsCount: adminNominees.filter((nominee) => nominee.status === "pending").length,
         pendingReviewCount,
         visibleModuleCount: countVisibleModules(eventState?.effectiveModules),
       }),
-    [eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
+    [adminNominees, eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
   );
 
   const activeSectionContent = useMemo(() => {
@@ -194,6 +199,21 @@ export default function CanhoesAdminModule() {
         );
       case "members":
         return <AdminMembersSection loading={loading} members={eventMembers} />;
+      case "nominations":
+        return (
+          <AdminNominationsSection
+            eventId={activeEvent?.id ?? null}
+            categories={categories}
+            initialRows={adminNominees}
+          />
+        );
+      case "results":
+        return (
+          <AdminOfficialResultsSection
+            eventId={activeEvent?.id ?? null}
+            initialResults={officialResults}
+          />
+        );
       case "modules":
         return (
           <AdminModulesSection
@@ -226,6 +246,7 @@ export default function CanhoesAdminModule() {
     activeTab,
     allCategoryProposals,
     allNominees,
+    adminNominees,
     categories,
     eventMembers,
     events,
@@ -234,6 +255,7 @@ export default function CanhoesAdminModule() {
     handleUpdatePhase,
     loading,
     measureProposals,
+    officialResults,
     pendingCategoryProposals,
     pendingMeasureProposals,
     pendingNominees,
