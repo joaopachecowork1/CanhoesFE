@@ -38,7 +38,15 @@ function getAdminErrorMessage(error: unknown) {
   return "Nao foi possivel carregar o admin.";
 }
 
-export default function CanhoesAdminModule() {
+type CanhoesAdminModuleProps = {
+  forcedSection?: AdminSectionId;
+  showTabs?: boolean;
+};
+
+export default function CanhoesAdminModule({
+  forcedSection,
+  showTabs = true,
+}: Readonly<CanhoesAdminModuleProps>) {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
   const {
     allCategoryProposals,
@@ -57,7 +65,14 @@ export default function CanhoesAdminModule() {
     refresh,
   } = useAdminBootstrap(activeEvent?.id ?? null);
 
-  const [activeTab, setActiveTab] = useState<AdminSectionId>(getDefaultAdminSection());
+  const [activeTab, setActiveTab] = useState<AdminSectionId>(
+    forcedSection ?? getDefaultAdminSection()
+  );
+
+  useEffect(() => {
+    if (!forcedSection) return;
+    setActiveTab(forcedSection);
+  }, [forcedSection]);
 
   const pendingNominees = useMemo(
     () => allNominees.filter((nominee) => nominee.status === "pending"),
@@ -306,9 +321,11 @@ export default function CanhoesAdminModule() {
         </div>
       )}
 
-      <div className="sticky top-[5.2rem] z-20 pb-1 sm:top-[5.45rem]">
-        <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
-      </div>
+      {showTabs ? (
+        <div className="sticky top-[5.2rem] z-20 pb-1 sm:top-[5.45rem]">
+          <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
+        </div>
+      ) : null}
 
       {activeSectionContent}
     </div>

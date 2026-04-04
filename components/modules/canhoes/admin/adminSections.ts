@@ -93,6 +93,35 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
 ] as const;
 
+export const ADMIN_SECTION_IDS: readonly AdminSectionId[] = ADMIN_SECTION_REGISTRY.map(
+  (sectionDefinition) => sectionDefinition.id
+);
+
+export function isAdminSectionId(value: string): value is AdminSectionId {
+  return (ADMIN_SECTION_IDS as readonly string[]).includes(value);
+}
+
+export function getAdminSectionMeta() {
+  return ADMIN_SECTION_REGISTRY.map((sectionDefinition) => ({
+    id: sectionDefinition.id,
+    label: sectionDefinition.label,
+    icon: sectionDefinition.icon,
+  }));
+}
+
+export function getAdminAdjacentSection(
+  current: AdminSectionId,
+  direction: "prev" | "next"
+): AdminSectionId | null {
+  const index = ADMIN_SECTION_IDS.indexOf(current);
+  if (index < 0) return null;
+
+  const targetIndex = direction === "next" ? index + 1 : index - 1;
+  if (targetIndex < 0 || targetIndex >= ADMIN_SECTION_IDS.length) return null;
+
+  return ADMIN_SECTION_IDS[targetIndex] ?? null;
+}
+
 export function buildAdminSectionItems(
   context: Readonly<AdminSectionCountContext>
 ): AdminSectionItem[] {
