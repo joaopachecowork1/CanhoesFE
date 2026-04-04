@@ -3,6 +3,7 @@
 import React from "react";
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { DevAuthModeBanner } from "@/components/dev/DevAuthModeBanner";
 import { ThemeProvider } from "@/components/ui/themeprovider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,6 +27,7 @@ export default function AppProviders({ children }: Readonly<{ children: React.Re
           <AuthProvider>
             {children}
             <Toaster />
+            <DevAuthModeBanner />
           </AuthProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

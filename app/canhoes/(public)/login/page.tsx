@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function CanhoesLoginPage() {
   const router = useRouter();
-  const { isLogged, loading, loginGoogle } = useAuth();
+  const { isLogged, loading, loginGoogle, isDevAuthBypass } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [leafParticles, setLeafParticles] = useState<
@@ -34,10 +34,10 @@ export default function CanhoesLoginPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && isLogged) {
+    if (!isDevAuthBypass && !loading && isLogged) {
       router.replace("/canhoes");
     }
-  }, [isLogged, loading, router]);
+  }, [isDevAuthBypass, isLogged, loading, router]);
 
   const handleLogin = () => {
     setIsSigningIn(true);
@@ -92,6 +92,22 @@ export default function CanhoesLoginPage() {
             <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,136,0.18),transparent)]" />
 
             <div className="space-y-3">
+              {isDevAuthBypass ? (
+                <div className="rounded-lg border border-[rgba(255,209,102,0.32)] bg-[rgba(62,38,12,0.72)] px-3 py-2 text-xs text-[rgba(255,236,188,0.92)]">
+                  Modo desenvolvimento ativo. Bypass auth local ligado.
+                </div>
+              ) : null}
+
+              {isDevAuthBypass ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/canhoes")}
+                >
+                  Entrar em modo desenvolvimento
+                </Button>
+              ) : null}
+
               <Button
                 className="w-full"
                 onClick={handleLogin}
@@ -102,7 +118,7 @@ export default function CanhoesLoginPage() {
                   : "Continuar com Google"}
               </Button>
               <p className="text-center text-xs text-[var(--beige)]/72">
-                Acesso reservado aos membros do evento.
+                Acesso reservado aos membros do evento. O login Google continua ativo.
               </p>
             </div>
           </div>
