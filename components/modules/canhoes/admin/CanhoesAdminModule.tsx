@@ -84,17 +84,17 @@ export default function CanhoesAdminModule() {
       totalMeasures: measureProposals.length,
       pendingMeasures: pendingMeasureProposals.length,
       memberCount: eventMembers.length,
-      visibleModules: eventState?.effectiveModules?.length ?? 0,
+      visibleModules: countVisibleModules(eventState?.effectiveModules),
     }),
     [
-      allNominees.length,
+      allNominees,
       pendingNominees.length,
       categories.length,
       pendingCategoryProposals.length,
       measureProposals.length,
       pendingMeasureProposals.length,
       eventMembers.length,
-      eventState?.effectiveModules?.length,
+      eventState?.effectiveModules,
     ]
   );
 

@@ -274,7 +274,7 @@ export function CategoriesAdmin({
                     value={row.kind}
                     onValueChange={(value) => setDraft(row.id, { kind: value })}
                   >
-                    <SelectTrigger id={`category-kind-${row.id}`}>
+                    <SelectTrigger id={`category-kind-${row.id}`} className="h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -285,41 +285,42 @@ export function CategoriesAdmin({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-2">
-                    <span className="text-sm font-medium text-[var(--bg-paper)]">
-                      Ativa
-                    </span>
+                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.16)] bg-[rgba(0,0,0,0.3)] px-2.5 py-1.5">
+                    <span className="text-xs font-medium">Ativa</span>
                     <Switch
                       checked={row.isActive}
                       onCheckedChange={(checked) => setDraft(row.id, { isActive: checked })}
+                      size="sm"
                     />
                   </div>
-                </div>
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[rgba(212,184,150,0.14)] pt-3">
-                  <Badge variant="secondary" className="text-xs">
-                    {row.kind === "Sticker" ? "Sticker" : "Votação"}
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => void saveCategory(row.id)}
-                      disabled={loading}
-                    >
-                      Guardar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => void deleteCategory(row.id, row.name)}
-                      disabled={loading}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Eliminar
-                    </Button>
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[rgba(212,184,150,0.14)] pt-2">
+                    <Badge variant="outline" className="text-xs h-6">
+                      {row.kind === "Sticker" ? "Sticker" : "Votação"}
+                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => void saveCategory(row.id)}
+                        disabled={loading}
+                        className="h-8 text-xs"
+                      >
+                        Guardar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => void deleteCategory(row.id, row.name)}
+                        disabled={loading}
+                        className="h-8 text-xs"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Eliminar</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

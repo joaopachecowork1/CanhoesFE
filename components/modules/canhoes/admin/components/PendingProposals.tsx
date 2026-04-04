@@ -231,7 +231,7 @@ function ProposalReviewCard({ proposal }: Readonly<{ proposal: PendingProposalCa
         <div className="flex items-center gap-2 text-[var(--color-title)]">
           <Gavel className="h-4 w-4" />
           <span className="editorial-kicker">
-            {FILTER_LABELS[proposal.note] ?? proposal.note}
+            {FILTER_LABELS[proposal.note as keyof typeof FILTER_LABELS] ?? proposal.note}
           </span>
         </div>
       ) : null}

@@ -66,7 +66,6 @@ export function HubPostCard({
   const reactionCounts = post.reactionCounts || {};
 
   const hasMedia = mediaUrls.length > 0;
-  const hasPoll = !!post.poll;
   const hasText = !!(post.text?.trim());
 
   return (
@@ -91,7 +90,7 @@ export function HubPostCard({
           {hasMedia && <MediaCarousel urls={mediaUrls} aspect="video" />}
         </div>
 
-        {hasPoll && (
+        {post.poll && (
           <div className="px-3 pb-2 pt-1 sm:px-4">
             <PollBox
               poll={post.poll}

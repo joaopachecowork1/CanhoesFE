@@ -209,6 +209,9 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
       return;
     }
 
+    const currentEvent = event;
+    const currentOverview = overview;
+
     let isCancelled = false;
 
     async function loadHomeExtras() {
@@ -217,16 +220,16 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
 
       try {
         const [secretSanta, voting, recentPosts] = await Promise.all([
-          overview.modules.secretSanta
-            ? canhoesEventsRepo.getSecretSantaOverview(event.id)
+          currentOverview.modules.secretSanta
+            ? canhoesEventsRepo.getSecretSantaOverview(currentEvent.id)
             : Promise.resolve(
-                buildSecretSantaFallbackState(event.id, overview.myWishlistItemCount)
+                buildSecretSantaFallbackState(currentEvent.id, currentOverview.myWishlistItemCount)
               ),
-          overview.modules.voting
-            ? canhoesEventsRepo.getVotingOverview(event.id)
-            : Promise.resolve(buildVotingFallbackState(overview)),
-          overview.modules.feed
-            ? canhoesEventsRepo.getFeedPosts(event.id)
+          currentOverview.modules.voting
+            ? canhoesEventsRepo.getVotingOverview(currentEvent.id)
+            : Promise.resolve(buildVotingFallbackState(currentOverview)),
+          currentOverview.modules.feed
+            ? canhoesEventsRepo.getFeedPosts(currentEvent.id)
             : Promise.resolve([]),
         ]);
 
@@ -248,7 +251,7 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
             )
           );
           logFrontendError("CanhoesEventHome.loadHomeExtras", nextError, {
-            eventId: event.id,
+            eventId: currentEvent.id,
           });
         }
       }
