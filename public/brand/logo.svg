@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 220" role="img" aria-label="Canhoes do Ano logo">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a4f2d"/>
+      <stop offset="100%" stop-color="#24321b"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8d846f"/>
+      <stop offset="55%" stop-color="#4e473b"/>
+      <stop offset="100%" stop-color="#2d281f"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6d4b2f"/>
+      <stop offset="100%" stop-color="#3f2b1c"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="808" height="208" rx="24" fill="#182112" stroke="#af9162" stroke-opacity="0.6" stroke-width="3"/>
+  <rect x="28" y="34" width="152" height="152" rx="32" fill="url(#plate)" stroke="#af9162" stroke-opacity="0.5" stroke-width="2.5"/>
+
+  <circle cx="104" cy="109" r="51" fill="none" stroke="#92774f" stroke-width="2.8"/>
+
+  <g transform="translate(104 118) rotate(-28)">
+    <rect x="-34" y="-5" width="68" height="10" rx="5" fill="url(#wood)"/>
+    <rect x="-39" y="-7" width="17" height="14" rx="7" fill="url(#metal)"/>
+    <rect x="22" y="-7" width="17" height="14" rx="7" fill="url(#metal)"/>
+  </g>
+  <g transform="translate(104 118) rotate(28)">
+    <rect x="-34" y="-5" width="68" height="10" rx="5" fill="url(#wood)"/>
+    <rect x="-39" y="-7" width="17" height="14" rx="7" fill="url(#metal)"/>
+    <rect x="22" y="-7" width="17" height="14" rx="7" fill="url(#metal)"/>
+  </g>
+
+  <g transform="translate(104 96)">
+    <rect x="-14" y="-4" width="28" height="8" rx="4" fill="#4f3a26"/>
+    <g fill="#98a870" stroke="#7d8f5b" stroke-width="0.9">
+      <path d="M-11 -14L-2 -13L-1 -2L-10 -2Z"/>
+      <path d="M-1 -15L8 -14L9 -2L0 -2Z"/>
+      <path d="M-6 -16L3 -15L4 -5L-5 -5Z"/>
+    </g>
+  </g>
+
+  <path d="M68 142C77 152 88 157 100 159" stroke="#856d4b" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M140 142C131 152 120 157 108 159" stroke="#856d4b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <text x="220" y="106" fill="#e8d6b1" font-family="Fraunces, serif" font-size="63" font-weight="700">CANHOES DO ANO</text>
+  <text x="220" y="145" fill="#c4aa83" font-family="JetBrains Mono, monospace" font-size="20" letter-spacing="2">PREMIANDO OS MELHORES DA COMUNIDADE</text>
+</svg>
