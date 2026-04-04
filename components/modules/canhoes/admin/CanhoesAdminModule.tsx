@@ -306,7 +306,7 @@ export default function CanhoesAdminModule() {
         </div>
       )}
 
-      <div className="sticky top-[5.45rem] z-20">
+      <div className="sticky top-[5.2rem] z-20 pb-1 sm:top-[5.45rem]">
         <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
       </div>
 

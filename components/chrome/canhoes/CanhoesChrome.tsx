@@ -173,7 +173,7 @@ export function CanhoesChrome({
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(6.8rem+env(safe-area-inset-bottom,0px))]">
+      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(7.2rem+env(safe-area-inset-bottom,0px))]">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

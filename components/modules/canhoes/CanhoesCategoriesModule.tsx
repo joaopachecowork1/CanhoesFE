@@ -25,6 +25,7 @@ export function CanhoesCategoriesModule() {
     const [categoryList, setCategoryList] = useState<EventCategoryDto[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [search, setSearch] = useState("");
     const [categoryName, setCategoryName] = useState("");
     const [categoryDescription, setCategoryDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,11 +62,21 @@ export function CanhoesCategoriesModule() {
 
     const canSubmitProposal =
         categoryName.trim().length >= 3 && Boolean(overview?.permissions.canSubmitProposal);
-    const submitButtonLabel = overview?.permissions.canSubmitProposal
-        ? isSubmitting
-            ? "A enviar..."
-            : "Propor"
-        : "Propostas fechadas";
+    let submitButtonLabel = "Propostas fechadas";
+    if (overview?.permissions.canSubmitProposal) {
+        submitButtonLabel = "Propor";
+    }
+    if (isSubmitting) {
+        submitButtonLabel = "A enviar...";
+    }
+
+    const filteredCategoryList = categoryList.filter((category) =>
+        search.trim()
+            ? `${category.title} ${category.description ?? ""}`
+                .toLowerCase()
+                .includes(search.trim().toLowerCase())
+            : true
+    );
 
     const handleProposalSubmit = async () => {
         if (!canSubmitProposal || !event) return;
@@ -152,6 +163,13 @@ export function CanhoesCategoriesModule() {
                 </CardHeader>
 
                 <CardContent className="space-y-3">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Procurar categoria"
+                        className="h-9"
+                    />
+
                     {errorMessage ? (
                         <ErrorAlert
                             title="Erro ao carregar categorias"
@@ -165,25 +183,27 @@ export function CanhoesCategoriesModule() {
                         <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
                     ) : null}
 
-                    {!isLoading && !isOverviewLoading && !errorMessage && categoryList.length === 0 ? (
+                    {!isLoading && !isOverviewLoading && !errorMessage && filteredCategoryList.length === 0 ? (
                         <p className="body-small text-[var(--color-text-muted)]">Ainda não há categorias.</p>
                     ) : null}
 
-                    {!isLoading && !isOverviewLoading
-                        ? categoryList.map((category) => (
-                            <div key={category.id} className="canhoes-list-item flex items-center justify-between gap-3 p-3">
-                                <div className="min-w-0">
-                                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
-                                        {category.title}
-                                    </p>
-                                    <p className="body-small text-[var(--color-text-muted)]">
-                                        {category.description || "Sem descricao adicional."}
-                                    </p>
+                    {isLoading || isOverviewLoading ? null : (
+                        <div className="max-h-[46svh] space-y-2 overflow-y-auto pr-1">
+                            {filteredCategoryList.map((category) => (
+                                <div key={category.id} className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                                            {category.title}
+                                        </p>
+                                        <p className="text-xs text-[var(--color-text-muted)]">
+                                            {category.description || "Sem descricao adicional."}
+                                        </p>
+                                    </div>
+                                    <Badge variant="secondary">{category.isActive ? "Ativa" : "Inativa"}</Badge>
                                 </div>
-                                <Badge variant="secondary">{category.isActive ? "Ativa" : "Inativa"}</Badge>
-                            </div>
-                        ))
-                        : null}
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

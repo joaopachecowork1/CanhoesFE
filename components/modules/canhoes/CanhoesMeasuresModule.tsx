@@ -170,7 +170,7 @@ export function CanhoesMeasuresModule() {
                 </div>
               ))}
             </div>
-          ) : null}
+          )}
         </CardContent>
       </Card>
     </div>

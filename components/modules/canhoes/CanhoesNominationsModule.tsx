@@ -11,6 +11,7 @@ import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +50,7 @@ export function CanhoesNominationsModule() {
 
   const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
   const error = categoriesQuery.error ?? myStatusQuery.error ?? approvedQuery.error;
-  const categories = categoriesQuery.data ?? [];
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
   const myStatus = myStatusQuery.data ?? [];
   const approvedNominees = approvedQuery.data ?? [];
 
@@ -131,38 +132,19 @@ export function CanhoesNominationsModule() {
         badgeLabel={`Categorias: ${categories.length}`}
       />
 
-      <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
-        <div className="flex min-w-max gap-2">
-          {categories.map((category) => {
-            const isActive = selectedCategory?.id === category.id;
-            const hasSubmission = myStatus.some(
-              (status) => status.categoryId === category.id && status.hasNominated
-            );
-
-            return (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => setSelectedCategoryId(category.id)}
-                className={cn(
-                  "canhoes-tap inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
-                  isActive
-                    ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
-                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)]"
-                )}
-                aria-pressed={isActive}
-              >
-                <span className="truncate">{category.name}</span>
-                {hasSubmission ? (
-                  <span className="rounded-full border border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-1.5 py-0.5 text-[10px] text-[var(--bg-paper)]">
-                    Enviado
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <CompactSegmentTabs
+        activeId={selectedCategory?.id ?? ""}
+        items={categories.map((category) => ({
+          id: category.id,
+          label: category.name,
+          badge: myStatus.some(
+            (status) => status.categoryId === category.id && status.hasNominated
+          )
+            ? "Enviado"
+            : undefined,
+        }))}
+        onSelect={setSelectedCategoryId}
+      />
 
       {selectedCategory ? (
         <CategoryNominationCard

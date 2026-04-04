@@ -30,8 +30,10 @@ export function AdminOfficialResultsSection({
     initialData: initialResults,
   });
 
-  const results = resultsQuery.data ?? null;
-  const resultCategories = results?.categories ?? [];
+  const resultCategories = useMemo(
+    () => resultsQuery.data?.categories ?? [],
+    [resultsQuery.data]
+  );
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
@@ -76,6 +78,8 @@ export function AdminOfficialResultsSection({
       </AdminStateMessage>
     );
   }
+
+  const results = resultsQuery.data;
 
   const getParticipationClass = (rate: number) => {
     if (rate < 0.5) return "text-[var(--neon-red)]";

@@ -14,6 +14,7 @@ import {
   formatCanhoesPhaseLabel,
   getNomineeStatusBadgeVariant,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function CanhoesNomineesModule() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(NO_CATEGORY);
+  const [activeListCategoryId, setActiveListCategoryId] = useState<string | null>(null);
   const [nomineeTitle, setNomineeTitle] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -86,11 +88,97 @@ export function CanhoesNomineesModule() {
   }, [nomineeList]);
 
   const isNominationPhase = canhoesState?.phase === "nominations";
-  const submitButtonLabel = isNominationPhase
-    ? isSubmitting
-      ? "A submeter..."
-      : "Submeter"
-    : "Nomeações fechadas";
+  let submitButtonLabel = "Nomeações fechadas";
+  if (isNominationPhase) {
+    submitButtonLabel = "Submeter";
+  }
+  if (isSubmitting) {
+    submitButtonLabel = "A submeter...";
+  }
+
+  const nomineeGroups = useMemo(() => {
+    const groups = categoryList
+      .map((category) => ({
+        id: category.id,
+        label: category.name,
+        nominees: nomineesByCategory.get(category.id) ?? [],
+      }))
+      .filter((group) => group.nominees.length > 0);
+
+    const uncategorized = nomineesByCategory.get("__uncategorized") ?? [];
+    if (uncategorized.length > 0) {
+      groups.push({
+        id: "__uncategorized",
+        label: "Sem categoria",
+        nominees: uncategorized,
+      });
+    }
+
+    return groups;
+  }, [categoryList, nomineesByCategory]);
+
+  useEffect(() => {
+    if (nomineeGroups.length === 0) {
+      setActiveListCategoryId(null);
+      return;
+    }
+
+    setActiveListCategoryId((current) => {
+      if (current && nomineeGroups.some((group) => group.id === current)) return current;
+      return nomineeGroups[0].id;
+    });
+  }, [nomineeGroups]);
+
+  const selectedGroup = nomineeGroups.find((group) => group.id === activeListCategoryId) ?? null;
+  let nomineeListContent: JSX.Element | null = null;
+  if (!isLoading && !errorMessage) {
+    if (nomineeGroups.length === 0) {
+      nomineeListContent = (
+        <p className="body-small text-[var(--color-text-muted)]">Ainda sem nomeações nesta edição.</p>
+      );
+    } else {
+      nomineeListContent = (
+        <div className="space-y-3">
+          <CompactSegmentTabs
+            activeId={selectedGroup?.id ?? ""}
+            items={nomineeGroups.map((group) => ({
+              id: group.id,
+              label: group.label,
+              badge: String(group.nominees.length),
+            }))}
+            onSelect={setActiveListCategoryId}
+          />
+
+          {selectedGroup ? (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>{selectedGroup.label}</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <div className="max-h-[48svh] space-y-3 overflow-y-auto pr-1">
+                  {selectedGroup.nominees.map((nominee) => (
+                    <div key={nominee.id} className="canhoes-list-item flex items-center gap-3 p-2.5">
+                      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{nominee.title}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">
+                          {new Date(nominee.createdAtUtc).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>{nominee.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      );
+    }
+  }
 
   const handleSubmit = async () => {
     if (!canSubmit || canhoesState?.phase !== "nominations") return;
@@ -206,39 +294,7 @@ export function CanhoesNomineesModule() {
 
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar nomeações...</p> : null}
 
-      {!isLoading && !errorMessage ? (
-        <div className="space-y-4">
-          {categoryList.map((category) => {
-            const nomineesForCategory = nomineesByCategory.get(category.id) ?? [];
-            if (nomineesForCategory.length === 0) return null;
-
-            return (
-              <Card key={category.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle>{category.name}</CardTitle>
-                </CardHeader>
-
-                <CardContent className="space-y-3">
-                  {nomineesForCategory.map((nominee) => (
-                    <div key={nominee.id} className="canhoes-list-item flex items-center gap-3 p-3">
-                      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-[var(--color-text-primary)]">{nominee.title}</p>
-                        <p className="body-small text-[var(--color-text-muted)]">
-                          {new Date(nominee.createdAtUtc).toLocaleString()}
-                        </p>
-                      </div>
-
-                      <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>{nominee.status}</Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : null}
+      {nomineeListContent}
     </div>
   );
 }

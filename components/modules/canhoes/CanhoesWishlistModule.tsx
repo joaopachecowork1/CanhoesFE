@@ -9,6 +9,7 @@ import {
   CanhoesMediaThumb,
   CanhoesModuleHeader,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -46,6 +47,7 @@ export function CanhoesWishlistModule() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   const [wishlistTitle, setWishlistTitle] = useState("");
   const [wishlistUrl, setWishlistUrl] = useState("");
@@ -54,6 +56,22 @@ export function CanhoesWishlistModule() {
 
   const canSubmit = wishlistTitle.trim().length >= 2;
   const wishlistByUser = useMemo(() => groupWishlistItemsByUser(wishlistItems), [wishlistItems]);
+
+  useEffect(() => {
+    if (memberList.length === 0) {
+      setSelectedMemberId(null);
+      return;
+    }
+
+    setSelectedMemberId((current) => {
+      if (current && memberList.some((member) => member.id === current)) return current;
+      if (user?.id && memberList.some((member) => member.id === user.id)) return user.id;
+      return memberList[0].id;
+    });
+  }, [memberList, user?.id]);
+
+  const selectedMember = memberList.find((member) => member.id === selectedMemberId) ?? null;
+  const selectedMemberItems = selectedMember ? wishlistByUser.get(selectedMember.id) ?? [] : [];
 
   const loadWishlist = async () => {
     setIsLoading(true);
@@ -137,6 +155,39 @@ export function CanhoesWishlistModule() {
     }
   };
 
+  let wishlistContent: JSX.Element | null = null;
+  if (!isLoading && !errorMessage) {
+    if (memberList.length === 0) {
+      wishlistContent = (
+        <p className="body-small text-[var(--color-text-muted)]">Ainda sem membros na wishlist.</p>
+      );
+    } else {
+      wishlistContent = (
+        <div className="space-y-3">
+          <CompactSegmentTabs
+            activeId={selectedMember?.id ?? ""}
+            items={memberList.map((member) => ({
+              id: member.id,
+              label: member.displayName || member.email,
+              badge: String((wishlistByUser.get(member.id) ?? []).length),
+            }))}
+            onSelect={setSelectedMemberId}
+          />
+
+          {selectedMember ? (
+            <WishlistMemberPanel
+              deletingItemId={deletingItemId}
+              items={selectedMemberItems}
+              member={selectedMember}
+              onDelete={handleDelete}
+              userId={user?.id ?? null}
+            />
+          ) : null}
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="space-y-4">
       <CanhoesModuleHeader
@@ -208,71 +259,82 @@ export function CanhoesWishlistModule() {
 
       {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
 
-      {!isLoading && !errorMessage ? (
-        <div className="space-y-4">
-          {memberList.map((member) => {
-            const itemsForMember = wishlistByUser.get(member.id) ?? [];
-            const isCurrentUser = member.id === user?.id;
-
-            return (
-              <Card key={member.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex flex-wrap items-center gap-2">
-                    <span className="truncate">{member.displayName || member.email}</span>
-                    {isCurrentUser ? <Badge variant="outline">tu</Badge> : null}
-                    {member.isAdmin && !isCurrentUser ? <Badge variant="outline">admin</Badge> : null}
-                    <span className="body-small ml-auto text-[var(--color-text-muted)]">{itemsForMember.length} itens</span>
-                  </CardTitle>
-                </CardHeader>
-
-                <CardContent className="space-y-3">
-                  {itemsForMember.length === 0 ? (
-                    <p className="body-small text-[var(--color-text-muted)]">Ainda sem itens.</p>
-                  ) : null}
-
-                  {itemsForMember.map((wishlistItem) => (
-                    <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-3">
-                      <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-[var(--color-text-primary)]">{wishlistItem.title}</p>
-                        {wishlistItem.notes ? (
-                          <p className="body-small line-clamp-2 text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
-                        ) : null}
-                        {wishlistItem.url ? (
-                          <a href={wishlistItem.url} target="_blank" rel="noreferrer" className="canhoes-link mt-2 inline-flex items-center gap-1 text-sm">
-                            <LinkIcon className="h-3.5 w-3.5" />
-                            Abrir link
-                          </a>
-                        ) : null}
-                      </div>
-
-                      <div className="flex shrink-0 flex-col items-end justify-between gap-2">
-                        <p className="text-[11px] text-[var(--color-text-muted)]">
-                          {new Date(wishlistItem.updatedAtUtc).toLocaleDateString()}
-                        </p>
-
-                        {isCurrentUser ? (
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(wishlistItem.id)}
-                            disabled={deletingItemId === wishlistItem.id}
-                            className="canhoes-tap rounded-full border border-transparent p-2 text-[var(--color-text-muted)] hover:border-[var(--color-danger)]/30 hover:text-[var(--color-danger)] disabled:opacity-50"
-                            aria-label="Apagar item"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : null}
+      {wishlistContent}
     </div>
+  );
+}
+
+function WishlistMemberPanel({
+  deletingItemId,
+  items,
+  member,
+  onDelete,
+  userId,
+}: Readonly<{
+  deletingItemId: string | null;
+  items: WishlistItemDto[];
+  member: PublicUserDto;
+  onDelete: (wishlistItemId: string) => Promise<void>;
+  userId: string | null;
+}>) {
+  const isCurrentUser = member.id === userId;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex flex-wrap items-center gap-2">
+          <span className="truncate">{member.displayName || member.email}</span>
+          {isCurrentUser ? <Badge variant="outline">tu</Badge> : null}
+          {member.isAdmin && !isCurrentUser ? <Badge variant="outline">admin</Badge> : null}
+          <span className="body-small ml-auto text-[var(--color-text-muted)]">{items.length} itens</span>
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        {items.length === 0 ? (
+          <p className="body-small text-[var(--color-text-muted)]">Ainda sem itens.</p>
+        ) : (
+          <div className="max-h-[50svh] space-y-3 overflow-y-auto pr-1">
+            {items.map((wishlistItem) => (
+              <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-2.5">
+                <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{wishlistItem.title}</p>
+                  {wishlistItem.notes ? (
+                    <p className="line-clamp-2 text-xs text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
+                  ) : null}
+                  {wishlistItem.url ? (
+                    <a href={wishlistItem.url} target="_blank" rel="noreferrer" className="canhoes-link mt-1.5 inline-flex items-center gap-1 text-xs">
+                      <LinkIcon className="h-3.5 w-3.5" />
+                      Abrir link
+                    </a>
+                  ) : null}
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end justify-between gap-2">
+                  <p className="text-[11px] text-[var(--color-text-muted)]">
+                    {new Date(wishlistItem.updatedAtUtc).toLocaleDateString()}
+                  </p>
+
+                  {isCurrentUser ? (
+                    <button
+                      type="button"
+                      onClick={() => void onDelete(wishlistItem.id)}
+                      disabled={deletingItemId === wishlistItem.id}
+                      className="canhoes-tap rounded-full border border-transparent p-2 text-[var(--color-text-muted)] hover:border-[var(--color-danger)]/30 hover:text-[var(--color-danger)] disabled:opacity-50"
+                      aria-label="Apagar item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

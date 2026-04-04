@@ -11,6 +11,7 @@ import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -31,7 +32,10 @@ export function CanhoesOfficialVotingModule() {
   });
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const boardCategories = boardQuery.data?.categories ?? [];
+  const boardCategories = useMemo(
+    () => boardQuery.data?.categories ?? [],
+    [boardQuery.data]
+  );
 
   const castVote = useMutation({
     mutationFn: (payload: CastOfficialVoteRequest) =>
@@ -140,36 +144,15 @@ export function CanhoesOfficialVotingModule() {
         </CardContent>
       </Card>
 
-      <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
-        <div className="flex min-w-max gap-2">
-          {board.categories.map((category) => {
-            const isActive = selectedCategory?.id === category.id;
-            const hasVote = Boolean(category.myNomineeId);
-
-            return (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => setSelectedCategoryId(category.id)}
-                className={cn(
-                  "canhoes-tap inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
-                  isActive
-                    ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
-                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)]"
-                )}
-                aria-pressed={isActive}
-              >
-                <span className="truncate">{category.title}</span>
-                {hasVote ? (
-                  <span className="rounded-full border border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-1.5 py-0.5 text-[10px] text-[var(--bg-paper)]">
-                    Votado
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <CompactSegmentTabs
+        activeId={selectedCategory?.id ?? ""}
+        items={board.categories.map((category) => ({
+          id: category.id,
+          label: category.title,
+          badge: category.myNomineeId ? "Votado" : undefined,
+        }))}
+        onSelect={setSelectedCategoryId}
+      />
 
       {selectedCategory ? (
         <OfficialVotingCategoryCard

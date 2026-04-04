@@ -4,14 +4,15 @@
       <stop offset="0%" stop-color="#2c3b22"/>
       <stop offset="100%" stop-color="#131b0f"/>
     </linearGradient>
-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#8d846f"/>
-      <stop offset="55%" stop-color="#4e473b"/>
-      <stop offset="100%" stop-color="#2d281f"/>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f0ddba"/>
+      <stop offset="65%" stop-color="#dcc49e"/>
+      <stop offset="100%" stop-color="#c2a277"/>
     </linearGradient>
-    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6d4b2f"/>
-      <stop offset="100%" stop-color="#3f2b1c"/>
+    <linearGradient id="ember" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffb25e"/>
+      <stop offset="60%" stop-color="#ff6c2f"/>
+      <stop offset="100%" stop-color="#7f2315"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.68" cy="0.16" r="0.72">
       <stop offset="0%" stop-color="#f1c96f" stop-opacity="0.36"/>
@@ -29,31 +30,23 @@
     <circle cx="170" cy="170" r="150" fill="rgba(18,26,13,0.34)" stroke="#9f8258" stroke-width="6"/>
     <circle cx="170" cy="170" r="129" fill="none" stroke="#6d583b" stroke-opacity="0.5" stroke-width="2"/>
 
-    <g transform="translate(170 186) rotate(-28)">
-      <rect x="-88" y="-12" width="176" height="24" rx="12" fill="url(#wood)"/>
-      <rect x="-98" y="-16" width="40" height="32" rx="16" fill="url(#metal)"/>
-      <rect x="58" y="-16" width="40" height="32" rx="16" fill="url(#metal)"/>
-    </g>
-    <g transform="translate(170 186) rotate(28)">
-      <rect x="-88" y="-12" width="176" height="24" rx="12" fill="url(#wood)"/>
-      <rect x="-98" y="-16" width="40" height="32" rx="16" fill="url(#metal)"/>
-      <rect x="58" y="-16" width="40" height="32" rx="16" fill="url(#metal)"/>
-    </g>
+    <g transform="translate(170 178) rotate(-18)">
+      <ellipse cx="-96" cy="18" rx="96" ry="16" fill="rgba(0,0,0,0.2)"/>
+      <path d="M-112 -16L85 -4Q103 -3 108 10Q112 22 98 29L-98 48Q-115 49 -122 36Q-128 22 -112 -16Z" fill="url(#paper)" stroke="#9d7f58" stroke-width="2.2"/>
 
-    <g transform="translate(170 134)">
-      <rect x="-34" y="-8" width="68" height="16" rx="8" fill="#4f3a26"/>
-      <g fill="#98a870" stroke="#7d8f5b" stroke-width="1.7">
-        <path d="M-28 -26L-7 -24L-4 2L-27 2Z"/>
-        <path d="M-7 -29L14 -27L17 2L-6 2Z"/>
-        <path d="M-18 -31L3 -29L6 -5L-17 -5Z"/>
-      </g>
-      <path d="M-24 -26C-21 -29 -20 -32 -20 -35" stroke="#c7ba98" stroke-width="2" stroke-linecap="round"/>
-      <path d="M-2 -29C1 -32 2 -35 2 -38" stroke="#c7ba98" stroke-width="2" stroke-linecap="round"/>
-      <path d="M-13 -31C-10 -34 -9 -37 -9 -40" stroke="#c7ba98" stroke-width="2" stroke-linecap="round"/>
-    </g>
+      <path d="M-115 -14Q-127 7 -115 34" fill="none" stroke="#8e724f" stroke-width="2.1"/>
+      <path d="M-92 -10Q-103 9 -92 31" fill="none" stroke="#b79b74" stroke-width="1.8" opacity="0.62"/>
 
-    <path d="M71 246C98 277 127 294 159 301" stroke="#8b7350" stroke-width="7" stroke-linecap="round"/>
-    <path d="M269 246C242 277 213 294 181 301" stroke="#8b7350" stroke-width="7" stroke-linecap="round"/>
+      <rect x="-130" y="-18" width="23" height="67" rx="11" fill="url(#ember)" stroke="#5d1f15" stroke-width="1.8"/>
+      <circle cx="-118" cy="15" r="18" fill="rgba(255,130,63,0.34)"/>
+
+      <path d="M104 7Q119 16 119 25Q119 33 106 39L95 41Q104 30 102 20Q102 11 95 5Z" fill="#d9dbe0" stroke="#9299a2" stroke-width="1.8"/>
+      <path d="M95 5Q103 13 103 22Q104 32 96 42" fill="none" stroke="#757f8a" stroke-width="1.6"/>
+
+      <path d="M-126 -18C-136 -43 -127 -58 -114 -73" fill="none" stroke="#ece6da" stroke-width="4" stroke-linecap="round" opacity="0.74"/>
+      <path d="M-107 -24C-91 -50 -90 -72 -102 -88" fill="none" stroke="#f8f3e9" stroke-width="3.1" stroke-linecap="round" opacity="0.58"/>
+      <path d="M-83 -14C-64 -32 -58 -55 -68 -74" fill="none" stroke="#fffaf0" stroke-width="2.2" stroke-linecap="round" opacity="0.46"/>
+    </g>
   </g>
 
   <text x="520" y="228" fill="#f0ddba" font-family="Fraunces, serif" font-size="96" font-weight="700">CANHOES DO ANO</text>

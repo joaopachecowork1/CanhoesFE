@@ -340,7 +340,7 @@ export function CategoriesAdmin({
                               <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
                                 Off
                               </Badge>
-                            ) : null}
+                            )}
                             {isDirty ? (
                               <Badge className="h-5 border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-1.5 text-[10px] text-[var(--bg-paper)]">
                                 Editada

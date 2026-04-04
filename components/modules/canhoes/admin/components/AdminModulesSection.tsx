@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Layers3, Sparkles, Trophy } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useModuleVisibility, type ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import type {
   EventAdminSecretSantaStateDto,
   EventAdminStateDto,
@@ -31,6 +31,7 @@ const GROUP_LABELS = {
   core: adminCopy.state.groupCore,
   finale: adminCopy.state.groupFinale,
 } as const;
+const GROUP_ORDER: Array<ModuleVisibilityItem["group"]> = ["core", "community", "finale"];
 
 export function AdminModulesSection({
   activeEventName,
@@ -70,9 +71,8 @@ export function AdminModulesSection({
     }
   );
 
-  const groupOrder: Array<ModuleVisibilityItem["group"]> = ["core", "community", "finale"];
   const availableGroups = useMemo(
-    () => groupOrder.filter((groupKey) => itemsByGroup[groupKey].length > 0),
+    () => GROUP_ORDER.filter((groupKey) => itemsByGroup[groupKey].length > 0),
     [itemsByGroup]
   );
   const [activeGroup, setActiveGroup] = useState<ModuleVisibilityItem["group"]>(
@@ -169,35 +169,15 @@ export function AdminModulesSection({
       {availableGroups.length > 0 ? (
         <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top,rgba(122,173,58,0.1),transparent_40%),linear-gradient(180deg,rgba(18,24,11,0.94),rgba(11,14,8,0.96))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
           <div className="space-y-3">
-            <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
-              <div className="flex min-w-max gap-2">
-                {availableGroups.map((groupKey) => {
-                  const isActive = visibleGroup === groupKey;
-                  const groupCount = itemsByGroup[groupKey].filter((item) => item.checked).length;
-
-                  return (
-                    <button
-                      key={groupKey}
-                      type="button"
-                      onClick={() => setActiveGroup(groupKey)}
-                      className={cn(
-                        "canhoes-tap inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
-                        isActive
-                          ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
-                          : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)]"
-                      )}
-                      aria-pressed={isActive}
-                    >
-                      <GroupIcon groupKey={groupKey} />
-                      <span>{GROUP_LABELS[groupKey]}</span>
-                      <Badge className="rounded-full border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.18)] px-1.5 text-[0.65rem] text-[var(--bg-paper)] shadow-none">
-                        {groupCount}/{itemsByGroup[groupKey].length}
-                      </Badge>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <CompactSegmentTabs
+              activeId={visibleGroup}
+              items={availableGroups.map((groupKey) => ({
+                id: groupKey,
+                label: GROUP_LABELS[groupKey],
+                badge: `${itemsByGroup[groupKey].filter((item) => item.checked).length}/${itemsByGroup[groupKey].length}`,
+              }))}
+              onSelect={(id) => setActiveGroup(id as ModuleVisibilityItem["group"])}
+            />
 
             <div className="divide-y divide-[rgba(212,184,150,0.14)]">
               {itemsByGroup[visibleGroup].map((item) => (
@@ -231,16 +211,6 @@ function getModuleStatusLabel(item: ModuleVisibilityItem) {
   if (!item.checked) return "OFF";
   if (item.effective) return "ON";
   return "Fase";
-}
-
-function GroupIcon({ groupKey }: Readonly<{ groupKey: ModuleVisibilityItem["group"] }>) {
-  if (groupKey === "core") {
-    return <Layers3 className="h-4 w-4 text-[var(--moss)]" />;
-  }
-  if (groupKey === "community") {
-    return <Sparkles className="h-4 w-4 text-[var(--accent-purple-soft)]" />;
-  }
-  return <Trophy className="h-4 w-4 text-[var(--neon-amber)]" />;
 }
 
 function VisibilityRow({
