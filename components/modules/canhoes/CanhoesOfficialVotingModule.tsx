@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Flame, Loader2, Vote } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -29,6 +29,9 @@ export function CanhoesOfficialVotingModule() {
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(queryEventId),
   });
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const boardCategories = boardQuery.data?.categories ?? [];
 
   const castVote = useMutation({
     mutationFn: (payload: CastOfficialVoteRequest) =>
@@ -66,6 +69,18 @@ export function CanhoesOfficialVotingModule() {
     },
   });
 
+  useEffect(() => {
+    if (boardCategories.length === 0) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    setSelectedCategoryId((current) => {
+      if (current && boardCategories.some((category) => category.id === current)) return current;
+      return boardCategories[0].id;
+    });
+  }, [boardCategories]);
+
   if (boardQuery.isLoading) {
     return (
       <div className="space-y-3">
@@ -95,6 +110,11 @@ export function CanhoesOfficialVotingModule() {
   const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
   const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
 
+  const selectedCategory =
+    board.categories.find((category) => category.id === selectedCategoryId) ??
+    board.categories[0] ??
+    null;
+
   if (!isOfficialVotingPhase) {
     return <CanhoesVotingModule />;
   }
@@ -120,16 +140,46 @@ export function CanhoesOfficialVotingModule() {
         </CardContent>
       </Card>
 
-      {board.categories.map((category) => (
+      <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
+        <div className="flex min-w-max gap-2">
+          {board.categories.map((category) => {
+            const isActive = selectedCategory?.id === category.id;
+            const hasVote = Boolean(category.myNomineeId);
+
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setSelectedCategoryId(category.id)}
+                className={cn(
+                  "canhoes-tap inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
+                  isActive
+                    ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
+                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)]"
+                )}
+                aria-pressed={isActive}
+              >
+                <span className="truncate">{category.title}</span>
+                {hasVote ? (
+                  <span className="rounded-full border border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-1.5 py-0.5 text-[10px] text-[var(--bg-paper)]">
+                    Votado
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {selectedCategory ? (
         <OfficialVotingCategoryCard
-          key={category.id}
-          category={category}
+          category={selectedCategory}
           canVote={board.canVote}
           isBusy={castVote.isPending}
           onVote={(payload) => castVote.mutate(payload)}
           pendingPayload={castVote.variables ?? null}
         />
-      ))}
+      ) : null}
 
       {votedCategories === totalCategories && totalCategories > 0 ? (
         <Card className="border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)] rounded-2xl">

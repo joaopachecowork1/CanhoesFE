@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Cigarette, Flame, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ export function CanhoesVotingModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingVoteKey, setSavingVoteKey] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const loadVotingData = useCallback(async () => {
     if (!event) {
@@ -55,6 +56,25 @@ export function CanhoesVotingModule() {
   }, [loadVotingData]);
 
   const isVotingOpen = Boolean(votingBoard?.canVote);
+
+  const categories = votingBoard?.categories ?? [];
+
+  useEffect(() => {
+    if (categories.length === 0) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    setSelectedCategoryId((current) => {
+      if (current && categories.some((category) => category.id === current)) return current;
+      return categories[0].id;
+    });
+  }, [categories]);
+
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === selectedCategoryId) ?? null,
+    [categories, selectedCategoryId]
+  );
 
   const handleVote = async (categoryId: string, optionId: string) => {
     if (!event || !isVotingOpen) return;
@@ -101,16 +121,46 @@ export function CanhoesVotingModule() {
       ) : null}
 
       {!isLoading && !isOverviewLoading && votingBoard ? (
-        <div className="space-y-4">
-          {votingBoard.categories.map((category) => (
+        <div className="space-y-3">
+          <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
+            <div className="flex min-w-max gap-2">
+              {categories.map((category) => {
+                const isActive = selectedCategory?.id === category.id;
+                const hasSelection = Boolean(category.myOptionId);
+
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setSelectedCategoryId(category.id)}
+                    className={cn(
+                      "canhoes-tap inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
+                      isActive
+                        ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
+                        : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)]"
+                    )}
+                    aria-pressed={isActive}
+                  >
+                    <span className="truncate">{category.title}</span>
+                    {hasSelection ? (
+                      <span className="rounded-full border border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-1.5 py-0.5 text-[10px] text-[var(--bg-paper)]">
+                        Votado
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {selectedCategory ? (
             <VotingCategoryCard
-              key={category.id}
-              category={category}
+              category={selectedCategory}
               isSavingKey={savingVoteKey}
               onVote={handleVote}
               votingOpen={isVotingOpen}
             />
-          ))}
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -176,7 +226,13 @@ function VoteOption({
   label: string;
   onClick: () => void;
 }>) {
-  const actionLabel = isSaving ? "A guardar..." : isSelected ? "Selecionado" : "Votar";
+  let actionLabel = "Votar";
+  if (isSelected) {
+    actionLabel = "Selecionado";
+  }
+  if (isSaving) {
+    actionLabel = "A guardar...";
+  }
 
   return (
     <button

@@ -55,7 +55,7 @@ export function CanhoesBottomTabs({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40"
+      className="fixed inset-x-0 bottom-0 z-50"
       aria-label="Navegacao principal do evento"
     >
       <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-2 pb-safe sm:px-3">
@@ -75,9 +75,16 @@ export function CanhoesBottomTabs({
 }
 
 function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
-  const Icon = entry.item.icon as LucideIcon;
+  const Icon: LucideIcon = entry.item.icon;
   const isActive = Boolean(entry.isActive);
   const isMoreItem = entry.item.id === "more";
+  let iconToneClass = "text-[rgba(245,237,224,0.92)]";
+  if (isMoreItem) {
+    iconToneClass = "text-[var(--bg-paper)]";
+  }
+  if (isActive) {
+    iconToneClass = "text-[var(--neon-green)]";
+  }
 
   return {
     ariaLabel: entry.item.label,
@@ -92,11 +99,7 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
     icon: Icon,
     iconClassName: cn(
       "h-[1.05rem] w-[1.05rem]",
-      isActive
-        ? "text-[var(--neon-green)]"
-        : isMoreItem
-          ? "text-[var(--bg-paper)]"
-          : "text-[rgba(245,237,224,0.92)]"
+      iconToneClass
     ),
     isActive,
     label: entry.item.label,

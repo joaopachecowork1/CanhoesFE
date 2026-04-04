@@ -68,24 +68,22 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
 
         <Separator className="bg-[rgba(212,184,150,0.12)]" />
 
-        <div className="space-y-3">
+        <div className="max-h-[58svh] overflow-y-auto rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)]">
           {filteredVotes.map((vote, index) => (
             <article
               key={`${vote.userId}:${vote.categoryId}:${index}`}
-              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4"
+              className="grid gap-1 border-b border-[rgba(212,184,150,0.1)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3"
             >
-              <div className="space-y-2">
-                <p className="font-semibold text-[var(--bg-paper)]">
-                  {categoryMap.get(vote.categoryId) ?? vote.categoryId}
-                </p>
-                <div className="space-y-1 text-sm text-[rgba(245,237,224,0.74)]">
-                  <p>Nomeado: {vote.nomineeId}</p>
-                  <p>Utilizador: {vote.userId}</p>
-                </div>
-                <p className="text-xs text-[rgba(245,237,224,0.62)]">
-                  {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
-                </p>
+              <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                {categoryMap.get(vote.categoryId) ?? vote.categoryId}
+              </p>
+              <div className="space-y-0.5 text-xs text-[rgba(245,237,224,0.74)] sm:text-sm">
+                <p className="truncate">Nomeado: {vote.nomineeId}</p>
+                <p className="truncate">Utilizador: {vote.userId}</p>
               </div>
+              <p className="text-[11px] text-[rgba(245,237,224,0.62)] sm:text-right">
+                {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
+              </p>
             </article>
           ))}
         </div>

@@ -15,6 +15,7 @@ import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function CanhoesMeasuresModule() {
@@ -23,6 +24,7 @@ export function CanhoesMeasuresModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [proposalText, setProposalText] = useState("");
+  const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadMeasures = async () => {
@@ -57,11 +59,13 @@ export function CanhoesMeasuresModule() {
 
   const isNominationPhase = canhoesState?.phase === "nominations";
   const canSubmitProposal = proposalText.trim().length >= 5 && isNominationPhase;
-  const submitButtonLabel = isNominationPhase
-    ? isSubmitting
-      ? "A enviar..."
-      : "Propor"
-    : "Propostas fechadas";
+  let submitButtonLabel = "Propostas fechadas";
+  if (isNominationPhase) {
+    submitButtonLabel = "Propor";
+  }
+  if (isSubmitting) {
+    submitButtonLabel = "A enviar...";
+  }
 
   const handleProposalSubmit = async () => {
     if (!canSubmitProposal) return;
@@ -82,6 +86,12 @@ export function CanhoesMeasuresModule() {
       setIsSubmitting(false);
     }
   };
+
+  const filteredMeasures = measureList.filter((measure) =>
+    search.trim()
+      ? measure.text.toLowerCase().includes(search.trim().toLowerCase())
+      : true
+  );
 
   return (
     <div className="space-y-4">
@@ -127,6 +137,13 @@ export function CanhoesMeasuresModule() {
         </CardHeader>
 
         <CardContent className="space-y-3">
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Procurar medida"
+            className="h-9"
+          />
+
           {errorMessage ? (
             <ErrorAlert
               title="Erro ao carregar medidas"
@@ -138,20 +155,22 @@ export function CanhoesMeasuresModule() {
 
           {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
 
-          {!isLoading && !errorMessage && measureList.length === 0 ? (
+          {!isLoading && !errorMessage && filteredMeasures.length === 0 ? (
             <p className="body-small text-[var(--color-text-muted)]">Ainda não há medidas.</p>
           ) : null}
 
-          {!isLoading
-            ? measureList.map((measure) => (
-                <div key={measure.id} className="canhoes-list-item space-y-1 p-3">
-                  <p className="font-semibold text-[var(--color-text-primary)]">{measure.text}</p>
-                  <p className="body-small text-[var(--color-text-muted)]">
+          {isLoading ? null : (
+            <div className="max-h-[44svh] space-y-2 overflow-y-auto pr-1">
+              {filteredMeasures.map((measure) => (
+                <div key={measure.id} className="canhoes-list-item space-y-1 p-2.5">
+                  <p className="text-sm font-semibold text-[var(--color-text-primary)]">{measure.text}</p>
+                  <p className="text-xs text-[var(--color-text-muted)]">
                     {new Date(measure.createdAtUtc).toLocaleString()}
                   </p>
                 </div>
-              ))
-            : null}
+              ))}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

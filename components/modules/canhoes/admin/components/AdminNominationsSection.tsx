@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trophy, User } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ export function AdminNominationsSection({
   const [tab, setTab] = useState<StatusTab>("pending");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [selectedNominationId, setSelectedNominationId] = useState<string | null>(null);
   const queryEventId = eventId ?? "";
 
   const nominationsQuery = useQuery({
@@ -117,6 +118,23 @@ export function AdminNominationsSection({
       .filter((row) => (categoryFilter === "all" ? true : row.categoryId === categoryFilter))
       .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
   }, [rows, tab, categoryFilter]);
+
+  useEffect(() => {
+    if (filteredRows.length === 0) {
+      setSelectedNominationId(null);
+      return;
+    }
+
+    setSelectedNominationId((current) => {
+      if (current && filteredRows.some((row) => row.id === current)) return current;
+      return filteredRows[0].id;
+    });
+  }, [filteredRows]);
+
+  const selectedRow = useMemo(
+    () => filteredRows.find((row) => row.id === selectedNominationId) ?? null,
+    [filteredRows, selectedNominationId]
+  );
 
   const tabLabels: Record<StatusTab, string> = {
     pending: "Pendentes",
@@ -203,50 +221,70 @@ export function AdminNominationsSection({
           {filteredRows.length === 0 ? (
             <AdminStateMessage variant="panel">Fila limpa - nenhuma nomeacao {emptyStateLabel[tab]}.</AdminStateMessage>
           ) : (
-            <div className="space-y-3">
-              {filteredRows.map((row) => {
-                const categoryName = categories.find((category) => category.id === row.categoryId)?.name ?? "Sem categoria";
-                const isBusy = approveNomination.isPending || rejectNomination.isPending || setCategory.isPending;
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+              <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
+                <div className="max-h-[56svh] space-y-1 overflow-y-auto pr-1">
+                  {filteredRows.map((row) => {
+                    const isSelected = row.id === selectedNominationId;
+                    const categoryName =
+                      categories.find((category) => category.id === row.categoryId)?.name ??
+                      "Sem categoria";
 
-                return (
-                  <article key={row.id} className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-3.5">
+                    return (
+                      <button
+                        key={row.id}
+                        type="button"
+                        onClick={() => setSelectedNominationId(row.id)}
+                        className={
+                          isSelected
+                            ? "w-full rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.36)] bg-[rgba(36,49,23,0.9)] px-3 py-2.5 text-left"
+                            : "w-full rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,11,0.62)] px-3 py-2.5 text-left hover:bg-[rgba(24,31,16,0.82)]"
+                        }
+                        aria-pressed={isSelected}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                              {row.title}
+                            </p>
+                            <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
+                              {categoryName}
+                            </p>
+                          </div>
+                          <Badge variant={badgeVariantByStatus[row.status]}>{row.status}</Badge>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {selectedRow ? (
+                <article className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-3.5">
+                  <div className="space-y-3">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <p className="font-semibold text-[var(--bg-paper)]">{row.title}</p>
-                        <p className="text-xs text-[var(--color-text-muted)]">Categoria: {categoryName}</p>
+                        <p className="font-semibold text-[var(--bg-paper)]">{selectedRow.title}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">
+                          Categoria: {categories.find((category) => category.id === selectedRow.categoryId)?.name ?? "Sem categoria"}
+                        </p>
                         {/* ADMIN ONLY - nao expor ao cliente membro */}
                         <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] flex items-center gap-1.5">
                           <User className="h-3 w-3" />
-                          Submetido por: {row.submittedByName} · {new Date(row.createdAtUtc).toLocaleString("pt-PT")}
+                          Submetido por: {selectedRow.submittedByName} · {new Date(selectedRow.createdAtUtc).toLocaleString("pt-PT")}
                         </p>
                       </div>
-                      <Badge variant={badgeVariantByStatus[row.status]}>{row.status}</Badge>
+                      <Badge variant={badgeVariantByStatus[selectedRow.status]}>{selectedRow.status}</Badge>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        disabled={isBusy || row.status === "approved"}
-                        className="bg-[rgba(0,255,136,0.12)] border-[var(--border-neon)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
-                        onClick={() => approveNomination.mutate(row.id)}
-                      >
-                        Aprovar
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={isBusy || row.status === "rejected"}
-                        className="bg-[rgba(255,58,58,0.08)] border-[var(--neon-red)] text-[var(--neon-red)]"
-                        onClick={() => setRejectingId(row.id)}
-                      >
-                        Rejeitar
-                      </Button>
-
-                      <div className="w-full sm:w-60 sm:ml-auto">
+                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                      <div>
+                        <p className="mb-2 text-xs font-medium text-[var(--color-text-muted)]">Mover para categoria</p>
                         <Select
-                          value={row.categoryId ?? "none"}
-                          onValueChange={(value) => setCategory.mutate({ nomineeId: row.id, categoryId: value })}
+                          value={selectedRow.categoryId ?? "none"}
+                          onValueChange={(value) =>
+                            setCategory.mutate({ nomineeId: selectedRow.id, categoryId: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Mover para categoria" />
@@ -261,10 +299,41 @@ export function AdminNominationsSection({
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="flex flex-wrap gap-2 sm:justify-end">
+                        <Button
+                          type="button"
+                          disabled={
+                            approveNomination.isPending ||
+                            rejectNomination.isPending ||
+                            setCategory.isPending ||
+                            selectedRow.status === "approved"
+                          }
+                          className="bg-[rgba(0,255,136,0.12)] border-[var(--border-neon)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                          onClick={() => approveNomination.mutate(selectedRow.id)}
+                        >
+                          Aprovar
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={
+                            approveNomination.isPending ||
+                            rejectNomination.isPending ||
+                            setCategory.isPending ||
+                            selectedRow.status === "rejected"
+                          }
+                          className="bg-[rgba(255,58,58,0.08)] border-[var(--neon-red)] text-[var(--neon-red)]"
+                          onClick={() => setRejectingId(selectedRow.id)}
+                        >
+                          Rejeitar
+                        </Button>
+                      </div>
                     </div>
-                  </article>
-                );
-              })}
+                  </div>
+                </article>
+              ) : null}
             </div>
           )}
         </CardContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BarChart2, ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -30,6 +30,33 @@ export function AdminOfficialResultsSection({
     initialData: initialResults,
   });
 
+  const results = resultsQuery.data ?? null;
+  const resultCategories = results?.categories ?? [];
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (resultCategories.length === 0) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    setSelectedCategoryId((current) => {
+      if (current && resultCategories.some((category) => category.categoryId === current)) {
+        return current;
+      }
+      return resultCategories[0].categoryId;
+    });
+  }, [resultCategories]);
+
+  const selectedCategory = useMemo(
+    () =>
+      resultCategories.find((category) => category.categoryId === selectedCategoryId) ??
+      resultCategories[0] ??
+      null,
+    [resultCategories, selectedCategoryId]
+  );
+
   if (!isAdmin) {
     return <AdminStateMessage tone="warning">Secao disponivel apenas para admins.</AdminStateMessage>;
   }
@@ -49,8 +76,6 @@ export function AdminOfficialResultsSection({
       </AdminStateMessage>
     );
   }
-
-  const results = resultsQuery.data;
 
   const getParticipationClass = (rate: number) => {
     if (rate < 0.5) return "text-[var(--neon-red)]";
@@ -78,69 +103,113 @@ export function AdminOfficialResultsSection({
         </CardHeader>
       </Card>
 
-      {results.categories.map((category) => {
-        const participationLabel = `${category.totalVotes}/${results.totalMembers} membros votaram (${Math.round(category.participationRate * 100)}%)`;
-        const participationClass = getParticipationClass(category.participationRate);
-
-        const ranked = [...category.nominees].sort((left, right) => right.voteCount - left.voteCount);
-        const isExpanded = Boolean(expandedCategories[category.categoryId]);
-
-        return (
-          <Card key={category.categoryId} className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
-            <CardHeader className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <CardTitle>{category.categoryName}</CardTitle>
-                <span className={cn("text-sm font-medium", participationClass)}>{participationLabel}</span>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              {ranked.map((nominee, index) => {
-                const { medal, fillClass } = getRankMeta(index);
-                const percentage = category.totalVotes > 0 ? Math.round((nominee.voteCount / category.totalVotes) * 100) : 0;
+      {results.categories.length > 0 ? (
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+          <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
+            <div className="max-h-[58svh] space-y-1 overflow-y-auto pr-1">
+              {results.categories.map((category) => {
+                const isSelected = category.categoryId === selectedCategory?.categoryId;
+                const participationRate = Math.round(category.participationRate * 100);
 
                 return (
-                  <div key={nominee.nomineeId} className="space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm text-[var(--text-primary)] truncate">{medal} {nominee.nomineeTitle}</p>
-                      <span className="text-xs text-[var(--text-muted)]">{nominee.voteCount} votos ({percentage}%)</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                      <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
-                    </div>
-                  </div>
+                  <button
+                    key={category.categoryId}
+                    type="button"
+                    onClick={() => setSelectedCategoryId(category.categoryId)}
+                    className={cn(
+                      "w-full rounded-[var(--radius-md-token)] border px-3 py-2.5 text-left",
+                      isSelected
+                        ? "border-[rgba(122,173,58,0.36)] bg-[rgba(36,49,23,0.9)]"
+                        : "border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,11,0.62)] hover:bg-[rgba(24,31,16,0.82)]"
+                    )}
+                    aria-pressed={isSelected}
+                  >
+                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                      {category.categoryName}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
+                      {category.totalVotes}/{results.totalMembers} votaram ({participationRate}%)
+                    </p>
+                  </button>
                 );
               })}
+            </div>
+          </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full justify-center"
-                onClick={() =>
-                  setExpandedCategories((current) => ({
-                    ...current,
-                    [category.categoryId]: !current[category.categoryId],
-                  }))
-                }
-              >
-                {isExpanded ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
-                Ver eleitores
-              </Button>
-
-              {isExpanded ? (
-                <div className="space-y-1 rounded-md border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,10,0.75)] p-3 animate-in fade-in duration-200">
-                  {/* ADMIN ONLY - nao expor ao cliente membro */}
-                  {ranked.map((nominee) => (
-                    <p key={nominee.nomineeId} className="text-xs text-[var(--text-muted)]">
-                      <span className="text-[var(--text-primary)]">{nominee.nomineeTitle}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}
-                    </p>
-                  ))}
+          {selectedCategory ? (
+            <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+              <CardHeader className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>{selectedCategory.categoryName}</CardTitle>
+                  <span className={cn("text-sm font-medium", getParticipationClass(selectedCategory.participationRate))}>
+                    {selectedCategory.totalVotes}/{results.totalMembers} membros votaram ({Math.round(selectedCategory.participationRate * 100)}%)
+                  </span>
                 </div>
-              ) : null}
-            </CardContent>
-          </Card>
-        );
-      })}
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                {[...selectedCategory.nominees]
+                  .sort((left, right) => right.voteCount - left.voteCount)
+                  .map((nominee, index) => {
+                    const { medal, fillClass } = getRankMeta(index);
+                    const percentage =
+                      selectedCategory.totalVotes > 0
+                        ? Math.round((nominee.voteCount / selectedCategory.totalVotes) * 100)
+                        : 0;
+
+                    return (
+                      <div key={nominee.nomineeId} className="space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm text-[var(--text-primary)]">
+                            {medal} {nominee.nomineeTitle}
+                          </p>
+                          <span className="text-xs text-[var(--text-muted)]">
+                            {nominee.voteCount} votos ({percentage}%)
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                          <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-center"
+                  onClick={() =>
+                    setExpandedCategories((current) => ({
+                      ...current,
+                      [selectedCategory.categoryId]: !current[selectedCategory.categoryId],
+                    }))
+                  }
+                >
+                  {expandedCategories[selectedCategory.categoryId] ? (
+                    <ChevronUp className="mr-2 h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="mr-2 h-4 w-4" />
+                  )}
+                  Ver eleitores
+                </Button>
+
+                {expandedCategories[selectedCategory.categoryId] ? (
+                  <div className="max-h-[34svh] space-y-1 overflow-y-auto rounded-md border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,10,0.75)] p-3 animate-in fade-in duration-200">
+                    {/* ADMIN ONLY - nao expor ao cliente membro */}
+                    {[...selectedCategory.nominees]
+                      .sort((left, right) => right.voteCount - left.voteCount)
+                      .map((nominee) => (
+                        <p key={nominee.nomineeId} className="text-xs text-[var(--text-muted)]">
+                          <span className="text-[var(--text-primary)]">{nominee.nomineeTitle}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}
+                        </p>
+                      ))}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

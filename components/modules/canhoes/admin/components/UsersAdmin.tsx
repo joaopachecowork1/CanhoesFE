@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { adminCopy } from "@/lib/canhoesCopy";
 import type { PublicUserDto } from "@/lib/api/types";
@@ -39,11 +41,11 @@ function MemberRowSkeleton() {
 
 function MemberRow({ member }: Readonly<{ member: PublicUserDto }>) {
   return (
-    <article className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]">
+    <article className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-2.5 text-[var(--bg-paper)]">
       <div className="flex items-center gap-3">
         <div
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-[11px] font-bold",
             member.isAdmin
               ? "border-[rgba(122,173,58,0.32)] bg-[rgba(122,173,58,0.18)] text-[var(--bg-paper)]"
               : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.86)]"
@@ -66,8 +68,21 @@ function MemberRow({ member }: Readonly<{ member: PublicUserDto }>) {
 }
 
 export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
-  const adminMembers = members.filter((member) => member.isAdmin);
-  const regularMembers = members.filter((member) => !member.isAdmin);
+  const [query, setQuery] = useState("");
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredMembers = useMemo(() => {
+    if (!normalizedQuery) return members;
+
+    return members.filter((member) => {
+      const name = (member.displayName ?? "").toLowerCase();
+      const email = member.email.toLowerCase();
+      return name.includes(normalizedQuery) || email.includes(normalizedQuery);
+    });
+  }, [members, normalizedQuery]);
+
+  const adminMembers = filteredMembers.filter((member) => member.isAdmin);
+  const regularMembers = filteredMembers.filter((member) => !member.isAdmin);
 
   return (
     <div className="space-y-5">
@@ -88,6 +103,15 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
             </p>
           </div>
         </div>
+
+        <div className="mt-3">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Procurar por nome ou email"
+            className="h-9"
+          />
+        </div>
       </section>
 
       {loading ? (
@@ -105,9 +129,11 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
           count={adminMembers.length}
           defaultOpen
         >
-          {adminMembers.map((member) => (
-            <MemberRow key={member.id} member={member} />
-          ))}
+          <div className="max-h-[44svh] space-y-2 overflow-y-auto pr-1">
+            {adminMembers.map((member) => (
+              <MemberRow key={member.id} member={member} />
+            ))}
+          </div>
         </AdminCollapsibleSection>
       ) : null}
 
@@ -117,9 +143,11 @@ export function UsersAdmin({ loading, members }: Readonly<UsersAdminProps>) {
           title={adminCopy.users.members}
           count={regularMembers.length}
         >
-          {regularMembers.map((member) => (
-            <MemberRow key={member.id} member={member} />
-          ))}
+          <div className="max-h-[48svh] space-y-2 overflow-y-auto pr-1">
+            {regularMembers.map((member) => (
+              <MemberRow key={member.id} member={member} />
+            ))}
+          </div>
         </AdminCollapsibleSection>
       ) : null}
 
