@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { LogOut, Menu, ScrollText } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
+import { CanhoesBrandMark } from "./CanhoesBrandMark";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
 import { CanhoesFloatingActionMenu } from "./CanhoesFloatingActionMenu";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
@@ -115,20 +116,9 @@ export function CanhoesChrome({
             className="page-hero editorial-shell border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-4 py-4 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-5 sm:py-5"
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1 space-y-3">
-                <div className="flex flex-wrap items-center gap-2 text-[var(--bg-paper-alt)]">
-                  <span className="inline-flex items-center gap-2">
-                    <ScrollText className="h-4 w-4 text-[var(--neon-green)]" />
-                    <span className="label text-[rgba(245,237,224,0.9)]">Canhoes do Ano</span>
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h1 className="heading-2 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
-                    Canhoes do Ano
-                  </h1>
-                  <p className="body-small text-[rgba(245,237,224,0.9)]">{pageTitle}</p>
-                </div>
+              <div className="min-w-0 flex-1 space-y-2">
+                <CanhoesBrandMark />
+                <p className="body-small text-[rgba(245,237,224,0.88)]">{pageTitle}</p>
               </div>
 
               <div className="flex items-center gap-2">

@@ -32,6 +32,22 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Canh\u00f5es do Ano",
   description: "O ritual anual dos Canh\u00f5es: feed, vota\u00e7\u00f5es, nomea\u00e7\u00f5es e gala.",
+  icons: {
+    icon: "/brand/icon.svg",
+    apple: "/brand/icon.svg",
+    shortcut: "/brand/icon.svg",
+  },
+  openGraph: {
+    title: "Canhoes do Ano",
+    description: "Premiando a comunidade com uma experiencia clara, moderna e memoravel.",
+    images: ["/brand/hero.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Canhoes do Ano",
+    description: "Premiando a comunidade com uma experiencia clara, moderna e memoravel.",
+    images: ["/brand/hero.svg"],
+  },
 };
 
 export const viewport: Viewport = {

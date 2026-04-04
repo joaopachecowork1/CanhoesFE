@@ -46,25 +46,25 @@ export function AdminNominationsSection({
   const [tab, setTab] = useState<StatusTab>("pending");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const queryEventId = eventId ?? "";
 
   const nominationsQuery = useQuery({
-    queryKey: ["admin-nominations", eventId],
+    queryKey: ["admin-nominations", queryEventId],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(eventId!),
+    queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(queryEventId),
     initialData: initialRows,
   });
 
   const invalidate = async () => {
-    if (!eventId) return;
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-nominations", eventId] }),
-      queryClient.invalidateQueries({ queryKey: ["official-voting", eventId] }),
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin-bootstrap", eventId] }),
+      queryClient.invalidateQueries({ queryKey: ["admin-nominations", queryEventId] }),
+      queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId] }),
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin-bootstrap", queryEventId] }),
     ]);
   };
 
   const approveNomination = useMutation({
-    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminApproveNomination(eventId!, nomineeId),
+    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminApproveNomination(queryEventId, nomineeId),
     onSuccess: async () => {
       toast.success("Nomeacao aprovada.");
       await invalidate();
@@ -75,7 +75,7 @@ export function AdminNominationsSection({
   });
 
   const rejectNomination = useMutation({
-    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminRejectNomination(eventId!, nomineeId),
+    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminRejectNomination(queryEventId, nomineeId),
     onSuccess: async () => {
       setRejectingId(null);
       toast.success("Nomeacao rejeitada.");
@@ -88,7 +88,7 @@ export function AdminNominationsSection({
 
   const setCategory = useMutation({
     mutationFn: ({ nomineeId, categoryId }: { nomineeId: string; categoryId: string }) =>
-      canhoesEventsRepo.adminSetNominationCategory(eventId!, nomineeId, {
+      canhoesEventsRepo.adminSetNominationCategory(queryEventId, nomineeId, {
         categoryId: categoryId === "none" ? null : categoryId,
       }),
     onSuccess: async () => {
@@ -117,6 +117,22 @@ export function AdminNominationsSection({
       .filter((row) => (categoryFilter === "all" ? true : row.categoryId === categoryFilter))
       .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
   }, [rows, tab, categoryFilter]);
+
+  const tabLabels: Record<StatusTab, string> = {
+    pending: "Pendentes",
+    approved: "Aprovadas",
+    rejected: "Rejeitadas",
+  };
+  const emptyStateLabel: Record<StatusTab, string> = {
+    pending: "pendente",
+    approved: "aprovada",
+    rejected: "rejeitada",
+  };
+  const badgeVariantByStatus: Record<AdminNomineeDto["status"], "default" | "destructive" | "secondary"> = {
+    approved: "default",
+    pending: "secondary",
+    rejected: "destructive",
+  };
 
   if (!eventId) {
     return <AdminStateMessage>Falta uma edicao ativa para moderar nomeacoes.</AdminStateMessage>;
@@ -149,7 +165,7 @@ export function AdminNominationsSection({
           <div className="flex flex-wrap items-center gap-2">
             {(["pending", "approved", "rejected"] as const).map((status) => {
               const active = tab === status;
-              const label = status === "pending" ? "Pendentes" : status === "approved" ? "Aprovadas" : "Rejeitadas";
+              const label = tabLabels[status];
               return (
                 <Button
                   key={status}
@@ -185,7 +201,7 @@ export function AdminNominationsSection({
           </div>
 
           {filteredRows.length === 0 ? (
-            <AdminStateMessage variant="panel">Fila limpa - nenhuma nomeacao {tab === "pending" ? "pendente" : tab}.</AdminStateMessage>
+            <AdminStateMessage variant="panel">Fila limpa - nenhuma nomeacao {emptyStateLabel[tab]}.</AdminStateMessage>
           ) : (
             <div className="space-y-3">
               {filteredRows.map((row) => {
@@ -204,7 +220,7 @@ export function AdminNominationsSection({
                           Submetido por: {row.submittedByName} · {new Date(row.createdAtUtc).toLocaleString("pt-PT")}
                         </p>
                       </div>
-                      <Badge variant={row.status === "approved" ? "default" : row.status === "rejected" ? "destructive" : "secondary"}>{row.status}</Badge>
+                      <Badge variant={badgeVariantByStatus[row.status]}>{row.status}</Badge>
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-2">

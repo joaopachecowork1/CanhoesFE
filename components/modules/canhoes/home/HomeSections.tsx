@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { homeCopy as productHomeCopy } from "@/lib/canhoesCopy";
 import { getPhaseLabel, openComposeSheet } from "@/lib/canhoesEvent";
@@ -144,8 +145,20 @@ export function CanhoesEventHomeContent({
 
   return (
     <div className="space-y-4">
-      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.18),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.16),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
         <div className="space-y-4 px-4 py-5 sm:px-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.88)]">
+                {event.name}
+              </p>
+              <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+                {productHomeCopy.heroTitle}
+              </h1>
+            </div>
+            <CanhoesHeroEmblem compact className="mt-1" />
+          </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
               {phaseLabel}
@@ -153,7 +166,7 @@ export function CanhoesEventHomeContent({
             {overview.nextPhase ? (
               <Badge
                 variant="outline"
-                className="border-[var(--border-purple)] bg-[rgba(177,140,255,0.12)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)]"
+                className="border-[rgba(212,184,150,0.28)] bg-[rgba(212,184,150,0.1)] text-[var(--bg-paper)]"
               >
                 Proxima: {getPhaseLabel(overview.nextPhase.type)}
               </Badge>
@@ -161,11 +174,8 @@ export function CanhoesEventHomeContent({
           </div>
 
           <div className="space-y-2">
-            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.88)]">
-              {event.name}
-            </p>
             <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
-              {productHomeCopy.heroTitle}
+              Resumo da Fase
             </h1>
             <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">
               {phaseSummary}
@@ -203,12 +213,12 @@ export function CanhoesEventHomeContent({
         <HomePanel
           title={productHomeCopy.alertsTitle}
           icon={Clock3}
-          cardClassName="border-[var(--border-purple)] bg-[rgba(93,67,138,0.18)]"
+          cardClassName="border-[rgba(212,184,150,0.22)] bg-[rgba(57,45,28,0.28)]"
         >
           {homeCopy.alerts.map((alert) => (
             <div
               key={alert}
-              className="rounded-[var(--radius-md-token)] border border-[var(--border-purple)] bg-[rgba(93,67,138,0.28)] px-3 py-3 text-sm text-[var(--bg-paper)]"
+              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.24)] bg-[rgba(57,45,28,0.42)] px-3 py-3 text-sm text-[var(--bg-paper)]"
             >
               {alert}
             </div>
@@ -385,7 +395,7 @@ function MetricCard({
       className={cn(
         PANEL_ITEM_CLASS,
         tone === "purple" &&
-          "border-[var(--border-purple)] bg-[rgba(93,67,138,0.18)] shadow-[var(--glow-purple-sm)]"
+          "border-[rgba(212,184,150,0.24)] bg-[rgba(57,45,28,0.3)]"
       )}
     >
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.76)]">
@@ -410,7 +420,7 @@ function ActionLinkButton({
 }>) {
   const className =
     variant === "outline"
-      ? "border-[var(--border-purple)] bg-[rgba(177,140,255,0.08)] text-[var(--accent-purple-soft)] shadow-[var(--glow-purple-sm)] hover:bg-[rgba(177,140,255,0.14)]"
+      ? "border-[rgba(212,184,150,0.3)] bg-[rgba(212,184,150,0.08)] text-[var(--bg-paper)] hover:bg-[rgba(212,184,150,0.14)]"
       : undefined;
 
   if (action.href) {
@@ -448,7 +458,7 @@ function ChecklistItem({
           "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
           done
             ? "border-[rgba(74,92,47,0.24)] bg-[rgba(74,92,47,0.12)] text-[var(--success)]"
-            : "border-[var(--border-purple)] bg-[rgba(177,140,255,0.14)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
+            : "border-[rgba(212,184,150,0.28)] bg-[rgba(212,184,150,0.12)] text-[var(--beige)]"
         )}
       >
         <CheckCircle2 className="h-4 w-4" />

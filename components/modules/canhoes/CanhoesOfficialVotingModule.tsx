@@ -11,32 +11,35 @@ import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 export function CanhoesOfficialVotingModule() {
   const queryClient = useQueryClient();
-  const { event } = useEventOverview();
+  const { event, overview } = useEventOverview();
 
   const eventId = event?.id ?? null;
+  const queryEventId = eventId ?? "";
+  const isOfficialVotingPhase = overview?.activePhase?.type === "VOTING";
 
   const boardQuery = useQuery({
-    queryKey: ["official-voting", eventId],
+    queryKey: ["official-voting", queryEventId],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(eventId!),
+    queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(queryEventId),
   });
 
   const castVote = useMutation({
     mutationFn: (payload: CastOfficialVoteRequest) =>
-      canhoesEventsRepo.castOfficialVote(eventId!, payload),
+      canhoesEventsRepo.castOfficialVote(queryEventId, payload),
     onMutate: async (payload) => {
       if (!eventId) return { previous: null };
 
-      await queryClient.cancelQueries({ queryKey: ["official-voting", eventId] });
-      const previous = queryClient.getQueryData<OfficialVotingBoardDto>(["official-voting", eventId]);
+      await queryClient.cancelQueries({ queryKey: ["official-voting", queryEventId] });
+      const previous = queryClient.getQueryData<OfficialVotingBoardDto>(["official-voting", queryEventId]);
 
-      queryClient.setQueryData<OfficialVotingBoardDto>(["official-voting", eventId], (old) => {
+      queryClient.setQueryData<OfficialVotingBoardDto>(["official-voting", queryEventId], (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -52,14 +55,14 @@ export function CanhoesOfficialVotingModule() {
     },
     onError: (error, _payload, context) => {
       if (eventId && context?.previous) {
-        queryClient.setQueryData(["official-voting", eventId], context.previous);
+        queryClient.setQueryData(["official-voting", queryEventId], context.previous);
       }
       logFrontendError("CanhoesOfficialVoting.castVote", error, { eventId });
       toast.error(getErrorMessage(error, "Nao foi possivel registar o voto. Tenta novamente."));
     },
     onSettled: async () => {
       if (!eventId) return;
-      await queryClient.invalidateQueries({ queryKey: ["official-voting", eventId] });
+      await queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId] });
     },
   });
 
@@ -91,6 +94,10 @@ export function CanhoesOfficialVotingModule() {
   const totalCategories = board.categories.length;
   const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
   const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
+
+  if (!isOfficialVotingPhase) {
+    return <CanhoesVotingModule />;
+  }
 
   return (
     <div className="space-y-4">
@@ -141,13 +148,13 @@ function OfficialVotingCategoryCard({
   isBusy,
   onVote,
   pendingPayload,
-}: {
+}: Readonly<{
   category: OfficialVotingCategoryDto;
   canVote: boolean;
   isBusy: boolean;
   onVote: (payload: CastOfficialVoteRequest) => void;
   pendingPayload: CastOfficialVoteRequest | null;
-}) {
+}>) {
   const voteMap = useMemo(() => {
     const totalVotes = category.totalVotes ?? 0;
     return category.nominees.map((nominee) => {
@@ -159,11 +166,11 @@ function OfficialVotingCategoryCard({
 
   return (
     <Card className="border-[var(--border-moss)] bg-[var(--bg-surface)] rounded-2xl relative">
-      {!canVote ? (
+      {canVote ? null : (
         <div className="absolute inset-0 z-10 rounded-2xl bg-black/35 backdrop-blur-[1px] flex items-center justify-center text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
           Votacao encerrada
         </div>
-      ) : null}
+      )}
 
       <CardHeader className="pb-2">
         <CardTitle className="text-[var(--text-primary)] flex items-center gap-2">
@@ -180,6 +187,13 @@ function OfficialVotingCategoryCard({
           const selected = category.myNomineeId === nominee.id;
           const pending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
           const stats = voteMap.find((entry) => entry.id === nominee.id);
+          let statusIcon = null;
+
+          if (pending) {
+            statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+          } else if (selected) {
+            statusIcon = <CheckCircle2 className="h-4 w-4" />;
+          }
 
           return (
             <button
@@ -199,9 +213,7 @@ function OfficialVotingCategoryCard({
                 ) : null}
               </div>
 
-              <div className="shrink-0 text-[var(--neon-green)]">
-                {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : selected ? <CheckCircle2 className="h-4 w-4" /> : null}
-              </div>
+              <div className="shrink-0 text-[var(--neon-green)]">{statusIcon}</div>
             </button>
           );
         })}

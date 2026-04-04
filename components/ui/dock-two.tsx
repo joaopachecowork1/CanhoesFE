@@ -53,7 +53,7 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         aria-label={ariaLabel ?? label}
         title={label}
         className={cn(
-          "group relative inline-flex min-w-[4.45rem] snap-center flex-col items-center justify-center gap-1 rounded-[1rem] px-2 py-2.5 transition-colors hover:bg-secondary",
+          "group relative inline-flex min-w-[4rem] snap-center flex-col items-center justify-center gap-1 rounded-[1rem] px-2 py-2 transition-colors hover:bg-secondary",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           buttonClassName
         )}
@@ -90,11 +90,11 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex h-64 w-full items-center justify-center p-2", className)}
+        className={cn("flex w-full items-center justify-center", className)}
       >
         <div
           className={cn(
-            "relative flex h-64 w-full max-w-4xl snap-x snap-mandatory items-center justify-center rounded-2xl overflow-x-auto scrollbar-none overscroll-x-contain touch-pan-x",
+            "relative flex w-full snap-x snap-mandatory items-center justify-center overflow-x-auto scrollbar-none overscroll-x-contain touch-pan-x",
             containerClassName
           )}
         >

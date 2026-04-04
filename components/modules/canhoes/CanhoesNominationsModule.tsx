@@ -23,27 +23,28 @@ export function CanhoesNominationsModule() {
   const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
 
   const eventId = event?.id ?? null;
+  const queryEventId = eventId ?? "";
   const isPhaseOpen = overview?.activePhase?.type === "PROPOSALS";
 
   const categoriesQuery = useQuery({
-    queryKey: ["nominations", eventId, "categories"],
+    queryKey: ["nominations", queryEventId, "categories"],
     enabled: Boolean(eventId),
     queryFn: async () => {
-      const categories = await canhoesEventsRepo.adminGetCategories(eventId!);
+      const categories = await canhoesEventsRepo.adminGetCategories(queryEventId);
       return categories.filter((category) => category.isActive);
     },
   });
 
   const myStatusQuery = useQuery({
-    queryKey: ["nominations", eventId, "my-status"],
+    queryKey: ["nominations", queryEventId, "my-status"],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getMyNominationStatus(eventId!),
+    queryFn: () => canhoesEventsRepo.getMyNominationStatus(queryEventId),
   });
 
   const approvedQuery = useQuery({
-    queryKey: ["nominations", eventId, "approved"],
+    queryKey: ["nominations", queryEventId, "approved"],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getApprovedNominees(eventId!),
+    queryFn: () => canhoesEventsRepo.getApprovedNominees(queryEventId),
   });
 
   const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
@@ -116,14 +117,14 @@ export function CanhoesNominationsModule() {
         <CategoryNominationCard
           key={category.id}
           category={category}
-          eventId={eventId}
+          eventId={queryEventId}
           isPhaseOpen={isPhaseOpen}
           myStatus={myStatus.find((status) => status.categoryId === category.id)}
           approvedNominees={approvedNominees.filter((nominee) => nominee.categoryId === category.id)}
           onRefresh={async () => {
             await Promise.all([
-              queryClient.invalidateQueries({ queryKey: ["nominations", eventId, "my-status"] }),
-              queryClient.invalidateQueries({ queryKey: ["nominations", eventId, "approved"] }),
+              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "my-status"] }),
+              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "approved"] }),
             ]);
           }}
         />
@@ -139,14 +140,14 @@ function CategoryNominationCard({
   approvedNominees,
   isPhaseOpen,
   onRefresh,
-}: {
+}: Readonly<{
   category: AwardCategoryDto;
   eventId: string;
   myStatus: MyNominationStatusDto | undefined;
   approvedNominees: NomineeDto[];
   isPhaseOpen: boolean;
   onRefresh: () => Promise<void>;
-}) {
+}>) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [pendingLabel, setPendingLabel] = useState<string | null>(null);
@@ -209,16 +210,17 @@ function CategoryNominationCard({
                 <span className="font-[var(--font-mono)]">{titleTrimmed.length}/120</span>
               </div>
               {file ? <p className="text-xs text-[var(--text-muted)]">Ficheiro selecionado: {file.name}</p> : null}
-              <label className="block text-xs text-[var(--text-muted)]">
-                Upload opcional
+              <div className="space-y-1 text-xs text-[var(--text-muted)]">
+                <label htmlFor={`nomination-file-${category.id}`}>Upload opcional</label>
                 <input
+                  id={`nomination-file-${category.id}`}
                   type="file"
                   accept="image/*"
-                  className="mt-1 block w-full text-xs"
+                  className="block w-full text-xs"
                   onChange={(event) => setFile(event.target.files?.[0] ?? null)}
                   disabled={!isPhaseOpen || createNomination.isPending}
                 />
-              </label>
+              </div>
             </div>
 
             <Button

@@ -21,11 +21,12 @@ export function AdminOfficialResultsSection({
 }>) {
   const isAdmin = useIsAdmin();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const queryEventId = eventId ?? "";
 
   const resultsQuery = useQuery({
-    queryKey: ["admin-official-results", eventId],
+    queryKey: ["admin-official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
-    queryFn: () => canhoesEventsRepo.adminGetOfficialResults(eventId!),
+    queryFn: () => canhoesEventsRepo.adminGetOfficialResults(queryEventId),
     initialData: initialResults,
   });
 
@@ -51,6 +52,19 @@ export function AdminOfficialResultsSection({
 
   const results = resultsQuery.data;
 
+  const getParticipationClass = (rate: number) => {
+    if (rate < 0.5) return "text-[var(--neon-red)]";
+    if (rate < 0.8) return "text-[var(--neon-amber)]";
+    return "text-[var(--neon-green)]";
+  };
+
+  const getRankMeta = (index: number) => {
+    if (index === 0) return { medal: "🥇", fillClass: "bg-[var(--neon-amber)]" };
+    if (index === 1) return { medal: "🥈", fillClass: "bg-[var(--text-muted)]" };
+    if (index === 2) return { medal: "🥉", fillClass: "bg-[var(--bark)]" };
+    return { medal: "", fillClass: "bg-[var(--bark)]" };
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
@@ -66,12 +80,7 @@ export function AdminOfficialResultsSection({
 
       {results.categories.map((category) => {
         const participationLabel = `${category.totalVotes}/${results.totalMembers} membros votaram (${Math.round(category.participationRate * 100)}%)`;
-        const participationClass =
-          category.participationRate < 0.5
-            ? "text-[var(--neon-red)]"
-            : category.participationRate < 0.8
-            ? "text-[var(--neon-amber)]"
-            : "text-[var(--neon-green)]";
+        const participationClass = getParticipationClass(category.participationRate);
 
         const ranked = [...category.nominees].sort((left, right) => right.voteCount - left.voteCount);
         const isExpanded = Boolean(expandedCategories[category.categoryId]);
@@ -87,9 +96,8 @@ export function AdminOfficialResultsSection({
 
             <CardContent className="space-y-3">
               {ranked.map((nominee, index) => {
-                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+                const { medal, fillClass } = getRankMeta(index);
                 const percentage = category.totalVotes > 0 ? Math.round((nominee.voteCount / category.totalVotes) * 100) : 0;
-                const fillClass = index === 0 ? "bg-[var(--neon-amber)]" : index === 1 ? "bg-[var(--text-muted)]" : "bg-[var(--bark)]";
 
                 return (
                   <div key={nominee.nomineeId} className="space-y-1">

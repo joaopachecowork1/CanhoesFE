@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Leaf, Target } from "lucide-react";
+import { Leaf } from "lucide-react";
 
+import { CanhoesBrandMark } from "@/components/chrome/canhoes/CanhoesBrandMark";
+import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -39,6 +41,7 @@ export default function CanhoesLoginPage() {
 
   const handleLogin = () => {
     setIsSigningIn(true);
+    console.log("[Login Page] Starting Google sign-in...");
     loginGoogle();
   };
 
@@ -70,19 +73,16 @@ export default function CanhoesLoginPage() {
         >
           <div className="space-y-6">
             <div className="flex items-center justify-center">
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[var(--accent)] text-[var(--text-primary)] shadow-[var(--glow-moss)]">
-                <Target className="h-10 w-10" />
-                <Leaf className="absolute -right-1 -top-1 h-6 w-6 text-[var(--neon-green)]" />
-              </div>
+              <CanhoesHeroEmblem />
             </div>
 
             <div className="space-y-3 text-center">
+              <div className="flex justify-center">
+                <CanhoesBrandMark compact />
+              </div>
               <p className="editorial-kicker text-[var(--beige)]">
                 Ritual anual
               </p>
-              <h1 className="heading-1 text-[var(--text-primary)] [text-shadow:var(--glow-green-sm)]">
-                Canhoes do Ano
-              </h1>
               <p className="body-small text-[var(--beige)]/78">
                 Um espaco privado para o feed, os premios, as votacoes e o
                 arquivo do grupo.

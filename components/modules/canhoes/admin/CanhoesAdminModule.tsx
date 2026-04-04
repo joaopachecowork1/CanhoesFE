@@ -170,99 +170,73 @@ export default function CanhoesAdminModule() {
     [adminNominees, eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
   );
 
-  const activeSectionContent = useMemo(() => {
-    switch (activeTab) {
-      case "overview":
-        return (
-          <AdminOverviewSection
-            activeEventName={activeEvent?.name ?? null}
-            allNominees={allNominees}
-            loading={loading}
-            pendingCategoryProposals={pendingCategoryProposals}
-            pendingMeasureProposals={pendingMeasureProposals}
-            pendingNominees={pendingNominees}
-            state={eventState}
-          />
-        );
-      case "categories":
-        return (
-          <AdminCategoriesSection
-            categories={categories}
-            categoryProposals={allCategoryProposals}
-            eventId={activeEvent?.id ?? null}
-            loading={loading}
-            measureProposals={measureProposals}
-            nominees={allNominees}
-            onUpdate={handleRefresh}
-            votes={voteAuditRows}
-          />
-        );
-      case "members":
-        return <AdminMembersSection loading={loading} members={eventMembers} />;
-      case "nominations":
-        return (
-          <AdminNominationsSection
-            eventId={activeEvent?.id ?? null}
-            categories={categories}
-            initialRows={adminNominees}
-          />
-        );
-      case "results":
-        return (
-          <AdminOfficialResultsSection
-            eventId={activeEvent?.id ?? null}
-            initialResults={officialResults}
-          />
-        );
-      case "modules":
-        return (
-          <AdminModulesSection
-            activeEventName={activeEvent?.name ?? null}
-            eventId={activeEvent?.id ?? null}
-            loading={loading}
-            onUpdate={handleRefresh}
-            secretSantaState={secretSanta}
-            state={eventState}
-          />
-        );
-      case "phase":
-        return (
-          <AdminPhaseSection
-            activeEventName={activeEvent?.name ?? null}
-            eventId={activeEvent?.id ?? null}
-            events={events}
-            onActivateEvent={handleActivateEvent}
-            onRefresh={handleRefresh}
-            onUpdatePhase={handleUpdatePhase}
-            state={eventState}
-          />
-        );
-      default:
-        return null;
-    }
-  }, [
-    activeEvent?.id,
-    activeEvent?.name,
-    activeTab,
-    allCategoryProposals,
-    allNominees,
-    adminNominees,
-    categories,
-    eventMembers,
-    events,
-    handleActivateEvent,
-    handleRefresh,
-    handleUpdatePhase,
-    loading,
-    measureProposals,
-    officialResults,
-    pendingCategoryProposals,
-    pendingMeasureProposals,
-    pendingNominees,
-    secretSanta,
-    eventState,
-    voteAuditRows,
-  ]);
+  let activeSectionContent = null;
+  if (activeTab === "overview") {
+    activeSectionContent = (
+      <AdminOverviewSection
+        activeEventName={activeEvent?.name ?? null}
+        allNominees={allNominees}
+        loading={loading}
+        pendingCategoryProposals={pendingCategoryProposals}
+        pendingMeasureProposals={pendingMeasureProposals}
+        pendingNominees={pendingNominees}
+        state={eventState}
+      />
+    );
+  } else if (activeTab === "categories") {
+    activeSectionContent = (
+      <AdminCategoriesSection
+        categories={categories}
+        categoryProposals={allCategoryProposals}
+        eventId={activeEvent?.id ?? null}
+        loading={loading}
+        measureProposals={measureProposals}
+        nominees={allNominees}
+        onUpdate={handleRefresh}
+        votes={voteAuditRows}
+      />
+    );
+  } else if (activeTab === "members") {
+    activeSectionContent = <AdminMembersSection loading={loading} members={eventMembers} />;
+  } else if (activeTab === "nominations") {
+    activeSectionContent = (
+      <AdminNominationsSection
+        eventId={activeEvent?.id ?? null}
+        categories={categories}
+        initialRows={adminNominees}
+      />
+    );
+  } else if (activeTab === "results") {
+    activeSectionContent = (
+      <AdminOfficialResultsSection
+        eventId={activeEvent?.id ?? null}
+        initialResults={officialResults}
+      />
+    );
+  } else if (activeTab === "modules") {
+    activeSectionContent = (
+      <AdminModulesSection
+        activeEventName={activeEvent?.name ?? null}
+        eventId={activeEvent?.id ?? null}
+        loading={loading}
+        onUpdate={handleRefresh}
+        secretSantaState={secretSanta}
+        state={eventState}
+      />
+    );
+  } else if (activeTab === "phase") {
+    activeSectionContent = (
+      <AdminPhaseSection
+        activeEventName={activeEvent?.name ?? null}
+        eventId={activeEvent?.id ?? null}
+        events={events}
+        onActivateEvent={handleActivateEvent}
+        onRefresh={handleRefresh}
+        onUpdatePhase={handleUpdatePhase}
+        state={eventState}
+      />
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -293,38 +267,38 @@ export default function CanhoesAdminModule() {
       ) : null}
 
       {!loading && activeEvent && (
-        <div className="space-y-2 sm:hidden">
-          <div className="grid grid-cols-3 gap-2">
+        <div className="sm:hidden">
+          <div className="grid grid-cols-3 gap-1.5">
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
                 Candidatos
               </p>
-              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {stats.totalNominees} total
               </p>
-              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
                 {stats.pendingNominees} pendentes
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
                 Categorias
               </p>
-              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {stats.totalCategories} total
               </p>
-              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
                 {stats.pendingCategories} pendentes
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.7rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
                 Membros
               </p>
-              <p className="mt-1 font-semibold text-[var(--text-primary)]">
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 {stats.memberCount}
               </p>
-              <p className="text-[var(--text-subtle)] text-[0.6rem] leading-none">
+              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
                 {stats.visibleModules} módulos
               </p>
             </div>
@@ -332,7 +306,7 @@ export default function CanhoesAdminModule() {
         </div>
       )}
 
-      <div className="sticky top-[5.75rem] z-20">
+      <div className="sticky top-[5.45rem] z-20">
         <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
       </div>
 
