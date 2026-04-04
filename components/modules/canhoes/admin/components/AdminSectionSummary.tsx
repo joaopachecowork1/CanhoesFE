@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 /**
  * Summary section for displaying statistics and counts.
  * Matches the dark paper theme with moose-inspired border colors.
@@ -43,7 +45,7 @@ export function AdminSectionSummary({
         <p className="body-small text-[var(--color-text-muted)]">{description}</p>
       </CardHeader>
       <CardContent className="space-y-3">
-        {items.map((item, index) => (
+        {items.map((item) => (
           <div
             key={item.label}
             className={`flex flex-wrap items-center justify-between gap-2 rounded-md border border-[rgba(212,184,150,0.12)] px-3 py-2 ${

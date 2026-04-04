@@ -1,3 +1,24 @@
+type ProposalStatus = "pending" | "approved" | "rejected" | "withdrawn";
+
+const statusToLabelMap: Record<ProposalStatus, string> = {
+  approved: "Aprovada",
+  pending: "Pendente",
+  rejected: "Rejeitada",
+  withdrawn: "Retirada",
+};
+
+const statusToIconMap: Record<ProposalStatus, React.ReactNode> = {
+  approved: null,
+  pending: null,
+  rejected: null,
+  withdrawn: null,
+};
+
+function formatDate(date: string) {
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? date : parsed.toLocaleDateString("pt-PT");
+}
+
 /**
  * Compact list item for displaying a single proposal.
  * Matches the dark paper theme with moose-inspired border colors.
@@ -40,7 +61,6 @@ export function ProposalListItem({
   status: ProposalStatus;
   title?: React.ReactNode;
 }>) {
-  const statusTone = statusToToneMap[status];
   const statusLabel = statusToLabelMap[status];
   const statusIcon = statusToIconMap[status];
 
@@ -52,6 +72,7 @@ export function ProposalListItem({
       onClick={onClick}
       role="button"
       tabIndex={-1}
+      data-proposal-id={id}
       title={`Proposta: ${title}`}
     >
       {icon && <div className="shrink-0">{icon}</div>}

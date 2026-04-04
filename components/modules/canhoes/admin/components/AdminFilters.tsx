@@ -1,3 +1,17 @@
+import { ChevronDown } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+
+type ProposalFilter = "" | "approved" | "pending" | "rejected";
+type SortMode = "created" | "created-desc" | "name";
+
 /**
  * Filter component for proposal search and sorting.
  * Matches the dark paper theme with moose-inspired border colors.
@@ -35,7 +49,6 @@ export function AdminFilters({
   onStatusChange: (status: ProposalFilter) => void;
   onSortChange: (sort: SortMode) => void;
   sortMode: SortMode;
-  activeStatus: ProposalFilter;
 }>) {
   const SearchInput = () => (
     <Input
@@ -70,8 +83,7 @@ export function AdminFilters({
             className="bg-[rgba(18,23,12,0.58)] border-[rgba(212,184,150,0.16)] text-[var(--bg-paper)] hover:bg-[rgba(18,23,12,0.65)]"
           >
             Filtro
-            <DropdownMenuIndicator className="stroke-[var(--color-accent)]" />
-            <DropdownMenuShortcut />
+            <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -101,8 +113,7 @@ export function AdminFilters({
             className="bg-[rgba(18,23,12,0.58)] border-[rgba(212,184,150,0.16)] text-[var(--bg-paper)] hover:bg-[rgba(18,23,12,0.65)]"
           >
             Ordenar
-            <DropdownMenuIndicator className="stroke-[var(--color-accent)]" />
-            <DropdownMenuShortcut />
+            <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent

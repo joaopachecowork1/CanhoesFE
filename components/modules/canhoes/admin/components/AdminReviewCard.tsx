@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+
 /**
  * Reusable card component for proposal review pages.
  * Provides a consistent layout with title, meta, status, actions, and optional content slots.

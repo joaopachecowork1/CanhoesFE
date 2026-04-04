@@ -1,3 +1,33 @@
+import { Calendar, Trash2, User } from "lucide-react";
+
+type ProposalStatus = "pending" | "approved" | "rejected" | "withdrawn";
+
+const statusToToneMap: Record<ProposalStatus, string> = {
+  approved: "",
+  pending: "",
+  rejected: "",
+  withdrawn: "",
+};
+
+const statusToLabelMap: Record<ProposalStatus, string> = {
+  approved: "Aprovada",
+  pending: "Pendente",
+  rejected: "Rejeitada",
+  withdrawn: "Retirada",
+};
+
+const statusToIconMap: Record<ProposalStatus, React.ReactNode> = {
+  approved: null,
+  pending: null,
+  rejected: null,
+  withdrawn: null,
+};
+
+function formatDate(date: string) {
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? date : parsed.toLocaleDateString("pt-PT");
+}
+
 /**
  * Card component for displaying a single proposal.
  * Matches the dark paper theme with moose-inspired border colors.
@@ -53,12 +83,6 @@ export function ProposalCard({
   const statusLabel = statusToLabelMap[status];
   const statusIcon = statusToIconMap[status];
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (onStatusChange) {
-      onStatusChange(id, e.target.value as ProposalStatus);
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onDelete) {
@@ -96,13 +120,13 @@ export function ProposalCard({
         <div className="flex flex-wrap items-center gap-2 text-xs text-[rgba(245,237,224,0.6)]">
           {author && (
             <div className="flex items-center gap-1.5">
-              <IconUser className="h-3 w-3 shrink-0" />
+              <User className="h-3 w-3 shrink-0" />
               <span>{author}</span>
             </div>
           )}
           {date && (
             <div className="flex items-center gap-1.5">
-              <IconCalendar className="h-3 w-3 shrink-0" />
+              <Calendar className="h-3 w-3 shrink-0" />
               <span>{formatDate(date)}</span>
             </div>
           )}
@@ -127,7 +151,7 @@ export function ProposalCard({
           onClick={handleDelete}
           type="button"
         >
-          <IconTrash className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
         </button>
       )}
     </div>

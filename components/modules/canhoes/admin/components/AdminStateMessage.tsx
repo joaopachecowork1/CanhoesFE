@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 /**
  * State message component for displaying loading, empty, or disabled states.
  * Matches the dark paper theme with moose-inspired styling.
@@ -12,10 +14,12 @@
  * ```
  */
 export function AdminStateMessage({
+  action,
   children,
   variant = "panel",
   tone = "default",
 }: Readonly<{
+  action?: React.ReactNode;
   children: React.ReactNode;
   variant?: "page" | "panel" | "card";
   tone?: "default" | "warning" | "error";
@@ -36,5 +40,12 @@ export function AdminStateMessage({
       ? "border-[rgba(253,224,71,0.22)] bg-[rgba(30,18,12,0.9)] text-[rgba(245,237,224,0.72)]"
       : "border-[rgba(212,184,150,0.22)] bg-[rgba(18,23,12,0.72)] text-[rgba(245,237,224,0.72)]";
 
-  return <div className={cn(styles, toneClass)}>{children}</div>;
+  return (
+    <div className={cn(styles, toneClass)}>
+      <div className="flex flex-col items-center justify-center gap-3">
+        {children}
+        {action}
+      </div>
+    </div>
+  );
 }

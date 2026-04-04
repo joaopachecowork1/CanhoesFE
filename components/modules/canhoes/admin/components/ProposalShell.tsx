@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 /**
  * Card container for proposal review sections.
  * Provides a consistent layout with title, subtitle, description, and content slots.
