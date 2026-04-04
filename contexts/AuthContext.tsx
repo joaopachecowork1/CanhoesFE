@@ -16,6 +16,7 @@ type AuthContextType = {
   user: AuthUser | null;
   isLogged: boolean;
   loading: boolean;
+  profileLoading: boolean;
   isDevAuthBypass: boolean;
   loginGoogle: () => void;
   logout: () => void;
@@ -32,7 +33,7 @@ type MeResponse = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const devBypassUser = DEV_AUTH_BYPASS_ENABLED
@@ -117,9 +118,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       isLogged: isAuthenticated || isDevAuthBypass,
-      loading:
-        !isDevAuthBypass &&
-        (status === "loading" || (isAuthenticated && isHydratingBackendUser)),
+      loading: !isDevAuthBypass && status === "loading",
+      profileLoading: !isDevAuthBypass && isAuthenticated && isHydratingBackendUser,
       isDevAuthBypass,
       loginGoogle: () => signIn("google"),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),

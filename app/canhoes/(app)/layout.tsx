@@ -27,7 +27,7 @@ export default function CanhoesAppLayout({
   const { isLogged, loading, user } = useAuth();
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       if (loading && !user) {
         router.replace("/canhoes/login");
       }
@@ -37,7 +37,7 @@ export default function CanhoesAppLayout({
       router.replace("/canhoes/login");
     }
 
-    return () => window.clearTimeout(timeoutId);
+    return () => globalThis.clearTimeout(timeoutId);
   }, [isLogged, loading, router, user]);
 
   if (loading && !user) {

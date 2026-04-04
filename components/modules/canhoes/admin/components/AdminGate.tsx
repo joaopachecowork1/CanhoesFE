@@ -33,7 +33,7 @@ function AdminStateCard({
 }
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
-  const { loading, isLogged, user, loginGoogle } = useAuth();
+  const { loading, profileLoading, isLogged, user, loginGoogle } = useAuth();
   const isAdmin = useIsAdmin();
   const router = useRouter();
 
@@ -50,6 +50,18 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
   }
 
   if (isLogged && !user) {
+    return (
+      <AdminStateCard
+        title="A sincronizar perfil"
+        description="A conta ja tem sessao, mas o perfil ainda esta a ser sincronizado com o contexto do evento."
+        action={
+          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
+        }
+      />
+    );
+  }
+
+  if (profileLoading) {
     return (
       <AdminStateCard
         title="A sincronizar perfil"
