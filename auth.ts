@@ -9,8 +9,8 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid email profile",
-          response_type: "code id_token",
-          // Force Google to return id_token (not just access_token)
+          // Use standard auth code flow. Google rejects hybrid flow without nonce.
+          response_type: "code",
         },
       },
     }),
