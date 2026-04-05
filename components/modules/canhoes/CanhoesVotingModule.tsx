@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Flame, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,11 +10,12 @@ import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { useCategorySelection } from "./useCategorySelection";
+import { CategoryTabs } from "./CategoryTabs";
 import {
   CanhoesModuleHeader,
   formatEventPhaseLabel,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -24,7 +25,6 @@ export function CanhoesVotingModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingVote, setSavingVote] = useState<{ categoryId: string; optionId: string } | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const loadVotingData = useCallback(async () => {
     if (!event) {
@@ -57,25 +57,9 @@ export function CanhoesVotingModule() {
   }, [loadVotingData]);
 
   const isVotingOpen = Boolean(votingBoard?.canVote);
+  const categories = votingBoard?.categories ?? [];
 
-  const categories = useMemo(() => votingBoard?.categories ?? [], [votingBoard]);
-
-  useEffect(() => {
-    if (categories.length === 0) {
-      setSelectedCategoryId(null);
-      return;
-    }
-
-    setSelectedCategoryId((current) => {
-      if (current && categories.some((category) => category.id === current)) return current;
-      return categories[0].id;
-    });
-  }, [categories]);
-
-  const selectedCategory = useMemo(
-    () => categories.find((category) => category.id === selectedCategoryId) ?? null,
-    [categories, selectedCategoryId]
-  );
+  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } = useCategorySelection(categories);
 
   const handleVote = async (categoryId: string, optionId: string) => {
     if (!event || !isVotingOpen) return;
@@ -123,14 +107,11 @@ export function CanhoesVotingModule() {
 
       {!isLoading && !isOverviewLoading && votingBoard ? (
         <div className="space-y-3">
-          <CompactSegmentTabs
-            activeId={selectedCategory?.id ?? ""}
-            items={categories.map((category) => ({
-              id: category.id,
-              label: category.title,
-              badge: category.myOptionId ? "Votado" : undefined,
-            }))}
+          <CategoryTabs
+            categories={categories}
+            selectedId={selectedCategoryId ?? ""}
             onSelect={setSelectedCategoryId}
+            getBadge={(cat) => cat.myOptionId ? "Votado" : undefined}
           />
 
           {selectedCategory ? (

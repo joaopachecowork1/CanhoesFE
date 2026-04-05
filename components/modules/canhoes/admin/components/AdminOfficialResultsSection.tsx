@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { BarChart2, ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -8,6 +8,7 @@ import type { AdminOfficialResultsDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { cn } from "@/lib/utils";
+import { useCategorySelection } from "../../useCategorySelection";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,29 +36,8 @@ export function AdminOfficialResultsSection({
     [resultsQuery.data]
   );
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (resultCategories.length === 0) {
-      setSelectedCategoryId(null);
-      return;
-    }
-
-    setSelectedCategoryId((current) => {
-      if (current && resultCategories.some((category) => category.categoryId === current)) {
-        return current;
-      }
-      return resultCategories[0].categoryId;
-    });
-  }, [resultCategories]);
-
-  const selectedCategory = useMemo(
-    () =>
-      resultCategories.find((category) => category.categoryId === selectedCategoryId) ??
-      resultCategories[0] ??
-      null,
-    [resultCategories, selectedCategoryId]
-  );
+  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
+    useCategorySelection(resultCategories, (c) => c.categoryId);
 
   if (!isAdmin) {
     return <AdminStateMessage tone="warning">Secao disponivel apenas para admins.</AdminStateMessage>;

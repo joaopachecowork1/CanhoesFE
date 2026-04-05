@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { adminCopy } from "@/lib/canhoesCopy";
+import { AdminCard } from "./AdminCard";
 import type { AwardCategoryDto } from "@/lib/api/types";
 
 type VoteAuditRow = {
@@ -45,14 +46,42 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
       .slice(0, MAX_DISPLAY);
   }, [votes, search, categoryMap]);
 
-  let content: ReactNode;
   if (loading) {
-    content = <div className="body-small text-[rgba(245,237,224,0.68)]">{adminCopy.audit.loading}</div>;
-  } else if (votes.length === 0) {
-    content = <div className="body-small text-[rgba(245,237,224,0.68)]">{adminCopy.audit.empty}</div>;
-  } else {
-    content = (
-      <>
+    return (
+      <AdminCard>
+        <CardHeader className="space-y-1">
+          <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{adminCopy.audit.kicker}</p>
+          <CardTitle className="text-[var(--bg-paper)]">{adminCopy.audit.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="body-small text-[rgba(245,237,224,0.68)]">{adminCopy.audit.loading}</div>
+        </CardContent>
+      </AdminCard>
+    );
+  }
+
+  if (votes.length === 0) {
+    return (
+      <AdminCard>
+        <CardHeader className="space-y-1">
+          <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{adminCopy.audit.kicker}</p>
+          <CardTitle className="text-[var(--bg-paper)]">{adminCopy.audit.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="body-small text-[rgba(245,237,224,0.68)]">{adminCopy.audit.empty}</div>
+        </CardContent>
+      </AdminCard>
+    );
+  }
+
+  return (
+    <AdminCard>
+      <CardHeader className="space-y-1">
+        <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{adminCopy.audit.kicker}</p>
+        <CardTitle className="text-[var(--bg-paper)]">{adminCopy.audit.title}</CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
         <Input
           placeholder={adminCopy.audit.search}
           value={search}
@@ -87,18 +116,7 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
             </article>
           ))}
         </div>
-      </>
-    );
-  }
-
-  return (
-    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
-      <CardHeader className="space-y-1">
-        <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{adminCopy.audit.kicker}</p>
-        <CardTitle className="text-[var(--bg-paper)]">{adminCopy.audit.title}</CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-4">{content}</CardContent>
-    </Card>
+      </CardContent>
+    </AdminCard>
   );
 }

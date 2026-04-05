@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CheckCircle2, Flame, Loader2, Vote } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { useCategorySelection } from "./useCategorySelection";
+import { CategoryTabs } from "./CategoryTabs";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -31,11 +32,13 @@ export function CanhoesOfficialVotingModule() {
     queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(queryEventId),
   });
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const boardCategories = useMemo(
     () => boardQuery.data?.categories ?? [],
     [boardQuery.data]
   );
+
+  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
+    useCategorySelection(boardCategories);
 
   const castVote = useMutation({
     mutationFn: (payload: CastOfficialVoteRequest) =>
@@ -73,18 +76,6 @@ export function CanhoesOfficialVotingModule() {
     },
   });
 
-  useEffect(() => {
-    if (boardCategories.length === 0) {
-      setSelectedCategoryId(null);
-      return;
-    }
-
-    setSelectedCategoryId((current) => {
-      if (current && boardCategories.some((category) => category.id === current)) return current;
-      return boardCategories[0].id;
-    });
-  }, [boardCategories]);
-
   if (boardQuery.isLoading) {
     return (
       <div className="space-y-3">
@@ -114,11 +105,6 @@ export function CanhoesOfficialVotingModule() {
   const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
   const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
 
-  const selectedCategory =
-    board.categories.find((category) => category.id === selectedCategoryId) ??
-    board.categories[0] ??
-    null;
-
   if (!isOfficialVotingPhase) {
     return <CanhoesVotingModule />;
   }
@@ -144,14 +130,11 @@ export function CanhoesOfficialVotingModule() {
         </CardContent>
       </Card>
 
-      <CompactSegmentTabs
-        activeId={selectedCategory?.id ?? ""}
-        items={board.categories.map((category) => ({
-          id: category.id,
-          label: category.title,
-          badge: category.myNomineeId ? "Votado" : undefined,
-        }))}
+      <CategoryTabs
+        categories={boardCategories}
+        selectedId={selectedCategoryId ?? ""}
         onSelect={setSelectedCategoryId}
+        getBadge={(cat) => cat.myNomineeId ? "Votado" : undefined}
       />
 
       {selectedCategory ? (
