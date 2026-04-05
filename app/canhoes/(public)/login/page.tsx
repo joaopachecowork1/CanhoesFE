@@ -29,15 +29,15 @@ export default function CanhoesLoginPage() {
   }, []);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setIsVisible(true), 100);
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = globalThis.setTimeout(() => setIsVisible(true), 100);
+    return () => globalThis.clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
-    if (!isDevAuthBypass && !loading && isLogged) {
+    if (!loading && isLogged) {
       router.replace("/canhoes");
     }
-  }, [isDevAuthBypass, isLogged, loading, router]);
+  }, [isLogged, loading, router]);
 
   const handleLogin = () => {
     setIsSigningIn(true);

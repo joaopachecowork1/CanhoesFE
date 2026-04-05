@@ -17,12 +17,12 @@ function isFalse(value: string) {
   return value.trim().toLowerCase() === "false";
 }
 
-const nonProduction = process.env.NODE_ENV !== "production";
-
 const bypassFlag = readEnv("NEXT_PUBLIC_DEV_AUTH_BYPASS", "DEV_AUTH_BYPASS", "false");
 const autoAdminFlag = readEnv("NEXT_PUBLIC_DEV_AUTH_AUTO_ADMIN", "DEV_AUTH_AUTO_ADMIN", "true");
 
-export const DEV_AUTH_BYPASS_ENABLED = nonProduction && isTrue(bypassFlag);
+// Temporary emergency mode: keep auth mocked everywhere until OAuth is restored.
+// Revert this to env-based logic before enabling real authentication again.
+export const DEV_AUTH_BYPASS_ENABLED = true;
 
 export const DEV_AUTH_AUTO_ADMIN_ENABLED =
   DEV_AUTH_BYPASS_ENABLED && !isFalse(autoAdminFlag);
