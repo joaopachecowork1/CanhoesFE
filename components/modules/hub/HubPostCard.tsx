@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { BlurFade } from "@/components/animations/BlurFade";
@@ -36,7 +37,7 @@ interface HubPostCardProps {
   onAdminDelete: (postId: string) => void;
 }
 
-export function HubPostCard({
+function HubPostCardComponent({
   post,
   index,
   isAdmin,
@@ -149,3 +150,6 @@ export function HubPostCard({
     </BlurFade>
   );
 }
+
+// OPTIMIZATION: Memoize to prevent unnecessary re-renders when parent state changes
+export const HubPostCard = memo(HubPostCardComponent);

@@ -21,7 +21,7 @@ function normalizeEventsResponse(payload: unknown): EventSummaryDto[] {
 export function useEventOverview() {
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["eventOverview"],
     queryFn: async () => {
       try {
@@ -72,6 +72,7 @@ export function useEventOverview() {
     error: resolvedError,
     event: data?.event ?? null,
     isLoading,
+    isFetching,
     overview: data?.overview ?? null,
     refresh,
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,17 @@ import {
   buildAdminSectionItems,
   getDefaultAdminSection,
 } from "./adminSections";
-import { AdminCategoriesSection } from "./components/AdminCategoriesSection";
-import { AdminMembersSection } from "./components/AdminMembersSection";
-import { AdminModulesSection } from "./components/AdminModulesSection";
-import { AdminNominationsSection } from "./components/AdminNominationsSection";
-import { AdminOfficialResultsSection } from "./components/AdminOfficialResultsSection";
-import { AdminOverviewSection } from "./components/AdminOverviewSection";
-import { AdminPhaseSection } from "./components/AdminPhaseSection";
 import { AdminStateMessage } from "./components/AdminStateMessage";
 import { AdminTabs } from "./components/AdminTabs";
+
+// OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
+const AdminCategoriesSection = lazy(() => import("./components/AdminCategoriesSection").then(m => ({ default: m.AdminCategoriesSection })));
+const AdminMembersSection = lazy(() => import("./components/AdminMembersSection").then(m => ({ default: m.AdminMembersSection })));
+const AdminModulesSection = lazy(() => import("./components/AdminModulesSection").then(m => ({ default: m.AdminModulesSection })));
+const AdminNominationsSection = lazy(() => import("./components/AdminNominationsSection").then(m => ({ default: m.AdminNominationsSection })));
+const AdminOfficialResultsSection = lazy(() => import("./components/AdminOfficialResultsSection").then(m => ({ default: m.AdminOfficialResultsSection })));
+const AdminOverviewSection = lazy(() => import("./components/AdminOverviewSection").then(m => ({ default: m.AdminOverviewSection })));
+const AdminPhaseSection = lazy(() => import("./components/AdminPhaseSection").then(m => ({ default: m.AdminPhaseSection })));
 
 function getAdminErrorMessage(error: unknown) {
   if (!error) return null;
@@ -186,70 +188,88 @@ export default function CanhoesAdminModule({
   );
 
   let activeSectionContent = null;
+  const loadingFallback = <div className="py-8 text-center text-[var(--text-subtle)]">A carregar...</div>;
+  
   if (activeTab === "overview") {
     activeSectionContent = (
-      <AdminOverviewSection
-        activeEventName={activeEvent?.name ?? null}
-        allNominees={allNominees}
-        loading={loading}
-        pendingCategoryProposals={pendingCategoryProposals}
-        pendingMeasureProposals={pendingMeasureProposals}
-        pendingNominees={pendingNominees}
-        state={eventState}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminOverviewSection
+          activeEventName={activeEvent?.name ?? null}
+          allNominees={allNominees}
+          loading={loading}
+          pendingCategoryProposals={pendingCategoryProposals}
+          pendingMeasureProposals={pendingMeasureProposals}
+          pendingNominees={pendingNominees}
+          state={eventState}
+        />
+      </Suspense>
     );
   } else if (activeTab === "categories") {
     activeSectionContent = (
-      <AdminCategoriesSection
-        categories={categories}
-        categoryProposals={allCategoryProposals}
-        eventId={activeEvent?.id ?? null}
-        loading={loading}
-        measureProposals={measureProposals}
-        nominees={allNominees}
-        onUpdate={handleRefresh}
-        votes={voteAuditRows}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminCategoriesSection
+          categories={categories}
+          categoryProposals={allCategoryProposals}
+          eventId={activeEvent?.id ?? null}
+          loading={loading}
+          measureProposals={measureProposals}
+          nominees={allNominees}
+          onUpdate={handleRefresh}
+          votes={voteAuditRows}
+        />
+      </Suspense>
     );
   } else if (activeTab === "members") {
-    activeSectionContent = <AdminMembersSection loading={loading} members={eventMembers} />;
+    activeSectionContent = (
+      <Suspense fallback={loadingFallback}>
+        <AdminMembersSection loading={loading} members={eventMembers} />
+      </Suspense>
+    );
   } else if (activeTab === "nominations") {
     activeSectionContent = (
-      <AdminNominationsSection
-        eventId={activeEvent?.id ?? null}
-        categories={categories}
-        initialRows={adminNominees}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminNominationsSection
+          eventId={activeEvent?.id ?? null}
+          categories={categories}
+          initialRows={adminNominees}
+        />
+      </Suspense>
     );
   } else if (activeTab === "results") {
     activeSectionContent = (
-      <AdminOfficialResultsSection
-        eventId={activeEvent?.id ?? null}
-        initialResults={officialResults}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminOfficialResultsSection
+          eventId={activeEvent?.id ?? null}
+          initialResults={officialResults}
+        />
+      </Suspense>
     );
   } else if (activeTab === "modules") {
     activeSectionContent = (
-      <AdminModulesSection
-        activeEventName={activeEvent?.name ?? null}
-        eventId={activeEvent?.id ?? null}
-        loading={loading}
-        onUpdate={handleRefresh}
-        secretSantaState={secretSanta}
-        state={eventState}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminModulesSection
+          activeEventName={activeEvent?.name ?? null}
+          eventId={activeEvent?.id ?? null}
+          loading={loading}
+          onUpdate={handleRefresh}
+          secretSantaState={secretSanta}
+          state={eventState}
+        />
+      </Suspense>
     );
   } else if (activeTab === "phase") {
     activeSectionContent = (
-      <AdminPhaseSection
-        activeEventName={activeEvent?.name ?? null}
-        eventId={activeEvent?.id ?? null}
-        events={events}
-        onActivateEvent={handleActivateEvent}
-        onRefresh={handleRefresh}
-        onUpdatePhase={handleUpdatePhase}
-        state={eventState}
-      />
+      <Suspense fallback={loadingFallback}>
+        <AdminPhaseSection
+          activeEventName={activeEvent?.name ?? null}
+          eventId={activeEvent?.id ?? null}
+          events={events}
+          onActivateEvent={handleActivateEvent}
+          onRefresh={handleRefresh}
+          onUpdatePhase={handleUpdatePhase}
+          state={eventState}
+        />
+      </Suspense>
     );
   }
 

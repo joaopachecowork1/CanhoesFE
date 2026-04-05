@@ -21,6 +21,8 @@ export function EventModuleGate({
 }>) {
   const access = useEventModuleAccess(moduleKey);
 
+  // OPTIMIZATION: Only show loading on initial fetch when no cached data exists
+  // When data is cached (isFetching but not isLoading), render children immediately
   if (access.isLoading) {
     return (
       <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
@@ -34,6 +36,11 @@ export function EventModuleGate({
         </CardContent>
       </Card>
     );
+  }
+
+  // If we have cached data but are refetching in background, still render children
+  if (access.isFetching && !access.isLoading) {
+    return <>{children}</>;
   }
 
   if (access.error || !access.event || !access.overview) {

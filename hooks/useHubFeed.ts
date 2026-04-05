@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
@@ -147,9 +147,10 @@ export function useHubFeed() {
     }
   }, []);
 
+  // FIXED: Removed [load] dependency that caused duplicate requests
   useEffect(() => {
     void load();
-  }, [load]);
+  }, []); // Empty deps = runs once on mount only
 
   useEffect(() => {
     const handlePostCreated = (event: Event) => {
@@ -173,17 +174,25 @@ export function useHubFeed() {
       globalThis.removeEventListener("hub:postCreated", handlePostCreated);
   }, []);
 
+  // FIXED: Track which posts have had comments fetched to prevent cascade re-fetches
+  const fetchedCommentPostsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     const postIdsNeedingPreview = safePosts
       .filter(
         (post) =>
-          (post.commentCount ?? 0) > 0 && comments[post.id] === undefined
+          (post.commentCount ?? 0) > 0 && 
+          !fetchedCommentPostsRef.current.has(post.id) &&
+          comments[post.id] === undefined
       )
       .map((post) => post.id);
 
     if (postIdsNeedingPreview.length === 0) return;
 
     let cancelled = false;
+
+    // Mark these posts as being fetched to prevent duplicate requests
+    postIdsNeedingPreview.forEach(id => fetchedCommentPostsRef.current.add(id));
 
     void Promise.allSettled(
       postIdsNeedingPreview.map(async (postId) => {
@@ -200,6 +209,8 @@ export function useHubFeed() {
               : currentComments
           );
         } catch {
+          // Remove from tracking set on failure so it can retry
+          fetchedCommentPostsRef.current.delete(postId);
           // Inline previews fail silently; the post should still render.
         }
       })
@@ -208,7 +219,8 @@ export function useHubFeed() {
     return () => {
       cancelled = true;
     };
-  }, [comments, safePosts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safePosts]); // FIXED: Removed [comments] dependency that caused cascade loop
 
   const toggleReaction = useCallback(
     async (postId: string, emoji: string) => {

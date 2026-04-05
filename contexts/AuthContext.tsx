@@ -46,12 +46,6 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     : null;
   const isDevAuthBypass = Boolean(devBypassUser);
 
-  if (isAuthenticated && session?.idToken) {
-    console.log("[AuthContext] Session authenticated, idToken present");
-  } else if (isAuthenticated && !session?.idToken) {
-    console.warn("[AuthContext] ⚠️ Session authenticated but NO idToken - backend calls will fail");
-  }
-
   const { data: backendUser, isLoading: isHydratingBackendUser } = useQuery<AuthUser | null>({
     queryKey: ["auth", "me", session?.idToken],
     enabled: isAuthenticated && !isDevAuthBypass,
@@ -60,25 +54,20 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     refetchOnWindowFocus: false,
     retry: false,
     queryFn: async ({ signal }) => {
-      console.log("[AuthContext] Fetching /api/me with idToken...");
       const response = await fetch("/api/me", { signal });
       if (response.status === 401 || response.status === 403) {
-        console.error("[AuthContext] /api/me returned 401/403 - token may be invalid or expired");
         return null;
       }
       if (!response.ok) {
         throw new Error(`Failed to load /api/me (${response.status})`);
       }
-      
+
       const payload = (await response.json()) as MeResponse;
       const nextUser = payload.user;
 
       if (!nextUser) {
-        console.warn("[AuthContext] /api/me returned no user data");
         return null;
       }
-
-      console.log("[AuthContext] Backend user loaded:", { id: nextUser.id, email: nextUser.email });
 
       return {
         id: nextUser.id,

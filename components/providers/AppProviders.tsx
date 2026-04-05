@@ -13,8 +13,14 @@ const client = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       retry: 1,
-      staleTime: 30_000,
+      staleTime: 60_000, // 1 minute - reduces backend load
+      gcTime: 5 * 60 * 1000, // 5 minutes - keeps data in memory longer
+      networkMode: "online",
+    },
+    mutations: {
+      retry: 0, // Don't retry mutations to avoid duplicate writes
     },
   },
 });

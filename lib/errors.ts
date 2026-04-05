@@ -14,6 +14,14 @@ const DEFAULT_STATUS_MESSAGES: Partial<Record<number, string>> = {
   503: "O backend esta temporariamente indisponivel.",
 };
 
+const CODE_MESSAGES: Record<string, string> = {
+  PROXY_PATH_MISSING: "Pedido invalido no proxy da API.",
+  MOCK_REQUEST_FAILED: "O modo mock nao conseguiu processar o pedido.",
+  PROXY_BACKEND_UNREACHABLE: "Nao foi possivel contactar o backend.",
+  PROXY_UNHANDLED_ERROR: "O proxy da API falhou ao processar o pedido.",
+  UNHANDLED_SERVER_ERROR: "O servidor encontrou um erro inesperado.",
+};
+
 function readErrorDetail(details: unknown) {
   if (typeof details === "string") {
     const normalized = details.trim();
@@ -32,6 +40,12 @@ function readErrorDetail(details: unknown) {
   }
 
   return null;
+}
+
+function readErrorCode(details: unknown) {
+  if (!details || typeof details !== "object") return null;
+  const value = (details as Record<string, unknown>).code;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
 function isGenericErrorMessage(message: string) {
@@ -58,7 +72,9 @@ export function getErrorMessage(
   statusMessages?: Partial<Record<number, string>>
 ) {
   if (error instanceof ApiError) {
+    const code = readErrorCode(error.details);
     const baseMessage =
+      (code ? CODE_MESSAGES[code] : null) ??
       statusMessages?.[error.status] ??
       DEFAULT_STATUS_MESSAGES[error.status] ??
       fallback;
@@ -83,7 +99,7 @@ export function getErrorMessage(
 }
 
 export function logFrontendError(context: string, error: unknown, details?: unknown) {
-  if (typeof details === "undefined") {
+  if (details === undefined) {
     console.error(`[${context}]`, error);
     return;
   }

@@ -7,6 +7,7 @@
  * - Junior-friendly
  * - Safe defaults for auth bootstrap (avoid crashing on 401)
  * - Still allow "strict" mode when you want to throw on 401
+ * - Request deduplication for GET requests (prevents duplicate calls with 15+ users)
  */
 
 export const CANHOES_API_URL =
@@ -26,6 +27,7 @@ export class ApiError extends Error {
 type CanhoesRequestInit = RequestInit & {
   canhoes?: {
     throwOnUnauthorized?: boolean;
+    skipDeduplication?: boolean; // Allow bypassing deduplication when needed
   };
 };
 
@@ -57,12 +59,29 @@ function isUnauthorizedStatus(status: number) {
   return status === 401 || status === 403;
 }
 
+// OPTIMIZATION: Request deduplication for GET requests
+// Prevents multiple identical requests from hitting the backend simultaneously
+const pendingRequests = new Map<string, Promise<unknown>>();
+
+function getRequestKey(path: string, init?: CanhoesRequestInit): string | null {
+  // Only deduplicate GET requests
+  const method = (init?.method || "GET").toUpperCase();
+  if (method !== "GET") return null;
+  
+  // Skip if explicitly disabled
+  if (init?.canhoes?.skipDeduplication) return null;
+  
+  const normalized = normalizePath(path);
+  return `GET:${normalized}`;
+}
+
 /**
  * Main fetch.
  *
  * Default behavior:
  * - Throws on non-2xx EXCEPT 401/403, which returns null (so app doesn't crash on bootstrap)
  * - If you want strict unauthorized behavior: pass { canhoes: { throwOnUnauthorized: true } }
+ * - GET requests are automatically deduplicated (prevents duplicate calls)
  */
 export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): Promise<T> {
   const normalized = normalizePath(path);
@@ -81,28 +100,50 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { headers: _ignoredHeaders, canhoes, ...restInit } = init || {};
 
-  const res = await fetch(proxyUrl, {
-    ...restInit,
-    headers,
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  if (res.ok) {
-    return (await readBody(res)) as T;
+  // OPTIMIZATION: Check for pending identical request
+  const requestKey = getRequestKey(path, init);
+  if (requestKey && pendingRequests.has(requestKey)) {
+    return pendingRequests.get(requestKey) as Promise<T>;
   }
 
-  const details = await readBody(res);
-  const msg =
-    typeof details === "object" && details !== null && "message" in details
-      ? String((details as { message: unknown }).message)
-      : res.statusText || "Request failed";
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(proxyUrl, {
+        ...restInit,
+        headers,
+        credentials: "include",
+        cache: "no-store",
+      });
 
-  // ✅ default: DON'T crash on 401/403 (bootstrap loads)
-  const throwOnUnauthorized = Boolean(canhoes?.throwOnUnauthorized);
-  if (isUnauthorizedStatus(res.status) && !throwOnUnauthorized) {
-    return null as unknown as T;
+      if (res.ok) {
+        return (await readBody(res)) as T;
+      }
+
+      const details = await readBody(res);
+      const msg =
+        typeof details === "object" && details !== null && "message" in details
+          ? String((details as { message: unknown }).message)
+          : res.statusText || "Request failed";
+
+      // ✅ default: DON'T crash on 401/403 (bootstrap loads)
+      const throwOnUnauthorized = Boolean(canhoes?.throwOnUnauthorized);
+      if (isUnauthorizedStatus(res.status) && !throwOnUnauthorized) {
+        return null as unknown as T;
+      }
+
+      throw new ApiError(msg, res.status, details);
+    } finally {
+      // Clean up pending request
+      if (requestKey) {
+        pendingRequests.delete(requestKey);
+      }
+    }
+  })();
+
+  // Store pending request for deduplication
+  if (requestKey) {
+    pendingRequests.set(requestKey, fetchPromise);
   }
 
-  throw new ApiError(msg, res.status, details);
+  return fetchPromise;
 }
