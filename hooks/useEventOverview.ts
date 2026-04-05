@@ -3,10 +3,15 @@
 import { useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
+import type { EventSummaryDto } from "@/lib/api/types";
 import { REFRESH_EVENT_OVERVIEW_EVENT, pickActiveEvent } from "@/lib/canhoesEvent";
 import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+
+function normalizeEventsResponse(payload: unknown): EventSummaryDto[] {
+  if (!Array.isArray(payload)) return [];
+  return payload as EventSummaryDto[];
+}
 
 /**
  * Loads the active event plus its overview in one place so chrome, admin and
@@ -20,7 +25,8 @@ export function useEventOverview() {
     queryKey: ["eventOverview"],
     queryFn: async () => {
       try {
-        const events = await canhoesEventsRepo.listEvents();
+        const eventsPayload = await canhoesEventsRepo.listEvents();
+        const events = normalizeEventsResponse(eventsPayload);
         const activeEvent = pickActiveEvent(events);
 
         if (!activeEvent) {
@@ -51,12 +57,19 @@ export function useEventOverview() {
       void queryClient.invalidateQueries({ queryKey: ["eventOverview"] });
     };
 
-    window.addEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
-    return () => window.removeEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
+    globalThis.addEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
+    return () => globalThis.removeEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
   }, [queryClient]);
 
+  let resolvedError: Error | null = null;
+  if (error instanceof Error) {
+    resolvedError = error;
+  } else if (error) {
+    resolvedError = new Error(String(error));
+  }
+
   return {
-    error: error instanceof Error ? error : error ? new Error(String(error)) : null,
+    error: resolvedError,
     event: data?.event ?? null,
     isLoading,
     overview: data?.overview ?? null,

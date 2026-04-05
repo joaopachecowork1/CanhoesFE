@@ -2,7 +2,10 @@ import { canhoesFetch } from "@/lib/api/canhoesClient";
 import type * as T from "@/lib/api/types";
 
 export const canhoesEventsRepo = {
-  listEvents: () => canhoesFetch<T.EventSummaryDto[]>("/v1/events"),
+  listEvents: () =>
+    canhoesFetch<T.EventSummaryDto[]>("/v1/events", {
+      canhoes: { throwOnUnauthorized: true },
+    }),
 
   getEventContext: (eventId: string) =>
     canhoesFetch<T.EventContextDto>(`/v1/events/${eventId}`),

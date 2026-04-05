@@ -140,6 +140,24 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
 
     console.log(`[Proxy] Response ${response.status} for ${proxyPath}`);
 
+    if (DEV_AUTH_BYPASS_ENABLED && (response.status === 401 || response.status === 403)) {
+      const mockProxyPath = `/${proxyPath}${request.nextUrl.search}`;
+      const mockBody = method !== "GET" && method !== "DELETE" ? new TextDecoder().decode(body) : null;
+
+      try {
+        const payload = await getMockResponse(mockProxyPath, method, { body: mockBody });
+        console.warn(`[Proxy] Backend returned ${response.status} for ${proxyPath}; serving dev mock fallback.`);
+        return NextResponse.json(payload ?? null, {
+          status: 200,
+          headers: {
+            "x-dev-auth-fallback": "mock",
+          },
+        });
+      } catch (mockError) {
+        console.error("[Proxy] Dev fallback failed", mockError);
+      }
+    }
+
     // 204 has no body by definition; passing a body causes NextResponse to throw.
     if (response.status === 204) {
       return new NextResponse(null, {
