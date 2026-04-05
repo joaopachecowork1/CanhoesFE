@@ -140,21 +140,21 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
 
     console.log(`[Proxy] Response ${response.status} for ${proxyPath}`);
 
-    if (DEV_AUTH_BYPASS_ENABLED && (response.status === 401 || response.status === 403)) {
+    if (IS_MOCK_MODE && (response.status === 401 || response.status === 403)) {
       const mockProxyPath = `/${proxyPath}${request.nextUrl.search}`;
       const mockBody = method !== "GET" && method !== "DELETE" ? new TextDecoder().decode(body) : null;
 
       try {
         const payload = await getMockResponse(mockProxyPath, method, { body: mockBody });
-        console.warn(`[Proxy] Backend returned ${response.status} for ${proxyPath}; serving dev mock fallback.`);
+        console.warn(`[Proxy] Backend returned ${response.status} for ${proxyPath}; serving mock fallback.`);
         return NextResponse.json(payload ?? null, {
           status: 200,
           headers: {
-            "x-dev-auth-fallback": "mock",
+            "x-auth-fallback": "mock",
           },
         });
       } catch (mockError) {
-        console.error("[Proxy] Dev fallback failed", mockError);
+        console.error("[Proxy] Mock fallback failed", mockError);
       }
     }
 

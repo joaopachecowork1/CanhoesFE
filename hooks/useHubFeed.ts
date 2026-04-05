@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -39,16 +38,16 @@ function applyPostReaction(post: HubPostDto, emoji: string) {
   if (wasActive) myReactions.delete(emoji);
   else myReactions.add(emoji);
 
-  const reactionCounts = { ...(post.reactionCounts ?? {}) };
+  const reactionCounts = { ...post.reactionCounts };
   reactionCounts[emoji] = Math.max(
     0,
     (reactionCounts[emoji] ?? 0) + (wasActive ? -1 : 1)
   );
 
-  const nextLikeCount =
-    emoji === HEART_REACTION
-      ? Math.max(0, (post.likeCount ?? 0) + (wasActive ? -1 : 1))
-      : (post.likeCount ?? 0);
+  let nextLikeCount = post.likeCount ?? 0;
+  if (emoji === HEART_REACTION) {
+    nextLikeCount = Math.max(0, nextLikeCount + (wasActive ? -1 : 1));
+  }
 
   return {
     ...post,
@@ -98,7 +97,7 @@ function applyCommentReaction(comment: HubCommentDto, emoji: string) {
   if (wasActive) myReactions.delete(emoji);
   else myReactions.add(emoji);
 
-  const reactionCounts = { ...(comment.reactionCounts ?? {}) };
+  const reactionCounts = { ...comment.reactionCounts };
   reactionCounts[emoji] = Math.max(
     0,
     (reactionCounts[emoji] ?? 0) + (wasActive ? -1 : 1)
@@ -157,22 +156,28 @@ export function useHubFeed() {
       const createdPost = (event as CustomEvent<HubPostDto | undefined>).detail;
       if (!createdPost?.id) return;
 
-      setPosts((currentPosts) => [
-        createdPost,
-        ...currentPosts.filter((post) => post.id !== createdPost.id),
-      ]);
+      setPosts((currentPosts) => {
+        const nextPosts: HubPostDto[] = [];
+
+        for (const post of currentPosts) {
+          if (post.id === createdPost.id) continue;
+          nextPosts.push(post);
+        }
+
+        return [createdPost, ...nextPosts];
+      });
     };
 
-    window.addEventListener("hub:postCreated", handlePostCreated);
+    globalThis.addEventListener("hub:postCreated", handlePostCreated);
     return () =>
-      window.removeEventListener("hub:postCreated", handlePostCreated);
+      globalThis.removeEventListener("hub:postCreated", handlePostCreated);
   }, []);
 
   useEffect(() => {
     const postIdsNeedingPreview = safePosts
       .filter(
         (post) =>
-          (post.commentCount ?? 0) > 0 && typeof comments[post.id] === "undefined"
+          (post.commentCount ?? 0) > 0 && comments[post.id] === undefined
       )
       .map((post) => post.id);
 
@@ -187,12 +192,12 @@ export function useHubFeed() {
           if (cancelled) return;
 
           setComments((currentComments) =>
-            typeof currentComments[postId] !== "undefined"
-              ? currentComments
-              : {
+            currentComments[postId] === undefined
+              ? {
                   ...currentComments,
                   [postId]: (list ?? []).filter(Boolean),
                 }
+              : currentComments
           );
         } catch {
           // Inline previews fail silently; the post should still render.

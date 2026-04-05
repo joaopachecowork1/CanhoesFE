@@ -28,12 +28,16 @@ export const DEV_AUTH_AUTO_ADMIN_ENABLED =
   DEV_AUTH_BYPASS_ENABLED && !isFalse(autoAdminFlag);
 
 export const DEV_AUTH_USER_CONFIG: DevAuthUserConfig = {
-  id: readEnv("NEXT_PUBLIC_DEV_AUTH_USER_ID", "DEV_AUTH_USER_ID", "dev-admin-001"),
-  name: readEnv("NEXT_PUBLIC_DEV_AUTH_NAME", "DEV_AUTH_NAME", "Dev Admin"),
+  id: readEnv(
+    "NEXT_PUBLIC_DEV_AUTH_USER_ID",
+    "DEV_AUTH_USER_ID",
+    "11111111-1111-1111-1111-111111111111"
+  ),
+  name: readEnv("NEXT_PUBLIC_DEV_AUTH_NAME", "DEV_AUTH_NAME", "Mock Admin"),
   email: readEnv(
     "NEXT_PUBLIC_DEV_AUTH_EMAIL",
     "DEV_AUTH_EMAIL",
-    "dev-admin@canhoes.local"
+    "dev@canhoes.com"
   ),
   isAdmin: DEV_AUTH_AUTO_ADMIN_ENABLED,
 };

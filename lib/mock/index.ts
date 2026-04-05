@@ -16,8 +16,8 @@
 import type { AuthUser } from "@/contexts/AuthContext";
 
 /**
- * Mock data mode is opt-in.
- * Enable only with NEXT_PUBLIC_MOCK_AUTH=true when static fixtures are desired.
+ * Mock data mode is opt-in only.
+ * Use it only when you explicitly want static fixtures instead of backend data.
  */
 export const IS_MOCK_MODE: boolean =
   process.env.NODE_ENV !== "production" &&
