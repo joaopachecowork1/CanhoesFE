@@ -35,7 +35,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const { data: session, status } = useSession();
-  const isAuthenticated = status === "authenticated";
+  const isLoggedIn = status === "authenticated";
   const devBypassUser = DEV_AUTH_BYPASS_ENABLED
     ? {
         id: DEV_AUTH_USER_CONFIG.id,
@@ -46,9 +46,9 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     : null;
   const isDevAuthBypass = Boolean(devBypassUser);
 
-  const { data: backendUser, isLoading: isHydratingBackendUser } = useQuery<AuthUser | null>({
+  const backendUserQuery = useQuery<AuthUser | null>({
     queryKey: ["auth", "me", session?.idToken],
-    enabled: isAuthenticated && !isDevAuthBypass,
+    enabled: isLoggedIn && !isDevAuthBypass,
     staleTime: 1000 * 60 * 5, // 5 minutes cache
     gcTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
 
   const user = useMemo<AuthUser | null>(() => {
     if (devBypassUser) return devBypassUser;
-    if (!isAuthenticated) return null;
+    if (!isLoggedIn) return null;
 
     const sessionUser = session?.user as
       | {
@@ -92,28 +92,28 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       | undefined;
 
     return {
-      id: backendUser?.id || sessionUser?.id || "unknown",
-      email: backendUser?.email || sessionUser?.email || "",
+      id: backendUserQuery.data?.id || sessionUser?.id || "unknown",
+      email: backendUserQuery.data?.email || sessionUser?.email || "",
       name:
-        backendUser?.name ||
+        backendUserQuery.data?.name ||
         sessionUser?.name ||
         sessionUser?.email?.split("@")[0] ||
         "",
-      isAdmin: Boolean(backendUser?.isAdmin),
+      isAdmin: Boolean(backendUserQuery.data?.isAdmin),
     };
-  }, [backendUser, devBypassUser, session?.user, isAuthenticated]);
+  }, [backendUserQuery.data, devBypassUser, session?.user, isLoggedIn]);
 
   const value = useMemo<AuthContextType>(
     () => ({
       user,
-      isLogged: isAuthenticated || isDevAuthBypass,
+      isLogged: isLoggedIn || isDevAuthBypass,
       loading: !isDevAuthBypass && status === "loading",
-      profileLoading: !isDevAuthBypass && isAuthenticated && isHydratingBackendUser,
+      profileLoading: !isDevAuthBypass && isLoggedIn && backendUserQuery.isLoading,
       isDevAuthBypass,
       loginGoogle: () => signIn("google"),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
     }),
-    [isAuthenticated, isDevAuthBypass, status, isHydratingBackendUser, user]
+    [isLoggedIn, isDevAuthBypass, status, backendUserQuery.isLoading, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

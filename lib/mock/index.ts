@@ -13,8 +13,6 @@
  *   NEXT_PUBLIC_MOCK_AUTH=false npm run dev
  */
 
-import type { AuthUser } from "@/contexts/AuthContext";
-
 /**
  * Mock data mode is opt-in only.
  * Use it only when you explicitly want static fixtures instead of backend data.
@@ -28,14 +26,3 @@ export const IS_MOCK_MODE: boolean =
  * development without the real production event/runtime guarantees.
  */
 export const IS_LOCAL_MODE = IS_MOCK_MODE;
-
-/**
- * Mock admin user injected into AuthContext when mock mode is active.
- * Role: admin — has access to all protected pages and the admin panel.
- */
-export const MOCK_AUTH_USER: AuthUser = {
-  id: "mock-admin-001",
-  email: "admin@dev.local",
-  name: "Dev Admin",
-  isAdmin: true,
-};

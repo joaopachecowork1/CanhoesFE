@@ -1,13 +1,12 @@
 "use client";
 
 /**
- * Very small fetch wrapper for the Canhoes backend (via /api/proxy/*).
- *
- * Goals:
- * - Junior-friendly
- * - Safe defaults for auth bootstrap (avoid crashing on 401)
- * - Still allow "strict" mode when you want to throw on 401
- * - Request deduplication for GET requests (prevents duplicate calls with 15+ users)
+ * Fetch wrapper for the Canhoes backend (proxied via Next.js /api/proxy/*).
+ * 
+ * Features:
+ * - Auto-deduplicates GET requests to prevent duplicate backend calls
+ * - Safe 401/403 handling (returns null instead of throwing, to avoid crash on bootstrap)
+ * - Supports strict auth mode when needed via { canhoes: { throwOnUnauthorized: true } }
  */
 
 export const CANHOES_API_URL =
@@ -16,6 +15,7 @@ export const CANHOES_API_URL =
 export class ApiError extends Error {
   status: number;
   details?: unknown;
+  
   constructor(message: string, status: number, details?: unknown) {
     super(message);
     this.name = "ApiError";
@@ -27,7 +27,7 @@ export class ApiError extends Error {
 type CanhoesRequestInit = RequestInit & {
   canhoes?: {
     throwOnUnauthorized?: boolean;
-    skipDeduplication?: boolean; // Allow bypassing deduplication when needed
+    skipDeduplication?: boolean;
   };
 };
 
@@ -59,29 +59,27 @@ function isUnauthorizedStatus(status: number) {
   return status === 401 || status === 403;
 }
 
-// OPTIMIZATION: Request deduplication for GET requests
-// Prevents multiple identical requests from hitting the backend simultaneously
-const pendingRequests = new Map<string, Promise<unknown>>();
+// Pending GET requests for deduplication
+const pendingGetRequests = new Map<string, Promise<unknown>>();
 
-function getRequestKey(path: string, init?: CanhoesRequestInit): string | null {
-  // Only deduplicate GET requests
+function getDeduplicationKey(path: string, init?: CanhoesRequestInit): string | null {
   const method = (init?.method || "GET").toUpperCase();
   if (method !== "GET") return null;
-  
-  // Skip if explicitly disabled
   if (init?.canhoes?.skipDeduplication) return null;
-  
+
   const normalized = normalizePath(path);
   return `GET:${normalized}`;
 }
 
 /**
- * Main fetch.
- *
+ * Fetches data from the Canhoes backend via proxy.
+ * 
  * Default behavior:
- * - Throws on non-2xx EXCEPT 401/403, which returns null (so app doesn't crash on bootstrap)
- * - If you want strict unauthorized behavior: pass { canhoes: { throwOnUnauthorized: true } }
- * - GET requests are automatically deduplicated (prevents duplicate calls)
+ * - Returns null on 401/403 (doesn't throw, to avoid crash on bootstrap)
+ * - Throws ApiError on other failures
+ * - Deduplicates GET requests automatically
+ * 
+ * For strict auth on 401/403, pass { canhoes: { throwOnUnauthorized: true } }
  */
 export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): Promise<T> {
   const normalized = normalizePath(path);
@@ -96,14 +94,14 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
     headers.set("Content-Type", "application/json");
   }
 
-  // remove custom key before passing to fetch
+  // Remove custom canhoes config before passing to fetch
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { headers: _ignoredHeaders, canhoes, ...restInit } = init || {};
 
-  // OPTIMIZATION: Check for pending identical request
-  const requestKey = getRequestKey(path, init);
-  if (requestKey && pendingRequests.has(requestKey)) {
-    return pendingRequests.get(requestKey) as Promise<T>;
+  // Check for pending identical GET request
+  const dedupKey = getDeduplicationKey(path, init);
+  if (dedupKey && pendingGetRequests.has(dedupKey)) {
+    return pendingGetRequests.get(dedupKey) as Promise<T>;
   }
 
   const fetchPromise = (async () => {
@@ -125,7 +123,7 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
           ? String((details as { message: unknown }).message)
           : res.statusText || "Request failed";
 
-      // ✅ default: DON'T crash on 401/403 (bootstrap loads)
+      // Default: don't crash on 401/403 (bootstrap loads safely)
       const throwOnUnauthorized = Boolean(canhoes?.throwOnUnauthorized);
       if (isUnauthorizedStatus(res.status) && !throwOnUnauthorized) {
         return null as unknown as T;
@@ -133,16 +131,15 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
 
       throw new ApiError(msg, res.status, details);
     } finally {
-      // Clean up pending request
-      if (requestKey) {
-        pendingRequests.delete(requestKey);
+      if (dedupKey) {
+        pendingGetRequests.delete(dedupKey);
       }
     }
   })();
 
-  // Store pending request for deduplication
-  if (requestKey) {
-    pendingRequests.set(requestKey, fetchPromise);
+  // Store pending GET request for deduplication
+  if (dedupKey) {
+    pendingGetRequests.set(dedupKey, fetchPromise);
   }
 
   return fetchPromise;

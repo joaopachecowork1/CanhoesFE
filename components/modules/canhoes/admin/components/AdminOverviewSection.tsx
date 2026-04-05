@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { CalendarClock, Eye, TimerReset, Vote } from "lucide-react";
 
 import { formatEventPhaseLabel } from "@/components/modules/canhoes/CanhoesModuleParts";
@@ -108,7 +107,7 @@ function OverviewMetric({
   tone = "default",
   value,
 }: Readonly<{
-  icon: ReactNode;
+  icon: React.ReactNode;
   label: string;
   tone?: "default" | "highlight";
   value: string;

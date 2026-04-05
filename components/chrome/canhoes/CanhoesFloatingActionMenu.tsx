@@ -1,7 +1,6 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -17,6 +16,10 @@ import {
     getVisibleMoreNavItems,
     type CanhoesNavItem,
 } from "./canhoesNavigation";
+import { useDismissOnEscape } from "./useDismissOnEscape";
+
+const DRAG_DISMISS_THRESHOLD = 110;
+const DRAG_DISMISS_VELOCITY = 700;
 
 type CanhoesFloatingActionMenuProps = {
     isOpen: boolean;
@@ -52,19 +55,10 @@ export function CanhoesFloatingActionMenu({
         overview,
     });
 
-  useEffect(() => {
-        if (!isOpen) return;
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") onOpenChange(false);
-        };
-
-        document.addEventListener("keydown", handleEscape);
-        return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onOpenChange]);
+    useDismissOnEscape(isOpen, () => onOpenChange(false));
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > 110 || info.velocity.y > 700) {
+    if (info.offset.y > DRAG_DISMISS_THRESHOLD || info.velocity.y > DRAG_DISMISS_VELOCITY) {
       onOpenChange(false);
     }
   };

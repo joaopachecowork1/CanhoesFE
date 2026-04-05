@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import type { EventOverviewDto } from "@/lib/api/types";
@@ -57,96 +56,74 @@ export function useCanhoesShellNavigation({
     name?: string | null;
   } | null;
 }>) {
-  const pageTitle = useMemo(() => getPageTitle(pathname), [pathname]);
-  const isEventHomePath = useMemo(() => isHomePath(pathname), [pathname]);
-  const userLabel = useMemo(() => resolveUserLabel(user), [user]);
+  const pageTitle = getPageTitle(pathname);
+  const isEventHomePath = isHomePath(pathname);
+  const userLabel = resolveUserLabel(user);
 
-  const promotedItems = useMemo(
-    () =>
-      getPromotedNavItems({
-        isAdmin,
-        isLocalMode,
-        overview,
-      }),
-    [isAdmin, isLocalMode, overview]
-  );
+  const promotedItems = getPromotedNavItems({
+    isAdmin,
+    isLocalMode,
+    overview,
+  });
 
   const fixedRightItem = isAdmin ? ADMIN_NAV_ITEM : MORE_NAV_ITEM;
 
-  const isMoreActive = useMemo(
-    () =>
-      fixedRightItem.id === MORE_NAV_ITEM.id &&
-      Boolean(pathname) &&
-      isMoreSectionActive({
-        isAdmin,
-        isLocalMode,
-        overview,
-        pathname: pathname ?? "",
-        promotedItems,
-      }),
-    [fixedRightItem.id, isAdmin, isLocalMode, overview, pathname, promotedItems]
-  );
+  const isMoreActive =
+    fixedRightItem.id === MORE_NAV_ITEM.id &&
+    Boolean(pathname) &&
+    isMoreSectionActive({
+      isAdmin,
+      isLocalMode,
+      overview,
+      pathname: pathname ?? "",
+      promotedItems,
+    });
 
-  const bottomLeftEntries = useMemo<readonly CanhoesBottomTabEntry[]>(
-    () => {
-      const entries: CanhoesBottomTabEntry[] = [
-        {
-          item: HOME_NAV_ITEM,
-          isActive: isTabActive(pathname, HOME_NAV_ITEM.href),
-          onClick: () => router.push(HOME_NAV_ITEM.href),
-        },
-      ];
-
-      if (promotedItems[0]) {
-        entries.push({
-          item: promotedItems[0],
-          isActive: isTabActive(pathname, promotedItems[0].href),
-          onClick: () => router.push(promotedItems[0].href),
-        });
-      }
-
-      return entries;
+  const bottomLeftEntries: readonly CanhoesBottomTabEntry[] = [
+    {
+      item: HOME_NAV_ITEM,
+      isActive: isTabActive(pathname, HOME_NAV_ITEM.href),
+      onClick: () => router.push(HOME_NAV_ITEM.href),
     },
-    [pathname, promotedItems, router]
-  );
+    ...(promotedItems[0]
+      ? [
+          {
+            item: promotedItems[0],
+            isActive: isTabActive(pathname, promotedItems[0].href),
+            onClick: () => router.push(promotedItems[0].href),
+          },
+        ]
+      : []),
+  ];
 
-  const bottomRightEntries = useMemo<readonly CanhoesBottomTabEntry[]>(
-    () => {
-      const entries: CanhoesBottomTabEntry[] = [];
-
-      if (promotedItems[1]) {
-        entries.push({
-          item: promotedItems[1],
-          isActive: isTabActive(pathname, promotedItems[1].href),
-          onClick: () => router.push(promotedItems[1].href),
-        });
-      }
-
-      entries.push({
-        item: fixedRightItem,
-        isActive:
-          fixedRightItem.id === MORE_NAV_ITEM.id
-            ? isMenuOpen || isMoreActive
-            : isTabActive(pathname, fixedRightItem.href),
-        onClick:
-          fixedRightItem.id === MORE_NAV_ITEM.id
-            ? onOpenMenu
-            : () => router.push(fixedRightItem.href),
-      });
-
-      return entries;
+  const bottomRightEntries: readonly CanhoesBottomTabEntry[] = [
+    ...(promotedItems[1]
+      ? [
+          {
+            item: promotedItems[1],
+            isActive: isTabActive(pathname, promotedItems[1].href),
+            onClick: () => router.push(promotedItems[1].href),
+          },
+        ]
+      : []),
+    {
+      item: fixedRightItem,
+      isActive:
+        fixedRightItem.id === MORE_NAV_ITEM.id
+          ? isMenuOpen || isMoreActive
+          : isTabActive(pathname, fixedRightItem.href),
+      onClick:
+        fixedRightItem.id === MORE_NAV_ITEM.id
+          ? onOpenMenu
+          : () => router.push(fixedRightItem.href),
     },
-    [fixedRightItem, isMenuOpen, isMoreActive, onOpenMenu, pathname, promotedItems, router]
-  );
+  ];
 
-  const menuPrimaryIds = useMemo(
-    () => [
-      HOME_NAV_ITEM.id,
-      ...promotedItems.map((item) => item.id),
-      fixedRightItem.id,
-    ],
-    [fixedRightItem.id, promotedItems]
-  );
+  const menuPrimaryIds = [
+    HOME_NAV_ITEM.id,
+    ...promotedItems.map((item) => item.id),
+    fixedRightItem.id,
+  ];
 
   return {
     bottomLeftEntries,

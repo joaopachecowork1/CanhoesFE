@@ -117,8 +117,6 @@ export function useHubFeed() {
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
-
-  // Voting triggers a short celebratory overlay in the current experience.
   const [showParticles, setShowParticles] = useState<{
     postId: string;
     x: number;
@@ -147,10 +145,9 @@ export function useHubFeed() {
     }
   }, []);
 
-  // FIXED: Removed [load] dependency that caused duplicate requests
   useEffect(() => {
     void load();
-  }, []); // Empty deps = runs once on mount only
+  }, []);
 
   useEffect(() => {
     const handlePostCreated = (event: Event) => {
@@ -158,13 +155,7 @@ export function useHubFeed() {
       if (!createdPost?.id) return;
 
       setPosts((currentPosts) => {
-        const nextPosts: HubPostDto[] = [];
-
-        for (const post of currentPosts) {
-          if (post.id === createdPost.id) continue;
-          nextPosts.push(post);
-        }
-
+        const nextPosts = currentPosts.filter((post) => post.id !== createdPost.id);
         return [createdPost, ...nextPosts];
       });
     };
@@ -174,14 +165,13 @@ export function useHubFeed() {
       globalThis.removeEventListener("hub:postCreated", handlePostCreated);
   }, []);
 
-  // FIXED: Track which posts have had comments fetched to prevent cascade re-fetches
   const fetchedCommentPostsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const postIdsNeedingPreview = safePosts
       .filter(
         (post) =>
-          (post.commentCount ?? 0) > 0 && 
+          (post.commentCount ?? 0) > 0 &&
           !fetchedCommentPostsRef.current.has(post.id) &&
           comments[post.id] === undefined
       )
@@ -190,8 +180,6 @@ export function useHubFeed() {
     if (postIdsNeedingPreview.length === 0) return;
 
     let cancelled = false;
-
-    // Mark these posts as being fetched to prevent duplicate requests
     postIdsNeedingPreview.forEach(id => fetchedCommentPostsRef.current.add(id));
 
     void Promise.allSettled(
@@ -202,16 +190,11 @@ export function useHubFeed() {
 
           setComments((currentComments) =>
             currentComments[postId] === undefined
-              ? {
-                  ...currentComments,
-                  [postId]: (list ?? []).filter(Boolean),
-                }
+              ? { ...currentComments, [postId]: (list ?? []).filter(Boolean) }
               : currentComments
           );
         } catch {
-          // Remove from tracking set on failure so it can retry
           fetchedCommentPostsRef.current.delete(postId);
-          // Inline previews fail silently; the post should still render.
         }
       })
     );
@@ -219,8 +202,7 @@ export function useHubFeed() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safePosts]); // FIXED: Removed [comments] dependency that caused cascade loop
+  }, [safePosts]);
 
   const toggleReaction = useCallback(
     async (postId: string, emoji: string) => {

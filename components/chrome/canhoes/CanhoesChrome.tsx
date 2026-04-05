@@ -12,12 +12,16 @@ import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+import { CanhoesAmbientBackground } from "./CanhoesAmbientBackground";
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
 import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
 import { CanhoesFloatingActionMenu } from "./CanhoesFloatingActionMenu";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
 import { useCanhoesShellNavigation } from "./useCanhoesShellNavigation";
+
+const headerButtonClass =
+  "min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]";
 
 export function CanhoesChrome({
   children,
@@ -35,17 +39,20 @@ export function CanhoesChrome({
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Close overlays on navigation
   useEffect(() => {
     setIsComposeSheetOpen(false);
     setIsMenuOpen(false);
   }, [pathname]);
 
+  // Close compose sheet if module is disabled
   useEffect(() => {
     if (!canCompose) {
       setIsComposeSheetOpen(false);
     }
   }, [canCompose]);
 
+  // Listen for global compose sheet open event
   useEffect(() => {
     const handleOpenCompose = () => {
       if (!canCompose) return;
@@ -79,28 +86,7 @@ export function CanhoesChrome({
       data-theme="canhoes"
       className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <motion.div
-          aria-hidden="true"
-          className="absolute -left-20 top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(0,255,136,0.16),transparent_68%)] blur-3xl"
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { x: [0, 24, -8, 0], y: [0, -16, 18, 0], scale: [1, 1.06, 0.98, 1] }
-          }
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="absolute right-[-5rem] top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(177,140,255,0.18),transparent_70%)] blur-3xl"
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { x: [0, -26, 10, 0], y: [0, 20, -14, 0], scale: [1, 0.96, 1.04, 1] }
-          }
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+      <CanhoesAmbientBackground />
 
       <div
         aria-hidden="true"
@@ -126,7 +112,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                    className={headerButtonClass}
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -142,7 +128,7 @@ export function CanhoesChrome({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                  className={headerButtonClass}
                   onClick={() => setIsMenuOpen((current) => !current)}
                   aria-expanded={isMenuOpen}
                   aria-label="Abrir menu"

@@ -26,11 +26,14 @@ function flattenByStatus<T>(items?: ProposalsByStatusDto<T> | null) {
 }
 
 /**
- * Hydrates the admin control center from a single event-scoped contract so the
- * admin shell does not have to coordinate multiple bootstrap requests.
+ * Loads all admin data for an event in a single request.
+ * This is the single source of truth for admin state.
+ * 
+ * Returns event state, categories, nominees, proposals, votes, members, etc.
+ * Data is cached for 5 minutes to avoid unnecessary refetches.
  */
 export function useAdminBootstrap(eventId: string | null) {
-  const query = useQuery<EventAdminBootstrapDto>({
+  const bootstrapQuery = useQuery<EventAdminBootstrapDto>({
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getAdminBootstrap(eventId!),
     queryKey: ["canhoes", "admin-bootstrap", eventId],
@@ -39,7 +42,7 @@ export function useAdminBootstrap(eventId: string | null) {
     refetchOnWindowFocus: false,
   });
 
-  const bootstrap = query.data ?? null;
+  const bootstrap = bootstrapQuery.data ?? null;
   const state: EventAdminStateDto | null = bootstrap?.state ?? null;
   const events: EventSummaryDto[] = bootstrap?.events ?? [];
   const categories: AwardCategoryDto[] = bootstrap?.categories ?? [];
@@ -61,8 +64,8 @@ export function useAdminBootstrap(eventId: string | null) {
   );
 
   const refresh = useCallback(async () => {
-    await query.refetch();
-  }, [query]);
+    await bootstrapQuery.refetch();
+  }, [bootstrapQuery]);
 
   return {
     allCategoryProposals,
@@ -71,9 +74,9 @@ export function useAdminBootstrap(eventId: string | null) {
     adminNominees,
     bootstrap,
     categories,
-    error: query.error ?? null,
+    error: bootstrapQuery.error ?? null,
     events,
-    loading: Boolean(eventId) && (query.isLoading || (query.isFetching && !bootstrap)),
+    loading: Boolean(eventId) && (bootstrapQuery.isLoading || (bootstrapQuery.isFetching && !bootstrap)),
     members,
     officialResults,
     secretSanta,

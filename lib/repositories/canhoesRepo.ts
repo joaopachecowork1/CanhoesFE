@@ -1,4 +1,4 @@
-import { canhoesFetch } from "@/lib/api";
+import { canhoesFetch } from "@/lib/api/canhoesClient";
 import type * as T from "@/lib/api/types";
 
 /**

@@ -108,6 +108,22 @@ export const adminCopy = {
     historyTitle: "Historico de propostas",
     historyEmpty:
       "Ainda nao chegaram propostas de categoria para esta edicao.",
+    title: "Categorias",
+    description: "Gerir e modificar as categorias de premio da edicao.",
+    expand: "Expandir lista",
+    collapse: "Reduzir lista",
+    loading: "A carregar categorias...",
+    success: "Categoria sincronizada",
+    edit: "Editar",
+    error: {
+      emptyName: "Por favor preencha o nome da categoria.",
+      emptyDescription: "Por favor preencha a descricao da categoria.",
+      tooLong: "O nome deve ter no maximo 80 caracteres.",
+      tooLongDescription: "A descricao deve ter no maximo 200 caracteres.",
+      invalidId: "ID invalido.",
+    },
+    maxNameLength: 80,
+    maxDescriptionLength: 200,
   },
   secretSanta: {
     kicker: "Amigo secreto",

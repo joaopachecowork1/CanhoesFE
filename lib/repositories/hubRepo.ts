@@ -1,16 +1,18 @@
 import { canhoesFetch } from "@/lib/api/canhoesClient";
 import type * as T from "@/lib/api/types";
 
+const MAX_UPLOAD_IMAGES = 10;
+
 /**
  * Hub / Feed API repository
  */
 export const hubRepo = {
-  getPosts: (take: number = 25) =>
-    canhoesFetch<T.HubPostDto[]>(`/hub/posts?take=${take}`),
+  getPosts: (take?: number) =>
+    canhoesFetch<T.HubPostDto[]>(`/hub/posts?take=${take ?? 25}`),
 
   uploadImages: async (files: File[]) => {
     const fd = new FormData();
-    for (const f of files.slice(0, 10)) fd.append("files", f);
+    for (const f of files.slice(0, MAX_UPLOAD_IMAGES)) fd.append("files", f);
     return canhoesFetch<string[]>("/hub/uploads", {
       method: "POST",
       // IMPORTANT: do not set Content-Type; browser will set boundary

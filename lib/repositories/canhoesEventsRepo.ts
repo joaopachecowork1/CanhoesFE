@@ -1,6 +1,10 @@
 import { canhoesFetch } from "@/lib/api/canhoesClient";
 import type * as T from "@/lib/api/types";
 
+// ============================================================================
+// EVENT CONTEXT & OVERVIEW
+// ============================================================================
+
 export const canhoesEventsRepo = {
   listEvents: () =>
     canhoesFetch<T.EventSummaryDto[]>("/v1/events", {
@@ -19,6 +23,7 @@ export const canhoesEventsRepo = {
   getSecretSantaOverview: (eventId: string) =>
     canhoesFetch<T.EventSecretSantaOverviewDto>(`/v1/events/${eventId}/secret-santa/overview`),
 
+  // FEED
   getFeedPosts: (eventId: string) =>
     canhoesFetch<T.EventFeedPostDto[]>(`/v1/events/${eventId}/feed/posts`),
 
@@ -28,6 +33,7 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  // EVENT CATEGORIES (user-facing)
   getCategories: (eventId: string) =>
     canhoesFetch<T.EventCategoryDto[]>(`/v1/events/${eventId}/categories`),
 
@@ -37,6 +43,7 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  // ADMIN - AWARD CATEGORIES
   adminGetCategories: (eventId: string) =>
     canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/admin/categories`),
 
@@ -61,6 +68,7 @@ export const canhoesEventsRepo = {
       method: "DELETE",
     }),
 
+  // ADMIN - STATE & BOOTSTRAP
   getAdminState: (eventId: string) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`),
 
@@ -205,6 +213,7 @@ export const canhoesEventsRepo = {
       }`
     ),
 
+  // VOTING (user-facing)
   getVotingBoard: (eventId: string) =>
     canhoesFetch<T.EventVotingBoardDto>(`/v1/events/${eventId}/voting`),
 
@@ -265,6 +274,7 @@ export const canhoesEventsRepo = {
   adminGetOfficialResults: (eventId: string) =>
     canhoesFetch<T.AdminOfficialResultsDto>(`/v1/events/${eventId}/admin/official-results`),
 
+  // PROPOSALS (user-facing)
   getProposals: (eventId: string) =>
     canhoesFetch<T.EventProposalDto[]>(`/v1/events/${eventId}/proposals`),
 
@@ -280,6 +290,7 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
+  // WISHLIST
   getWishlist: (eventId: string) =>
     canhoesFetch<T.EventWishlistItemDto[]>(`/v1/events/${eventId}/wishlist`),
 

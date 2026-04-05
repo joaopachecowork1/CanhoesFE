@@ -16,11 +16,43 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-function getPlacementIcon(position: number) {
+function renderPlacementIcon(position: number) {
   return position === 0 ? (
     <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
   ) : (
     <Medal className="h-4 w-4 text-[var(--color-beige)]" />
+  );
+}
+
+function NomineeRankCard({
+  nominee,
+  rank,
+}: Readonly<{
+  nominee: CanhoesCategoryResultDto["top"][number];
+  rank: number;
+}>) {
+  const isWinner = rank === 0;
+
+  return (
+    <div key={nominee.nomineeId} className="canhoes-list-item flex items-center gap-3 p-3">
+      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-text-primary)]">
+            {renderPlacementIcon(rank)} #{rank + 1}
+          </span>
+          <span className="truncate font-semibold text-[var(--color-text-primary)]">
+            {nominee.title}
+          </span>
+        </div>
+        <p className="body-small text-[var(--color-text-muted)]">{nominee.votes} votos</p>
+      </div>
+
+      <Badge variant={isWinner ? "default" : "outline"}>
+        {isWinner ? "Winner" : "Top"}
+      </Badge>
+    </div>
   );
 }
 
@@ -92,29 +124,15 @@ export function CanhoesGalaModule() {
                 </CardTitle>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                {categoryResult.top.length === 0 ? (
-                  <p className="body-small text-[var(--color-text-muted)]">Sem nomeações aprovadas.</p>
-                ) : null}
-
+              <CardContent className="space-y-3">
                 <div className="space-y-3">
-                  {categoryResult.top.map((nominee, index) => (
-                    <div key={nominee.nomineeId} className="canhoes-list-item flex items-center gap-3 p-3">
-                      <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-text-primary)]">
-                            {getPlacementIcon(index)} #{index + 1}
-                          </span>
-                          <span className="truncate font-semibold text-[var(--color-text-primary)]">{nominee.title}</span>
-                        </div>
-                        <p className="body-small text-[var(--color-text-muted)]">{nominee.votes} votos</p>
-                      </div>
-
-                      <Badge variant={index === 0 ? "default" : "outline"}>{index === 0 ? "Winner" : "Top"}</Badge>
-                    </div>
-                  ))}
+                  {categoryResult.top.length === 0 ? (
+                    <p className="body-small text-[var(--color-text-muted)]">Sem nomeações aprovadas.</p>
+                  ) : (
+                    categoryResult.top.map((nominee, index) => (
+                      <NomineeRankCard key={nominee.nomineeId} nominee={nominee} rank={index} />
+                    ))
+                  )}
                 </div>
 
                 <Separator />

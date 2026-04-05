@@ -23,7 +23,7 @@ export function CanhoesVotingModule() {
   const [votingBoard, setVotingBoard] = useState<EventVotingBoardDto | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [savingVoteKey, setSavingVoteKey] = useState<string | null>(null);
+  const [savingVote, setSavingVote] = useState<{ categoryId: string; optionId: string } | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const loadVotingData = useCallback(async () => {
@@ -80,7 +80,7 @@ export function CanhoesVotingModule() {
   const handleVote = async (categoryId: string, optionId: string) => {
     if (!event || !isVotingOpen) return;
 
-    setSavingVoteKey(`${categoryId}:${optionId}`);
+    setSavingVote({ categoryId, optionId });
     try {
       await canhoesEventsRepo.castVote(event.id, { categoryId, optionId });
       await loadVotingData();
@@ -93,7 +93,7 @@ export function CanhoesVotingModule() {
       });
       toast.error(message);
     } finally {
-      setSavingVoteKey(null);
+      setSavingVote(null);
     }
   };
 
@@ -136,7 +136,7 @@ export function CanhoesVotingModule() {
           {selectedCategory ? (
             <VotingCategoryCard
               category={selectedCategory}
-              isSavingKey={savingVoteKey}
+              savingVote={savingVote}
               onVote={handleVote}
               votingOpen={isVotingOpen}
             />
@@ -149,12 +149,12 @@ export function CanhoesVotingModule() {
 
 function VotingCategoryCard({
   category,
-  isSavingKey,
+  savingVote,
   onVote,
   votingOpen,
 }: Readonly<{
   category: EventVotingCategoryDto;
-  isSavingKey: string | null;
+  savingVote: { categoryId: string; optionId: string } | null;
   onVote: (categoryId: string, optionId: string) => void;
   votingOpen: boolean;
 }>) {
@@ -177,8 +177,8 @@ function VotingCategoryCard({
         {category.options.map((option) => (
           <VoteOption
             key={option.id}
-            isDisabled={!votingOpen || Boolean(isSavingKey)}
-            isSaving={isSavingKey === `${category.id}:${option.id}`}
+            isDisabled={!votingOpen || Boolean(savingVote)}
+            isSaving={savingVote?.categoryId === category.id && savingVote?.optionId === option.id}
             isSelected={category.myOptionId === option.id}
             label={option.label}
             onClick={() => onVote(category.id, option.id)}

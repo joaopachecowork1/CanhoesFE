@@ -7,10 +7,10 @@ import { AdminReviewCard } from "@/components/modules/canhoes/admin/components/A
 import { AdminSectionSummary } from "@/components/modules/canhoes/admin/components/AdminSectionSummary";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
+import { ProposalShell } from "@/components/modules/canhoes/admin/components/ProposalShell";
 import { statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type {
@@ -23,6 +23,7 @@ import {
   type PendingProposalCard,
   type PendingProposalField,
 } from "./usePendingProposalModeration";
+import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "./proposalConstants";
 
 type PendingProposalsProps = {
   eventId: string | null;
@@ -32,48 +33,12 @@ type PendingProposalsProps = {
   onUpdate: () => Promise<void>;
 };
 
-const FILTER_LABELS = {
-  all: "Todas",
-  approved: "Aprovadas",
-  pending: "Pendentes",
-  rejected: "Rejeitadas",
-} as const;
-const FILTER_OPTIONS = ["all", "pending", "approved", "rejected"] as const;
-
-function ProposalShell({
-  children,
-  description,
-  subtitle,
-  title,
-}: Readonly<{
-  children: ReactNode;
-  description: string;
-  subtitle: string;
-  title: string;
-}>) {
-  return (
-    <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
-      <CardHeader className="space-y-2">
-        <p className="editorial-kicker">{subtitle}</p>
-        <CardTitle>{title}</CardTitle>
-        <p className="body-small text-[var(--color-text-muted)]">{description}</p>
-      </CardHeader>
-      <CardContent className="space-y-3">{children}</CardContent>
-    </Card>
-  );
-}
-
-function ProposalPanelState({
-  controlsDisabled,
-  emptyMessage,
-  hasItems,
-  loading,
-}: Readonly<{
-  controlsDisabled: boolean;
-  emptyMessage: string;
-  hasItems: boolean;
-  loading: boolean;
-}>) {
+function renderProposalPanelState(
+  loading: boolean,
+  controlsDisabled: boolean,
+  hasItems: boolean,
+  emptyMessage: string
+) {
   if (loading) return <AdminStateMessage>A carregar propostas...</AdminStateMessage>;
   if (controlsDisabled) {
     return (
@@ -82,19 +47,15 @@ function ProposalPanelState({
       </AdminStateMessage>
     );
   }
-
   return hasItems ? null : <AdminStateMessage variant="panel">{emptyMessage}</AdminStateMessage>;
 }
 
 function ProposalFieldInput({ field }: Readonly<{ field: PendingProposalField }>) {
-  const icon =
-    field.icon === "name" ? (
-      <FilePenLine className="h-3.5 w-3.5" />
-    ) : field.icon === "measure" ? (
-      <ScrollText className="h-3.5 w-3.5" />
-    ) : (
-      <ScrollText className="h-3.5 w-3.5" />
-    );
+  const icon = field.icon === "name" ? (
+    <FilePenLine className="h-3.5 w-3.5" />
+  ) : (
+    <ScrollText className="h-3.5 w-3.5" />
+  );
 
   return (
     <div className="space-y-2">
@@ -231,7 +192,7 @@ function ProposalReviewCard({ proposal }: Readonly<{ proposal: PendingProposalCa
         <div className="flex items-center gap-2 text-[var(--color-title)]">
           <Gavel className="h-4 w-4" />
           <span className="editorial-kicker">
-            {FILTER_LABELS[proposal.note as keyof typeof FILTER_LABELS] ?? proposal.note}
+            {PROPOSAL_STATUS_LABELS[proposal.note as keyof typeof PROPOSAL_STATUS_LABELS] ?? proposal.note}
           </span>
         </div>
       ) : null}
@@ -299,17 +260,17 @@ export function PendingProposals({
             <AdminStatusFilters
               active={panel.filter}
               counts={panel.counts}
-              labels={FILTER_LABELS}
+              labels={PROPOSAL_STATUS_LABELS}
               onChange={panel.setFilter}
-              options={FILTER_OPTIONS}
+              options={PROPOSAL_STATUS_OPTIONS}
             />
 
-            <ProposalPanelState
-              loading={loading}
-              controlsDisabled={moderation.controlsDisabled}
-              hasItems={panel.items.length > 0}
-              emptyMessage={panel.emptyMessage}
-            />
+            {renderProposalPanelState(
+              loading,
+              moderation.controlsDisabled,
+              panel.items.length > 0,
+              panel.emptyMessage
+            )}
 
             {!loading &&
               !moderation.controlsDisabled &&

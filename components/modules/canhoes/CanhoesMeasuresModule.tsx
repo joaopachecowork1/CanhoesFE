@@ -18,35 +18,41 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+type ModuleData = {
+  state: CanhoesStateDto | null;
+  measures: GalaMeasureDto[];
+};
+
+async function loadModuleData(): Promise<ModuleData> {
+  const [nextState, nextMeasures] = await Promise.all([
+    canhoesRepo.getState(),
+    canhoesRepo.getMeasures(),
+  ]);
+  return { state: nextState, measures: nextMeasures };
+}
+
 export function CanhoesMeasuresModule() {
-  const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
-  const [measureList, setMeasureList] = useState<GalaMeasureDto[]>([]);
+  const [moduleData, setModuleData] = useState<ModuleData>({ state: null, measures: [] });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [proposalText, setProposalText] = useState("");
   const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadMeasures = async () => {
+  const loadData = async () => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const [nextState, nextMeasures] = await Promise.all([
-        canhoesRepo.getState(),
-        canhoesRepo.getMeasures(),
-      ]);
-
-      setCanhoesState(nextState);
-      setMeasureList(nextMeasures);
+      const data = await loadModuleData();
+      setModuleData(data);
     } catch (error) {
       const message = getErrorMessage(
         error,
         "Nao foi possivel carregar as medidas desta edicao."
       );
       logFrontendError("CanhoesMeasures.loadMeasures", error);
-      setCanhoesState(null);
-      setMeasureList([]);
+      setModuleData({ state: null, measures: [] });
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -54,18 +60,16 @@ export function CanhoesMeasuresModule() {
   };
 
   useEffect(() => {
-    void loadMeasures();
+    void loadData();
   }, []);
 
-  const isNominationPhase = canhoesState?.phase === "nominations";
+  const isNominationPhase = moduleData.state?.phase === "nominations";
   const canSubmitProposal = proposalText.trim().length >= 5 && isNominationPhase;
-  let submitButtonLabel = "Propostas fechadas";
-  if (isNominationPhase) {
-    submitButtonLabel = "Propor";
-  }
-  if (isSubmitting) {
-    submitButtonLabel = "A enviar...";
-  }
+  const submitButtonLabel = isSubmitting
+    ? "A enviar..."
+    : isNominationPhase
+    ? "Propor"
+    : "Propostas fechadas";
 
   const handleProposalSubmit = async () => {
     if (!canSubmitProposal) return;
@@ -87,7 +91,7 @@ export function CanhoesMeasuresModule() {
     }
   };
 
-  const filteredMeasures = measureList.filter((measure) =>
+  const filteredMeasures = moduleData.measures.filter((measure) =>
     search.trim()
       ? measure.text.toLowerCase().includes(search.trim().toLowerCase())
       : true
@@ -100,7 +104,7 @@ export function CanhoesMeasuresModule() {
         title="Medidas"
         description="Junta regras e castigos para a gala sem partir o layout em mobile."
         badgeLabel={
-          canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+          moduleData.state ? `Fase: ${formatCanhoesPhaseLabel(moduleData.state.phase)}` : undefined
         }
       />
 
@@ -149,7 +153,7 @@ export function CanhoesMeasuresModule() {
               title="Erro ao carregar medidas"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void loadMeasures()}
+              onAction={() => void loadData()}
             />
           ) : null}
 

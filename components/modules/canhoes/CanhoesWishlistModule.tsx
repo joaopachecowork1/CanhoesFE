@@ -49,12 +49,14 @@ export function CanhoesWishlistModule() {
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
-  const [wishlistTitle, setWishlistTitle] = useState("");
-  const [wishlistUrl, setWishlistUrl] = useState("");
-  const [wishlistNotes, setWishlistNotes] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [formState, setFormState] = useState({
+    title: "",
+    url: "",
+    notes: "",
+    selectedFile: null as File | null,
+  });
 
-  const canSubmit = wishlistTitle.trim().length >= 2;
+  const canSubmit = formState.title.trim().length >= 2;
   const wishlistByUser = useMemo(() => groupWishlistItemsByUser(wishlistItems), [wishlistItems]);
 
   useEffect(() => {
@@ -109,19 +111,16 @@ export function CanhoesWishlistModule() {
     setIsSaving(true);
     try {
       const createdItem = await canhoesRepo.createWishlistItem({
-        notes: wishlistNotes.trim() || null,
-        title: wishlistTitle.trim(),
-        url: wishlistUrl.trim() || null,
+        notes: formState.notes.trim() || null,
+        title: formState.title.trim(),
+        url: formState.url.trim() || null,
       });
 
-      if (selectedFile) {
-        await canhoesRepo.uploadWishlistImage(createdItem.id, selectedFile);
+      if (formState.selectedFile) {
+        await canhoesRepo.uploadWishlistImage(createdItem.id, formState.selectedFile);
       }
 
-      setWishlistTitle("");
-      setWishlistUrl("");
-      setWishlistNotes("");
-      setSelectedFile(null);
+      setFormState({ title: "", url: "", notes: "", selectedFile: null });
       await loadWishlist();
       toast.success("Item adicionado");
     } catch (error) {
@@ -208,8 +207,8 @@ export function CanhoesWishlistModule() {
             <label className="space-y-2">
               <span className="canhoes-field-label">Título</span>
               <Input
-                value={wishlistTitle}
-                onChange={(event) => setWishlistTitle(event.target.value)}
+                value={formState.title}
+                onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
                 placeholder="Ex.: Mouse sem fios"
               />
             </label>
@@ -217,8 +216,8 @@ export function CanhoesWishlistModule() {
             <label className="space-y-2">
               <span className="canhoes-field-label">URL</span>
               <Input
-                value={wishlistUrl}
-                onChange={(event) => setWishlistUrl(event.target.value)}
+                value={formState.url}
+                onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
                 placeholder="URL opcional"
               />
             </label>
@@ -227,8 +226,8 @@ export function CanhoesWishlistModule() {
           <label className="space-y-2">
             <span className="canhoes-field-label">Notas</span>
             <Textarea
-              value={wishlistNotes}
-              onChange={(event) => setWishlistNotes(event.target.value)}
+              value={formState.notes}
+              onChange={(event) => setFormState((prev) => ({ ...prev, notes: event.target.value }))}
               placeholder="Notas opcionais"
             />
           </label>
@@ -236,8 +235,8 @@ export function CanhoesWishlistModule() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CanhoesFileTrigger
               accept="image/png,image/jpeg"
-              fileName={selectedFile?.name}
-              onChange={setSelectedFile}
+              fileName={formState.selectedFile?.name}
+              onChange={(file) => setFormState((prev) => ({ ...prev, selectedFile: file }))}
               placeholder="Adicionar imagem (opcional)"
             />
 
