@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
+import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAuth";
 import { IS_MOCK_MODE } from "@/lib/mock";
 import { getMockResponse } from "@/lib/mock/mockFetch";
 
@@ -94,6 +95,24 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
     if (idToken) {
       headers.set("Authorization", `Bearer ${idToken}`);
       console.log("[Proxy] Authorization header set, token starts with:", idToken.substring(0, 50) + "...");
+    } else if (DEV_AUTH_BYPASS_ENABLED) {
+      // Dev-only identity forwarding so backend can upsert/resolve the mock user
+      // without requiring Google OAuth credits during local development.
+      headers.set("x-dev-auth-bypass", "true");
+      headers.set("x-dev-user-id", DEV_AUTH_USER_CONFIG.id);
+      headers.set("x-dev-user-email", DEV_AUTH_USER_CONFIG.email);
+      headers.set("x-dev-user-name", DEV_AUTH_USER_CONFIG.name);
+      headers.set("x-dev-user-admin", String(DEV_AUTH_USER_CONFIG.isAdmin));
+
+      const devBackendToken = process.env.DEV_AUTH_BACKEND_TOKEN;
+      if (devBackendToken) {
+        headers.set("Authorization", `Bearer ${devBackendToken}`);
+      }
+
+      console.log("[Proxy] Dev auth bypass headers set for backend user sync", {
+        devUserEmail: DEV_AUTH_USER_CONFIG.email,
+        hasDevBackendToken: Boolean(devBackendToken),
+      });
     } else {
       console.warn("[Proxy] NO ID TOKEN - request will likely fail auth");
     }

@@ -15,10 +15,13 @@
 
 import type { AuthUser } from "@/contexts/AuthContext";
 
-/** True in non-production builds unless explicitly disabled with NEXT_PUBLIC_MOCK_AUTH=false. */
+/**
+ * Mock data mode is opt-in.
+ * Enable only with NEXT_PUBLIC_MOCK_AUTH=true when static fixtures are desired.
+ */
 export const IS_MOCK_MODE: boolean =
   process.env.NODE_ENV !== "production" &&
-  process.env.NEXT_PUBLIC_MOCK_AUTH !== "false";
+  process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 
 /**
  * Local mode is currently the same thing as mock mode:
