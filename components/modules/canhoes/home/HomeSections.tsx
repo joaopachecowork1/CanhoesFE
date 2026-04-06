@@ -1,18 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Gift,
-  Loader2,
-  MessageSquare,
-  Sparkles,
-  Vote,
-} from "lucide-react";
+import { Clock3, Gift, Loader2, MessageSquare, Vote } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,26 +11,22 @@ import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { homeCopy as homeCopyText } from "@/lib/canhoesCopy";
 import { getPhaseLabel, openComposeSheet } from "@/lib/canhoesEvent";
-import { absMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 import type { CanhoesEventHomeViewModel } from "./useCanhoesEventHome";
+import { ActionButton, ActionLinkButton } from "./HomeActions";
+import { ChecklistItem, MetricCard } from "./HomeCards";
+import { FeedPostCard, SecretSantaStateCard } from "./HomeFeedCard";
 
 const HERO_CARD_CLASS =
   "rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.16),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const PANEL_CARD_CLASS =
   "rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]";
-const PANEL_ITEM_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3";
-const METRIC_TONE_CLASS: Record<string, string> = {
-  green: "",
-  purple: "border-[rgba(212,184,150,0.24)] bg-[rgba(57,45,28,0.3)]",
-};
 
 type HomeAction = CanhoesEventHomeViewModel["homeCopy"]["primaryAction"];
 type RecentPost = CanhoesEventHomeViewModel["recentPosts"][number];
 type MetricItem = { hint: string; label: string; tone?: "green" | "purple"; value: string };
-type ChecklistItem = { done: boolean; hint?: string; label: string };
+type ChecklistItemData = { done: boolean; hint?: string; label: string };
 type AlertItem = string;
 
 export function CanhoesEventHomeLoadingState() {
@@ -78,19 +64,7 @@ export function CanhoesEventHomeErrorState({
 export function CanhoesEventHomeContent({
   viewModel,
 }: Readonly<{ viewModel: CanhoesEventHomeViewModel }>) {
-  const {
-    event,
-    homeCopy,
-    overview,
-    phaseDeadline,
-    phaseLabel,
-    phaseSummary,
-    recentPosts,
-    secretSanta,
-    secretSantaAction,
-    voting,
-    wishlistAction,
-  } = viewModel;
+  const { event, homeCopy, overview, phaseDeadline, phaseLabel, phaseSummary, recentPosts, secretSanta, secretSantaAction, voting, wishlistAction } = viewModel;
 
   const metrics: MetricItem[] = [
     {
@@ -117,7 +91,7 @@ export function CanhoesEventHomeContent({
     },
   ];
 
-  const checklist: ChecklistItem[] = [
+  const checklist: ChecklistItemData[] = [
     {
       done: !overview.modules.wishlist || secretSanta.myWishlistItemCount > 0,
       hint: overview.modules.wishlist ? `${secretSanta.myWishlistItemCount} itens visiveis` : "Wishlist indisponivel nesta fase",
@@ -147,14 +121,10 @@ export function CanhoesEventHomeContent({
         phaseSummary={phaseSummary}
       />
 
-      {homeCopy.alerts.length > 0 ? (
-        <HomeAlertsSection alerts={homeCopy.alerts} />
-      ) : null}
+      {homeCopy.alerts.length > 0 ? <HomeAlertsSection alerts={homeCopy.alerts} /> : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        {overview.modules.feed ? (
-          <HomeFeedPanel posts={recentPosts} />
-        ) : null}
+        {overview.modules.feed ? <HomeFeedPanel posts={recentPosts} /> : null}
 
         <div className="space-y-4">
           {overview.modules.secretSanta ? (
@@ -222,9 +192,7 @@ function HomeHeroSection({
           <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
             Resumo da Fase
           </h1>
-          <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">
-            {phaseSummary}
-          </p>
+          <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">{phaseSummary}</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -245,7 +213,7 @@ function HomeHeroSection({
             {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
           </span>
           <span className="inline-flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[var(--neon-green)]" />
+            <MessageSquare className="h-4 w-4 text-[var(--neon-green)]" />
             {overview.permissions.canManage ? homeCopyText.manageLabel : homeCopyText.memberLabel}
           </span>
         </div>
@@ -275,7 +243,6 @@ function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
         <div className="flex justify-end">
           <Button variant="outline" onClick={openComposeSheet}>
             Publicar no feed
-            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       }
@@ -320,7 +287,7 @@ function HomeSecretSantaPanel({
   );
 }
 
-function HomeChecklistPanel({ items }: Readonly<{ items: ChecklistItem[] }>) {
+function HomeChecklistPanel({ items }: Readonly<{ items: ChecklistItemData[] }>) {
   return (
     <HomePanel title={homeCopyText.checklistTitle} icon={Vote}>
       {items.map((item) => (
@@ -363,167 +330,6 @@ function HomePanelState({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-4 text-sm text-[rgba(245,237,224,0.88)]">
       {children}
-    </div>
-  );
-}
-
-function FeedPostCard({
-  post,
-}: Readonly<{
-  post: CanhoesEventHomeViewModel["recentPosts"][number];
-}>) {
-  return (
-    <div className={cn(PANEL_ITEM_CLASS, "space-y-2")}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.8)]">
-          {post.userName}
-        </p>
-        <span className="text-xs text-[rgba(245,237,224,0.74)]">
-          {new Date(post.createdAt).toLocaleDateString("pt-PT")}
-        </span>
-      </div>
-      <p className="text-sm leading-6 text-[var(--bg-paper)]">{post.content}</p>
-      {post.mediaUrls?.[0] || post.imageUrl ? (
-        <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={absMediaUrl(post.mediaUrls?.[0] ?? post.imageUrl)}
-            alt={`Media do post de ${post.userName}`}
-            loading="lazy"
-            decoding="async"
-            className="h-44 w-full object-cover"
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function SecretSantaStateCard({
-  assignedUserName,
-  assignedWishlistItemCount,
-  hasAssignment,
-  hasDraw,
-}: Readonly<{
-  assignedUserName?: string;
-  assignedWishlistItemCount: number;
-  hasAssignment: boolean;
-  hasDraw: boolean;
-}>) {
-  return hasAssignment && assignedUserName ? (
-    <div className={cn(PANEL_ITEM_CLASS, "space-y-2")}>
-      <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.78)]">
-        Pessoa atribuida
-      </p>
-      <p className="text-base font-semibold text-[var(--bg-paper)]">{assignedUserName}</p>
-      <p className="text-sm text-[rgba(245,237,224,0.84)]">
-        {assignedWishlistItemCount} itens na wishlist.
-      </p>
-    </div>
-  ) : (
-    <div className={cn(PANEL_ITEM_CLASS, "space-y-2")}>
-      <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em] text-[rgba(245,237,224,0.78)]">
-        Estado
-      </p>
-      <p className="text-sm text-[var(--bg-paper)]">
-        {hasDraw
-          ? "O sorteio ja existe, mas a tua atribuicao ainda nao ficou disponivel."
-          : "O sorteio desta edicao ainda nao foi gerado."}
-      </p>
-    </div>
-  );
-}
-
-function MetricCard({
-  hint,
-  label,
-  tone = "green",
-  value,
-}: Readonly<{
-  hint: string;
-  label: string;
-  tone?: "green" | "purple";
-  value: string;
-}>) {
-  return (
-    <div
-      className={cn(
-        PANEL_ITEM_CLASS,
-        tone === "purple" &&
-          "border-[rgba(212,184,150,0.24)] bg-[rgba(57,45,28,0.3)]"
-      )}
-    >
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.76)]">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-semibold text-[var(--bg-paper)]">{value}</p>
-      <p className="mt-1 text-xs text-[rgba(245,237,224,0.8)]">{hint}</p>
-    </div>
-  );
-}
-
-function ActionButton({ action }: Readonly<{ action: HomeAction }>) {
-  return <ActionLinkButton action={action} variant={action.tone ?? "default"} />;
-}
-
-function ActionLinkButton({
-  action,
-  variant,
-}: Readonly<{
-  action: HomeAction;
-  variant: "default" | "outline" | "secondary";
-}>) {
-  const className =
-    variant === "outline"
-      ? "border-[rgba(212,184,150,0.3)] bg-[rgba(212,184,150,0.08)] text-[var(--bg-paper)] hover:bg-[rgba(212,184,150,0.14)]"
-      : undefined;
-
-  if (action.href) {
-    return (
-      <Button variant={variant} className={className} asChild>
-        <Link href={action.href}>
-          {action.label}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </Button>
-    );
-  }
-
-  return (
-    <Button variant={variant} className={className} onClick={action.onClick}>
-      {action.label}
-      <ArrowRight className="h-4 w-4" />
-    </Button>
-  );
-}
-
-function ChecklistItem({
-  done,
-  hint,
-  label,
-}: Readonly<{
-  done: boolean;
-  hint?: string;
-  label: string;
-}>) {
-  return (
-    <div className={cn(PANEL_ITEM_CLASS, "flex items-start gap-3 text-[var(--bg-paper)]")}>
-      <span
-        className={cn(
-          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
-          done
-            ? "border-[rgba(74,92,47,0.24)] bg-[rgba(74,92,47,0.12)] text-[var(--success)]"
-            : "border-[rgba(212,184,150,0.28)] bg-[rgba(212,184,150,0.12)] text-[var(--beige)]"
-        )}
-      >
-        <CheckCircle2 className="h-4 w-4" />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--bg-paper)]">{label}</span>
-        {hint ? (
-          <span className="mt-1 block text-xs text-[rgba(245,237,224,0.8)]">{hint}</span>
-        ) : null}
-      </span>
     </div>
   );
 }
