@@ -1,6 +1,12 @@
 "use client";
 
-import { CanhoesOfficialVotingModule } from "@/components/modules/canhoes/CanhoesOfficialVotingModule";
+import dynamic from "next/dynamic";
+import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+
+const CanhoesOfficialVotingModule = dynamic(
+  () => import("@/components/modules/canhoes/CanhoesOfficialVotingModule").then((m) => ({ default: m.CanhoesOfficialVotingModule })),
+  { loading: () => <FeedSkeleton /> }
+);
 
 export default function VotacaoPage() {
   return <CanhoesOfficialVotingModule />;
