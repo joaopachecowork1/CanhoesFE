@@ -2,20 +2,138 @@
 
 /**
  * Fetch wrapper for the Canhoes backend (proxied via Next.js /api/proxy/*).
- * 
+ *
  * Features:
  * - Auto-deduplicates GET requests to prevent duplicate backend calls
  * - Safe 401/403 handling (returns null instead of throwing, to avoid crash on bootstrap)
+ * - Rate limiting with exponential backoff retry logic
  * - Supports strict auth mode when needed via { canhoes: { throwOnUnauthorized: true } }
  */
 
 export const CANHOES_API_URL =
   process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:5000";
 
+// Retry configuration
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  initialDelayMs: 1000,
+  maxDelayMs: 10000,
+  retryableStatusCodes: [429, 500, 502, 503, 504],
+};
+
+// Track requests per endpoint for rate limiting
+const requestCounts = new Map<string, number>();
+const lastRequestTimes = new Map<string, number>();
+
+/**
+ * Check if a request should be rate limited
+ */
+function shouldRateLimit(endpoint: string): boolean {
+  const now = Date.now();
+  const endpointKey = `GET:${endpoint}`;
+
+  const nowTime = lastRequestTimes.get(endpointKey) || 0;
+  const timeDiff = now - nowTime;
+
+  // Reset counter if 1 minute passed
+  if (timeDiff > 60_000) {
+    requestCounts.delete(endpointKey);
+  }
+
+  const count = requestCounts.get(endpointKey) || 0;
+  const maxRequests = parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_MAX || "100", 10);
+
+  // Rate limited if more than max requests in window
+  if (count >= maxRequests) {
+    return true;
+  }
+
+  requestCounts.set(endpointKey, count + 1);
+
+  return false;
+}
+
+/**
+ * Calculate retry delay with exponential backoff
+ */
+function calculateRetryDelay(
+  attempt: number,
+  error: Error & { status?: number; retryAfter?: string }
+): number {
+  const baseDelay = RETRY_CONFIG.initialDelayMs;
+  const maxDelay = RETRY_CONFIG.maxDelayMs;
+
+  // Exponential backoff: base * 2^attempt
+  let delay = baseDelay * Math.pow(2, attempt - 1);
+
+  // Respect Retry-After header if present
+  if (error.retryAfter) {
+    try {
+      const retryAfterMs = parseInt(error.retryAfter, 10);
+      if (!isNaN(retryAfterMs)) {
+        delay = Math.max(delay, retryAfterMs);
+      }
+    } catch {
+      // Invalid retry-after header, ignore
+    }
+  }
+
+  // Jitter: add random variation (±10%)
+  const jitter = (Math.random() - 0.5) * 0.2 * delay;
+  delay = Math.min(delay + jitter, maxDelay);
+
+  return Math.max(delay, 100); // Minimum 100ms delay
+}
+
+/**
+ * Create a retry wrapper for fetch requests
+ */
+async function withRetry<T>(
+  fetchFn: () => Promise<T>,
+  attempt = 1
+): Promise<T> {
+  if (attempt > RETRY_CONFIG.maxRetries) {
+    const error = fetchFn();
+    throw (await error) as ApiError;
+  }
+
+  try {
+    return await fetchFn();
+  } catch (error) {
+    const err = error as Error & { status?: number };
+
+    // Check if error is retryable
+    const status = err.status || 0;
+    const isRetryable = RETRY_CONFIG.retryableStatusCodes.includes(status);
+
+    // Also check for rate limit header
+    if (error instanceof Response && error.headers.has("Retry-After")) {
+      const retryAfter = error.headers.get("Retry-After");
+      if (retryAfter) {
+        const delay = parseInt(retryAfter, 10);
+        if (!isNaN(delay)) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return withRetry(fetchFn, attempt + 1) as T;
+        }
+      }
+    }
+
+    // Only retry on specific status codes
+    if (!isRetryable || status >= 400 && status < 500) {
+      throw error;
+    }
+
+    const delay = calculateRetryDelay(attempt, err);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    return withRetry(fetchFn, attempt + 1);
+  }
+}
+
 export class ApiError extends Error {
   status: number;
   details?: unknown;
-  
+
   constructor(message: string, status: number, details?: unknown) {
     super(message);
     this.name = "ApiError";
@@ -72,19 +190,32 @@ function getDeduplicationKey(path: string, init?: CanhoesRequestInit): string | 
 }
 
 /**
- * Fetches data from the Canhoes backend via proxy.
- * 
+ * Fetches data from the Canhoes backend via proxy with rate limiting and retry logic.
+ *
  * Default behavior:
  * - Returns null on 401/403 (doesn't throw, to avoid crash on bootstrap)
  * - Throws ApiError on other failures
  * - Deduplicates GET requests automatically
- * 
+ * - Rate limits requests (configurable via NEXT_PUBLIC_RATE_LIMIT_MAX/TTL)
+ * - Retries failed requests with exponential backoff
+ *
  * For strict auth on 401/403, pass { canhoes: { throwOnUnauthorized: true } }
  */
-export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): Promise<T> {
+export async function canhoesFetch<T>(
+  path: string,
+  init?: CanhoesRequestInit
+): Promise<T> {
   const normalized = normalizePath(path);
   if (!normalized) {
     throw new ApiError("Invalid API path: path cannot be empty", 400);
+  }
+
+  // Check rate limiting before making request
+  if (shouldRateLimit(normalized)) {
+    const waitTime = (parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_TTL || "300000", 10) /
+      parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_MAX || "100", 10)) * 1000;
+
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
   }
 
   const proxyUrl = `/api/proxy/${normalized}`;
@@ -106,12 +237,14 @@ export async function canhoesFetch<T>(path: string, init?: CanhoesRequestInit): 
 
   const fetchPromise = (async () => {
     try {
-      const res = await fetch(proxyUrl, {
-        ...restInit,
-        headers,
-        credentials: "include",
-        cache: "no-store",
-      });
+      const res = await withRetry(() =>
+        fetch(proxyUrl, {
+          ...restInit,
+          headers,
+          credentials: "include",
+          cache: "no-store",
+        })
+      );
 
       if (res.ok) {
         return (await readBody(res)) as T;

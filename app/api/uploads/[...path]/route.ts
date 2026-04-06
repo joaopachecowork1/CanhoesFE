@@ -6,7 +6,7 @@ const backend =
   "http://localhost:5000";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await context.params;
