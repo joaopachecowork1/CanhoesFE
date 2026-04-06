@@ -26,7 +26,19 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    // ────────────────────────────────────────────────────────────
+    // 🔒 ADITIONAL STRICT OPTIONS
+    // ──────────────────────────────────────────────────────────────
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": [
     "next-env.d.ts",
