@@ -147,6 +147,7 @@ export function useHubFeed() {
 
   useEffect(() => {
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -202,6 +203,7 @@ export function useHubFeed() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safePosts]);
 
   const toggleReaction = useCallback(

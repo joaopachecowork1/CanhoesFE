@@ -41,7 +41,6 @@ export default function CanhoesLoginPage() {
 
   const handleLogin = () => {
     setIsSigningIn(true);
-    console.log("[Login Page] Starting Google sign-in...");
     loginGoogle();
   };
 

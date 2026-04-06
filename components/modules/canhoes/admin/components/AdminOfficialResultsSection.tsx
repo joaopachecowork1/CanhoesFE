@@ -36,7 +36,7 @@ export function AdminOfficialResultsSection({
     [resultsQuery.data]
   );
 
-  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
+  const { setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
     useCategorySelection(resultCategories, (c) => c.categoryId);
 
   if (!isAdmin) {

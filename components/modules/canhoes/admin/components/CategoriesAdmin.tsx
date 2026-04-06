@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ArrowUpDown, Pencil } from "lucide-react";
 
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
@@ -9,80 +9,18 @@ import type { AwardCategoryDto } from "@/lib/api/types";
 
 type Props = {
   categories: AwardCategoryDto[];
-  eventId: string | null;
   loading: boolean;
-  onUpdate: () => Promise<void>;
 };
 
-export function CategoriesAdmin({ categories, eventId, loading, onUpdate }: Readonly<Props>) {
+export function CategoriesAdmin({ categories, loading }: Readonly<Props>) {
   const [expanded, setExpanded] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
-  const [editingDescription, setEditingDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  const editingInputName = useRef<HTMLInputElement>(null);
-  const editingInputDescription = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (editingId) {
-      const category = categories.find((c) => c.id === editingId);
-      if (category) {
-        setEditingName(category.name);
-        setEditingDescription(category.description ?? "");
-      }
-    }
-  }, [editingId, categories]);
-
-  useEffect(() => {
-    if (editingInputName.current && editingId) {
-      editingInputName.current.focus();
-    }
-  }, [editingId]);
 
   const handleToggleExpand = () => setExpanded((prev) => !prev);
 
-  const handleEdit = (category: AwardCategoryDto) => {
-    setEditingId(category.id);
-    setError(null);
-  };
-
-  const handleSave = async () => {
-    if (!editingName.trim()) {
-      setError(adminCopy.categories.error.emptyName);
-      return;
-    }
-    if (!editingDescription.trim()) {
-      setError(adminCopy.categories.error.emptyDescription);
-      return;
-    }
-    if (editingName.trim().length > adminCopy.categories.maxNameLength) {
-      setError(adminCopy.categories.error.tooLong);
-      return;
-    }
-    if (editingDescription.trim().length > adminCopy.categories.maxDescriptionLength) {
-      setError(adminCopy.categories.error.tooLongDescription);
-      return;
-    }
-
-    await onUpdate();
-    setEditingId(null);
-    setError(null);
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setError(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !error) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      handleCancel();
-    }
+  const handleEdit = () => {
+    // TODO: implement edit modal
+    setError("Edicao de categorias ainda nao implementada.");
   };
 
   return (
@@ -162,16 +100,12 @@ function MiniCategoryRow({
 }: {
   category: AwardCategoryDto;
   loading: boolean;
-  onEdit: (c: AwardCategoryDto) => void;
+  onEdit: () => void;
 }) {
-  const handleClick = () => {
-    onEdit(category);
-  };
-
   return (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={onEdit}
       disabled={loading}
       className="flex-1 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.76)] p-3.5 text-left transition-colors hover:border-[rgba(177,140,255,0.28)] hover:bg-[rgba(18,23,12,0.86)] active:border-[rgba(177,140,255,0.32)] active:bg-[rgba(11,14,8,0.86)] disabled:pointer-events-none disabled:opacity-50 disabled:active:border-[rgba(212,184,150,0.14)] disabled:active:bg-[rgba(11,14,8,0.76)]"
     >
@@ -196,7 +130,7 @@ function CategoryRow({
 }: {
   category: AwardCategoryDto;
   loading: boolean;
-  onEdit: (c: AwardCategoryDto) => void;
+  onEdit: () => void;
 }) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.76)] p-3.5">
@@ -213,7 +147,7 @@ function CategoryRow({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => onEdit(category)}
+            onClick={onEdit}
             disabled={loading}
             className="rounded-full border border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.94)] p-1.5 text-[rgba(245,237,224,0.64)] transition-colors hover:border-[rgba(177,140,255,0.32)] hover:bg-[rgba(46,155,240,0.16)] hover:text-[var(--bg-paper)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[rgba(212,184,150,0.18)] disabled:hover:bg-[rgba(18,23,12,0.94)] disabled:hover:text-[rgba(245,237,224,0.64)]"
             title={adminCopy.categories.edit}

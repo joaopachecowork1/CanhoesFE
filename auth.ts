@@ -19,16 +19,12 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user, account }) {
-      // Capture Google's id_token when first logging in
       if (account?.id_token) {
         token.idToken = account.id_token;
-        console.log("[Auth JWT Callback] id_token captured from Google account");
       }
 
-      // Capture access_token as fallback if id_token not available
       if (account?.access_token && !token.idToken) {
         token.idToken = account.access_token;
-        console.log("[Auth JWT Callback] Using access_token as fallback (id_token missing)");
       }
 
       if (user) {
@@ -36,13 +32,6 @@ export const authOptions: NextAuthOptions = {
       }
 
       token.isAdmin = Boolean(token.isAdmin);
-
-      // Log token state for debugging
-      console.log("[Auth JWT Callback] Token state:", {
-        hasIdToken: !!token.idToken,
-        isAdmin: token.isAdmin,
-        googleAccountPresent: account?.provider === "google",
-      });
 
       return token;
     },

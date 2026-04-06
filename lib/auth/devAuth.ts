@@ -9,15 +9,10 @@ function readEnv(publicKey: string, privateKey: string, fallback: string) {
   return process.env[publicKey] ?? process.env[privateKey] ?? fallback;
 }
 
-function isTrue(value: string) {
-  return value.trim().toLowerCase() === "true";
-}
-
 function isFalse(value: string) {
   return value.trim().toLowerCase() === "false";
 }
 
-const bypassFlag = readEnv("NEXT_PUBLIC_DEV_AUTH_BYPASS", "DEV_AUTH_BYPASS", "false");
 const autoAdminFlag = readEnv("NEXT_PUBLIC_DEV_AUTH_AUTO_ADMIN", "DEV_AUTH_AUTO_ADMIN", "true");
 
 // Temporary emergency mode: keep auth mocked everywhere until OAuth is restored.

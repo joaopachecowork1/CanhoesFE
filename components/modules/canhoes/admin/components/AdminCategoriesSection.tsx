@@ -1,6 +1,6 @@
 "use client";
 
-import type { AwardCategoryDto, CategoryProposalDto, MeasureProposalDto, NomineeDto, AdminVoteAuditRowDto } from "@/lib/api/types";
+import type { AwardCategoryDto, CategoryProposalDto, MeasureProposalDto, AdminVoteAuditRowDto } from "@/lib/api/types";
 
 import { CategoriesAdmin } from "./CategoriesAdmin";
 import { AdminNominationsSection } from "./AdminNominationsSection";
@@ -13,7 +13,6 @@ type AdminCategoriesSectionProps = {
   eventId: string | null;
   loading: boolean;
   measureProposals: MeasureProposalDto[];
-  nominees: NomineeDto[];
   onUpdate: () => Promise<void>;
   votes: AdminVoteAuditRowDto[];
 };
@@ -32,7 +31,6 @@ export function AdminCategoriesSection({
   eventId,
   loading,
   measureProposals,
-  nominees,
   onUpdate,
   votes,
 }: Readonly<AdminCategoriesSectionProps>) {
@@ -40,9 +38,7 @@ export function AdminCategoriesSection({
     <div className="space-y-6">
       <CategoriesAdmin
         categories={categories}
-        eventId={eventId}
         loading={loading}
-        onUpdate={onUpdate}
       />
 
       <PendingProposals

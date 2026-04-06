@@ -36,14 +36,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
-  const devBypassUser = DEV_AUTH_BYPASS_ENABLED
-    ? {
-        id: DEV_AUTH_USER_CONFIG.id,
-        email: DEV_AUTH_USER_CONFIG.email,
-        name: DEV_AUTH_USER_CONFIG.name,
-        isAdmin: DEV_AUTH_USER_CONFIG.isAdmin,
-      }
-    : null;
+
+  const devBypassUser = useMemo<AuthUser | null>(() => (
+    DEV_AUTH_BYPASS_ENABLED
+      ? {
+          id: DEV_AUTH_USER_CONFIG.id,
+          email: DEV_AUTH_USER_CONFIG.email,
+          name: DEV_AUTH_USER_CONFIG.name,
+          isAdmin: DEV_AUTH_USER_CONFIG.isAdmin,
+        }
+      : null
+  ), []);
+
   const isDevAuthBypass = Boolean(devBypassUser);
 
   const backendUserQuery = useQuery<AuthUser | null>({

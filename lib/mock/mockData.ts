@@ -225,14 +225,6 @@ export const MOCK_MEMBERS: PublicUserDto[] = [
   },
 ];
 
-export const MOCK_MEMBERS_EXTENDED = [
-  { id: "user-001", displayName: "Joao P.", email: "joao@canhoes.pt", isAdmin: true },
-  { id: "user-002", displayName: "Maria S.", email: "maria@canhoes.pt", isAdmin: false },
-  { id: "user-003", displayName: "Pedro L.", email: "pedro@canhoes.pt", isAdmin: false },
-  { id: "user-004", displayName: "Ana C.", email: "ana@canhoes.pt", isAdmin: false },
-  { id: "user-005", displayName: "Rui F.", email: "rui@canhoes.pt", isAdmin: false },
-];
-
 export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
   {
     id: "nom-001",
