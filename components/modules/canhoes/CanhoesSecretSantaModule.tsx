@@ -232,11 +232,6 @@ export function CanhoesSecretSantaModule() {
     );
   }, [screenState]);
 
-  const myWishlistItems = useMemo(() => {
-    if (screenState.status !== "ready" || !user?.id) return [];
-    return screenState.wishlistItems.filter((item) => item.userId === user.id);
-  }, [screenState, user?.id]);
-
   const wishlistHref = overview?.modules.wishlist ? CANHOES_MEMBER_MODULE_MAP.wishlist.href : "/canhoes";
   const wishlistLabel = overview?.modules.wishlist ? "Abrir wishlist" : "Voltar ao evento";
 
@@ -311,7 +306,7 @@ export function CanhoesSecretSantaModule() {
           wishlistLabel={wishlistLabel}
         />
         <WishlistPreviewCard
-          myWishlistItemCount={screenState.status === "ready" ? screenState.overview.myWishlistItemCount : myWishlistItems.length}
+          myWishlistItemCount={screenState.status === "ready" ? screenState.overview.myWishlistItemCount : 0}
           wishlistHref={wishlistHref}
           wishlistLabel={wishlistLabel}
         />
@@ -346,6 +341,52 @@ function SecretSantaContent({
   wishlistHref: string;
   wishlistLabel: string;
 }>) {
+  if (isBusy) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-4 w-4 text-[var(--color-fire)]" />
+            O teu amigo secreto
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <Card>
+        <CardContent className="py-6">
+          <ErrorAlert
+            title="Erro ao carregar o amigo secreto"
+            description={errorMessage}
+            actionLabel="Tentar novamente"
+            onAction={() => globalThis.location.reload()}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (hasAssignment && assignedUserName) {
+    return (
+      <SecretSantaAssignmentCard
+        assignedUserName={assignedUserName}
+        assignedWishlistItems={assignedWishlistItems}
+        wishlistHref={wishlistHref}
+        wishlistLabel={wishlistLabel}
+      />
+    );
+  }
+
+  const statusMessage = hasDraw
+    ? "O sorteio existe, mas ainda nao ha atribuicao disponivel para o teu perfil."
+    : "Ainda nao existe sorteio para este evento.";
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -354,44 +395,10 @@ function SecretSantaContent({
           O teu amigo secreto
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {isBusy ? (
-          <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
-        ) : null}
-
-        {hasAssignment && assignedUserName ? (
-          <SecretSantaAssignmentCard
-            assignedUserName={assignedUserName}
-            assignedWishlistItems={assignedWishlistItems}
-            wishlistHref={wishlistHref}
-            wishlistLabel={wishlistLabel}
-          />
-        ) : null}
-
-        {hasDraw && !hasAssignment ? (
-          <div className="canhoes-list-item p-4">
-            <p className="body-small text-[var(--color-text-muted)]">
-              O sorteio existe, mas ainda nao ha atribuicao disponivel para o teu perfil.
-            </p>
-          </div>
-        ) : null}
-
-        {hasDraw === false ? (
-          <div className="canhoes-list-item p-4">
-            <p className="body-small text-[var(--color-text-muted)]">
-              Ainda nao existe sorteio para este evento.
-            </p>
-          </div>
-        ) : null}
-
-        {errorMessage ? (
-          <ErrorAlert
-            title="Erro ao carregar o amigo secreto"
-            description={errorMessage}
-            actionLabel="Tentar novamente"
-            onAction={() => globalThis.location.reload()}
-          />
-        ) : null}
+      <CardContent>
+        <div className="canhoes-list-item p-4">
+          <p className="body-small text-[var(--color-text-muted)]">{statusMessage}</p>
+        </div>
       </CardContent>
     </Card>
   );
