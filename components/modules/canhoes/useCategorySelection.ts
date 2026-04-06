@@ -9,14 +9,16 @@ import { useEffect, useMemo, useState } from "react";
  *
  * Usage:
  * ```ts
+ * // Items with `id` property:
  * const { selectedId, setSelectedId, selectedItem } = useCategorySelection(categories);
- * // or with custom id selector:
- * const { selectedId, setSelectedId, selectedItem } = useCategorySelection(categories, c => c.categoryId);
+ *
+ * // Items with a different id property:
+ * const { selectedId, setSelectedId, selectedItem } = useCategorySelection(categories, (c) => c.categoryId);
  * ```
  */
 export function useCategorySelection<T>(
   items: T[],
-  getId: (item: T) => string = (item: any) => item.id
+  getId: (item: T) => string
 ) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
