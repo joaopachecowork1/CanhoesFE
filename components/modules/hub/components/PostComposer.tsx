@@ -1,21 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  BarChart3,
-  ImagePlus,
-  Loader2,
-  PlusCircle,
-  ScrollText,
-  Send,
-  Trash2,
-} from "lucide-react";
+import { BarChart3, ImagePlus, Loader2, PlusCircle, ScrollText, Send, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
+import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/hooks/useComposer";
 
 export interface PostComposerSubmitData {
   text: string;
@@ -24,9 +16,6 @@ export interface PostComposerSubmitData {
   pollQuestion: string;
   pollOptions: string[];
 }
-
-const MAX_MEDIA_FILES = 10;
-const MAX_POLL_OPTIONS = 6;
 
 function buildPollOptionKey(options: string[], option: string, optionIndex: number): string {
   const normalizedOption = option.trim().toLowerCase() || "vazio";
@@ -42,32 +31,22 @@ export function PostComposer({
 }: Readonly<{
   onSubmit: (data: PostComposerSubmitData) => void | Promise<void>;
 }>) {
-  const [text, setText] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
-  const [pollOn, setPollOn] = useState(false);
-  const [pollQuestion, setPollQuestion] = useState("");
-  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const previewUrls = useMemo(
-    () => files.map((file) => URL.createObjectURL(file)),
-    [files]
-  );
-
-  useEffect(() => {
-    return () => {
-      previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
-    };
-  }, [previewUrls]);
-
-  const resetComposer = useCallback(() => {
-    setText("");
-    setFiles([]);
-    setPollOn(false);
-    setPollQuestion("");
-    setPollOptions(["", ""]);
-  }, []);
+  const {
+    state: { text, files, previewUrls, isSubmitting, isPollEnabled, pollQuestion, pollOptions },
+    actions: {
+      setText,
+      setIsSubmitting,
+      setIsPollEnabled,
+      setPollQuestion,
+      handleFiles,
+      removeFile,
+      handlePollOptionChange,
+      addPollOption,
+      removePollOption,
+      reset,
+    },
+    refs: { fileInputRef },
+  } = useComposer();
 
   const handleSubmit = async () => {
     if (isSubmitting || !text.trim()) return;
@@ -76,58 +55,18 @@ export function PostComposer({
     try {
       await onSubmit({
         files,
-        pollOn,
+        pollOn: isPollEnabled,
         pollOptions,
         pollQuestion,
         text,
       });
-      resetComposer();
+      reset();
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleFiles = (fileList: FileList | null) => {
-    if (!fileList) return;
-
-    setFiles((currentFiles) =>
-      [...currentFiles, ...Array.from(fileList)].slice(0, MAX_MEDIA_FILES)
-    );
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const removeFile = (fileIndex: number) => {
-    setFiles((currentFiles) =>
-      currentFiles.filter((_, currentIndex) => currentIndex !== fileIndex)
-    );
-  };
-
-  const updatePollOption = (optionIndex: number, value: string) => {
-    setPollOptions((currentOptions) =>
-      currentOptions.map((option, currentIndex) =>
-        currentIndex === optionIndex ? value : option
-      )
-    );
-  };
-
-  const addPollOption = () => {
-    if (pollOptions.length < MAX_POLL_OPTIONS) {
-      setPollOptions((currentOptions) => [...currentOptions, ""]);
-    }
-  };
-
-  const removePollOption = (optionIndex: number) => {
-    if (pollOptions.length > 2) {
-      setPollOptions((currentOptions) =>
-        currentOptions.filter((_, currentIndex) => currentIndex !== optionIndex)
-      );
-    }
-  };
-
-  const pollButtonActiveClassName = pollOn
+  const pollButtonActiveClassName = isPollEnabled
     ? "border-[rgba(177,140,255,0.26)] [box-shadow:var(--glow-purple-sm)]"
     : "";
   const mediaButtonActiveClassName = files.length > 0
@@ -169,10 +108,10 @@ export function PostComposer({
 
             <Button
               type="button"
-              variant={pollOn ? "secondary" : "outline"}
+              variant={isPollEnabled ? "secondary" : "outline"}
               size="sm"
               className={cn("gap-2 rounded-full px-4", pollButtonActiveClassName)}
-              onClick={() => setPollOn((currentValue) => !currentValue)}
+              onClick={() => setIsPollEnabled((currentValue) => !currentValue)}
               disabled={isSubmitting}
             >
               <BarChart3 className="h-4 w-4" />
@@ -239,7 +178,7 @@ export function PostComposer({
           </div>
         ) : null}
 
-        {pollOn ? (
+        {isPollEnabled ? (
           <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] p-4 sm:p-5">
             <div className="space-y-4">
               <div className="space-y-1">
@@ -281,7 +220,7 @@ export function PostComposer({
                       <Input
                         value={option}
                         onChange={(event) =>
-                          updatePollOption(optionIndex, event.target.value)
+                          handlePollOptionChange(optionIndex, event.target.value)
                         }
                         placeholder={`${feedCopy.composer.pollOptionPlaceholder} ${optionIndex + 1}`}
                       />

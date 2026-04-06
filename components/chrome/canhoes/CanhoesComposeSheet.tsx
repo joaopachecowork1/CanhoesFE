@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
@@ -9,6 +9,7 @@ import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 import { cn } from "@/lib/utils";
+import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/hooks/useComposer";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -21,11 +22,8 @@ import {
   isAcceptedImage,
   MAX_FILE_BYTES,
   MAX_FILE_MB,
-  MAX_MEDIA_FILES,
   normalizeUploadImage,
 } from "./compose/composeUpload";
-
-const MAX_POLL_OPTIONS = 6;
 
 export function CanhoesComposeSheet({
   open,
@@ -40,49 +38,45 @@ export function CanhoesComposeSheet({
   const isAuthenticated = status === "authenticated";
   const composeCopy = feedCopy.composer;
 
-  const [postText, setPostText] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadLabel, setUploadLabel] = useState("");
-  const [isPollEnabled, setIsPollEnabled] = useState(false);
-  const [pollQuestion, setPollQuestion] = useState("");
-  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const previewUrls = useMemo(
-    () => selectedFiles.map((file) => URL.createObjectURL(file)),
-    [selectedFiles]
-  );
-
-  useEffect(() => {
-    return () => previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
-  }, [previewUrls]);
-
-  const resetComposer = useCallback(() => {
-    setPostText("");
-    setSelectedFiles([]);
-    setUploadProgress(0);
-    setUploadLabel("");
-    setIsPollEnabled(false);
-    setPollQuestion("");
-    setPollOptions(["", ""]);
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      resetComposer();
+  const {
+    state: { text, files, previewUrls, isSubmitting, isPollEnabled, pollQuestion, pollOptions },
+    actions: {
+      setText,
+      setFiles,
+      setIsSubmitting,
+      setIsPollEnabled,
+      setPollQuestion,
+      removeFile,
+      handlePollOptionChange,
+      addPollOption,
+      removePollOption,
+      reset: resetBase,
+    },
+    refs: { fileInputRef },
+  } = useComposer({
+    onReset: () => {
+      setUploadProgress(0);
+      setUploadLabel("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    },
+  });
+
+  useEffect(() => {
+    if (!open) {
+      resetBase();
     }
-  }, [open, resetComposer]);
+  }, [open, resetBase]);
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList) return;
 
     const incomingFiles = Array.from(fileList);
-    const nextFiles = [...selectedFiles];
+    const nextFiles = [...files];
     const existingKeys = new Set(
       nextFiles.map((file) => `${file.name}-${file.size}-${file.lastModified}`)
     );
@@ -114,7 +108,7 @@ export function CanhoesComposeSheet({
       existingKeys.add(fileKey);
     }
 
-    setSelectedFiles(nextFiles);
+    setFiles(nextFiles);
 
     if (optimizedFileCount > 0) {
       toast.success(`${optimizedFileCount} ${composeCopy.optimizedLabel}`);
@@ -125,14 +119,8 @@ export function CanhoesComposeSheet({
     }
   };
 
-  const handleRemoveFile = (index: number) => {
-    setSelectedFiles((currentFiles) =>
-      currentFiles.filter((_, currentIndex) => currentIndex !== index)
-    );
-  };
-
   const handleMoveFile = (index: number, direction: -1 | 1) => {
-    setSelectedFiles((currentFiles) => {
+    setFiles((currentFiles) => {
       const targetIndex = index + direction;
       if (targetIndex < 0 || targetIndex >= currentFiles.length) return currentFiles;
 
@@ -143,29 +131,9 @@ export function CanhoesComposeSheet({
     });
   };
 
-  const handlePollOptionChange = (index: number, value: string) => {
-    setPollOptions((currentOptions) =>
-      currentOptions.map((option, currentIndex) => (currentIndex === index ? value : option))
-    );
-  };
-
-  const handleAddPollOption = () => {
-    if (pollOptions.length < MAX_POLL_OPTIONS) {
-      setPollOptions((currentOptions) => [...currentOptions, ""]);
-    }
-  };
-
-  const handleRemovePollOption = (index: number) => {
-    if (pollOptions.length > 2) {
-      setPollOptions((currentOptions) =>
-        currentOptions.filter((_, currentIndex) => currentIndex !== index)
-      );
-    }
-  };
-
   const handleCreatePost = async () => {
-    const trimmedPostText = postText.trim();
-    if (!trimmedPostText) return;
+    const trimmedText = text.trim();
+    if (!trimmedText) return;
 
     setIsSubmitting(true);
     setUploadProgress(0);
@@ -174,22 +142,22 @@ export function CanhoesComposeSheet({
     try {
       let mediaUrls: string[] = [];
 
-      if (selectedFiles.length > 0) {
+      if (files.length > 0) {
         setUploadLabel(composeCopy.uploading);
         const uploadedUrls: string[] = [];
 
-        for (let index = 0; index < selectedFiles.length; index++) {
-          const selectedFile = selectedFiles[index];
-          const urls = await hubRepo.uploadImages([selectedFile]);
+        for (let index = 0; index < files.length; index++) {
+          const file = files[index];
+          const urls = await hubRepo.uploadImages([file]);
           const uploadedUrl = urls?.[0];
 
           if (!uploadedUrl) {
-            throw new Error(`Falha ao enviar ${selectedFile.name}`);
+            throw new Error(`Falha ao enviar ${file.name}`);
           }
 
           uploadedUrls.push(uploadedUrl);
-          setUploadProgress(Math.round(((index + 1) / selectedFiles.length) * 100));
-          setUploadLabel(`${composeCopy.uploading} ${index + 1}/${selectedFiles.length}`);
+          setUploadProgress(Math.round(((index + 1) / files.length) * 100));
+          setUploadLabel(`${composeCopy.uploading} ${index + 1}/${files.length}`);
         }
 
         mediaUrls = uploadedUrls;
@@ -204,7 +172,7 @@ export function CanhoesComposeSheet({
         mediaUrls,
         pollOptions: isPollEnabled ? trimmedPollOptions : null,
         pollQuestion: isPollEnabled && trimmedPollQuestion ? trimmedPollQuestion : null,
-        text: trimmedPostText,
+        text: trimmedText,
       });
 
       if (createdPost?.id && typeof window !== "undefined") {
@@ -212,7 +180,7 @@ export function CanhoesComposeSheet({
       }
 
       toast.success(composeCopy.published);
-      resetComposer();
+      resetBase();
       onDone?.();
       onOpenChange(false);
     } catch (error) {
@@ -250,22 +218,22 @@ export function CanhoesComposeSheet({
         {isAuthenticated ? (
           <div className="space-y-4 px-4 pb-4">
             <Textarea
-              value={postText}
-              onChange={(event) => setPostText(event.target.value)}
+              value={text}
+              onChange={(event) => setText(event.target.value)}
               placeholder={composeCopy.textPlaceholder}
               className="min-h-24 resize-none"
               autoFocus
             />
 
             <ComposeMediaGrid
-              files={selectedFiles}
+              files={files}
               maxFiles={MAX_MEDIA_FILES}
               previewUrls={previewUrls}
               onMove={handleMoveFile}
-              onRemove={handleRemoveFile}
+              onRemove={removeFile}
             />
 
-            {isSubmitting && selectedFiles.length > 0 ? (
+            {isSubmitting && files.length > 0 ? (
               <ComposeUploadProgress
                 label={uploadLabel || composeCopy.uploadingFallback}
                 progress={uploadProgress}
@@ -276,10 +244,10 @@ export function CanhoesComposeSheet({
               <ComposePollEditor
                 disabled={isSubmitting}
                 maxOptions={MAX_POLL_OPTIONS}
-                onAddOption={handleAddPollOption}
+                onAddOption={addPollOption}
                 onOptionChange={handlePollOptionChange}
                 onQuestionChange={setPollQuestion}
-                onRemoveOption={handleRemovePollOption}
+                onRemoveOption={removePollOption}
                 options={pollOptions}
                 question={pollQuestion}
               />
@@ -291,18 +259,18 @@ export function CanhoesComposeSheet({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   title={composeCopy.mediaLabel}
-                  disabled={isSubmitting || selectedFiles.length >= MAX_MEDIA_FILES}
+                  disabled={isSubmitting || files.length >= MAX_MEDIA_FILES}
                   className={cn(
                     "canhoes-tap relative flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
-                    selectedFiles.length > 0
+                    files.length > 0
                       ? "border-[var(--color-moss)] bg-[var(--color-moss)] text-[var(--color-text-primary)] shadow-[var(--glow-green-sm)]"
                       : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)]"
                   )}
                 >
                   <ImagePlus className="h-4 w-4" />
-                  {selectedFiles.length > 0 ? (
+                  {files.length > 0 ? (
                     <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-fire)] text-[9px] font-bold text-white">
-                      {selectedFiles.length}
+                      {files.length}
                     </span>
                   ) : null}
                 </button>
@@ -325,7 +293,7 @@ export function CanhoesComposeSheet({
 
               <Button
                 onClick={() => void handleCreatePost()}
-                disabled={isSubmitting || !postText.trim()}
+                disabled={isSubmitting || !text.trim()}
                 className="min-w-[120px]"
               >
                 {isSubmitting ? (

@@ -59,7 +59,7 @@ export function CanhoesVotingModule() {
   const isVotingOpen = Boolean(votingBoard?.canVote);
   const categories = votingBoard?.categories ?? [];
 
-  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } = useCategorySelection(categories);
+  const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } = useCategorySelection(categories, (c) => c.id);
 
   const handleVote = async (categoryId: string, optionId: string) => {
     if (!event || !isVotingOpen) return;

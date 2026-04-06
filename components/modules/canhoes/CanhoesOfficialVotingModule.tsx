@@ -38,7 +38,7 @@ export function CanhoesOfficialVotingModule() {
   );
 
   const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
-    useCategorySelection(boardCategories);
+    useCategorySelection(boardCategories, (c) => c.id);
 
   const castVote = useMutation({
     mutationFn: (payload: CastOfficialVoteRequest) =>
