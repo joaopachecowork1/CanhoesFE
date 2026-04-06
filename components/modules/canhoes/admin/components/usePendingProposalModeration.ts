@@ -206,6 +206,23 @@ export function usePendingProposalModeration({
   const categoryCounts = useMemo(() => buildCounts(categoryProposals), [categoryProposals]);
   const measureCounts = useMemo(() => buildCounts(measureProposalsAll), [measureProposalsAll]);
 
+  const runCategoryStatusChange = (
+    proposal: CategoryProposalDto,
+    newStatus: ProposalStatus
+  ) => {
+    const { error, success } = getStatusMessages(newStatus);
+    void runCategoryMutation(
+      proposal,
+      (patch) =>
+        canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, {
+          ...patch,
+          status: newStatus,
+        }),
+      success,
+      error
+    );
+  };
+
   const buildCategoryCard = (proposal: CategoryProposalDto): PendingProposalCard => {
     const draft = getCategoryDraft(proposal);
     const isBusy = processingIds.has(proposal.id);
@@ -237,19 +254,7 @@ export function usePendingProposalModeration({
       meta: new Date(proposal.createdAtUtc).toLocaleString("pt-PT"),
       onApprove:
         proposal.status !== "approved"
-          ? () => {
-              const { error, success } = getStatusMessages("approved");
-              void runCategoryMutation(
-                proposal,
-                (patch) =>
-                  canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, {
-                    ...patch,
-                    status: "approved",
-                  }),
-                success,
-                error
-              );
-            }
+          ? () => runCategoryStatusChange(proposal, "approved")
           : undefined,
       onDelete: () => {
         if (!eventId || !window.confirm(`Apagar a proposta "${proposal.name}"?`)) return;
@@ -263,35 +268,11 @@ export function usePendingProposalModeration({
       },
       onReject:
         proposal.status !== "rejected"
-          ? () => {
-              const { error, success } = getStatusMessages("rejected");
-              void runCategoryMutation(
-                proposal,
-                (patch) =>
-                  canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, {
-                    ...patch,
-                    status: "rejected",
-                  }),
-                success,
-                error
-              );
-            }
+          ? () => runCategoryStatusChange(proposal, "rejected")
           : undefined,
       onReopen:
         proposal.status !== "pending"
-          ? () => {
-              const { error, success } = getStatusMessages("pending");
-              void runCategoryMutation(
-                proposal,
-                (patch) =>
-                  canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, {
-                    ...patch,
-                    status: "pending",
-                  }),
-                success,
-                error
-              );
-            }
+          ? () => runCategoryStatusChange(proposal, "pending")
           : undefined,
       onSave: () => {
         void runCategoryMutation(
@@ -308,39 +289,35 @@ export function usePendingProposalModeration({
     };
   };
 
-  const buildMeasureCard = (proposal: MeasureProposalDto): PendingProposalCard => {
-    const draftText = getMeasureDraft(proposal);
-    const isBusy = processingIds.has(proposal.id);
+  const setMeasureStatus = (proposal: MeasureProposalDto, status: ProposalStatus) => {
+    if (!eventId) return;
+    const { success } = getStatusMessages(status);
 
-    const setMeasureStatus = (status: ProposalStatus) => {
-      if (!eventId) return;
-      const { success } = getStatusMessages(status);
+    void withProcessing(
+      proposal.id,
+      async () => {
+        const text = getMeasureText(proposal);
+        if (text && text !== proposal.text) {
+          await canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, { text });
+        }
 
-      void withProcessing(
-        proposal.id,
-        async () => {
-          const text = getMeasureText(proposal);
-          if (text && text !== proposal.text) {
-            await canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, { text });
-          }
-
-          if (status === "approved") {
-            await canhoesEventsRepo.adminApproveMeasureProposal(eventId, proposal.id);
-            return;
-          }
-
-          if (status === "rejected") {
-            await canhoesEventsRepo.adminRejectMeasureProposal(eventId, proposal.id);
-            return;
-          }
-
+        if (status === "approved") {
+          await canhoesEventsRepo.adminApproveMeasureProposal(eventId, proposal.id);
+        } else if (status === "rejected") {
+          await canhoesEventsRepo.adminRejectMeasureProposal(eventId, proposal.id);
+        } else {
           await canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, {
             status: "pending",
           });
-        },
-        success
-      );
-    };
+        }
+      },
+      success
+    );
+  };
+
+  const buildMeasureCard = (proposal: MeasureProposalDto): PendingProposalCard => {
+    const draftText = getMeasureDraft(proposal);
+    const isBusy = processingIds.has(proposal.id);
 
     return {
       fields: [
@@ -359,7 +336,7 @@ export function usePendingProposalModeration({
       meta: new Date(proposal.createdAtUtc).toLocaleString("pt-PT"),
       note: proposal.status,
       onApprove:
-        proposal.status !== "approved" ? () => setMeasureStatus("approved") : undefined,
+        proposal.status !== "approved" ? () => setMeasureStatus(proposal, "approved") : undefined,
       onDelete: () => {
         if (!eventId) return;
 
@@ -370,9 +347,9 @@ export function usePendingProposalModeration({
         );
       },
       onReject:
-        proposal.status !== "rejected" ? () => setMeasureStatus("rejected") : undefined,
+        proposal.status !== "rejected" ? () => setMeasureStatus(proposal, "rejected") : undefined,
       onReopen:
-        proposal.status !== "pending" ? () => setMeasureStatus("pending") : undefined,
+        proposal.status !== "pending" ? () => setMeasureStatus(proposal, "pending") : undefined,
       onSave: () => {
         const text = getMeasureText(proposal);
         if (!eventId || !text) return;

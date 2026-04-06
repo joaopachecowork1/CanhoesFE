@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense, type ReactElement } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -76,44 +76,39 @@ export default function CanhoesAdminModule({
     setActiveTab(forcedSection);
   }, [forcedSection]);
 
-  const pendingNominees = useMemo(
-    () => allNominees.filter((nominee) => nominee.status === "pending"),
-    [allNominees]
-  );
-  const pendingCategoryProposals = useMemo(
-    () =>
-      allCategoryProposals.filter((proposal) => proposal.status === "pending"),
-    [allCategoryProposals]
-  );
-  const pendingMeasureProposals = useMemo(
-    () => measureProposals.filter((proposal) => proposal.status === "pending"),
-    [measureProposals]
+  const pendingReviewCounts = useMemo(
+    () => ({
+      nominees: allNominees.filter((n) => n.status === "pending").length,
+      categories: allCategoryProposals.filter((p) => p.status === "pending").length,
+      measures: measureProposals.filter((p) => p.status === "pending").length,
+    }),
+    [allNominees, allCategoryProposals, measureProposals]
   );
 
   const pendingReviewCount =
-    pendingNominees.length +
-    pendingCategoryProposals.length +
-    pendingMeasureProposals.length;
+    pendingReviewCounts.nominees +
+    pendingReviewCounts.categories +
+    pendingReviewCounts.measures;
 
   const stats = useMemo(
     () => ({
       totalNominees: allNominees.length,
-      pendingNominees: pendingNominees.length,
+      pendingNominees: pendingReviewCounts.nominees,
       approvedNominees: allNominees.filter((n) => n.status === "approved").length,
       totalCategories: categories.length,
-      pendingCategories: pendingCategoryProposals.length,
+      pendingCategories: pendingReviewCounts.categories,
       totalMeasures: measureProposals.length,
-      pendingMeasures: pendingMeasureProposals.length,
+      pendingMeasures: pendingReviewCounts.measures,
       memberCount: eventMembers.length,
       visibleModules: countVisibleModules(eventState?.effectiveModules),
     }),
     [
       allNominees,
-      pendingNominees.length,
+      pendingReviewCounts.nominees,
       categories.length,
-      pendingCategoryProposals.length,
+      pendingReviewCounts.categories,
       measureProposals.length,
-      pendingMeasureProposals.length,
+      pendingReviewCounts.measures,
       eventMembers.length,
       eventState?.effectiveModules,
     ]
@@ -176,6 +171,10 @@ export default function CanhoesAdminModule({
     logFrontendError("Admin.bootstrap", error);
   }, [error]);
 
+  const pendingNominees = allNominees.filter((n) => n.status === "pending");
+  const pendingCategoryProposals = allCategoryProposals.filter((p) => p.status === "pending");
+  const pendingMeasureProposals = measureProposals.filter((p) => p.status === "pending");
+
   const adminTabs = useMemo(
     () =>
       buildAdminSectionItems({
@@ -187,91 +186,73 @@ export default function CanhoesAdminModule({
     [adminNominees, eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
   );
 
-  let activeSectionContent = null;
+  const SECTION_CONFIG: Record<AdminSectionId, () => ReactElement> = {
+    overview: () => (
+      <AdminOverviewSection
+        activeEventName={activeEvent?.name ?? null}
+        allNominees={allNominees}
+        loading={loading}
+        pendingCategoryProposals={pendingCategoryProposals}
+        pendingMeasureProposals={pendingMeasureProposals}
+        pendingNominees={pendingNominees}
+        state={eventState}
+      />
+    ),
+    categories: () => (
+      <AdminCategoriesSection
+        categories={categories}
+        categoryProposals={allCategoryProposals}
+        eventId={activeEvent?.id ?? null}
+        loading={loading}
+        measureProposals={measureProposals}
+        onUpdate={handleRefresh}
+        votes={voteAuditRows}
+      />
+    ),
+    members: () => (
+      <AdminMembersSection loading={loading} members={eventMembers} />
+    ),
+    nominations: () => (
+      <AdminNominationsSection
+        eventId={activeEvent?.id ?? null}
+        categories={categories}
+        initialRows={adminNominees}
+      />
+    ),
+    results: () => (
+      <AdminOfficialResultsSection
+        eventId={activeEvent?.id ?? null}
+        initialResults={officialResults}
+      />
+    ),
+    modules: () => (
+      <AdminModulesSection
+        activeEventName={activeEvent?.name ?? null}
+        eventId={activeEvent?.id ?? null}
+        loading={loading}
+        onUpdate={handleRefresh}
+        secretSantaState={secretSanta}
+        state={eventState}
+      />
+    ),
+    phase: () => (
+      <AdminPhaseSection
+        activeEventName={activeEvent?.name ?? null}
+        eventId={activeEvent?.id ?? null}
+        events={events}
+        onActivateEvent={handleActivateEvent}
+        onRefresh={handleRefresh}
+        onUpdatePhase={handleUpdatePhase}
+        state={eventState}
+      />
+    ),
+  };
+
   const loadingFallback = <div className="py-8 text-center text-[var(--text-subtle)]">A carregar...</div>;
-  
-  if (activeTab === "overview") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminOverviewSection
-          activeEventName={activeEvent?.name ?? null}
-          allNominees={allNominees}
-          loading={loading}
-          pendingCategoryProposals={pendingCategoryProposals}
-          pendingMeasureProposals={pendingMeasureProposals}
-          pendingNominees={pendingNominees}
-          state={eventState}
-        />
-      </Suspense>
-    );
-  } else if (activeTab === "categories") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminCategoriesSection
-          categories={categories}
-          categoryProposals={allCategoryProposals}
-          eventId={activeEvent?.id ?? null}
-          loading={loading}
-          measureProposals={measureProposals}
-          nominees={allNominees}
-          onUpdate={handleRefresh}
-          votes={voteAuditRows}
-        />
-      </Suspense>
-    );
-  } else if (activeTab === "members") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminMembersSection loading={loading} members={eventMembers} />
-      </Suspense>
-    );
-  } else if (activeTab === "nominations") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminNominationsSection
-          eventId={activeEvent?.id ?? null}
-          categories={categories}
-          initialRows={adminNominees}
-        />
-      </Suspense>
-    );
-  } else if (activeTab === "results") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminOfficialResultsSection
-          eventId={activeEvent?.id ?? null}
-          initialResults={officialResults}
-        />
-      </Suspense>
-    );
-  } else if (activeTab === "modules") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminModulesSection
-          activeEventName={activeEvent?.name ?? null}
-          eventId={activeEvent?.id ?? null}
-          loading={loading}
-          onUpdate={handleRefresh}
-          secretSantaState={secretSanta}
-          state={eventState}
-        />
-      </Suspense>
-    );
-  } else if (activeTab === "phase") {
-    activeSectionContent = (
-      <Suspense fallback={loadingFallback}>
-        <AdminPhaseSection
-          activeEventName={activeEvent?.name ?? null}
-          eventId={activeEvent?.id ?? null}
-          events={events}
-          onActivateEvent={handleActivateEvent}
-          onRefresh={handleRefresh}
-          onUpdatePhase={handleUpdatePhase}
-          state={eventState}
-        />
-      </Suspense>
-    );
-  }
+  const sectionRenderer = SECTION_CONFIG[activeTab];
+  const activeSectionContent = sectionRenderer ? (
+    <Suspense fallback={loadingFallback}>{sectionRenderer()}</Suspense>
+  ) : null;
 
   return (
     <div className="space-y-5">
