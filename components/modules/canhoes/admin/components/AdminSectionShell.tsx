@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, lazy, Suspense } from "react";
 import type { ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,8 @@ import {
   getAdminAdjacentSection,
   getAdminSectionMeta,
 } from "../adminSections";
-import { AdminRouteTabs } from "./AdminRouteTabs";
+
+const AdminRouteTabs = lazy(() => import("./AdminRouteTabs").then((m) => ({ default: m.AdminRouteTabs })));
 
 type AdminSectionShellProps = {
   activeId: AdminSectionId;
@@ -80,7 +81,9 @@ export function AdminSectionShell({
 
   return (
     <div className="space-y-3">
-      <AdminRouteTabs activeId={activeId} />
+      <Suspense fallback={<div className="h-8 w-full animate-pulse rounded-lg bg-[rgba(212,184,150,0.06)]" />}>
+        <AdminRouteTabs activeId={activeId} />
+      </Suspense>
 
       <div className="sm:hidden rounded-xl border border-[rgba(212,184,150,0.14)] bg-[rgba(16,20,11,0.72)] px-2 py-1.5">
         <div className="flex items-center gap-2">
