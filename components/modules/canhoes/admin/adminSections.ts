@@ -1,22 +1,16 @@
 import {
-  BarChart2,
   FolderTree,
-  LayoutDashboard,
   Layers3,
-  TimerReset,
-  Trophy,
+  Settings2,
   Users,
   type LucideIcon,
 } from "lucide-react";
 
 export type AdminSectionId =
-  | "overview"
-  | "categories"
-  | "nominations"
-  | "results"
-  | "members"
-  | "modules"
-  | "phase";
+  | "dashboard"
+  | "conteudo"
+  | "membros"
+  | "configuracoes";
 
 export type AdminSectionCountContext = {
   memberCount: number;
@@ -43,53 +37,32 @@ type AdminSectionDefinition = {
 
 const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
-    id: "overview",
-    label: "Overview",
-    description: "Resumo da edicao, stats e estado geral sem controlos.",
-    icon: LayoutDashboard,
+    id: "dashboard",
+    label: "Dashboard",
+    description: "Resumo da edicao, estatisticas e estado geral.",
+    icon: Layers3,
     count: () => 0,
   },
   {
-    id: "categories",
-    label: "Categories",
-    description: "Curadoria de categorias e revisao de conteudo da edicao.",
+    id: "conteudo",
+    label: "Conteúdo",
+    description: "Curadoria de categorias, nomeacoes e resultados.",
     icon: FolderTree,
-    count: (context) => context.pendingReviewCount,
+    count: (context) => context.pendingReviewCount + context.pendingNominationsCount,
   },
   {
-    id: "nominations",
-    label: "Nomeacoes",
-    description: "Moderacao de nomeacoes com autoria visivel apenas para admin.",
-    icon: Trophy,
-    count: (context) => context.pendingNominationsCount,
-  },
-  {
-    id: "results",
-    label: "Resultados",
-    description: "Ranking oficial por categoria, participacao e eleitores.",
-    icon: BarChart2,
-    count: () => 0,
-  },
-  {
-    id: "members",
-    label: "Members",
+    id: "membros",
+    label: "Membros",
     description: "Lista de membros e roles desta edicao.",
     icon: Users,
     count: (context) => context.memberCount,
   },
   {
-    id: "modules",
-    label: "Modules",
-    description: "Unico sitio para gerir visibilidade de modulos.",
-    icon: Layers3,
+    id: "configuracoes",
+    label: "Configurações",
+    description: "Controlo central: visibilidade, fases e estado do evento.",
+    icon: Settings2,
     count: (context) => context.visibleModuleCount,
-  },
-  {
-    id: "phase",
-    label: "Phase",
-    description: "Evento ativo, fase atual e passagem entre fases.",
-    icon: TimerReset,
-    count: () => 0,
   },
 ] as const;
 
@@ -135,5 +108,5 @@ export function buildAdminSectionItems(
 }
 
 export function getDefaultAdminSection(): AdminSectionId {
-  return "overview";
+  return "dashboard";
 }

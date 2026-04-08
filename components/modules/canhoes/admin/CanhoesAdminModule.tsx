@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense, type ReactElement } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
@@ -10,9 +9,7 @@ import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { countVisibleModules } from "@/lib/modules";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { ApiError } from "@/lib/api/canhoesClient";
-import type { EventPhaseDto } from "@/lib/api/types";
 
 import {
   type AdminSectionId,
@@ -25,11 +22,10 @@ import { AdminTabs } from "./components/AdminTabs";
 // OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
 const AdminCategoriesSection = lazy(() => import("./components/AdminCategoriesSection").then(m => ({ default: m.AdminCategoriesSection })));
 const AdminMembersSection = lazy(() => import("./components/AdminMembersSection").then(m => ({ default: m.AdminMembersSection })));
-const AdminModulesSection = lazy(() => import("./components/AdminModulesSection").then(m => ({ default: m.AdminModulesSection })));
 const AdminNominationsSection = lazy(() => import("./components/AdminNominationsSection").then(m => ({ default: m.AdminNominationsSection })));
 const AdminOfficialResultsSection = lazy(() => import("./components/AdminOfficialResultsSection").then(m => ({ default: m.AdminOfficialResultsSection })));
 const AdminOverviewSection = lazy(() => import("./components/AdminOverviewSection").then(m => ({ default: m.AdminOverviewSection })));
-const AdminPhaseSection = lazy(() => import("./components/AdminPhaseSection").then(m => ({ default: m.AdminPhaseSection })));
+const AdminControlCenter = lazy(() => import("./components/AdminControlCenter").then(m => ({ default: m.AdminControlCenter })));
 
 function getAdminErrorMessage(error: unknown) {
   if (!error) return null;
@@ -120,41 +116,6 @@ export default function CanhoesAdminModule({
     await refreshOverview();
   }, [refresh, refreshOverview]);
 
-  const handleActivateEvent = useCallback(
-    async (eventId: string) => {
-      if (!eventId || eventId === activeEvent?.id) return;
-
-      try {
-        await canhoesEventsRepo.adminActivateEvent(eventId);
-        await refreshOverview();
-        refreshEventOverview();
-        toast.success("Evento ativo atualizado");
-      } catch (nextError) {
-        logFrontendError("Admin.handleActivateEvent", nextError, { eventId });
-        toast.error(
-          getErrorMessage(nextError, "Nao foi possivel mudar o evento ativo.")
-        );
-      }
-    },
-    [activeEvent?.id, refreshOverview]
-  );
-
-  const handleUpdatePhase = useCallback(
-    async (phaseType: EventPhaseDto["type"]) => {
-      if (!activeEvent?.id) return;
-
-      try {
-        await canhoesEventsRepo.updateAdminPhase(activeEvent.id, { phaseType });
-        await handleRefresh();
-        toast.success("Fase da edicao atualizada");
-      } catch (nextError) {
-        logFrontendError("Admin.handleUpdatePhase", nextError, { phaseType });
-        toast.error(getErrorMessage(nextError, "Nao foi possivel mudar a fase."));
-      }
-    },
-    [activeEvent?.id, handleRefresh]
-  );
-
   const dashboardError = getAdminErrorMessage(error);
 
   useEffect(() => {
@@ -187,7 +148,7 @@ export default function CanhoesAdminModule({
   );
 
   const SECTION_CONFIG: Record<AdminSectionId, () => ReactElement> = {
-    overview: () => (
+    dashboard: () => (
       <AdminOverviewSection
         activeEventName={activeEvent?.name ?? null}
         allNominees={allNominees}
@@ -198,53 +159,51 @@ export default function CanhoesAdminModule({
         state={eventState}
       />
     ),
-    categories: () => (
-      <AdminCategoriesSection
-        categories={categories}
-        categoryProposals={allCategoryProposals}
-        eventId={activeEvent?.id ?? null}
-        loading={loading}
-        measureProposals={measureProposals}
-        onUpdate={handleRefresh}
-        votes={voteAuditRows}
-      />
+    conteudo: () => (
+      <div className="space-y-6">
+        <Suspense fallback={loadingFallback}>
+          <AdminCategoriesSection
+            categories={categories}
+            categoryProposals={allCategoryProposals}
+            eventId={activeEvent?.id ?? null}
+            loading={loading}
+            measureProposals={measureProposals}
+            onUpdate={handleRefresh}
+            votes={voteAuditRows}
+          />
+        </Suspense>
+        <Suspense fallback={loadingFallback}>
+          <AdminNominationsSection
+            eventId={activeEvent?.id ?? null}
+            categories={categories}
+            initialRows={adminNominees}
+          />
+        </Suspense>
+        <Suspense fallback={loadingFallback}>
+          <AdminOfficialResultsSection
+            eventId={activeEvent?.id ?? null}
+            initialResults={officialResults}
+          />
+        </Suspense>
+      </div>
     ),
-    members: () => (
-      <AdminMembersSection loading={loading} members={eventMembers} />
+    membros: () => (
+      <Suspense fallback={loadingFallback}>
+        <AdminMembersSection loading={loading} members={eventMembers} />
+      </Suspense>
     ),
-    nominations: () => (
-      <AdminNominationsSection
-        eventId={activeEvent?.id ?? null}
-        categories={categories}
-        initialRows={adminNominees}
-      />
-    ),
-    results: () => (
-      <AdminOfficialResultsSection
-        eventId={activeEvent?.id ?? null}
-        initialResults={officialResults}
-      />
-    ),
-    modules: () => (
-      <AdminModulesSection
-        activeEventName={activeEvent?.name ?? null}
-        eventId={activeEvent?.id ?? null}
-        loading={loading}
-        onUpdate={handleRefresh}
-        secretSantaState={secretSanta}
-        state={eventState}
-      />
-    ),
-    phase: () => (
-      <AdminPhaseSection
-        activeEventName={activeEvent?.name ?? null}
-        eventId={activeEvent?.id ?? null}
-        events={events}
-        onActivateEvent={handleActivateEvent}
-        onRefresh={handleRefresh}
-        onUpdatePhase={handleUpdatePhase}
-        state={eventState}
-      />
+    configuracoes: () => (
+      <Suspense fallback={loadingFallback}>
+        <AdminControlCenter
+          activeEventName={activeEvent?.name ?? null}
+          eventId={activeEvent?.id ?? null}
+          events={events}
+          loading={loading}
+          onRefresh={handleRefresh}
+          secretSantaState={secretSanta}
+          state={eventState}
+        />
+      </Suspense>
     ),
   };
 

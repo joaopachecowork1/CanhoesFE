@@ -89,8 +89,8 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      "h-[4.4rem] w-[4.45rem] rounded-[1.2rem] border border-transparent bg-transparent text-[rgba(245,237,224,0.92)] shadow-none",
-      "hover:bg-[rgba(245,237,224,0.1)]",
+      "h-[48px] w-[48px] min-h-[48px] min-w-[48px] rounded-[1.2rem] border border-transparent bg-transparent text-[rgba(245,237,224,0.92)] shadow-none transition-all duration-200",
+      "hover:bg-[rgba(245,237,224,0.1)] active:scale-95",
       isMoreItem &&
         "border-[rgba(212,184,150,0.18)] bg-[linear-gradient(180deg,rgba(28,32,22,0.92),rgba(18,20,14,0.96))] text-[var(--bg-paper)]",
       isActive &&
@@ -98,7 +98,7 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
     ),
     icon: Icon,
     iconClassName: cn(
-      "h-[1.05rem] w-[1.05rem]",
+      "h-[20px] w-[20px]",
       iconToneClass
     ),
     isActive,
