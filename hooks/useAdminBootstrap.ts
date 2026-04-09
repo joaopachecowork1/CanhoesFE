@@ -43,24 +43,26 @@ export function useAdminBootstrap(eventId: string | null) {
   });
 
   const bootstrap = bootstrapQuery.data ?? null;
+  const proposals = bootstrap?.proposals ?? null;
+  const voteAudit = bootstrap?.votes ?? null;
   const state: EventAdminStateDto | null = bootstrap?.state ?? null;
   const events: EventSummaryDto[] = bootstrap?.events ?? [];
   const categories: AwardCategoryDto[] = bootstrap?.categories ?? [];
   const allNominees: NomineeDto[] = bootstrap?.nominees ?? [];
   const adminNominees: AdminNomineeDto[] = bootstrap?.adminNominees ?? [];
   const officialResults: AdminOfficialResultsDto | undefined = bootstrap?.officialResults;
-  const votes: AdminVoteAuditRowDto[] = bootstrap?.votes.votes ?? [];
+  const votes: AdminVoteAuditRowDto[] = voteAudit?.votes ?? [];
   const members: PublicUserDto[] = bootstrap?.members ?? [];
   const secretSanta: EventAdminSecretSantaStateDto | null = bootstrap?.secretSanta ?? null;
 
   const allCategoryProposals = useMemo<CategoryProposalDto[]>(
-    () => flattenByStatus(bootstrap?.proposals.categoryProposals),
-    [bootstrap]
+    () => flattenByStatus(proposals?.categoryProposals),
+    [proposals]
   );
 
   const allMeasureProposals = useMemo<MeasureProposalDto[]>(
-    () => flattenByStatus(bootstrap?.proposals.measureProposals),
-    [bootstrap]
+    () => flattenByStatus(proposals?.measureProposals),
+    [proposals]
   );
 
   const refresh = useCallback(async () => {

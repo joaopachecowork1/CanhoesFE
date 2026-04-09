@@ -81,7 +81,9 @@ export default function CanhoesAdminModule({
     [allNominees, allCategoryProposals, measureProposals]
   );
 
-  const pendingNominationCount = adminNominees.filter((nominee) => nominee.status === "pending").length;
+  const pendingNominationCount = adminNominees.length > 0
+    ? adminNominees.filter((nominee) => nominee.status === "pending").length
+    : pendingReviewCounts.nominees;
   const pendingReviewCount = pendingReviewCounts.categories + pendingReviewCounts.measures;
 
   const stats = useMemo(

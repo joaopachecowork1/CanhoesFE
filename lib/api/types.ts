@@ -443,7 +443,7 @@ export type EventAdminBootstrapDto = {
   state: EventAdminStateDto;
   categories: AwardCategoryDto[];
   nominees: NomineeDto[];
-  adminNominees: AdminNomineeDto[];
+  adminNominees?: AdminNomineeDto[];
   proposals: AdminProposalsHistoryDto;
   votes: AdminVotesDto;
   members: PublicUserDto[];
