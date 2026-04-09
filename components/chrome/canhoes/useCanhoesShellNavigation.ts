@@ -7,6 +7,7 @@ import type { EventOverviewDto } from "@/lib/api/types";
 import type { CanhoesBottomTabEntry } from "./CanhoesBottomTabs";
 import {
   ADMIN_NAV_ITEM,
+  getPageContext,
   getPromotedNavItems,
   getPageTitle,
   HOME_NAV_ITEM,
@@ -56,6 +57,7 @@ export function useCanhoesShellNavigation({
     name?: string | null;
   } | null;
 }>) {
+  const pageContext = getPageContext(pathname);
   const pageTitle = getPageTitle(pathname);
   const isEventHomePath = isHomePath(pathname);
   const userLabel = resolveUserLabel(user);
@@ -130,6 +132,7 @@ export function useCanhoesShellNavigation({
     bottomRightEntries,
     isEventHomePath,
     isMoreActive,
+    pageContext,
     pageTitle,
     promotedItems,
     userLabel,

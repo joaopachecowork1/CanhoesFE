@@ -4,26 +4,11 @@ import type { ComponentProps, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ImageOff, Upload } from "lucide-react";
 
-import type { CanhoesStateDto, EventPhaseDto, NomineeDto } from "@/lib/api/types";
+import type { EventPhaseDto, NomineeDto } from "@/lib/api/types";
 import { absMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
-
-export function formatCanhoesPhaseLabel(phase?: CanhoesStateDto["phase"]) {
-  switch (phase) {
-    case "nominations":
-      return "Nomeacoes";
-    case "voting":
-      return "Votacao";
-    case "gala":
-      return "Gala";
-    case "locked":
-      return "Fechado";
-    default:
-      return "Desconhecida";
-  }
-}
 
 export function formatEventPhaseLabel(phaseType?: EventPhaseDto["type"]) {
   switch (phaseType) {
@@ -110,6 +95,7 @@ export function CanhoesMediaThumb({
           className={cn("h-full w-full object-cover", imageClassName)}
           loading="lazy"
           decoding="async"
+          sizes="56px"
         />
       ) : (
         <ImageOff

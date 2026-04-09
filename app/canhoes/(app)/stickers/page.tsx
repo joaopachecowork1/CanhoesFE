@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 
 const CanhoesStickerSubmitModule = dynamic(
   () => import("@/components/modules/canhoes/CanhoesStickerSubmitModule").then((m) => ({ default: m.CanhoesStickerSubmitModule })),
@@ -7,5 +8,9 @@ const CanhoesStickerSubmitModule = dynamic(
 );
 
 export default function StickersPage() {
-  return <CanhoesStickerSubmitModule />;
+  return (
+    <EventModuleGate moduleKey="stickers">
+      <CanhoesStickerSubmitModule />
+    </EventModuleGate>
+  );
 }

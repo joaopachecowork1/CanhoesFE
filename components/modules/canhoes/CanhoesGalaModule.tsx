@@ -8,8 +8,10 @@ import {
   CanhoesModuleHeader,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { cn } from "@/lib/utils";
 import type { CanhoesCategoryResultDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +36,15 @@ function NomineeRankCard({
   const isWinner = rank === 0;
 
   return (
-    <div key={nominee.nomineeId} className="canhoes-list-item flex items-center gap-3 p-3">
+    <div
+      className={cn(
+        "canhoes-list-item flex items-center gap-3 rounded-[var(--radius-md-token)] border px-3 py-3 animate-[stagger-fade-in_0.3s_ease-out_both] transition-colors duration-200",
+        isWinner
+          ? "border-[rgba(0,255,136,0.3)] bg-[linear-gradient(180deg,rgba(0,255,136,0.06),transparent)] shadow-[0_0_12px_rgba(0,255,136,0.08)]"
+          : "border-[rgba(212,184,150,0.1)] hover:border-[rgba(122,173,58,0.15)]"
+      )}
+      style={{ animationDelay: `${rank * 0.08}s` }}
+    >
       <CanhoesMediaThumb alt={nominee.title} src={nominee.imageUrl} />
 
       <div className="min-w-0 flex-1">
@@ -98,7 +108,7 @@ export function CanhoesGalaModule() {
         badgeLabel={`Total votos: ${totalVotes}`}
       />
 
-      {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar resultados...</p> : null}
+      {isLoading ? <InlineLoader label="A carregar resultados" /> : null}
 
       {!isLoading && errorMessage ? (
         <ErrorAlert
@@ -120,7 +130,7 @@ export function CanhoesGalaModule() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex flex-wrap items-center justify-between gap-2">
                   <span>{categoryResult.categoryName}</span>
-                  <Badge variant="secondary">{categoryResult.totalVotes} votos</Badge>
+                  <Badge variant="amber">{categoryResult.totalVotes} votos</Badge>
                 </CardTitle>
               </CardHeader>
 

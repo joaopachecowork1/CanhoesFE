@@ -78,8 +78,8 @@ export function CanhoesNominationsModule() {
       <div className="space-y-3">
         <CanhoesModuleHeader
           icon={Trophy}
-          title="Nomeacoes"
-          description="Uma nomeacao por categoria durante a fase de propostas."
+          title="Nomeacoes oficiais"
+          description="Area oficial para propor um nome por categoria durante a fase de propostas."
         />
         <FeedSkeleton />
       </div>
@@ -89,8 +89,8 @@ export function CanhoesNominationsModule() {
   if (!eventId || error) {
     return (
       <ErrorAlert
-        title="Erro ao carregar nomeacoes"
-        description={getErrorMessage(error, "Nao foi possivel carregar o modulo de nomeacoes.")}
+        title="Erro ao carregar nomeacoes oficiais"
+        description={getErrorMessage(error, "Nao foi possivel carregar a area oficial de nomeacoes.")}
         actionLabel="Tentar novamente"
         onAction={() => {
           void categoriesQuery.refetch();
@@ -105,7 +105,7 @@ export function CanhoesNominationsModule() {
     return (
       <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl">
         <CardContent className="py-8 text-center text-[var(--text-muted)]">
-          Ainda nao ha categorias abertas.
+          Ainda nao ha categorias oficiais abertas.
         </CardContent>
       </Card>
     );
@@ -116,8 +116,8 @@ export function CanhoesNominationsModule() {
       <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl opacity-80">
         <CardContent className="py-10 text-center text-[var(--text-muted)] space-y-2">
           <Lock className="mx-auto h-5 w-5" />
-          <p className="font-semibold">Nomeacoes fechadas</p>
-          <p className="text-sm">Esta area volta a abrir na fase de propostas.</p>
+          <p className="font-semibold">Nomeacoes oficiais fechadas</p>
+          <p className="text-sm">Esta area oficial volta a abrir na fase de propostas.</p>
         </CardContent>
       </Card>
     );
@@ -127,8 +127,8 @@ export function CanhoesNominationsModule() {
     <div className="space-y-4">
       <CanhoesModuleHeader
         icon={Trophy}
-        title="Nomeacoes"
-        description="Cada membro pode submeter uma nomeacao por categoria."
+        title="Nomeacoes oficiais"
+        description="Cada membro pode submeter uma nomeacao oficial por categoria."
         badgeLabel={`Categorias: ${categories.length}`}
       />
 
@@ -224,7 +224,7 @@ function CategoryNominationCard({
               <Clock className="mr-1 h-3.5 w-3.5" />
               Aguarda aprovacao
             </Badge>
-            <span className="text-sm text-[var(--text-primary)]">{nominatedTitle || "Ja nomeaste nesta categoria"}</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{nominatedTitle || "Ja nomeaste nesta categoria"}</span>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
@@ -262,7 +262,7 @@ function CategoryNominationCard({
               className={cn(
                 "min-w-36",
                 isValid && !createNomination.isPending
-                  ? "bg-[rgba(0,255,136,0.12)] border border-[var(--border-neon)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                  ? "bg-[linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,212,170,0.12))] border border-[var(--border-neon)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(0,255,136,0.22)] hover:shadow-[0_0_18px_rgba(0,255,136,0.18)] active:scale-[0.98]"
                   : "opacity-50"
               )}
             >
@@ -273,20 +273,24 @@ function CategoryNominationCard({
 
         <div className="pt-1 space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-[var(--text-primary)]">Aprovadas</h4>
+            <h4 className="text-sm font-medium text-[var(--text-primary)]">Nomeacoes aprovadas</h4>
             <span className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
               {approvedNominees.length} nominee(s)
             </span>
           </div>
 
           {approvedNominees.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria.</p>
+            <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria oficial.</p>
           ) : (
-            <ul className="space-y-2">
-              {approvedNominees.map((nominee) => (
-                <li key={nominee.id} className="canhoes-list-item px-3 py-2 text-sm text-[var(--text-primary)] flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--neon-green)]" />
-                  <span>{nominee.title}</span>
+            <ul className="space-y-1.5">
+              {approvedNominees.map((nominee, index) => (
+                <li
+                  key={nominee.id}
+                  className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 animate-[stagger-fade-in_0.3s_ease-out_both] transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]"
+                  style={{ animationDelay: `${index * 0.04}s` }}
+                >
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--neon-green)]" />
+                  <span className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.title}</span>
                 </li>
               ))}
             </ul>

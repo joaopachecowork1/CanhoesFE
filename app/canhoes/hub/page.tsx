@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
-// Back-compat: old hub URL.
+/**
+ * @deprecated Legacy route — will be removed in next cleanup.
+ * Canonical route: /canhoes
+ */
 export default function CanhoesHubRedirect() {
   redirect("/canhoes");
 }

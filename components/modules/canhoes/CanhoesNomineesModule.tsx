@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Cigarette } from "lucide-react";
+import { Cigarette, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import type { AwardCategoryDto, CanhoesStateDto, NomineeDto } from "@/lib/api/types";
+import { useEventOverview } from "@/hooks/useEventOverview";
+import type { AwardCategoryDto, NomineeDto } from "@/lib/api/types";
 import {
   CanhoesFileTrigger,
   CanhoesMediaThumb,
   CanhoesModuleHeader,
-  formatCanhoesPhaseLabel,
+  formatEventPhaseLabel,
   getNomineeStatusBadgeVariant,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
@@ -19,14 +20,21 @@ import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentT
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NO_CATEGORY = "__none__";
 
+/** Map backend phase type to legacy display label */
+function isNominationPhase(phaseType?: string): boolean {
+  return phaseType === "PROPOSALS";
+}
+
 export function CanhoesNomineesModule() {
-  const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
+  const { overview } = useEventOverview();
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,13 +53,11 @@ export function CanhoesNomineesModule() {
     setErrorMessage(null);
 
     try {
-      const [nextState, nextCategories, nextNominees] = await Promise.all([
-        canhoesRepo.getState(),
+      const [nextCategories, nextNominees] = await Promise.all([
         canhoesRepo.getCategories(),
         canhoesRepo.getNominees(undefined, "nominees"),
       ]);
 
-      setCanhoesState(nextState);
       setCategoryList(nextCategories);
       setNomineeList(nextNominees);
     } catch (error) {
@@ -60,7 +66,6 @@ export function CanhoesNomineesModule() {
         "Nao foi possivel carregar as nomeacoes desta edicao."
       );
       logFrontendError("CanhoesNominees.loadNominees", error);
-      setCanhoesState(null);
       setCategoryList([]);
       setNomineeList([]);
       setErrorMessage(message);
@@ -87,9 +92,10 @@ export function CanhoesNomineesModule() {
     return nomineesMap;
   }, [nomineeList]);
 
-  const isNominationPhase = canhoesState?.phase === "nominations";
+  const phaseType = overview?.activePhase?.type;
+  const nominationPhase = isNominationPhase(phaseType);
   let submitButtonLabel = "Nomeações fechadas";
-  if (isNominationPhase) {
+  if (nominationPhase) {
     submitButtonLabel = "Submeter";
   }
   if (isSubmitting) {
@@ -134,7 +140,7 @@ export function CanhoesNomineesModule() {
   if (!isLoading && !errorMessage) {
     if (nomineeGroups.length === 0) {
       nomineeListContent = (
-        <p className="body-small text-[var(--color-text-muted)]">Ainda sem nomeações nesta edição.</p>
+        <EmptyState icon={Inbox} title="Sem nomeacoes" description="Ainda nao ha nomeacoes nesta edicao." />
       );
     } else {
       nomineeListContent = (
@@ -181,7 +187,7 @@ export function CanhoesNomineesModule() {
   }
 
   const handleSubmit = async () => {
-    if (!canSubmit || canhoesState?.phase !== "nominations") return;
+    if (!canSubmit || !nominationPhase) return;
 
     if (selectedFile && !selectedFile.type.startsWith("image/")) {
       toast.error("Só é permitido upload de imagens.");
@@ -229,7 +235,7 @@ export function CanhoesNomineesModule() {
         title="Canhoes do Ano"
         description="Submete uma nomeacao com layout simples e controlos legiveis em mobile."
         badgeLabel={
-          canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+          phaseType ? `Fase: ${formatEventPhaseLabel(phaseType)}` : undefined
         }
       />
 
@@ -240,9 +246,9 @@ export function CanhoesNomineesModule() {
 
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2">
-              <span className="canhoes-field-label">Categoria</span>
-              <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <div className="space-y-2">
+              <span id="nomination-category-label" className="canhoes-field-label">Categoria</span>
+              <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId} aria-labelledby="nomination-category-label">
                 <SelectTrigger>
                   <SelectValue placeholder="Escolhe a categoria" />
                 </SelectTrigger>
@@ -255,16 +261,17 @@ export function CanhoesNomineesModule() {
                   ))}
                 </SelectContent>
               </Select>
-            </label>
+            </div>
 
-            <label className="space-y-2">
-              <span className="canhoes-field-label">Título</span>
+            <div className="space-y-2">
+              <label htmlFor="nomination-title-input" className="canhoes-field-label">Título</label>
               <Input
+                id="nomination-title-input"
                 value={nomineeTitle}
                 onChange={(event) => setNomineeTitle(event.target.value)}
                 placeholder="Ex.: O sticker mais lendário"
               />
-            </label>
+            </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -292,7 +299,7 @@ export function CanhoesNomineesModule() {
         />
       ) : null}
 
-      {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar nomeações...</p> : null}
+      {isLoading ? <InlineLoader label="A carregar nomeacoes" /> : null}
 
       {nomineeListContent}
     </div>

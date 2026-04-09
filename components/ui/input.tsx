@@ -12,7 +12,6 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         className
       )}
       style={{ willChange: "opacity" }}
-      aria-describedby={undefined}
       {...props}
     />
   );

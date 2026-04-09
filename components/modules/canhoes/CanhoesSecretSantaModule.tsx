@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Link as LinkIcon, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,6 +18,8 @@ import type {
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+
+import { InlineLoader } from "@/components/ui/inline-loader";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,7 +64,7 @@ function SecretSantaAssignmentCard({
       <CardContent className="space-y-3">
         <div className="canhoes-list-item space-y-3 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--color-text-primary)]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--moss),var(--neon-cyan))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]">
               <User className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -71,7 +73,7 @@ function SecretSantaAssignmentCard({
                 {assignedWishlistItems.length} itens na wishlist atribuida
               </p>
             </div>
-            <Badge variant="secondary">shhh</Badge>
+            <Badge variant="amber">shhh</Badge>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
@@ -232,6 +234,34 @@ export function CanhoesSecretSantaModule() {
     );
   }, [screenState]);
 
+  const retryLoad = useCallback(() => {
+    setErrorMessage(null);
+    if (!event) return;
+
+    const loadSecretSantaState = async () => {
+      try {
+        const [nextOverview, wishlistItems] = await Promise.all([
+          canhoesEventsRepo.getSecretSantaOverview(event.id),
+          canhoesEventsRepo.getWishlist(event.id),
+        ]);
+
+        setScreenState({
+          status: "ready",
+          overview: nextOverview,
+          wishlistItems,
+        });
+        setDrawEventCode(nextOverview.drawEventCode || buildDefaultEventCode(event.id));
+      } catch (error) {
+        const message = getErrorMessage(error, "Nao foi possivel carregar o contexto do amigo secreto.");
+        logFrontendError("CanhoesSecretSanta.retryLoadSecretSantaState", error, { eventId: event.id });
+        setScreenState({ status: "error" });
+        setErrorMessage(message);
+      }
+    };
+
+    void loadSecretSantaState();
+  }, [event]);
+
   const wishlistHref = overview?.modules.wishlist ? CANHOES_MEMBER_MODULE_MAP.wishlist.href : "/canhoes";
   const wishlistLabel = overview?.modules.wishlist ? "Abrir wishlist" : "Voltar ao evento";
 
@@ -302,6 +332,7 @@ export function CanhoesSecretSantaModule() {
           hasAssignment={screenState.status === "ready" && screenState.overview.hasAssignment}
           hasDraw={screenState.status === "ready" && screenState.overview.hasDraw}
           isBusy={isBusy}
+          onRetry={retryLoad}
           wishlistHref={wishlistHref}
           wishlistLabel={wishlistLabel}
         />
@@ -329,6 +360,7 @@ function SecretSantaContent({
   hasAssignment,
   hasDraw,
   isBusy,
+  onRetry,
   wishlistHref,
   wishlistLabel,
 }: Readonly<{
@@ -338,6 +370,7 @@ function SecretSantaContent({
   hasAssignment: boolean;
   hasDraw: boolean;
   isBusy: boolean;
+  onRetry: () => void;
   wishlistHref: string;
   wishlistLabel: string;
 }>) {
@@ -351,7 +384,7 @@ function SecretSantaContent({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+          <InlineLoader label="A carregar amigo secreto" />
         </CardContent>
       </Card>
     );
@@ -365,7 +398,7 @@ function SecretSantaContent({
             title="Erro ao carregar o amigo secreto"
             description={errorMessage}
             actionLabel="Tentar novamente"
-            onAction={() => globalThis.location.reload()}
+            onAction={onRetry}
           />
         </CardContent>
       </Card>

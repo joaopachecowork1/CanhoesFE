@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import dynamic from "next/dynamic";
 
 import CanhoesAdminModule from "@/components/modules/canhoes/admin/CanhoesAdminModule";
-import { isAdminSectionId, type AdminSectionId } from "@/components/modules/canhoes/admin/adminSections";
+import { isAdminSectionId } from "@/components/modules/canhoes/admin/adminSections";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 const AdminGate = dynamic(
@@ -15,15 +15,14 @@ const AdminSectionShell = dynamic(
   { loading: () => <FeedSkeleton /> }
 );
 
-// Mapeamento de secções antigas para novas (retrocompatibilidade)
-const OLD_TO_NEW_SECTION_MAP: Record<string, AdminSectionId> = {
-  overview: "dashboard",
-  categories: "conteudo",
-  nominations: "conteudo",
-  results: "conteudo",
-  members: "membros",
-  modules: "configuracoes",
-  phase: "configuracoes",
+const LEGACY_SECTION_REDIRECTS: Record<string, string> = {
+  overview: "/canhoes/admin/dashboard",
+  categories: "/canhoes/admin/conteudo?view=categorias",
+  nominations: "/canhoes/admin/conteudo",
+  results: "/canhoes/admin/conteudo?view=resultados",
+  members: "/canhoes/admin/membros",
+  modules: "/canhoes/admin/configuracoes",
+  phase: "/canhoes/admin/configuracoes",
 };
 
 type AdminSectionPageProps = {
@@ -35,10 +34,9 @@ export default async function AdminSectionPage({
 }: Readonly<AdminSectionPageProps>) {
   const { section } = await params;
 
-  // Redirecionar secções antigas para as novas
-  const newSection = OLD_TO_NEW_SECTION_MAP[section];
-  if (newSection && newSection !== section) {
-    redirect(`/canhoes/admin/${newSection}`);
+  const legacyRedirectTarget = LEGACY_SECTION_REDIRECTS[section];
+  if (legacyRedirectTarget) {
+    redirect(legacyRedirectTarget);
   }
 
   if (!isAdminSectionId(section)) {

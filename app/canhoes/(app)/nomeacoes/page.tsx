@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 
 const CanhoesNominationsModule = dynamic(
   () => import("@/components/modules/canhoes/CanhoesNominationsModule").then((m) => ({ default: m.CanhoesNominationsModule })),
@@ -9,5 +10,9 @@ const CanhoesNominationsModule = dynamic(
 );
 
 export default function NomeacoesPage() {
-  return <CanhoesNominationsModule />;
+  return (
+    <EventModuleGate moduleKey="nominees">
+      <CanhoesNominationsModule />
+    </EventModuleGate>
+  );
 }

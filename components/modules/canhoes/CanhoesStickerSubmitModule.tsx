@@ -1,22 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Cigarette } from "lucide-react";
+import { Cigarette, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   CanhoesFileTrigger,
   CanhoesMediaThumb,
   CanhoesModuleHeader,
-  formatCanhoesPhaseLabel,
+  formatEventPhaseLabel,
   getNomineeStatusBadgeVariant,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import type {
   AwardCategoryDto,
-  CanhoesStateDto,
   NomineeDto,
 } from "@/lib/api/types";
 
@@ -33,7 +35,7 @@ import {
 } from "@/components/ui/select";
 
 export function CanhoesStickerSubmitModule() {
-  const [canhoesState, setCanhoesState] = useState<CanhoesStateDto | null>(null);
+  const { overview } = useEventOverview();
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -62,13 +64,11 @@ export function CanhoesStickerSubmitModule() {
     setErrorMessage(null);
 
     try {
-      const [nextState, nextCategories, nextNominees] = await Promise.all([
-        canhoesRepo.getState(),
+      const [nextCategories, nextNominees] = await Promise.all([
         canhoesRepo.getCategories(),
         canhoesRepo.getNominees(undefined, "stickers"),
       ]);
 
-      setCanhoesState(nextState);
       setCategoryList(Array.isArray(nextCategories) ? nextCategories : []);
       setNomineeList(Array.isArray(nextNominees) ? nextNominees : []);
 
@@ -85,8 +85,6 @@ export function CanhoesStickerSubmitModule() {
         "Nao foi possivel carregar os stickers desta edicao."
       );
       logFrontendError("CanhoesStickerSubmit.loadStickerData", error);
-      toast.error(message);
-      setCanhoesState(null);
       setCategoryList([]);
       setNomineeList([]);
       setErrorMessage(message);
@@ -99,9 +97,10 @@ export function CanhoesStickerSubmitModule() {
     void loadStickerData();
   }, [loadStickerData]);
 
-  const isNominationPhase = canhoesState?.phase === "nominations";
+  const phaseType = overview?.activePhase?.type;
+  const nominationPhase = phaseType === "PROPOSALS";
   const canSubmit = stickerTitle.trim().length >= 2;
-  const submitButtonLabel = isNominationPhase
+  const submitButtonLabel = nominationPhase
     ? isSubmitting
       ? "A submeter..."
       : "Submeter sticker"
@@ -132,7 +131,7 @@ export function CanhoesStickerSubmitModule() {
   };
 
   const handleSubmit = async () => {
-    if (canhoesState?.phase !== "nominations" || !canSubmit) return;
+    if (!nominationPhase || !canSubmit) return;
 
     setIsSubmitting(true);
 
@@ -176,7 +175,7 @@ export function CanhoesStickerSubmitModule() {
             title="Arquivo de stickers"
             description="O fluxo de upload agora segue a mesma logica do feed: preview real, validacao explicita e URLs de imagem normalizadas para funcionar em mobile, Vercel e backend remoto."
             badgeLabel={
-              canhoesState ? `Fase: ${formatCanhoesPhaseLabel(canhoesState.phase)}` : undefined
+              phaseType ? `Fase: ${formatEventPhaseLabel(phaseType)}` : undefined
             }
           />
         </div>
@@ -199,13 +198,13 @@ export function CanhoesStickerSubmitModule() {
           ) : null}
 
           {isLoading ? (
-            <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+            <InlineLoader label="A carregar stickers" />
           ) : null}
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <label className="space-y-2">
-              <span className="canhoes-field-label">Categoria</span>
-              <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <div className="space-y-2">
+              <span id="sticker-category-label" className="canhoes-field-label">Categoria</span>
+              <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId} aria-labelledby="sticker-category-label">
                 <SelectTrigger>
                   <SelectValue placeholder="Escolhe a categoria" />
                 </SelectTrigger>
@@ -217,16 +216,17 @@ export function CanhoesStickerSubmitModule() {
                   ))}
                 </SelectContent>
               </Select>
-            </label>
+            </div>
 
-            <label className="space-y-2">
-              <span className="canhoes-field-label">Titulo</span>
+            <div className="space-y-2">
+              <label htmlFor="sticker-title-input" className="canhoes-field-label">Titulo</label>
               <Input
+                id="sticker-title-input"
                 value={stickerTitle}
                 onChange={(event) => setStickerTitle(event.target.value)}
                 placeholder="Ex: O sticker mais lendario"
               />
-            </label>
+            </div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -264,7 +264,7 @@ export function CanhoesStickerSubmitModule() {
             </p>
 
             <Button
-              disabled={!isNominationPhase || !canSubmit || isSubmitting}
+              disabled={!nominationPhase || !canSubmit || isSubmitting}
               onClick={() => void handleSubmit()}
               className="w-full sm:w-auto"
             >
@@ -286,13 +286,7 @@ export function CanhoesStickerSubmitModule() {
         </div>
 
         {!isLoading && !errorMessage && stickersWithImage.length === 0 ? (
-          <Card>
-            <CardContent className="py-10 text-center">
-              <p className="body-small text-[var(--color-text-muted)]">
-                Ainda nao ha stickers com imagem para mostrar.
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyState icon={Inbox} title="Sem stickers" description="Ainda nao ha stickers com imagem para mostrar." />
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

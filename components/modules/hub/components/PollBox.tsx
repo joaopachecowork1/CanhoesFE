@@ -18,7 +18,7 @@ export function PollBox({
     <section className="rounded-[var(--radius-lg-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)] p-4 sm:p-5">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="editorial-kicker">Votacao</p>
+          <p className="editorial-kicker">Sondagem</p>
           <h3 className="heading-3 text-[var(--color-text-primary)]">
             {poll.question}
           </h3>
@@ -68,7 +68,7 @@ export function PollBox({
 
         <p className="body-small text-[var(--color-text-muted)]">
           {totalVotes} voto(s) registados. Podes trocar o teu voto enquanto a
-          fase estiver ativa.
+          sondagem estiver ativa.
         </p>
       </div>
     </section>

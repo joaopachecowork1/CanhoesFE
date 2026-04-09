@@ -33,14 +33,19 @@ export function CompactSegmentTabs({
               className={cn(
                 "canhoes-tap inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200",
                 isActive
-                  ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
-                  : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.74)] text-[rgba(245,237,224,0.9)] hover:bg-[rgba(28,36,18,0.92)] active:scale-95"
+                  ? "border-[rgba(122,173,58,0.48)] bg-[rgba(36,49,23,0.98)] text-[var(--bg-paper)] shadow-[0_0_12px_rgba(0,255,136,0.08)]"
+                  : "border-[rgba(212,184,150,0.14)] bg-[var(--bg-surface)] text-[rgba(245,237,224,0.85)] hover:bg-[rgba(28,36,18,0.92)] active:scale-95"
               )}
               aria-pressed={isActive}
             >
               <span className="truncate">{item.label}</span>
               {item.badge ? (
-                <span className="rounded-full border border-[rgba(122,173,58,0.34)] bg-[rgba(122,173,58,0.2)] px-2 py-0.5 text-[11px] text-[var(--bg-paper)]">
+                <span className={cn(
+                  "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-200",
+                  isActive
+                    ? "bg-[rgba(0,255,136,0.15)] text-[var(--neon-green)]"
+                    : "border border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)] text-[var(--color-moss-light)]"
+                )}>
                   {item.badge}
                 </span>
               ) : null}

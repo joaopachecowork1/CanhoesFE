@@ -15,9 +15,13 @@ function isFalse(value: string) {
 
 const autoAdminFlag = readEnv("NEXT_PUBLIC_DEV_AUTH_AUTO_ADMIN", "DEV_AUTH_AUTO_ADMIN", "true");
 
-// Temporary emergency mode: keep auth mocked everywhere until OAuth is restored.
-// Revert this to env-based logic before enabling real authentication again.
-export const DEV_AUTH_BYPASS_ENABLED = true;
+/**
+ * Dev auth bypass — controlado por variável de ambiente.
+ * Definir NEXT_PUBLIC_DEV_AUTH_BYPASS_ENABLED=true para ativar em dev.
+ * Em produção deve ser false (omitir ou definir "false").
+ */
+export const DEV_AUTH_BYPASS_ENABLED =
+  readEnv("NEXT_PUBLIC_DEV_AUTH_BYPASS_ENABLED", "DEV_AUTH_BYPASS_ENABLED", "false").trim().toLowerCase() === "true";
 
 export const DEV_AUTH_AUTO_ADMIN_ENABLED =
   DEV_AUTH_BYPASS_ENABLED && !isFalse(autoAdminFlag);

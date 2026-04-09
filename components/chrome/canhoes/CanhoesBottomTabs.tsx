@@ -33,10 +33,10 @@ export function CanhoesBottomTabs({
   const composeItem = {
     ariaLabel: "Criar post",
     buttonClassName: cn(
-      "h-[4.3rem] w-[4.5rem] rounded-[1.2rem] border border-[rgba(212,184,150,0.2)] bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.2),transparent_45%),linear-gradient(180deg,rgba(39,48,24,0.96),rgba(18,23,11,0.98))] text-[var(--bg-paper)] shadow-[0_12px_20px_rgba(12,15,8,0.22)]",
-      "hover:bg-[radial-gradient(circle_at_30%_25%,rgba(122,173,58,0.28),transparent_45%),linear-gradient(180deg,rgba(44,55,28,0.98),rgba(20,26,12,0.98))]",
+      "h-12 w-12 rounded-xl border border-[rgba(212,184,150,0.15)] bg-[var(--bg-deep)] text-[var(--bg-paper)] shadow-sm",
+      "hover:border-[rgba(122,173,58,0.3)]",
       isComposeOpen &&
-        "border-[rgba(0,255,136,0.28)] bg-[radial-gradient(circle_at_30%_25%,rgba(0,255,136,0.26),transparent_45%),linear-gradient(180deg,rgba(45,68,29,0.96),rgba(21,33,16,0.96))] shadow-[var(--glow-green-sm),0_14px_24px_rgba(12,15,8,0.22)]"
+        "border-[rgba(0,255,136,0.25)] bg-[rgba(45,68,29,0.96)] text-[var(--neon-green)]"
     ),
     icon: Plus,
     iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--neon-green)]"),
@@ -64,9 +64,9 @@ export function CanhoesBottomTabs({
           className="h-auto p-0"
           containerClassName="h-auto w-full max-w-none justify-center"
           dockClassName={cn(
-            "min-h-[5.1rem] w-max min-w-fit max-w-full items-center gap-1 rounded-[1.7rem] border px-1.5 py-1.5",
-            "border-[rgba(212,184,150,0.14)] bg-[radial-gradient(circle_at_top_center,rgba(0,255,136,0.12),transparent_34%),linear-gradient(180deg,rgba(18,22,11,0.94),rgba(10,13,8,0.96))]",
-            "shadow-[0_20px_46px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-[18px]"
+            "min-h-[4rem] w-max min-w-fit max-w-full items-center gap-1 rounded-[1.4rem] border px-1 py-1.5",
+            "border-[rgba(212,184,150,0.12)] bg-[var(--bg-deep)]/95",
+            "shadow-[0_16px_32px_rgba(0,0,0,0.28)] backdrop-blur-[16px]"
           )}
         />
       </div>
@@ -78,7 +78,7 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   const Icon: LucideIcon = entry.item.icon;
   const isActive = Boolean(entry.isActive);
   const isMoreItem = entry.item.id === "more";
-  let iconToneClass = "text-[rgba(245,237,224,0.92)]";
+  let iconToneClass = "text-[rgba(245,237,224,0.85)]";
   if (isMoreItem) {
     iconToneClass = "text-[var(--bg-paper)]";
   }
@@ -89,16 +89,16 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      "h-[48px] w-[48px] min-h-[48px] min-w-[48px] rounded-[1.2rem] border border-transparent bg-transparent text-[rgba(245,237,224,0.92)] shadow-none transition-all duration-200",
-      "hover:bg-[rgba(245,237,224,0.1)] active:scale-95",
+      "h-11 w-11 min-h-[44px] min-w-[44px] rounded-xl border border-transparent bg-transparent transition-all duration-200",
+      "hover:bg-[rgba(245,237,224,0.08)] active:scale-95",
       isMoreItem &&
-        "border-[rgba(212,184,150,0.18)] bg-[linear-gradient(180deg,rgba(28,32,22,0.92),rgba(18,20,14,0.96))] text-[var(--bg-paper)]",
+        "border-[rgba(212,184,150,0.15)] bg-[var(--bg-surface)] text-[var(--bg-paper)]",
       isActive &&
-        "border-[rgba(122,173,58,0.4)] bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.14),transparent_55%),linear-gradient(180deg,rgba(42,55,28,0.96),rgba(20,27,13,0.99))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm),0_12px_24px_rgba(0,0,0,0.18)]"
+        "border-[rgba(122,173,58,0.35)] bg-[rgba(42,55,28,0.96)] text-[var(--bg-paper)]"
     ),
     icon: Icon,
     iconClassName: cn(
-      "h-[20px] w-[20px]",
+      "h-[18px] w-[18px]",
       iconToneClass
     ),
     isActive,

@@ -32,6 +32,16 @@ export type CanhoesNavItem = {
   requiresAdmin?: boolean;
 };
 
+export type CanhoesPageTone = "admin" | "event" | "official" | "social";
+
+export type CanhoesPageContext = {
+  description?: string;
+  shortLabel: string;
+  title: string;
+  tone: CanhoesPageTone;
+  toneLabel: string;
+};
+
 export const HOME_NAV_ITEM: CanhoesNavItem = {
   href: "/canhoes",
   icon: House,
@@ -131,7 +141,7 @@ const MODULE_NAV_ITEMS: Record<CanhoesMemberModuleKey, CanhoesNavItem> = {
 };
 
 export const ADMIN_NAV_ITEM: CanhoesNavItem = {
-  description: "Moderacao, fases, pendentes e estado do evento.",
+  description: "Painel operacional com fila, fases, visibilidade e resultados oficiais.",
   href: "/canhoes/admin",
   icon: Shield,
   id: "admin",
@@ -140,7 +150,7 @@ export const ADMIN_NAV_ITEM: CanhoesNavItem = {
 };
 
 export const MORE_NAV_ITEM: CanhoesNavItem = {
-  description: "Atalhos para o resto da edicao e areas secundarias.",
+  description: "Atalhos para areas sociais e oficiais que ficam fora do dock principal.",
   href: "/canhoes/menu",
   icon: Menu,
   id: "more",
@@ -156,6 +166,89 @@ const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
   ...ORDERED_MEMBER_NAV_ITEMS,
   ADMIN_NAV_ITEM,
 ];
+
+function resolvePageContextFromItem(item: CanhoesNavItem): CanhoesPageContext {
+  switch (item.id) {
+    case "feed":
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: "Mural social",
+        tone: "social",
+        toneLabel: "Social",
+      };
+    case "voting":
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: "Boletim oficial",
+        tone: "official",
+        toneLabel: "Oficial",
+      };
+    case "nominees":
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: "Nomeacoes oficiais",
+        tone: "official",
+        toneLabel: "Oficial",
+      };
+    case "categories":
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: "Categorias oficiais",
+        tone: "official",
+        toneLabel: "Oficial",
+      };
+    case "admin":
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: "Admin operacional",
+        tone: "admin",
+        toneLabel: "Admin",
+      };
+    default:
+      return {
+        description: item.description,
+        shortLabel: item.label,
+        title: item.label,
+        tone: "event",
+        toneLabel: "Evento",
+      };
+  }
+}
+
+export function getPageContext(pathname: string | null): CanhoesPageContext {
+  if (!pathname) {
+    return {
+      description: "Resumo da fase e acesso rapido as areas abertas desta edicao.",
+      shortLabel: HOME_NAV_ITEM.label,
+      title: "Evento",
+      tone: "event",
+      toneLabel: "Evento",
+    };
+  }
+
+  const matchedStaticPage = STATIC_PAGE_TITLES.find(({ href }) => pathname.startsWith(href));
+  if (matchedStaticPage) {
+    const navItem = [HOME_NAV_ITEM, ...ORDERED_MEMBER_NAV_ITEMS, ADMIN_NAV_ITEM].find(
+      (item) => item.href === matchedStaticPage.href
+    );
+    if (navItem) {
+      return resolvePageContextFromItem(navItem);
+    }
+  }
+
+  return {
+    description: "Resumo da fase e acesso rapido as areas abertas desta edicao.",
+    shortLabel: HOME_NAV_ITEM.label,
+    title: "Evento",
+    tone: "event",
+    toneLabel: "Evento",
+  };
+}
 
 function isNavItemAvailable({
   itemId,
@@ -207,12 +300,7 @@ export function getPromotedNavItems({
 }
 
 export function getPageTitle(pathname: string | null) {
-  if (!pathname) return HOME_NAV_ITEM.label;
-
-  const matchedStaticPage = STATIC_PAGE_TITLES.find(({ href }) => pathname.startsWith(href));
-  if (matchedStaticPage) return matchedStaticPage.label;
-
-  return HOME_NAV_ITEM.label;
+  return getPageContext(pathname).shortLabel;
 }
 
 export function getVisibleMoreNavItems({

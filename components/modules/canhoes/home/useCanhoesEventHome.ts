@@ -125,7 +125,7 @@ function buildHomeCopy(
 
         if (overview.permissions.canManage && !secretSanta.hasDraw) {
           return overview.modules.admin
-            ? { href: "/canhoes/admin", label: "Abrir sorteio" }
+            ? { href: "/canhoes/admin", label: "Abrir admin operacional" }
             : pickFallbackAction(overview);
         }
 
@@ -134,20 +134,22 @@ function buildHomeCopy(
         return buildModuleAction(
           overview,
           "categories",
-          overview.permissions.canSubmitProposal ? "Propor categoria" : "Ver categorias"
+          overview.permissions.canSubmitProposal
+            ? "Propor categoria oficial"
+            : "Ver categorias oficiais"
         );
       case "VOTING":
         return buildModuleAction(
           overview,
           "voting",
-          voting.remainingVoteCount > 0 ? "Votar agora" : "Rever votacao"
+          voting.remainingVoteCount > 0 ? "Votar no boletim" : "Rever boletim oficial"
         );
       case "RESULTS":
         return IS_LOCAL_MODE
-          ? buildModuleAction(overview, "categories", "Ver ranking")
+          ? buildModuleAction(overview, "categories", "Ver ranking oficial")
           : buildModuleAction(overview, "gala", "Abrir gala");
       default:
-        return buildModuleAction(overview, "categories", "Entrar nas categorias");
+        return buildModuleAction(overview, "categories", "Entrar nas categorias oficiais");
     }
   })();
 
@@ -156,7 +158,7 @@ function buildHomeCopy(
       ? buildModuleAction(overview, "wishlist", "Abrir wishlist", "outline")
       : overview.modules.feed
         ? {
-            label: "Publicar no feed",
+            label: "Publicar no mural",
             onClick: openComposeSheet,
             tone: "outline" as const,
           }
@@ -174,7 +176,7 @@ function buildHomeCopy(
         ? "Ainda nao submeteste nenhuma proposta nesta fase."
         : null,
       overview.modules.voting && voting.remainingVoteCount > 0
-        ? `Faltam ${voting.remainingVoteCount} categorias por votar.`
+        ? `Faltam ${voting.remainingVoteCount} categorias por votar no boletim oficial.`
         : null,
       overview.modules.wishlist && secretSanta.myWishlistItemCount === 0
         ? "A tua wishlist ainda esta vazia. Deixa pistas antes de o sorteio fechar."

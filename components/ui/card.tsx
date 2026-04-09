@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "editorial-shell group relative overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[linear-gradient(180deg,rgba(28,35,17,0.98),rgba(14,18,10,0.98))] text-[var(--color-text-primary)] shadow-[0_4px_16px_rgba(0,0,0,0.16),inset_0_1px_0_1px_rgba(255,255,255,0.08)] transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-[rgba(177,140,255,0.32)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.28),0_0_24px_rgba(177,140,255,0.14)] hover:shadow-[0_0_32px_rgba(177,140,255,0.08)] hover:shadow-[inset_0_1px_0_1px_rgba(255,255,255,0.08)] before:absolute before:inset-0 before:rounded-[var(--radius-lg-token)] before:bg-gradient-to-r before:from-[var(--bark)] before:via-[var(--moss)] before:to-transparent before:opacity-0 before:transition-opacity before:duration-700 before:group-hover:opacity-10 before:group-hover:before:bg-gradient-to-r before:group-hover:before:from-[var(--moss)] before:group-hover:before:via-[var(--bark)] before:group-hover:before:to-transparent",
+        "rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--color-text-primary)] shadow-sm transition-all duration-300",
         className
       )}
       {...props}

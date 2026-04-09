@@ -1,11 +1,11 @@
 export const adminCopy = {
   controlStrip: {
-    kicker: "Mesa da edicao",
-    title: "Comando desta edicao",
+    kicker: "Admin operacional",
+    title: "Painel operacional",
     description:
-      "Fase, moderacao e visibilidade num painel pensado para decisoes rapidas no telemovel.",
+      "Evento ativo, fase, fila e visibilidade num painel curto para decisoes rapidas no telemovel.",
     clearQueue: "Fila limpa",
-    refresh: "Atualizar mesa",
+    refresh: "Atualizar painel",
     activeEventFallback: "Sem edicao ativa",
     membersSummary: "membros nesta edicao",
     metrics: {
@@ -25,27 +25,27 @@ export const adminCopy = {
   shell: {
     backendHint: "Atualiza a edicao ou confirma o backend antes de continuar a moderacao.",
     more: {
-      openAction: "Abrir mais areas da edicao",
-      kicker: "Mapa da edicao",
-      title: "Mais areas da edicao",
+      openAction: "Abrir mais areas",
+      kicker: "Mais areas",
+      title: "Atalhos do evento",
       description:
-        "Atalhos para o resto da edicao sem tirar foco ao que fica sempre na navegacao principal.",
+        "Separa mural social, participacao oficial e admin sem alongar a navegacao principal.",
       summaryLabel: "Atalhos",
-      summaryTitle: "Outras paragens da edicao",
+      summaryTitle: "Areas fora do dock",
       summaryDescription:
-        "Abre o que fica fora do dock sem perder o ritmo desta fase.",
+        "Abre areas sociais, oficiais ou operacionais sem perder o contexto desta fase.",
       empty: "Nao ha outras areas abertas nesta fase.",
       explore: "Explorar",
-      exploreTitle: "Areas abertas nesta fase",
+      exploreTitle: "Areas abertas",
       exploreDescription:
-        "Atalhos para modulos secundarios que ficam fora do dock principal.",
-      admin: "Administracao",
+        "Atalhos para areas sociais e oficiais que ficam fora do dock principal.",
+      admin: "Admin",
       adminSectionDescription:
-        "Controlos reservados a quem gere a edicao, separados do resto do menu.",
-      adminTitle: "Mesa da edicao",
+        "Ferramentas operacionais reservadas a quem gere a edicao.",
+      adminTitle: "Painel operacional",
       adminDescription:
-        "Moderacao, fases e visibilidade ficam reunidas aqui para quem gere a edicao.",
-      adminAction: "Abrir admin",
+        "Fila, fases, visibilidade e resultados oficiais num unico ponto de controlo.",
+      adminAction: "Abrir painel",
       total: "Total",
       shortcuts: "atalhos",
     },
@@ -58,7 +58,7 @@ export const adminCopy = {
     contextKicker: "Contexto",
     contextTitle: "Evento ativo",
     contextDescription:
-      "Escolhe a edicao em curso e confirma rapidamente em que mesa estas a trabalhar.",
+      "Escolhe a edicao em curso e confirma rapidamente em que painel estas a operar.",
     activeEventLabel: "Evento ativo",
     currentEditionLabel: "Edicao em curso",
     currentEditionDescription:
@@ -77,7 +77,7 @@ export const adminCopy = {
     visibilityKicker: "Acesso",
     visibilityTitle: "Visibilidade dos modulos",
     visibilityDescription:
-      "A fase manda no ritmo, mas a mesa da edicao decide o que ainda fica aberto para o grupo.",
+      "A fase manda no ritmo, mas o admin decide o que ainda fica aberto para o grupo.",
     visibilityActionsLabel: "Acoes rapidas",
     enableAll: "Ativar todos",
     disableAll: "Desativar todos",
@@ -100,7 +100,7 @@ export const adminCopy = {
     createKicker: "Curadoria",
     createTitle: "Nova categoria",
     createDescription:
-      "Abre categorias para esta edicao sem sair da mesa de controlo.",
+      "Abre categorias para esta edicao sem sair do painel operacional.",
     manageKicker: "Gestao",
     manageTitle: "Categorias da edicao",
     empty: "Esta edicao ainda nao tem categorias criadas.",
@@ -175,23 +175,23 @@ export const homeCopy = {
   emptyFeed: "O mural desta edicao ainda espera pelo primeiro post.",
   secretSantaTitle: "O teu Amigo Secreto",
   checklistTitle: "Antes da proxima fase",
-  manageLabel: "Tens acesso a mesa desta edicao.",
-  memberLabel: "Vista de membro nesta edicao.",
+  manageLabel: "Tens acesso ao admin operacional desta edicao.",
+  memberLabel: "Vista de membro entre mural social e participacao oficial.",
 } as const;
 
 export const feedCopy = {
   hero: {
-    kicker: "Mural",
-    title: "Cronica viva da edicao",
+    kicker: "Mural social",
+    title: "Mural social da edicao",
     description:
-      "Publicacoes, imagens e votacoes curtas para manter o grupo alinhado ao ritmo desta fase.",
+      "Publicacoes, imagens e sondagens rapidas para manter o grupo alinhado sem misturar o boletim oficial.",
     refresh: "Atualizar mural",
   },
   empty: {
     kicker: "Mural por abrir",
-    title: "Esta edicao ainda nao tem registos publicados",
+    title: "O mural social ainda nao tem registos publicados",
     description:
-      "Abre o mural com uma fotografia, um aviso rapido ou um teaser da proxima fase.",
+      "Abre o mural com uma fotografia, um aviso rapido ou uma sondagem para o grupo.",
   },
   insights: {
     archive: {
@@ -203,8 +203,8 @@ export const feedCopy = {
       description: "Posts com imagem para dar mais contexto e memoria ao mural.",
     },
     polls: {
-      label: "Votacoes relampago",
-      description: "Perguntas rapidas para puxar participacao entre fases.",
+      label: "Sondagens do mural",
+      description: "Perguntas rapidas do mural, separadas do boletim oficial.",
     },
     pinned: {
       label: "Destaques",
@@ -212,21 +212,21 @@ export const feedCopy = {
     },
   },
   composer: {
-    kicker: "Novo registo",
-    title: "Publicar no mural da edicao",
+    kicker: "Novo post",
+    title: "Publicar no mural social da edicao",
     description:
-      "Partilha uma nota, uma imagem ou uma votacao curta para manter o grupo dentro do momento.",
+      "Partilha uma nota, uma imagem ou uma sondagem curta para manter o grupo dentro do momento.",
     sheetTitle: "Novo registo",
     sheetDescription:
-      "Partilha uma foto, um texto ou uma votacao curta para manter o grupo dentro desta fase.",
+      "Partilha uma foto, um texto ou uma sondagem curta para manter o grupo dentro desta fase.",
     mediaLabel: "Imagens",
-    pollLabel: "Votacao",
+    pollLabel: "Sondagem",
     textLabel: "Texto",
     textPlaceholder:
       "Escreve uma nota rapida, um contexto para a gala ou um update para o grupo.",
     mediaSelected: "Imagens prontas",
-    pollTitle: "Abrir uma votacao rapida",
-    pollDescription: "Define a pergunta e as opcoes antes de publicar.",
+    pollTitle: "Abrir uma sondagem no mural",
+    pollDescription: "Define a pergunta e as opcoes. Isto nao substitui o boletim oficial.",
     pollQuestionLabel: "Pergunta",
     pollQuestionPlaceholder:
       "Ex: Qual foi o momento mais improvavel desta edicao?",
@@ -249,11 +249,11 @@ export const feedCopy = {
     removeImage: "Remover imagem",
     removeOption: "Remover opcao",
     helper:
-      "Os melhores posts sao curtos, claros e com uma imagem ou pergunta que puxe reacao.",
+      "Os melhores posts sao curtos, claros e puxam resposta com uma imagem ou uma sondagem simples.",
     submit: "Publicar no mural",
   },
   post: {
-    pinned: "Arquivo em destaque",
+    pinned: "Destaque do mural",
     closeComments: "Fechar",
     openComments: "Abrir conversa",
     commentCount: "comentarios",
@@ -269,5 +269,37 @@ export const feedCopy = {
     unavailable: "Imagem indisponivel",
     detail:
       "O post ficou registado, mas o ficheiro ainda nao esta acessivel no arquivo.",
+  },
+} as const;
+
+export const stateCopy = {
+  loading: "A carregar...",
+  empty: {
+    default: "Sem dados para mostrar.",
+    categories: "Ainda nao ha categorias nesta edicao.",
+    measures: "Ainda nao ha medidas nesta edicao.",
+    nominees: "Ainda nao ha nomeacoes nesta edicao.",
+    stickers: "Ainda nao ha stickers com imagem para mostrar.",
+    wishlist: "Ainda nao ha itens na wishlist.",
+    votes: "Ainda nao ha votos registados nesta edicao.",
+    feed: "O mural desta edicao ainda espera pelo primeiro post.",
+    comments: "Este registo ainda nao tem respostas.",
+    results: "Ainda nao ha resultados oficiais nesta edicao.",
+    members: "Nenhum membro encontrado nesta edicao.",
+  },
+  error: {
+    default: "Nao foi possivel carregar os dados.",
+    categories: "Nao foi possivel carregar as categorias.",
+    measures: "Nao foi possivel carregar as medidas.",
+    nominees: "Nao foi possivel carregar as nomeacoes.",
+    stickers: "Nao foi possivel carregar os stickers.",
+    wishlist: "Nao foi possivel carregar a wishlist.",
+    votes: "Nao foi possivel carregar os votos.",
+    feed: "Nao foi possivel carregar o mural.",
+    results: "Nao foi possivel carregar os resultados.",
+    members: "Nao foi possivel carregar os membros.",
+  },
+  action: {
+    retry: "Tentar novamente",
   },
 } as const;

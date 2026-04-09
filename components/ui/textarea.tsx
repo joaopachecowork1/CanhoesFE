@@ -11,7 +11,6 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
         className
       )}
       style={{ willChange: "opacity" }}
-      aria-describedby={undefined}
       {...props}
     />
   );

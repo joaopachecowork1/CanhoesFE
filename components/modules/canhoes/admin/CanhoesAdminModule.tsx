@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense, type ReactElement } from "react";
 
+import { AsyncStatusCard } from "@/components/ui/async-status-card";
 import { Button } from "@/components/ui/button";
+import { SectionBoundary } from "@/components/ui/section-boundary";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
@@ -20,10 +22,8 @@ import { AdminStateMessage } from "./components/AdminStateMessage";
 import { AdminTabs } from "./components/AdminTabs";
 
 // OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
-const AdminCategoriesSection = lazy(() => import("./components/AdminCategoriesSection").then(m => ({ default: m.AdminCategoriesSection })));
+const AdminContentSection = lazy(() => import("./components/AdminContentSection").then(m => ({ default: m.AdminContentSection })));
 const AdminMembersSection = lazy(() => import("./components/AdminMembersSection").then(m => ({ default: m.AdminMembersSection })));
-const AdminNominationsSection = lazy(() => import("./components/AdminNominationsSection").then(m => ({ default: m.AdminNominationsSection })));
-const AdminOfficialResultsSection = lazy(() => import("./components/AdminOfficialResultsSection").then(m => ({ default: m.AdminOfficialResultsSection })));
 const AdminOverviewSection = lazy(() => import("./components/AdminOverviewSection").then(m => ({ default: m.AdminOverviewSection })));
 const AdminControlCenter = lazy(() => import("./components/AdminControlCenter").then(m => ({ default: m.AdminControlCenter })));
 
@@ -81,20 +81,15 @@ export default function CanhoesAdminModule({
     [allNominees, allCategoryProposals, measureProposals]
   );
 
-  const pendingReviewCount =
-    pendingReviewCounts.nominees +
-    pendingReviewCounts.categories +
-    pendingReviewCounts.measures;
+  const pendingNominationCount = adminNominees.filter((nominee) => nominee.status === "pending").length;
+  const pendingReviewCount = pendingReviewCounts.categories + pendingReviewCounts.measures;
 
   const stats = useMemo(
     () => ({
       totalNominees: allNominees.length,
       pendingNominees: pendingReviewCounts.nominees,
-      approvedNominees: allNominees.filter((n) => n.status === "approved").length,
       totalCategories: categories.length,
       pendingCategories: pendingReviewCounts.categories,
-      totalMeasures: measureProposals.length,
-      pendingMeasures: pendingReviewCounts.measures,
       memberCount: eventMembers.length,
       visibleModules: countVisibleModules(eventState?.effectiveModules),
     }),
@@ -103,8 +98,6 @@ export default function CanhoesAdminModule({
       pendingReviewCounts.nominees,
       categories.length,
       pendingReviewCounts.categories,
-      measureProposals.length,
-      pendingReviewCounts.measures,
       eventMembers.length,
       eventState?.effectiveModules,
     ]
@@ -140,11 +133,18 @@ export default function CanhoesAdminModule({
     () =>
       buildAdminSectionItems({
         memberCount: eventMembers.length,
-        pendingNominationsCount: adminNominees.filter((nominee) => nominee.status === "pending").length,
+        pendingNominationsCount: pendingNominationCount,
         pendingReviewCount,
         visibleModuleCount: countVisibleModules(eventState?.effectiveModules),
       }),
-    [adminNominees, eventMembers.length, eventState?.effectiveModules, pendingReviewCount]
+    [eventMembers.length, eventState?.effectiveModules, pendingNominationCount, pendingReviewCount]
+  );
+
+  const activeSectionMeta =
+    adminTabs.find((section) => section.id === activeTab) ?? null;
+
+  const showMobileSummary = Boolean(
+    !loading && activeEvent && showTabs && activeTab !== "configuracoes"
   );
 
   const SECTION_CONFIG: Record<AdminSectionId, () => ReactElement> = {
@@ -160,32 +160,19 @@ export default function CanhoesAdminModule({
       />
     ),
     conteudo: () => (
-      <div className="space-y-6">
-        <Suspense fallback={loadingFallback}>
-          <AdminCategoriesSection
-            categories={categories}
-            categoryProposals={allCategoryProposals}
-            eventId={activeEvent?.id ?? null}
-            loading={loading}
-            measureProposals={measureProposals}
-            onUpdate={handleRefresh}
-            votes={voteAuditRows}
-          />
-        </Suspense>
-        <Suspense fallback={loadingFallback}>
-          <AdminNominationsSection
-            eventId={activeEvent?.id ?? null}
-            categories={categories}
-            initialRows={adminNominees}
-          />
-        </Suspense>
-        <Suspense fallback={loadingFallback}>
-          <AdminOfficialResultsSection
-            eventId={activeEvent?.id ?? null}
-            initialResults={officialResults}
-          />
-        </Suspense>
-      </div>
+      <Suspense fallback={loadingFallback}>
+        <AdminContentSection
+          adminNominees={adminNominees}
+          categories={categories}
+          categoryProposals={allCategoryProposals}
+          eventId={activeEvent?.id ?? null}
+          initialResults={officialResults}
+          loading={loading}
+          measureProposals={measureProposals}
+          onUpdate={handleRefresh}
+          votes={voteAuditRows}
+        />
+      </Suspense>
     ),
     membros: () => (
       <Suspense fallback={loadingFallback}>
@@ -207,10 +194,25 @@ export default function CanhoesAdminModule({
     ),
   };
 
-  const loadingFallback = <div className="py-8 text-center text-[var(--text-subtle)]">A carregar...</div>;
+  const loadingFallback = (
+    <AsyncStatusCard
+      label="A abrir secao do admin"
+      hint="A preparar os dados e o layout desta area."
+      timeoutHint="Se esta secao nao abrir, recarrega a pagina para recuperar o admin."
+      actionLabel="Recarregar"
+      onAction={() => globalThis.location.reload()}
+    />
+  );
   const sectionRenderer = SECTION_CONFIG[activeTab];
   const activeSectionContent = sectionRenderer ? (
-    <Suspense fallback={loadingFallback}>{sectionRenderer()}</Suspense>
+    <SectionBoundary
+      title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta secao"}`}
+      description="Esta secao do admin falhou ao renderizar, mas o resto do painel continua disponivel."
+      onRetry={() => void handleRefresh()}
+      resetKey={activeTab}
+    >
+      <Suspense fallback={loadingFallback}>{sectionRenderer()}</Suspense>
+    </SectionBoundary>
   ) : null;
 
   return (
@@ -241,7 +243,7 @@ export default function CanhoesAdminModule({
         </AdminStateMessage>
       ) : null}
 
-      {!loading && activeEvent && (
+      {showMobileSummary && (
         <div className="sm:hidden">
           <div className="grid grid-cols-3 gap-1.5">
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">

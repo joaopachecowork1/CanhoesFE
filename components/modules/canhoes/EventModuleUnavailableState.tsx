@@ -27,6 +27,9 @@ export function EventModuleUnavailableState({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="body-small text-[rgba(245,237,224,0.78)]">{description}</p>
+        <p className="text-xs text-[var(--text-muted)]">
+          Isto pode acontecer se a fase do evento mudou ou se um admin ocultou este modulo.
+        </p>
         <div className="flex flex-wrap gap-2">
           <Button asChild>
             <Link href={fallbackHref}>Ir para {fallbackLabel}</Link>

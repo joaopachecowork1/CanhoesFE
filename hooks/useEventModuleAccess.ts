@@ -63,13 +63,18 @@ export function useEventModuleAccess(moduleKey: EventRouteModuleKey) {
   const eventOverview = useEventOverview();
   const definition = getModuleDefinition(moduleKey);
   const modules = eventOverview.overview?.modules as Record<string, boolean> | null | undefined;
+  const isAdmin = Boolean(eventOverview.overview?.permissions.isAdmin);
+
+  // Admins always have access to all modules.
+  // For the "admin" module specifically, also check permissions.isAdmin.
   const isAllowed =
     moduleKey === "admin"
-      ? Boolean(modules?.admin ?? eventOverview.overview?.permissions.isAdmin)
-      : Boolean(modules?.[moduleKey]);
+      ? Boolean(modules?.admin ?? isAdmin)
+      : isAdmin || Boolean(modules?.[moduleKey]);
+
   const fallback = getFallbackRoute(
     moduleKey,
-    Boolean(eventOverview.overview?.permissions.isAdmin),
+    isAdmin,
     modules
   );
 

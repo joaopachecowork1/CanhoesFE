@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { AdminCard } from "./AdminCard";
+import { AdminDetailPanel } from "./adminContentUi";
 import type { AwardCategoryDto } from "@/lib/api/types";
 
 type VoteAuditRow = {
@@ -97,7 +98,7 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
 
         <Separator className="bg-[rgba(212,184,150,0.12)]" />
 
-        <div className="max-h-[58svh] overflow-y-auto rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)]">
+        <AdminDetailPanel className="max-h-[58svh] overflow-y-auto px-0 py-0">
           {filteredVotes.map((vote, index) => (
             <article
               key={`${vote.userId}:${vote.categoryId}:${index}`}
@@ -115,7 +116,7 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
               </p>
             </article>
           ))}
-        </div>
+        </AdminDetailPanel>
       </CardContent>
     </AdminCard>
   );

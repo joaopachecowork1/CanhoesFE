@@ -1,20 +1,37 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-import type { AdminSectionId } from "../adminSections";
+import type { AdminSectionId, AdminSectionItem } from "../adminSections";
 import { getAdminSectionMeta } from "../adminSections";
+
+type AdminRouteTabItem = Pick<AdminSectionItem, "count" | "icon" | "id" | "label">;
 
 type AdminRouteTabsProps = {
   activeId: AdminSectionId;
+  items?: ReadonlyArray<AdminRouteTabItem>;
+  onSelect?: (id: AdminSectionId) => void;
 };
 
-export function AdminRouteTabs({ activeId }: Readonly<AdminRouteTabsProps>) {
-  const sections = getAdminSectionMeta();
+export function AdminRouteTabs({
+  activeId,
+  items,
+  onSelect,
+}: Readonly<AdminRouteTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sections = useMemo<ReadonlyArray<AdminRouteTabItem>>(
+    () =>
+      items ??
+      getAdminSectionMeta().map((section) => ({
+        ...section,
+        count: 0,
+      })),
+    [items]
+  );
 
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -29,10 +46,10 @@ export function AdminRouteTabs({ activeId }: Readonly<AdminRouteTabsProps>) {
   }, [activeId]);
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.14),transparent_36%),linear-gradient(180deg,rgba(16,20,11,0.94),rgba(10,13,8,0.96))] px-2 py-2 shadow-[var(--shadow-panel)] backdrop-blur-sm">
+    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.14),transparent_36%),linear-gradient(180deg,rgba(16,20,11,0.94),rgba(10,13,8,0.96))] px-2 py-1.5 shadow-[var(--shadow-panel)] backdrop-blur-sm">
       <div
         ref={scrollRef}
-        className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory"
+        className="-mx-1 overflow-x-auto px-1 scrollbar-none snap-x snap-mandatory"
       >
         <div className="flex min-w-max gap-1.5">
           {sections.map((section) => {
@@ -44,8 +61,9 @@ export function AdminRouteTabs({ activeId }: Readonly<AdminRouteTabsProps>) {
                 key={section.id}
                 href={`/canhoes/admin/${section.id}`}
                 aria-current={isActive ? "page" : undefined}
+                onClick={() => onSelect?.(section.id)}
                 className={cn(
-                  "canhoes-tap inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-[background-color,border-color,color,box-shadow]",
+                  "canhoes-tap inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold transition-[background-color,border-color,color,box-shadow]",
                   "snap-start",
                   isActive
                     ? "border-[rgba(122,173,58,0.48)] bg-[linear-gradient(180deg,rgba(36,49,23,0.98),rgba(18,24,11,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-green-sm)]"
@@ -53,9 +71,14 @@ export function AdminRouteTabs({ activeId }: Readonly<AdminRouteTabsProps>) {
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.11em]">
+                <span className="font-[var(--font-mono)] text-[9px] uppercase tracking-[0.11em]">
                   {section.label}
                 </span>
+                {section.count > 0 ? (
+                  <Badge className="h-4 min-w-4 rounded-full border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.16)] px-1 text-[9px] font-semibold leading-none text-[var(--bg-paper)] shadow-none">
+                    {section.count}
+                  </Badge>
+                ) : null}
               </Link>
             );
           })}

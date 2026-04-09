@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
 import { toast } from "sonner";
 
-import { Particles } from "@/components/animations/Particles";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import {
     Empty,
@@ -19,14 +19,42 @@ import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
+import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { SectionBoundary } from "@/components/ui/section-boundary";
 
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { HubPostCard } from "./HubPostCard";
-import { FeedInsightsPanel } from "./components/FeedInsightsPanel";
-import {
-    PostComposer,
-    type PostComposerSubmitData,
-} from "./components/PostComposer";
+import type { PostComposerSubmitData } from "./components/PostComposer";
+
+const loadParticles = () =>
+  import("@/components/animations/Particles").then((module) => ({
+    default: module.Particles,
+  }));
+
+const loadPostComposer = () =>
+  import("./components/PostComposer").then((module) => ({
+    default: module.PostComposer,
+  }));
+
+const loadFeedInsightsPanel = () =>
+  import("./components/FeedInsightsPanel").then((module) => ({
+    default: module.FeedInsightsPanel,
+  }));
+
+const LazyParticles = dynamic(loadParticles, {
+  loading: () => null,
+  ssr: false,
+});
+
+const LazyPostComposer = dynamic(loadPostComposer, {
+  loading: () => <ComposerFallback />,
+  ssr: false,
+});
+
+const LazyFeedInsightsPanel = dynamic(loadFeedInsightsPanel, {
+  loading: () => <FeedInsightsFallback />,
+  ssr: false,
+});
 
 // ─── HubFeedModule ────────────────────────────────────────────────────────────
 
@@ -72,6 +100,16 @@ export function HubFeedModule({
         }
     }, [session?.idToken, status]);
 
+    useEffect(() => {
+        if (!showComposer) return undefined;
+
+        const timeoutId = window.setTimeout(() => {
+            void loadPostComposer();
+        }, 900);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [showComposer]);
+
     const handleCreatePost = async (data: PostComposerSubmitData) => {
         const trimmedText = data.text.trim();
         if (!trimmedText) return;
@@ -104,7 +142,7 @@ export function HubFeedModule({
 
             toast.success("Post publicado");
         } catch (error) {
-            const message = getErrorMessage(error, "Nao foi possivel publicar no feed.");
+            const message = getErrorMessage(error, "Nao foi possivel publicar no mural.");
             logFrontendError("HubFeedModule.createPost", error);
             toast.error(message);
             throw error;
@@ -113,72 +151,129 @@ export function HubFeedModule({
 
     return (
         <div className="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
-            <div className="space-y-3">
-                {showComposer ? <PostComposer onSubmit={handleCreatePost} /> : null}
+            <SectionBoundary
+                title="Erro no mural social"
+                description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis."
+                onRetry={() => void refresh()}
+            >
+                <div className="space-y-3">
+                    {!showComposer ? (
+                        <CanhoesModuleHeader
+                            icon={ScrollText}
+                            title={feedCopy.hero.title}
+                            description={feedCopy.hero.description}
+                        />
+                    ) : null}
 
-                {errorMessage ? (
-                    <ErrorAlert
-                        title="Erro ao carregar o feed"
-                        description={errorMessage}
-                        actionLabel="Tentar novamente"
-                        onAction={() => void refresh()}
-                    />
-                ) : null}
+                    {showComposer ? <LazyPostComposer onSubmit={handleCreatePost} /> : null}
 
-                {loading ? <FeedSkeleton count={3} /> : (
-                    <div className="space-y-3">
-                        {posts.map((post, index) => (
-                            <HubPostCard
-                                key={post.id}
-                                post={post}
-                                index={index}
-                                isAdmin={isAdmin}
-                                openComments={openComments[post.id] ?? false}
-                                commentDraft={commentDrafts[post.id] ?? ""}
-                                comments={comments[post.id] ?? []}
-                                currentUserId={currentUserId}
-                                currentUserName={currentUserName}
-                                currentUserImage={currentUserImage}
-                                onToggleReaction={toggleReaction}
-                                onToggleComments={toggleComments}
-                                onVotePoll={votePoll}
-                                onAddComment={addComment}
-                                onDeleteComment={deleteComment}
-                                onCommentDraftChange={setCommentDraft}
-                                onToggleCommentReaction={toggleCommentReaction}
-                                onAdminPin={adminPin}
-                                onAdminDelete={adminDelete}
-                            />
-                        ))}
+                    {errorMessage ? (
+                        <ErrorAlert
+                            title="Erro ao carregar o mural"
+                            description={errorMessage}
+                            actionLabel="Tentar novamente"
+                            onAction={() => void refresh()}
+                        />
+                    ) : null}
 
-                        {posts.length === 0 ? (
-                            <Empty className="editorial-shell rounded-[var(--radius-lg-token)] py-10">
-                                <EmptyHeader>
-                                    <EmptyMedia variant="icon">
-                                        <ScrollText className="h-6 w-6" />
-                                    </EmptyMedia>
-                                    <EmptyTitle className="heading-3 text-[var(--text-dark)]">
-                                        {feedCopy.empty.title}
-                                    </EmptyTitle>
-                                    <EmptyDescription className="body-small text-[var(--text-muted)]">
-                                        {feedCopy.empty.description}
-                                    </EmptyDescription>
-                                </EmptyHeader>
-                            </Empty>
-                        ) : null}
-                    </div>
-                )}
-            </div>
+                    {loading ? <FeedSkeleton count={3} /> : (
+                        <div className="space-y-3">
+                            {posts.map((post, index) => (
+                                <HubPostCard
+                                    key={post.id}
+                                    post={post}
+                                    index={index}
+                                    isAdmin={isAdmin}
+                                    openComments={openComments[post.id] ?? false}
+                                    commentDraft={commentDrafts[post.id] ?? ""}
+                                    comments={comments[post.id] ?? []}
+                                    currentUserId={currentUserId}
+                                    currentUserName={currentUserName}
+                                    currentUserImage={currentUserImage}
+                                    onToggleReaction={toggleReaction}
+                                    onToggleComments={toggleComments}
+                                    onVotePoll={votePoll}
+                                    onAddComment={addComment}
+                                    onDeleteComment={deleteComment}
+                                    onCommentDraftChange={setCommentDraft}
+                                    onToggleCommentReaction={toggleCommentReaction}
+                                    onAdminPin={adminPin}
+                                    onAdminDelete={adminDelete}
+                                />
+                            ))}
 
-            <FeedInsightsPanel posts={posts} />
+                            {posts.length === 0 ? (
+                                <Empty className="editorial-shell rounded-[var(--radius-lg-token)] py-10">
+                                    <EmptyHeader>
+                                        <EmptyMedia variant="icon">
+                                            <ScrollText className="h-6 w-6" />
+                                        </EmptyMedia>
+                                        <EmptyTitle className="heading-3 text-[var(--text-dark)]">
+                                            {feedCopy.empty.title}
+                                        </EmptyTitle>
+                                        <EmptyDescription className="body-small text-[var(--text-muted)]">
+                                            {feedCopy.empty.description}
+                                        </EmptyDescription>
+                                    </EmptyHeader>
+                                </Empty>
+                            ) : null}
+                        </div>
+                    )}
+                </div>
+            </SectionBoundary>
+
+            <SectionBoundary
+                title="Erro nos indicadores do mural"
+                description="Os indicadores laterais falharam ao renderizar, mas o mural social continua disponivel."
+            >
+                <LazyFeedInsightsPanel posts={posts} />
+            </SectionBoundary>
 
             {showParticles ? (
-                <Particles
+                <LazyParticles
                     count={24}
                     onComplete={() => setShowParticles(null)}
                     className="pointer-events-none fixed inset-0 z-50"
                 />
             ) : null}
         </div>
+    );
+}
+
+function ComposerFallback() {
+    return (
+        <div className="editorial-shell space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+            <div className="space-y-2">
+                <div className="h-3 w-24 rounded bg-[rgba(74,92,47,0.18)] animate-pulse" />
+                <div className="h-8 w-48 rounded bg-[rgba(74,92,47,0.12)] animate-pulse" />
+            </div>
+            <div className="h-32 rounded-[var(--radius-md-token)] bg-[rgba(18,24,11,0.72)] animate-pulse" />
+            <div className="flex gap-2">
+                <div className="h-10 w-24 rounded-full bg-[rgba(74,92,47,0.12)] animate-pulse" />
+                <div className="h-10 w-24 rounded-full bg-[rgba(74,92,47,0.12)] animate-pulse" />
+            </div>
+        </div>
+    );
+}
+
+function FeedInsightsFallback() {
+    return (
+        <aside className="space-y-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                    key={index}
+                    className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-4 shadow-[var(--shadow-panel)] sm:px-5"
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="space-y-2">
+                            <div className="h-3 w-20 rounded bg-[rgba(74,92,47,0.18)] animate-pulse" />
+                            <div className="h-8 w-14 rounded bg-[rgba(74,92,47,0.12)] animate-pulse" />
+                        </div>
+                        <div className="h-11 w-11 rounded-full bg-[rgba(245,237,224,0.08)] animate-pulse" />
+                    </div>
+                    <div className="mt-3 h-3 w-4/5 rounded bg-[rgba(245,237,224,0.08)] animate-pulse" />
+                </div>
+            ))}
+        </aside>
     );
 }

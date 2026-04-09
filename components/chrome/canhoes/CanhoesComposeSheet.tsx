@@ -144,22 +144,15 @@ export function CanhoesComposeSheet({
 
       if (files.length > 0) {
         setUploadLabel(composeCopy.uploading);
-        const uploadedUrls: string[] = [];
+        setUploadProgress(0);
 
-        for (let index = 0; index < files.length; index++) {
-          const file = files[index];
-          const urls = await hubRepo.uploadImages([file]);
-          const uploadedUrl = urls?.[0];
+        const uploadedUrls = await hubRepo.uploadImages(files);
 
-          if (!uploadedUrl) {
-            throw new Error(`Falha ao enviar ${file.name}`);
-          }
-
-          uploadedUrls.push(uploadedUrl);
-          setUploadProgress(Math.round(((index + 1) / files.length) * 100));
-          setUploadLabel(`${composeCopy.uploading} ${index + 1}/${files.length}`);
+        if (!uploadedUrls || uploadedUrls.length !== files.length) {
+          throw new Error("Falha ao enviar as imagens");
         }
 
+        setUploadProgress(100);
         mediaUrls = uploadedUrls;
       }
 

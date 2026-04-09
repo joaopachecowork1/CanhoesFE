@@ -46,13 +46,13 @@ export function AdminOverviewSection({
       <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
         <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--neon-green)]">Overview</p>
+            <p className="editorial-kicker text-[var(--neon-green)]">Admin</p>
             <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
-              Painel de leitura da edicao
+              Painel operacional da edicao
             </h2>
             <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
-              Estado atual, ritmo da fila e sinais principais da edicao sem misturar
-              controlos no topo.
+              Leitura rapida do evento, da fila e dos sinais principais sem misturar
+              controlos com o conteudo operacional.
             </p>
           </div>
 

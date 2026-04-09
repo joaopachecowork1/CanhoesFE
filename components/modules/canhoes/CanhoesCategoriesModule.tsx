@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Flame, Trophy } from "lucide-react";
+import { Flame, Inbox, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
 import type { EventCategoryDto } from "@/lib/api/types";
@@ -16,7 +16,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -110,8 +112,8 @@ export function CanhoesCategoriesModule() {
         <div className="space-y-4">
             <CanhoesModuleHeader
                 icon={Flame}
-                title="Categorias"
-                description="Propoe novas categorias enquanto as nomeacoes estiverem abertas."
+                title="Categorias oficiais"
+                description="Consulta as categorias oficiais e propoe novas enquanto a fase de propostas estiver aberta."
                 badgeLabel={
                     overview
                         ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}`
@@ -123,33 +125,35 @@ export function CanhoesCategoriesModule() {
                 <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2">
                         <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
-                        Propor categoria
+                        Propor categoria oficial
                     </CardTitle>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <label className="space-y-2">
-                            <span className="canhoes-field-label">Nome</span>
+                        <div className="space-y-2">
+                            <label htmlFor="category-name-input" className="canhoes-field-label">Nome</label>
                             <Input
+                                id="category-name-input"
                                 value={categoryName}
                                 onChange={(event) => setCategoryName(event.target.value)}
                                 placeholder="Ex.: Melhor sticker de sempre"
                             />
-                        </label>
+                        </div>
 
-                        <label className="space-y-2">
-                            <span className="canhoes-field-label">Descrição</span>
+                        <div className="space-y-2">
+                            <label htmlFor="category-desc-input" className="canhoes-field-label">Descrição</label>
                             <Textarea
+                                id="category-desc-input"
                                 value={categoryDescription}
                                 onChange={(event) => setCategoryDescription(event.target.value)}
                                 placeholder="Dá contexto ao canhão..."
                             />
-                        </label>
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="canhoes-helper-text">A proposta fica pendente até aprovação de um admin.</p>
+                        <p className="canhoes-helper-text">A proposta entra em revisao antes de ficar oficial.</p>
                         <Button disabled={!canSubmitProposal || isSubmitting} onClick={() => void handleProposalSubmit()}>
                             {submitButtonLabel}
                         </Button>
@@ -159,32 +163,32 @@ export function CanhoesCategoriesModule() {
 
             <Card>
                 <CardHeader className="pb-2">
-                    <CardTitle>Categorias ativas</CardTitle>
+                    <CardTitle>Categorias oficiais</CardTitle>
                 </CardHeader>
 
                 <CardContent className="space-y-3">
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Procurar categoria"
+                        placeholder="Procurar categoria oficial"
                         className="h-9"
                     />
 
                     {errorMessage ? (
                         <ErrorAlert
-                            title="Erro ao carregar categorias"
+                            title="Erro ao carregar categorias oficiais"
                             description={errorMessage}
                             actionLabel="Tentar novamente"
                             onAction={() => void loadCategories()}
                         />
                     ) : null}
 
-                    {isLoading || isOverviewLoading ? (
-                        <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+                    {(isLoading || isOverviewLoading) ? (
+                        <InlineLoader label="A carregar categorias" />
                     ) : null}
 
                     {!isLoading && !isOverviewLoading && !errorMessage && filteredCategoryList.length === 0 ? (
-                        <p className="body-small text-[var(--color-text-muted)]">Ainda não há categorias.</p>
+                        <EmptyState icon={Inbox} title="Sem categorias oficiais" description="Ainda nao ha categorias oficiais nesta edicao." />
                     ) : null}
 
                     {isLoading || isOverviewLoading ? null : (

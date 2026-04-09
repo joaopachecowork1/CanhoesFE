@@ -1,13 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Loader2 } from "lucide-react";
 
 import {
   useEventModuleAccess,
   type EventRouteModuleKey,
 } from "@/hooks/useEventModuleAccess";
+import { AsyncStatusCard } from "@/components/ui/async-status-card";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { SectionBoundary } from "@/components/ui/section-boundary";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { EventModuleUnavailableState } from "./EventModuleUnavailableState";
@@ -25,22 +26,13 @@ export function EventModuleGate({
   // When data is cached (isFetching but not isLoading), render children immediately
   if (access.isLoading) {
     return (
-      <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
-        <CardContent className="flex min-h-[14rem] items-center justify-center">
-          <div className="flex items-center gap-3 text-[rgba(245,237,224,0.76)]">
-            <Loader2 className="h-5 w-5 animate-spin text-[var(--moss)]" />
-            <span className="font-[var(--font-mono)] text-sm uppercase tracking-[0.16em]">
-              A validar acesso
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <AsyncStatusCard
+        label="A validar acesso"
+        hint={`A confirmar se ${access.module.label.toLowerCase()} esta disponivel neste evento.`}
+        timeoutHint="A validacao de acesso esta a demorar mais do que o normal. Podes tentar novamente sem sair desta pagina."
+        onAction={() => void access.refresh()}
+      />
     );
-  }
-
-  // If we have cached data but are refetching in background, still render children
-  if (access.isFetching && !access.isLoading) {
-    return <>{children}</>;
   }
 
   if (access.error || !access.event || !access.overview) {
@@ -51,7 +43,7 @@ export function EventModuleGate({
             title={`Erro ao abrir ${access.module.label}`}
             description={
               access.error?.message ??
-              "Nao foi possivel confirmar o estado do evento agora."
+              "Nao foi possivel confirmar o estado do evento agora. Tenta novamente para recuperar esta area."
             }
             actionLabel="Tentar novamente"
             onAction={() => void access.refresh()}
@@ -72,5 +64,14 @@ export function EventModuleGate({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <SectionBoundary
+      title={`Erro nesta area: ${access.module.label}`}
+      description={`Esta area falhou ao renderizar, mas o resto da experiencia continua disponivel. Tenta abrir ${access.module.label.toLowerCase()} novamente.`}
+      onRetry={() => void access.refresh()}
+      resetKey={moduleKey}
+    >
+      {children}
+    </SectionBoundary>
+  );
 }

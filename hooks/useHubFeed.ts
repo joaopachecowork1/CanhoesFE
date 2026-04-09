@@ -208,11 +208,14 @@ export function useHubFeed() {
 
   const toggleReaction = useCallback(
     async (postId: string, emoji: string) => {
-      setPosts((currentPosts) =>
-        updatePostById(currentPosts, postId, (post) =>
+      // Capture previous state before optimistic update for rollback on failure
+      let previousPost: HubPostDto | undefined;
+      setPosts((currentPosts) => {
+        previousPost = currentPosts.find((post) => post.id === postId);
+        return updatePostById(currentPosts, postId, (post) =>
           applyPostReaction(post, emoji)
-        )
-      );
+        );
+      });
 
       try {
         if (emoji === HEART_REACTION) {
@@ -235,16 +238,23 @@ export function useHubFeed() {
 
         await hubRepo.toggleReaction(postId, emoji);
       } catch (error) {
+        // Revert only the affected post to its previous state instead of
+        // refetching the entire feed, which is disruptive and wasteful.
+        if (previousPost) {
+          const snapshot = previousPost;
+          setPosts((currentPosts) =>
+            updatePostById(currentPosts, postId, () => snapshot)
+          );
+        }
         const message = getErrorMessage(
           error,
           "Nao foi possivel atualizar a reacao do post."
         );
         logFrontendError("HubFeed.toggleReaction", error, { emoji, postId });
         toast.error(message);
-        void load();
       }
     },
-    [load]
+    []
   );
 
   const votePoll = useCallback(

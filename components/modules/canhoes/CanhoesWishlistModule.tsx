@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Gift, Link as LinkIcon, Trash2 } from "lucide-react";
+import { Gift, Inbox, Link as LinkIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -11,7 +11,9 @@ import {
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { useAuth } from "@/hooks/useAuth";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import type { PublicUserDto, WishlistItemDto } from "@/lib/api/types";
@@ -158,7 +160,7 @@ export function CanhoesWishlistModule() {
   if (!isLoading && !errorMessage) {
     if (memberList.length === 0) {
       wishlistContent = (
-        <p className="body-small text-[var(--color-text-muted)]">Ainda sem membros na wishlist.</p>
+        <EmptyState icon={Inbox} title="Sem membros" description="Ainda nao ha membros na wishlist." />
       );
     } else {
       wishlistContent = (
@@ -204,33 +206,36 @@ export function CanhoesWishlistModule() {
 
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="space-y-2">
-              <span className="canhoes-field-label">Título</span>
+            <div className="space-y-2">
+              <label htmlFor="wishlist-title-input" className="canhoes-field-label">Título</label>
               <Input
+                id="wishlist-title-input"
                 value={formState.title}
                 onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
                 placeholder="Ex.: Mouse sem fios"
               />
-            </label>
+            </div>
 
-            <label className="space-y-2">
-              <span className="canhoes-field-label">URL</span>
+            <div className="space-y-2">
+              <label htmlFor="wishlist-url-input" className="canhoes-field-label">URL</label>
               <Input
+                id="wishlist-url-input"
                 value={formState.url}
                 onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
                 placeholder="URL opcional"
               />
-            </label>
+            </div>
           </div>
 
-          <label className="space-y-2">
-            <span className="canhoes-field-label">Notas</span>
+          <div className="space-y-2">
+            <label htmlFor="wishlist-notes-input" className="canhoes-field-label">Notas</label>
             <Textarea
+              id="wishlist-notes-input"
               value={formState.notes}
               onChange={(event) => setFormState((prev) => ({ ...prev, notes: event.target.value }))}
               placeholder="Notas opcionais"
             />
-          </label>
+          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CanhoesFileTrigger
@@ -256,7 +261,7 @@ export function CanhoesWishlistModule() {
         />
       ) : null}
 
-      {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
+      {isLoading ? <InlineLoader label="A carregar wishlist" /> : null}
 
       {wishlistContent}
     </div>
@@ -291,7 +296,7 @@ function WishlistMemberPanel({
 
       <CardContent>
         {items.length === 0 ? (
-          <p className="body-small text-[var(--color-text-muted)]">Ainda sem itens.</p>
+          <p className="text-center text-sm text-[var(--text-muted)] py-4">Sem itens nesta wishlist.</p>
         ) : (
           <div className="max-h-[50svh] space-y-3 overflow-y-auto pr-1">
             {items.map((wishlistItem) => (

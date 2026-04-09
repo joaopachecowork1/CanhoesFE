@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Fraunces, JetBrains_Mono, Orbitron } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Orbitron } from "next/font/google";
 
 import AppProviders from "@/components/providers/AppProviders";
 
@@ -8,25 +8,21 @@ import "./globals.css";
 const orbitron = Orbitron({
   subsets: ["latin"],
   variable: "--font-orbitron",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["700", "800", "900"],
+  display: "swap",
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
-  weight: ["400", "500", "700"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
   weight: ["400", "600"],
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  weight: ["600", "700"],
 });
 
 const metadataBaseUrl =
@@ -68,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="pt" suppressHydrationWarning>
       <body
-        className={`${orbitron.variable} ${dmSans.variable} ${jetBrainsMono.variable} ${fraunces.variable} min-h-screen bg-background text-foreground antialiased`}
+        className={`${orbitron.variable} ${dmSans.variable} ${jetBrainsMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <AppProviders>{children}</AppProviders>
       </body>

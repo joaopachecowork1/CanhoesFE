@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { SectionBoundary } from "@/components/ui/section-boundary";
 import { homeCopy as homeCopyText } from "@/lib/canhoesCopy";
 import { getPhaseLabel, openComposeSheet } from "@/lib/canhoesEvent";
 import { cn } from "@/lib/utils";
@@ -68,8 +69,11 @@ export function CanhoesEventHomeContent({
 
   const metrics: MetricItem[] = [
     {
-      hint: voting.categoryCount > 0 ? `${voting.remainingVoteCount} por fechar` : "Sem categorias abertas nesta fase",
-      label: "Votacao",
+      hint:
+        voting.categoryCount > 0
+          ? `${voting.remainingVoteCount} por fechar`
+          : "Sem categorias oficiais abertas nesta fase",
+      label: "Boletim oficial",
       tone: "purple",
       value: `${voting.submittedVoteCount}/${voting.categoryCount}`,
     },
@@ -80,7 +84,7 @@ export function CanhoesEventHomeContent({
     },
     {
       hint: "Posts ja publicados nesta edicao",
-      label: "Feed",
+      label: "Mural social",
       tone: "purple",
       value: String(overview.counts.feedPostCount),
     },
@@ -104,8 +108,11 @@ export function CanhoesEventHomeContent({
     },
     {
       done: !overview.modules.voting || voting.remainingVoteCount === 0,
-      hint: overview.modules.voting && voting.categoryCount > 0 ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias` : "Sem votacoes abertas",
-      label: "Votacao deste ciclo",
+      hint:
+        overview.modules.voting && voting.categoryCount > 0
+          ? `${voting.submittedVoteCount} / ${voting.categoryCount} categorias`
+          : "Sem boletim oficial aberto",
+      label: "Boletim oficial deste ciclo",
     },
   ];
 
@@ -124,21 +131,38 @@ export function CanhoesEventHomeContent({
       {homeCopy.alerts.length > 0 ? <HomeAlertsSection alerts={homeCopy.alerts} /> : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        {overview.modules.feed ? <HomeFeedPanel posts={recentPosts} /> : null}
+        {overview.modules.feed ? (
+          <SectionBoundary
+            title="Erro no mural social"
+            description="O mural social falhou ao abrir, mas o resto do evento continua disponivel."
+          >
+            <HomeFeedPanel posts={recentPosts} />
+          </SectionBoundary>
+        ) : null}
 
         <div className="space-y-4">
           {overview.modules.secretSanta ? (
-            <HomeSecretSantaPanel
-              assignedWishlistItemCount={secretSanta.assignedWishlistItemCount}
-              assignedUserName={secretSanta.assignedUser?.name}
-              hasAssignment={secretSanta.hasAssignment}
-              hasDraw={secretSanta.hasDraw}
-              secretSantaAction={secretSantaAction}
-              wishlistAction={wishlistAction}
-            />
+            <SectionBoundary
+              title="Erro no amigo secreto"
+              description="A area do amigo secreto falhou ao renderizar, mas os outros blocos desta pagina continuam disponiveis."
+            >
+              <HomeSecretSantaPanel
+                assignedWishlistItemCount={secretSanta.assignedWishlistItemCount}
+                assignedUserName={secretSanta.assignedUser?.name}
+                hasAssignment={secretSanta.hasAssignment}
+                hasDraw={secretSanta.hasDraw}
+                secretSantaAction={secretSantaAction}
+                wishlistAction={wishlistAction}
+              />
+            </SectionBoundary>
           ) : null}
 
-          <HomeChecklistPanel items={checklist} />
+          <SectionBoundary
+            title="Erro no resumo da fase"
+            description="O resumo desta fase falhou ao renderizar, mas o resto da pagina continua disponivel."
+          >
+            <HomeChecklistPanel items={checklist} />
+          </SectionBoundary>
         </div>
       </div>
     </div>
@@ -237,12 +261,12 @@ function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
 function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
   return (
     <HomePanel
-      title="Feed da edicao"
+      title="Mural social da edicao"
       icon={MessageSquare}
       footer={
         <div className="flex justify-end">
           <Button variant="outline" onClick={openComposeSheet}>
-            Publicar no feed
+            Publicar no mural
           </Button>
         </div>
       }

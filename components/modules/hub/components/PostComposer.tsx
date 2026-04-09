@@ -160,6 +160,7 @@ export function PostComposer({
                         src={previewUrls[fileIndex]}
                         alt={file.name}
                         className="h-full w-full object-cover"
+                        decoding="async"
                       />
                     </div>
 

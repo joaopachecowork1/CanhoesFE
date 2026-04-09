@@ -90,11 +90,11 @@ function calculateRetryDelay(
  */
 async function withRetry<T>(
   fetchFn: () => Promise<T>,
-  attempt = 1
+  attempt = 1,
+  lastError?: unknown
 ): Promise<T> {
   if (attempt > RETRY_CONFIG.maxRetries) {
-    const error = fetchFn();
-    throw (await error) as ApiError;
+    throw lastError ?? new ApiError("Max retries exceeded", 0);
   }
 
   try {
@@ -113,7 +113,7 @@ async function withRetry<T>(
         const delay = parseInt(retryAfter, 10);
         if (!isNaN(delay)) {
           await new Promise((resolve) => setTimeout(resolve, delay));
-          return withRetry(fetchFn, attempt + 1) as T;
+          return withRetry(fetchFn, attempt + 1, error) as T;
         }
       }
     }
@@ -126,7 +126,7 @@ async function withRetry<T>(
     const delay = calculateRetryDelay(attempt, err);
     await new Promise((resolve) => setTimeout(resolve, delay));
 
-    return withRetry(fetchFn, attempt + 1);
+    return withRetry(fetchFn, attempt + 1, error);
   }
 }
 

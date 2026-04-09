@@ -4,7 +4,6 @@ import { Loader2, Sparkles } from "lucide-react";
 
 import type { EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
 import { getPhaseLabel } from "@/lib/canhoesEvent";
-import { cn } from "@/lib/utils";
 
 export function CanhoesPhaseHud({
   event,
@@ -17,10 +16,10 @@ export function CanhoesPhaseHud({
 }>) {
   if (isLoading) {
     return (
-      <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[rgba(245,237,224,0.92)]">
-        <Loader2 className="h-4 w-4 animate-spin text-[var(--neon-green)]" />
-        <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.14em]">
-          A abrir edicao
+      <div className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5 text-[rgba(245,237,224,0.7)]">
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--neon-green)]" />
+        <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em]">
+          A abrir
         </span>
       </div>
     );
@@ -29,30 +28,15 @@ export function CanhoesPhaseHud({
   if (!event || !overview) return null;
 
   const phaseLabel = getPhaseLabel(overview.activePhase?.type);
-  const subtitle = overview.nextPhase
-    ? `Proxima: ${getPhaseLabel(overview.nextPhase.type)}`
-    : overview.permissions.canVote
-      ? "Votacao em curso"
-      : overview.permissions.canSubmitProposal
-        ? "Propostas abertas"
-        : "Evento ativo";
 
   return (
-    <div className="canhoes-shell-chip inline-flex min-h-11 items-center gap-3 rounded-full border-[rgba(177,140,255,0.2)] px-4 py-2 text-left [box-shadow:var(--glow-purple-sm)]">
-      <span
-        className={cn("flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(177,140,255,0.42)] bg-[linear-gradient(180deg,rgba(78,55,110,0.94),rgba(34,26,50,0.98))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple)]")}
-      >
-        <Sparkles className="h-4 w-4" />
+    <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[rgba(177,140,255,0.18)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5">
+      <Sparkles className="h-3.5 w-3.5 text-[var(--accent-purple)]" />
+      <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[rgba(245,237,224,0.86)]">
+        {event.name}
       </span>
-
-      <span className="min-w-0">
-        <span className="block font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.86)]">
-          {event.name}
-        </span>
-        <span className="block text-sm font-semibold text-[var(--bg-paper)]">
-          {phaseLabel}
-        </span>
-        <span className="block text-xs text-[rgba(245,237,224,0.9)]">{subtitle}</span>
+      <span className="text-xs font-semibold text-[var(--bg-paper)]">
+        {phaseLabel}
       </span>
     </div>
   );

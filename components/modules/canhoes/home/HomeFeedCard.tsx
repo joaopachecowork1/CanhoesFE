@@ -32,6 +32,7 @@ export function FeedPostCard({
             alt={`Media do post de ${post.userName}`}
             loading="lazy"
             decoding="async"
+            sizes="(max-width: 768px) 100vw, 400px"
             className="h-44 w-full object-cover"
           />
         </div>

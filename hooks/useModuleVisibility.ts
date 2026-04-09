@@ -79,7 +79,7 @@ export function useModuleVisibility({
       },
       successMessage = "Visibilidade dos modulos atualizada"
     ) => {
-      if (!eventId || !state) return;
+      if (!eventId || !state) return false;
 
       setSavingKey(busyStateKey);
       try {
@@ -87,6 +87,7 @@ export function useModuleVisibility({
         await onUpdate();
         if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
         toast.success(successMessage);
+        return true;
       } catch (err) {
         logFrontendError("Admin.useModuleVisibility", err, {
           endpoint: `admin/state (${busyStateKey})`,
@@ -95,6 +96,7 @@ export function useModuleVisibility({
         toast.error(
           getErrorMessage(err, "Nao foi possivel guardar a configuracao dos modulos.")
         );
+        return false;
       } finally {
         setSavingKey(null);
       }
@@ -104,11 +106,11 @@ export function useModuleVisibility({
 
   const toggleModule = useCallback(
     async (key: keyof EventAdminModuleVisibilityDto, checked: boolean) => {
-      if (!state) return;
+      if (!state) return false;
 
       setOptimisticOverrides((prev) => ({ ...prev, [key]: checked }));
 
-      await persistState(
+      return persistState(
         key,
         {
           moduleVisibility: {
@@ -127,7 +129,7 @@ export function useModuleVisibility({
       const allOverrides = buildModuleVisibilityState(checked);
       setOptimisticOverrides(allOverrides);
 
-      await persistState(
+      return persistState(
         checked ? "all-enabled" : "all-disabled",
         { moduleVisibility: allOverrides },
         checked

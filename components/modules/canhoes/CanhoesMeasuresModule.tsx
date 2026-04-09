@@ -1,38 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flame, Gavel } from "lucide-react";
+import { Flame, Gavel, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
-import type { CanhoesStateDto, GalaMeasureDto } from "@/lib/api/types";
+import type { GalaMeasureDto } from "@/lib/api/types";
 import {
   CanhoesModuleHeader,
-  formatCanhoesPhaseLabel,
+  formatEventPhaseLabel,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-type ModuleData = {
-  state: CanhoesStateDto | null;
-  measures: GalaMeasureDto[];
-};
-
-async function loadModuleData(): Promise<ModuleData> {
-  const [nextState, nextMeasures] = await Promise.all([
-    canhoesRepo.getState(),
-    canhoesRepo.getMeasures(),
-  ]);
-  return { state: nextState, measures: nextMeasures };
-}
-
 export function CanhoesMeasuresModule() {
-  const [moduleData, setModuleData] = useState<ModuleData>({ state: null, measures: [] });
+  const { overview } = useEventOverview();
+  const [measures, setMeasures] = useState<GalaMeasureDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [proposalText, setProposalText] = useState("");
@@ -44,15 +35,15 @@ export function CanhoesMeasuresModule() {
     setErrorMessage(null);
 
     try {
-      const data = await loadModuleData();
-      setModuleData(data);
+      const nextMeasures = await canhoesRepo.getMeasures();
+      setMeasures(nextMeasures);
     } catch (error) {
       const message = getErrorMessage(
         error,
         "Nao foi possivel carregar as medidas desta edicao."
       );
       logFrontendError("CanhoesMeasures.loadMeasures", error);
-      setModuleData({ state: null, measures: [] });
+      setMeasures([]);
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -63,11 +54,12 @@ export function CanhoesMeasuresModule() {
     void loadData();
   }, []);
 
-  const isNominationPhase = moduleData.state?.phase === "nominations";
-  const canSubmitProposal = proposalText.trim().length >= 5 && isNominationPhase;
+  const phaseType = overview?.activePhase?.type;
+  const nominationPhase = phaseType === "PROPOSALS";
+  const canSubmitProposal = proposalText.trim().length >= 5 && nominationPhase;
   const submitButtonLabel = isSubmitting
     ? "A enviar..."
-    : isNominationPhase
+    : nominationPhase
     ? "Propor"
     : "Propostas fechadas";
 
@@ -91,7 +83,7 @@ export function CanhoesMeasuresModule() {
     }
   };
 
-  const filteredMeasures = moduleData.measures.filter((measure) =>
+  const filteredMeasures = measures.filter((measure) =>
     search.trim()
       ? measure.text.toLowerCase().includes(search.trim().toLowerCase())
       : true
@@ -104,7 +96,7 @@ export function CanhoesMeasuresModule() {
         title="Medidas"
         description="Junta regras e castigos para a gala sem partir o layout em mobile."
         badgeLabel={
-          moduleData.state ? `Fase: ${formatCanhoesPhaseLabel(moduleData.state.phase)}` : undefined
+          phaseType ? `Fase: ${formatEventPhaseLabel(phaseType)}` : undefined
         }
       />
 
@@ -117,14 +109,15 @@ export function CanhoesMeasuresModule() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <label className="space-y-2">
-            <span className="canhoes-field-label">Texto</span>
+          <div className="space-y-2">
+            <label htmlFor="measure-text-input" className="canhoes-field-label">Texto</label>
             <Textarea
+              id="measure-text-input"
               value={proposalText}
               onChange={(event) => setProposalText(event.target.value)}
               placeholder="Ex.: Quem perder paga uma rodada"
             />
-          </label>
+          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="canhoes-helper-text">A proposta fica pendente até aprovação de um admin.</p>
@@ -157,10 +150,10 @@ export function CanhoesMeasuresModule() {
             />
           ) : null}
 
-          {isLoading ? <p className="body-small text-[var(--color-text-muted)]">A carregar...</p> : null}
+          {isLoading ? <InlineLoader label="A carregar medidas" /> : null}
 
           {!isLoading && !errorMessage && filteredMeasures.length === 0 ? (
-            <p className="body-small text-[var(--color-text-muted)]">Ainda não há medidas.</p>
+            <EmptyState icon={Inbox} title="Sem medidas" description="Ainda nao ha medidas nesta edicao." />
           ) : null}
 
           {isLoading ? null : (

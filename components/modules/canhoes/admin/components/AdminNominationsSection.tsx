@@ -31,6 +31,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  ADMIN_CONTENT_CARD_CLASS,
+  AdminDetailPanel,
+  AdminDetailSheet,
+  AdminListPanel,
+  AdminSelectableButton,
+} from "./adminContentUi";
 
 type NominationStatus = "pending" | "approved" | "rejected";
 type NominationListFilter = "all" | NominationStatus;
@@ -47,14 +54,17 @@ const NOMINATION_EMPTY_STATE_LABELS: Record<NominationStatus, string> = {
   rejected: "rejeitada",
 };
 
-const NOMINATION_BADGE_VARIANT_BY_STATUS: Record<AdminNomineeDto["status"], "default" | "destructive" | "secondary"> = {
+const NOMINATION_BADGE_VARIANT_BY_STATUS: Record<
+  AdminNomineeDto["status"],
+  "default" | "destructive" | "secondary"
+> = {
   approved: "default",
   pending: "secondary",
   rejected: "destructive",
 };
 
 function getCategoryName(categoryId: string | null | undefined, categories: AwardCategoryDto[]) {
-  return categories.find((c) => c.id === categoryId)?.name ?? "Sem categoria";
+  return categories.find((category) => category.id === categoryId)?.name ?? "Sem categoria";
 }
 
 export function AdminNominationsSection({
@@ -89,7 +99,8 @@ export function AdminNominationsSection({
   };
 
   const approveNomination = useMutation({
-    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminApproveNomination(queryEventId, nomineeId),
+    mutationFn: (nomineeId: string) =>
+      canhoesEventsRepo.adminApproveNomination(queryEventId, nomineeId),
     onSuccess: async () => {
       toast.success("Nomeacao aprovada.");
       await invalidate();
@@ -100,7 +111,8 @@ export function AdminNominationsSection({
   });
 
   const rejectNomination = useMutation({
-    mutationFn: (nomineeId: string) => canhoesEventsRepo.adminRejectNomination(queryEventId, nomineeId),
+    mutationFn: (nomineeId: string) =>
+      canhoesEventsRepo.adminRejectNomination(queryEventId, nomineeId),
     onSuccess: async () => {
       setRejectingNominationId(null);
       toast.success("Nomeacao rejeitada.");
@@ -130,9 +142,9 @@ export function AdminNominationsSection({
   const statusCounts = useMemo(
     () =>
       nominations.reduce(
-        (acc, row) => {
-          acc[row.status]++;
-          return acc;
+        (accumulator, nomination) => {
+          accumulator[nomination.status]++;
+          return accumulator;
         },
         { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
       ),
@@ -149,11 +161,11 @@ export function AdminNominationsSection({
         if (categoryFilter === "all") return true;
         return nomination.categoryId === categoryFilter;
       })
-      .sort((a, b) => b.createdAtUtc.localeCompare(a.createdAtUtc));
-  }, [nominations, statusFilter, categoryFilter]);
+      .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
+  }, [categoryFilter, nominations, statusFilter]);
 
   const selectedNomination = useMemo(
-    () => filteredNominations.find((n) => n.id === selectedNominationId) ?? null,
+    () => filteredNominations.find((nomination) => nomination.id === selectedNominationId) ?? null,
     [filteredNominations, selectedNominationId]
   );
 
@@ -171,7 +183,10 @@ export function AdminNominationsSection({
   if (nominationsQuery.error) {
     logFrontendError("AdminNominationsSection.query", nominationsQuery.error, { eventId });
     return (
-      <AdminStateMessage tone="error" action={<Button onClick={() => void nominationsQuery.refetch()}>Tentar novamente</Button>}>
+      <AdminStateMessage
+        tone="error"
+        action={<Button onClick={() => void nominationsQuery.refetch()}>Tentar novamente</Button>}
+      >
         Nao foi possivel carregar as nomeacoes.
       </AdminStateMessage>
     );
@@ -179,7 +194,7 @@ export function AdminNominationsSection({
 
   return (
     <div className="space-y-4">
-      <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+      <Card className={ADMIN_CONTENT_CARD_CLASS}>
         <CardHeader className="space-y-2">
           <p className="editorial-kicker">Moderacao</p>
           <CardTitle className="flex items-center gap-2">
@@ -187,11 +202,13 @@ export function AdminNominationsSection({
             Nomeacoes
           </CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             {(["pending", "approved", "rejected"] as const).map((status) => {
               const isActive = statusFilter === status;
               const label = NOMINATION_STATUS_LABELS[status];
+
               return (
                 <Button
                   key={status}
@@ -199,12 +216,23 @@ export function AdminNominationsSection({
                   variant={isActive ? "secondary" : "outline"}
                   className={cn(
                     isActive ? "border-[var(--border-neon)]" : "",
-                    status === "pending" && statusCounts.pending > 0 ? "text-[var(--neon-amber)]" : ""
+                    status === "pending" && statusCounts.pending > 0
+                      ? "text-[var(--neon-amber)]"
+                      : ""
                   )}
                   onClick={() => setStatusFilter(status)}
                 >
                   {label}
-                  <Badge className={cn("ml-2", status === "pending" && statusCounts.pending > 0 ? "bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)] animate-pulse" : "")}>{statusCounts[status]}</Badge>
+                  <Badge
+                    className={cn(
+                      "ml-2",
+                      status === "pending" && statusCounts.pending > 0
+                        ? "animate-pulse bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)]"
+                        : ""
+                    )}
+                  >
+                    {statusCounts[status]}
+                  </Badge>
                 </Button>
               );
             })}
@@ -228,130 +256,129 @@ export function AdminNominationsSection({
 
           {filteredNominations.length === 0 ? (
             <AdminStateMessage variant="panel">
-              Fila limpa - nenhuma nomeacao {statusFilter === "all" ? "pendente" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
+              Fila limpa - nenhuma nomeacao{" "}
+              {statusFilter === "all" ? "pendente" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
             </AdminStateMessage>
           ) : (
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
-              <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
-                <div className="max-h-[56svh] space-y-1 overflow-y-auto pr-1">
-                  {filteredNominations.map((nomination) => {
-                    const isSelected = nomination.id === selectedNominationId;
-                    const categoryName = getCategoryName(nomination.categoryId, categories);
+            <AdminListPanel bodyClassName="max-h-[56svh]">
+              {filteredNominations.map((nomination) => {
+                const isSelected = nomination.id === selectedNominationId;
+                const categoryName = getCategoryName(nomination.categoryId, categories);
 
-                    return (
-                      <button
-                        key={nomination.id}
-                        type="button"
-                        onClick={() => setSelectedNominationId(nomination.id)}
-                        className={cn(
-                          "w-full rounded-[var(--radius-md-token)] border px-3 py-2.5 text-left transition-colors",
-                          isSelected
-                            ? "border-[rgba(122,173,58,0.36)] bg-[rgba(36,49,23,0.9)]"
-                            : "border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,11,0.62)] hover:bg-[rgba(24,31,16,0.82)]"
-                        )}
-                        aria-pressed={isSelected}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
-                              {nomination.title}
-                            </p>
-                            <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
-                              {categoryName}
-                            </p>
-                          </div>
-                          <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}>
-                            {nomination.status}
-                          </Badge>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {selectedNomination ? (
-                <article className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-3.5">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <p className="font-semibold text-[var(--bg-paper)]">
-                          {selectedNomination.title}
+                return (
+                  <AdminSelectableButton
+                    key={nomination.id}
+                    type="button"
+                    onClick={() => setSelectedNominationId(nomination.id)}
+                    selected={isSelected}
+                    aria-pressed={isSelected}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                          {nomination.title}
                         </p>
-                        <p className="text-xs text-[var(--color-text-muted)]">
-                          Categoria: {getCategoryName(selectedNomination.categoryId, categories)}
-                        </p>
-                        <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-                          <User className="h-3 w-3" />
-                          Submetido por: {selectedNomination.submittedByName} · {formatDateTimeUtc(selectedNomination.createdAtUtc)}
+                        <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
+                          {categoryName}
                         </p>
                       </div>
-                      <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[selectedNomination.status]}>
-                        {selectedNomination.status}
+                      <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}>
+                        {nomination.status}
                       </Badge>
                     </div>
-
-                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                      <div>
-                        <p className="mb-2 text-xs font-medium text-[var(--color-text-muted)]">
-                          Mover para categoria
-                        </p>
-                        <Select
-                          value={selectedNomination.categoryId ?? "none"}
-                          onValueChange={(value) =>
-                            setCategory.mutate({ nomineeId: selectedNomination.id, categoryId: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Mover para categoria" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Sem categoria</SelectItem>
-                            {categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <Button
-                          type="button"
-                          disabled={
-                            anyMutationPending ||
-                            selectedNomination.status === "approved"
-                          }
-                          className="bg-[rgba(0,255,136,0.12)] border-[var(--border-neon)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
-                          onClick={() => approveNomination.mutate(selectedNomination.id)}
-                        >
-                          Aprovar
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          disabled={
-                            anyMutationPending ||
-                            selectedNomination.status === "rejected"
-                          }
-                          className="bg-[rgba(255,58,58,0.08)] border-[var(--neon-red)] text-[var(--neon-red)]"
-                          onClick={() => setRejectingNominationId(selectedNomination.id)}
-                        >
-                          Rejeitar
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ) : null}
-            </div>
+                  </AdminSelectableButton>
+                );
+              })}
+            </AdminListPanel>
           )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={Boolean(rejectingNominationId)} onOpenChange={(open) => !open && setRejectingNominationId(null)}>
+      <AdminDetailSheet
+        open={Boolean(selectedNomination)}
+        onOpenChange={(open) => !open && setSelectedNominationId(null)}
+        kicker="Moderacao"
+        title={selectedNomination?.title ?? ""}
+        description={
+          selectedNomination
+            ? `Categoria atual: ${getCategoryName(selectedNomination.categoryId, categories)}`
+            : undefined
+        }
+      >
+        {selectedNomination ? (
+          <>
+            <AdminDetailPanel>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
+                    {formatDateTimeUtc(selectedNomination.createdAtUtc)}
+                  </p>
+                  <p className="flex items-center gap-1.5 text-sm text-[rgba(245,237,224,0.82)]">
+                    <User className="h-3.5 w-3.5" />
+                    Submetido por {selectedNomination.submittedByName}
+                  </p>
+                </div>
+                <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[selectedNomination.status]}>
+                  {selectedNomination.status}
+                </Badge>
+              </div>
+            </AdminDetailPanel>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-[var(--color-text-muted)]">
+                Mover para categoria
+              </p>
+              <Select
+                value={selectedNomination.categoryId ?? "none"}
+                onValueChange={(value) =>
+                  setCategory.mutate({
+                    nomineeId: selectedNomination.id,
+                    categoryId: value,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Mover para categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem categoria</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                type="button"
+                disabled={anyMutationPending || selectedNomination.status === "approved"}
+                className="border-[var(--border-neon)] bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                onClick={() => approveNomination.mutate(selectedNomination.id)}
+              >
+                Aprovar
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                disabled={anyMutationPending || selectedNomination.status === "rejected"}
+                className="border-[var(--neon-red)] bg-[rgba(255,58,58,0.08)] text-[var(--neon-red)]"
+                onClick={() => setRejectingNominationId(selectedNomination.id)}
+              >
+                Rejeitar
+              </Button>
+            </div>
+          </>
+        ) : null}
+      </AdminDetailSheet>
+
+      <AlertDialog
+        open={Boolean(rejectingNominationId)}
+        onOpenChange={(open) => !open && setRejectingNominationId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tens a certeza?</AlertDialogTitle>

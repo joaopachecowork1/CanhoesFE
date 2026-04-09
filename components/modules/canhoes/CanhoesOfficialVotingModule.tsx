@@ -81,8 +81,8 @@ export function CanhoesOfficialVotingModule() {
       <div className="space-y-3">
         <CanhoesModuleHeader
           icon={Vote}
-          title="Votacao Oficial"
-          description="Boletim oficial com uma escolha por categoria."
+          title="Boletim oficial"
+          description="Participacao oficial com uma escolha validada por categoria."
         />
         <FeedSkeleton />
       </div>
@@ -92,7 +92,7 @@ export function CanhoesOfficialVotingModule() {
   if (!eventId || boardQuery.error || !boardQuery.data) {
     return (
       <ErrorAlert
-        title="Erro ao carregar votacao oficial"
+        title="Erro ao carregar boletim oficial"
         description={getErrorMessage(boardQuery.error, "Nao foi possivel abrir o boletim oficial.")}
         actionLabel="Tentar novamente"
         onAction={() => void boardQuery.refetch()}
@@ -113,15 +113,15 @@ export function CanhoesOfficialVotingModule() {
     <div className="space-y-4">
       <CanhoesModuleHeader
         icon={Vote}
-        title="Votacao Oficial · Canhoes do Ano"
-        description="Feed especial de voto oficial separado das polls do feed normal."
+        title="Boletim oficial"
+        description="Area oficial de voto, separada das sondagens do mural."
         badgeLabel={`${votedCategories}/${totalCategories}`}
       />
 
       <Card className="border-[var(--border-moss)] bg-[var(--bg-surface)] rounded-2xl">
         <CardContent className="space-y-3 py-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[var(--text-muted)]">Votaste em {votedCategories} de {totalCategories} categorias</span>
+            <span className="text-[var(--text-muted)]">Votaste em {votedCategories} de {totalCategories} categorias oficiais</span>
             <span className="font-[var(--font-mono)] text-[var(--text-primary)]">{completion}%</span>
           </div>
           <div className="h-2 rounded-full bg-[var(--moss)]/30 overflow-hidden">
@@ -150,7 +150,7 @@ export function CanhoesOfficialVotingModule() {
       {votedCategories === totalCategories && totalCategories > 0 ? (
         <Card className="border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)] rounded-2xl">
           <CardContent className="py-6 text-center text-[var(--neon-green)] font-semibold">
-            Boletim completo
+            Boletim oficial completo
           </CardContent>
         </Card>
       ) : null}
@@ -184,7 +184,7 @@ function OfficialVotingCategoryCard({
     <Card className="border-[var(--border-moss)] bg-[var(--bg-surface)] rounded-2xl relative">
       {canVote ? null : (
         <div className="absolute inset-0 z-10 rounded-2xl bg-black/35 backdrop-blur-[1px] flex items-center justify-center text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
-          Votacao encerrada
+          Boletim encerrado
         </div>
       )}
 

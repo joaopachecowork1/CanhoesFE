@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import type { EventVotingBoardDto, EventVotingCategoryDto } from "@/lib/api/types";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
@@ -85,20 +86,20 @@ export function CanhoesVotingModule() {
     <div className="space-y-4">
       <CanhoesModuleHeader
         icon={Trophy}
-        title="Votacao"
-        description="O boletim desta fase usa o mesmo overview do evento para decidir se a votacao esta aberta e que categorias podes fechar."
+        title="Boletim oficial"
+        description="Area oficial para fechar o voto por categoria quando a fase o permitir."
         badgeLabel={
           overview ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}` : undefined
         }
       />
 
       {isLoading || isOverviewLoading ? (
-        <p className="body-small text-[var(--color-text-muted)]">A carregar...</p>
+        <InlineLoader label="A carregar boletim oficial" />
       ) : null}
 
       {!isLoading && !isOverviewLoading && !votingBoard && errorMessage ? (
         <ErrorAlert
-          title="Erro ao carregar votacao"
+          title="Erro ao carregar boletim oficial"
           description={errorMessage}
           actionLabel="Tentar novamente"
           onAction={() => void loadVotingData()}
@@ -155,19 +156,24 @@ function VotingCategoryCard({
           <p className="body-small text-[var(--color-text-muted)]">{category.description}</p>
         ) : null}
 
-        {category.options.map((option) => (
-          <VoteOption
+        {category.options.map((option, index) => (
+          <div
             key={option.id}
-            isDisabled={!votingOpen || Boolean(savingVote)}
-            isSaving={savingVote?.categoryId === category.id && savingVote?.optionId === option.id}
-            isSelected={category.myOptionId === option.id}
-            label={option.label}
-            onClick={() => onVote(category.id, option.id)}
-          />
+            className="animate-[stagger-fade-in_0.3s_ease-out_both]"
+            style={{ animationDelay: `${index * 0.06}s` }}
+          >
+            <VoteOption
+              isDisabled={!votingOpen || Boolean(savingVote)}
+              isSaving={savingVote?.categoryId === category.id && savingVote?.optionId === option.id}
+              isSelected={category.myOptionId === option.id}
+              label={option.label}
+              onClick={() => onVote(category.id, option.id)}
+            />
+          </div>
         ))}
 
         <p className="body-small text-[var(--color-text-muted)]">
-          Podes alterar o voto enquanto a fase de votacao continuar aberta.
+          Podes alterar o voto oficial enquanto a fase de votacao continuar aberta.
         </p>
       </CardContent>
     </Card>
@@ -189,7 +195,7 @@ function VoteOption({
 }>) {
   let actionLabel = "Votar";
   if (isSelected) {
-    actionLabel = "Selecionado";
+    actionLabel = "Voto atual";
   }
   if (isSaving) {
     actionLabel = "A guardar...";
@@ -201,27 +207,39 @@ function VoteOption({
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        "canhoes-tap canhoes-list-item flex w-full items-center justify-between gap-3 p-3 text-left",
-        isSelected && "border-[var(--color-beige)]/35 bg-[rgba(107,124,69,0.16)]",
-        isDisabled && "cursor-not-allowed opacity-55"
+        "canhoes-tap flex w-full items-center justify-between gap-3 rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-all duration-200",
+        isSelected
+          ? "border-[rgba(122,173,58,0.4)] bg-[rgba(42,55,28,0.9)] shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+          : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[rgba(122,173,58,0.25)] active:scale-[0.99]",
+        isDisabled && "cursor-not-allowed opacity-50"
       )}
     >
       <div className="min-w-0">
-        <p className="truncate font-semibold text-[var(--color-text-primary)]">{label}</p>
-        <p className="body-small text-[var(--color-text-muted)]">
-          {isSelected ? "Este e o teu voto atual." : "Toca para votar nesta opcao."}
+        <p className={cn(
+          "truncate font-semibold transition-colors duration-200",
+          isSelected ? "text-[var(--neon-green)]" : "text-[var(--bg-paper)]"
+        )}>{label}</p>
+        <p className="body-small text-[var(--text-muted)]">
+          {isSelected ? "Este e o teu voto oficial atual." : "Toca para registar o voto oficial nesta opcao."}
         </p>
       </div>
 
       <span
         className={cn(
-          "rounded-full px-3 py-1 text-xs font-semibold",
+          "inline-flex min-h-[28px] items-center rounded-full px-3 text-xs font-semibold transition-all duration-200",
           isSelected
-            ? "bg-[var(--color-moss)] text-[var(--color-text-primary)]"
-            : "bg-white/10 text-[var(--color-beige)]"
+            ? "bg-[var(--color-moss)] text-[var(--bg-paper)] shadow-sm"
+            : "bg-[rgba(245,237,224,0.06)] text-[var(--text-muted)]"
         )}
       >
-        {actionLabel}
+        {isSaving ? (
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--neon-green)]" />
+            A guardar
+          </span>
+        ) : (
+          actionLabel
+        )}
       </span>
     </button>
   );

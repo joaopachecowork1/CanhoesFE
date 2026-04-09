@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { LogOut, Menu } from "lucide-react";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 
 import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
@@ -10,18 +11,43 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { CanhoesAmbientBackground } from "./CanhoesAmbientBackground";
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
-import { CanhoesComposeSheet } from "./CanhoesComposeSheet";
-import { CanhoesFloatingActionMenu } from "./CanhoesFloatingActionMenu";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
 import { useCanhoesShellNavigation } from "./useCanhoesShellNavigation";
 
-const headerButtonClass =
-  "min-h-11 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] px-3 text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]";
+const loadCanhoesAmbientBackground = () =>
+  import("./CanhoesAmbientBackground").then((module) => ({
+    default: module.CanhoesAmbientBackground,
+  }));
+
+const loadCanhoesComposeSheet = () =>
+  import("./CanhoesComposeSheet").then((module) => ({
+    default: module.CanhoesComposeSheet,
+  }));
+
+const loadCanhoesFloatingActionMenu = () =>
+  import("./CanhoesFloatingActionMenu").then((module) => ({
+    default: module.CanhoesFloatingActionMenu,
+  }));
+
+const LazyCanhoesAmbientBackground = dynamic(loadCanhoesAmbientBackground, {
+  loading: () => null,
+  ssr: false,
+});
+
+const LazyCanhoesComposeSheet = dynamic(loadCanhoesComposeSheet, {
+  loading: () => null,
+  ssr: false,
+});
+
+const LazyCanhoesFloatingActionMenu = dynamic(loadCanhoesFloatingActionMenu, {
+  loading: () => null,
+  ssr: false,
+});
 
 export function CanhoesChrome({
   children,
@@ -38,6 +64,25 @@ export function CanhoesChrome({
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasOpenedComposeSheet, setHasOpenedComposeSheet] = useState(false);
+  const [hasOpenedMenu, setHasOpenedMenu] = useState(false);
+  const [showAmbientBackground, setShowAmbientBackground] = useState(false);
+
+  const handleComposeSheetChange = (open: boolean) => {
+    if (open) {
+      setHasOpenedComposeSheet(true);
+    }
+
+    setIsComposeSheetOpen(open);
+  };
+
+  const handleMenuOpenChange = (open: boolean) => {
+    if (open) {
+      setHasOpenedMenu(true);
+    }
+
+    setIsMenuOpen(open);
+  };
 
   // Close overlays on navigation
   useEffect(() => {
@@ -56,6 +101,7 @@ export function CanhoesChrome({
   useEffect(() => {
     const handleOpenCompose = () => {
       if (!canCompose) return;
+      setHasOpenedComposeSheet(true);
       setIsComposeSheetOpen(true);
     };
 
@@ -63,30 +109,57 @@ export function CanhoesChrome({
     return () => globalThis.removeEventListener(OPEN_COMPOSE_SHEET_EVENT, handleOpenCompose);
   }, [canCompose]);
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadCanhoesFloatingActionMenu();
+
+      if (canCompose) {
+        void loadCanhoesComposeSheet();
+      }
+    }, 1200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [canCompose]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setShowAmbientBackground(true);
+    }, 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   const {
     bottomLeftEntries,
     bottomRightEntries,
     isEventHomePath,
     menuPrimaryIds,
-    pageTitle,
+    pageContext,
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
     isLocalMode,
     isMenuOpen,
-    onOpenMenu: () => setIsMenuOpen(true),
+    onOpenMenu: () => handleMenuOpenChange(true),
     overview: eventOverview.overview,
     pathname,
     router,
     user,
   });
 
+  useEffect(() => {
+    const eventName = eventOverview.event?.name?.trim();
+    document.title = eventName
+      ? `${pageContext.title} · ${eventName}`
+      : `${pageContext.title} · Canhoes`;
+  }, [eventOverview.event?.name, pageContext.title]);
+
   return (
     <div
       data-theme="canhoes"
       className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
-      <CanhoesAmbientBackground />
+      {showAmbientBackground ? <LazyCanhoesAmbientBackground /> : null}
 
       <div
         aria-hidden="true"
@@ -94,25 +167,56 @@ export function CanhoesChrome({
       />
 
       <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.12)] bg-[rgba(12,15,9,0.8)] backdrop-blur-[24px]">
-        <div className="page-shell-wide pb-3 pt-3">
+        <div className="page-shell-wide pb-2 pt-2">
           <motion.div
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
             animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="page-hero editorial-shell border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-4 py-4 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-5 sm:py-5"
+            className="page-hero editorial-shell border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-4 sm:py-4"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
-                <CanhoesBrandMark />
-                <p className="body-small text-[rgba(245,237,224,0.88)]">{pageTitle}</p>
+                <CanhoesBrandMark compact subtitle="Premios da edicao" />
+
+                {!isEventHomePath ? (
+                  <div className="min-w-0 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "shrink-0 border-transparent px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]",
+                          pageContext.tone === "social" &&
+                            "bg-[rgba(177,140,255,0.16)] text-[var(--accent-purple-soft)]",
+                          pageContext.tone === "official" &&
+                            "bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)]",
+                          pageContext.tone === "admin" &&
+                            "bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)]",
+                          pageContext.tone === "event" &&
+                            "bg-[rgba(245,237,224,0.08)] text-[rgba(245,237,224,0.86)]"
+                        )}
+                      >
+                        {pageContext.toneLabel}
+                      </Badge>
+                      <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                        {pageContext.title}
+                      </p>
+                    </div>
+
+                    {pageContext.description ? (
+                      <p className="mt-1 line-clamp-1 text-xs text-[rgba(245,237,224,0.72)]">
+                        {pageContext.description}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {isLogged ? (
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className={headerButtonClass}
+                    size="icon"
+                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -120,33 +224,28 @@ export function CanhoesChrome({
                     }}
                   >
                     <LogOut className="h-4 w-4" />
-                    <span className="hidden sm:inline">Sair</span>
                   </Button>
                 ) : null}
 
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  className={headerButtonClass}
-                  onClick={() => setIsMenuOpen((current) => !current)}
+                  size="icon"
+                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                  onClick={() => handleMenuOpenChange(!isMenuOpen)}
                   aria-expanded={isMenuOpen}
                   aria-label="Abrir menu"
                 >
                   <Menu className="h-4 w-4" />
-                  <span className="hidden sm:inline">Menu</span>
                 </Button>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <div className="canhoes-shell-chip inline-flex min-h-11 items-center rounded-full px-4 py-2">
-                <div className="min-w-0">
-                  <p className="label text-[rgba(245,237,224,0.7)]">Perfil</p>
-                  <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
-                    {userLabel}
-                  </p>
-                </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5">
+                <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                  {userLabel}
+                </p>
               </div>
 
               <CanhoesPhaseHud
@@ -159,7 +258,7 @@ export function CanhoesChrome({
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(7.2rem+env(safe-area-inset-bottom,0px))]">
+      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -182,29 +281,33 @@ export function CanhoesChrome({
       <CanhoesBottomTabs
         isComposeOpen={isComposeSheetOpen}
         leftItems={bottomLeftEntries}
-        onCompose={() => setIsComposeSheetOpen(true)}
+        onCompose={() => handleComposeSheetChange(true)}
         rightItems={bottomRightEntries}
         showCompose={canCompose}
       />
 
-      <CanhoesFloatingActionMenu
-        isOpen={isMenuOpen}
-        onOpenChange={setIsMenuOpen}
-        isAdmin={isAdmin}
-        isLocalMode={isLocalMode}
-        overview={eventOverview.overview}
-        primaryIds={menuPrimaryIds}
-        onNavigate={(href) => {
-          setIsMenuOpen(false);
-          router.push(href);
-        }}
-      />
+      {isMenuOpen || hasOpenedMenu ? (
+        <LazyCanhoesFloatingActionMenu
+          isOpen={isMenuOpen}
+          onOpenChange={handleMenuOpenChange}
+          isAdmin={isAdmin}
+          isLocalMode={isLocalMode}
+          overview={eventOverview.overview}
+          primaryIds={menuPrimaryIds}
+          onNavigate={(href) => {
+            handleMenuOpenChange(false);
+            router.push(href);
+          }}
+        />
+      ) : null}
 
-      <CanhoesComposeSheet
-        open={isComposeSheetOpen}
-        onOpenChange={setIsComposeSheetOpen}
-        onDone={() => setIsComposeSheetOpen(false)}
-      />
+      {isComposeSheetOpen || hasOpenedComposeSheet ? (
+        <LazyCanhoesComposeSheet
+          open={isComposeSheetOpen}
+          onOpenChange={handleComposeSheetChange}
+          onDone={() => handleComposeSheetChange(false)}
+        />
+      ) : null}
     </div>
   );
 }

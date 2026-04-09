@@ -22,10 +22,10 @@ export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = 
   {
     key: "feed",
     label: "Feed",
-    navLabel: "Feed",
+    navLabel: "Mural",
     href: "/canhoes/feed",
     group: "core",
-    description: "Mural principal da edicao com posts, imagens e avisos curtos.",
+    description: "Mural social da edicao com posts, imagens e sondagens rapidas do grupo.",
   },
   {
     key: "nominees",
@@ -33,7 +33,7 @@ export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = 
     navLabel: "Nomeacoes",
     href: "/canhoes/nomeacoes",
     group: "community",
-    description: "Arquivo das nomeacoes aprovadas para consulta do grupo.",
+    description: "Area oficial para consultar nomeacoes aprovadas e o que ja entrou no ciclo.",
   },
   {
     key: "categories",
@@ -41,7 +41,7 @@ export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = 
     navLabel: "Categorias",
     href: "/canhoes/categorias",
     group: "core",
-    description: "Lista de categorias abertas nesta edicao e respetivo contexto.",
+    description: "Area oficial com categorias do premio e propostas abertas nesta fase.",
   },
   {
     key: "secretSanta",
@@ -62,10 +62,10 @@ export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = 
   {
     key: "voting",
     label: "Votacao",
-    navLabel: "Votos",
+    navLabel: "Boletim",
     href: "/canhoes/votacao",
     group: "core",
-    description: "Boletim da fase de votacao e progresso por categoria.",
+    description: "Boletim oficial da edicao com voto validado e progresso por categoria.",
   },
   {
     key: "stickers",
