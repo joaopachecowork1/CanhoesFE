@@ -33,7 +33,7 @@ export function CanhoesBottomTabs({
   const composeItem = {
     ariaLabel: "Criar post",
     buttonClassName: cn(
-      "h-12 w-12 rounded-xl border border-[rgba(212,184,150,0.15)] bg-[var(--bg-deep)] text-[var(--bg-paper)] shadow-sm",
+      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-[rgba(212,184,150,0.15)] bg-[var(--bg-deep)] px-2 py-2 text-[var(--bg-paper)] shadow-sm",
       "hover:border-[rgba(122,173,58,0.3)]",
       isComposeOpen &&
         "border-[rgba(0,255,136,0.25)] bg-[rgba(45,68,29,0.96)] text-[var(--neon-green)]"
@@ -89,7 +89,7 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      "h-11 w-11 min-h-[44px] min-w-[44px] rounded-xl border border-transparent bg-transparent transition-all duration-200",
+      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-transparent bg-transparent px-2 py-1.5 text-[rgba(245,237,224,0.88)] transition-all duration-200",
       "hover:bg-[rgba(245,237,224,0.08)] active:scale-95",
       isMoreItem &&
         "border-[rgba(212,184,150,0.15)] bg-[var(--bg-surface)] text-[var(--bg-paper)]",

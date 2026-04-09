@@ -103,7 +103,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         sessionUser?.name ||
         sessionUser?.email?.split("@")[0] ||
         "",
-      isAdmin: Boolean(backendUserQuery.data?.isAdmin),
+      isAdmin: Boolean(backendUserQuery.data?.isAdmin ?? sessionUser?.isAdmin),
     };
   }, [backendUserQuery.data, devBypassUser, session?.user, isLoggedIn]);
 
