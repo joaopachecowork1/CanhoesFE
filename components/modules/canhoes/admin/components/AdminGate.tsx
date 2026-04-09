@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 
 function AdminStateCard({
@@ -34,7 +35,9 @@ function AdminStateCard({
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
   const { loading, profileLoading, isLogged, user, loginGoogle } = useAuth();
+  const eventOverview = useEventOverview();
   const isAdmin = useIsAdmin();
+  const hasAdminAccess = isAdmin || Boolean(eventOverview.overview?.permissions.isAdmin);
   const router = useRouter();
 
   if (loading) {
@@ -73,6 +76,18 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
     );
   }
 
+  if (isLogged && !isAdmin && eventOverview.isLoading) {
+    return (
+      <AdminStateCard
+        title="A validar permissões"
+        description="A confirmar as permissões administrativas deste evento antes de abrir o centro de controlo."
+        action={
+          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
+        }
+      />
+    );
+  }
+
   if (!isLogged) {
     return (
       <AdminStateCard
@@ -87,7 +102,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
     );
   }
 
-  if (!isAdmin) {
+  if (!hasAdminAccess) {
     return (
       <AdminStateCard
         title="Acesso restrito"
