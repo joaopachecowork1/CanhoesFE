@@ -114,7 +114,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       loading: !isDevAuthBypass && status === "loading",
       profileLoading: !isDevAuthBypass && isLoggedIn && backendUserQuery.isLoading,
       isDevAuthBypass,
-      loginGoogle: () => signIn("google"),
+      loginGoogle: () => void signIn("google", { callbackUrl: "/canhoes" }),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
     }),
     [isLoggedIn, isDevAuthBypass, status, backendUserQuery.isLoading, user]

@@ -2,16 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Leaf } from "lucide-react";
+import { AlertTriangle, Leaf } from "lucide-react";
 
 import { CanhoesBrandMark } from "@/components/chrome/canhoes/CanhoesBrandMark";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
+const authErrorMessages: Record<string, string> = {
+  AccessDenied: "A conta Google autenticou, mas nao tem acesso a esta area.",
+  Callback: "O regresso da Google falhou. Tenta novamente em alguns segundos.",
+  Configuration: "O login Google nao esta configurado corretamente neste deploy.",
+  OAuthAccountNotLinked: "Esta conta ja existe com outro metodo de acesso.",
+  OAuthCallback: "A Google autenticou, mas o callback do login falhou.",
+  OAuthCreateAccount: "Nao foi possivel criar a sessao depois da autenticacao Google.",
+  OAuthSignin: "Nao foi possivel iniciar o login Google.",
+  SessionRequired: "Esta pagina precisa de uma sessao valida. Faz login novamente.",
+  default: "Nao foi possivel concluir o login Google. Tenta novamente.",
+};
+
 export default function CanhoesLoginPage() {
   const router = useRouter();
   const { isLogged, loading, loginGoogle, isDevAuthBypass } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [leafParticles, setLeafParticles] = useState<
@@ -38,6 +51,15 @@ export default function CanhoesLoginPage() {
       router.replace("/canhoes");
     }
   }, [isLogged, loading, router]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setAuthError(params.get("error"));
+  }, []);
+
+  const authErrorMessage = authError
+    ? authErrorMessages[authError] ?? authErrorMessages.default
+    : null;
 
   const handleLogin = () => {
     setIsSigningIn(true);
@@ -91,6 +113,26 @@ export default function CanhoesLoginPage() {
             <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,136,0.18),transparent)]" />
 
             <div className="space-y-3">
+              {authErrorMessage ? (
+                <div
+                  className="rounded-lg border border-[rgba(255,107,107,0.38)] bg-[rgba(66,20,20,0.76)] px-3 py-3 text-sm text-[rgba(255,228,228,0.94)]"
+                  role="alert"
+                >
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="space-y-1">
+                      <p className="font-medium">Falha no login Google</p>
+                      <p className="text-xs text-[rgba(255,228,228,0.84)]">
+                        {authErrorMessage}
+                      </p>
+                      <p className="text-xs text-[rgba(255,228,228,0.68)]">
+                        Codigo: {authError}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
               {isDevAuthBypass ? (
                 <div className="rounded-lg border border-[rgba(255,209,102,0.32)] bg-[rgba(62,38,12,0.72)] px-3 py-2 text-xs text-[rgba(255,236,188,0.92)]">
                   Modo desenvolvimento ativo. Bypass auth local ligado.

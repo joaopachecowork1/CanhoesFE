@@ -17,6 +17,10 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/canhoes/login",
+    error: "/canhoes/login",
+  },
   callbacks: {
     async jwt({ token, user, account }) {
       if (account?.id_token) {
