@@ -208,10 +208,10 @@ export function HubFeedModule({
                                         <EmptyMedia variant="icon">
                                             <ScrollText className="h-6 w-6" />
                                         </EmptyMedia>
-                                        <EmptyTitle className="heading-3 text-[var(--bg-paper)]">
+                                        <EmptyTitle className="heading-3 text-[var(--text-primary)]">
                                             {feedCopy.empty.title}
                                         </EmptyTitle>
-                                        <EmptyDescription className="body-small text-[rgba(245,237,224,0.76)]">
+                                        <EmptyDescription className="body-small text-[var(--text-muted)]">
                                             {feedCopy.empty.description}
                                         </EmptyDescription>
                                     </EmptyHeader>
