@@ -36,6 +36,7 @@ export function PollBox({
                 type="button"
                 onClick={() => onVote(option.id)}
                 aria-pressed={isActive}
+                aria-label={`${option.text} — ${option.voteCount} votos, ${percentage}%`}
                 className={cn(
                   "relative w-full overflow-hidden rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-colors",
                   isActive
@@ -51,6 +52,11 @@ export function PollBox({
                       : "bg-[var(--color-brown)]/10"
                   )}
                   style={{ width: `${percentage}%` }}
+                  role="progressbar"
+                  aria-valuenow={percentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${option.text}: ${percentage}%`}
                 />
 
                 <span className="relative flex items-center justify-between gap-3">

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
 
@@ -54,18 +53,23 @@ function useCarouselGesture(totalSlides: number) {
   };
 }
 
+export type MediaCarouselProps = {
+  urls: string[];
+  className?: string;
+  aspect?: "square" | "portrait" | "video";
+  onImageClick?: (index: number) => void;
+  authorName?: string;
+};
+
 export function MediaCarousel({
   urls,
   className,
   aspect = "square",
-}: Readonly<{
-  urls: string[];
-  className?: string;
-  aspect?: "square" | "portrait" | "video";
-}>) {
+  onImageClick,
+  authorName,
+}: Readonly<MediaCarouselProps>) {
   const media = useMemo(() => (urls ?? []).filter(Boolean), [urls]);
   const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
-  const [isImageExpanded, setIsImageExpanded] = useState(false);
   const { currentIndex, setCurrentIndex, handleTouchEnd, handleTouchMove, handleTouchStart } =
     useCarouselGesture(media.length);
 
@@ -77,13 +81,7 @@ export function MediaCarousel({
 
   if (media.length === 0) return null;
 
-  const compactHeightClassName = aspect === "portrait" ? "max-h-80" : "max-h-64";
-  const frameHeightClassName = isImageExpanded ? "max-h-[80vh]" : compactHeightClassName;
-  const imageClassName = isImageExpanded
-    ? "max-h-[80vh] w-full object-contain"
-    : "h-64 w-full object-cover";
-  const navButtonClassName =
-    "canhoes-tap absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-stone-300/70 bg-stone-100/95 p-1.5 text-stone-900 shadow-md transition-all sm:opacity-0 sm:group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35";
+  const maxH = aspect === "portrait" ? "max-h-[32rem]" : aspect === "video" ? "max-h-[28rem]" : "max-h-[24rem]";
   const currentImageUrl = media[currentIndex] ?? media[0];
 
   const markAsFailed = (url: string) => {
@@ -92,14 +90,23 @@ export function MediaCarousel({
     );
   };
 
+  const handleClick = (index: number) => {
+    onImageClick?.(index);
+  };
+
   return (
     <div className={cn("w-full", className)}>
-      <div className="rounded-xl border border-[rgba(74,92,47,0.28)] bg-gradient-to-br from-stone-950 via-[#1a2e1a] to-stone-900 p-2 shadow-[var(--shadow-paper-soft)]">
-        <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-stone-900 via-[#223122] to-stone-950">
+      <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)]">
+        <div
+          className="group relative overflow-hidden"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Galeria de imagens do post"
+        >
           <div
             className={cn(
-              "relative flex items-center justify-center overflow-hidden transition-all duration-300",
-              frameHeightClassName
+              "relative flex cursor-pointer items-center justify-center overflow-hidden",
+              maxH
             )}
             style={{ touchAction: "pan-y" }}
             onTouchStart={handleTouchStart}
@@ -113,13 +120,14 @@ export function MediaCarousel({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={absMediaUrl(currentImageUrl)}
-                  alt="Media do post"
+                  alt={authorName ? `Imagem de ${authorName}` : "Media do post"}
                   loading="lazy"
                   decoding="async"
                   draggable={false}
                   sizes="(max-width: 768px) 100vw, 768px"
-                  className={cn("rounded-xl transition-all duration-300", imageClassName)}
+                  className="w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
                   onError={() => markAsFailed(currentImageUrl)}
+                  onClick={() => handleClick(0)}
                 />
               )
             ) : (
@@ -130,11 +138,14 @@ export function MediaCarousel({
                   willChange: "transform",
                 }}
               >
-                {media.map((url, index) => (
+                {media.map((url, index) => {
+                  const isActive = index === currentIndex;
+                  const isAdjacent = Math.abs(index - currentIndex) === 1;
+                  return (
                   <div
                     key={url}
                     aria-hidden={index !== currentIndex}
-                    className="flex min-w-full items-center justify-center overflow-hidden px-1"
+                    className="flex min-w-full items-center justify-center overflow-hidden"
                   >
                     {failedMedia[url] ? (
                       <MediaFallback />
@@ -143,32 +154,31 @@ export function MediaCarousel({
                       <img
                         src={absMediaUrl(url)}
                         alt={`Imagem ${index + 1} de ${media.length}`}
-                        loading="lazy"
+                        loading={isActive || isAdjacent ? "eager" : "lazy"}
                         decoding="async"
                         draggable={false}
                         sizes="(max-width: 768px) 100vw, 768px"
-                        className={cn("rounded-xl transition-all duration-300", imageClassName)}
+                        className="w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
                         onError={() => markAsFailed(url)}
+                        onClick={() => handleClick(index)}
                       />
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
-            {!isImageExpanded ? (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
-            ) : null}
-
-            {media.length > 1 ? (
+            {media.length > 1 && (
               <>
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentIndex((previousIndex) => Math.max(0, previousIndex - 1))
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentIndex((previousIndex) => Math.max(0, previousIndex - 1));
+                  }}
                   aria-label="Imagem anterior"
-                  className={cn("left-2", navButtonClassName)}
+                  className="canhoes-tap absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.5)] p-1.5 text-[var(--text-primary)] opacity-0 shadow-lg transition-all group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
                   disabled={currentIndex === 0}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -176,41 +186,36 @@ export function MediaCarousel({
 
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setCurrentIndex((previousIndex) =>
                       Math.min(media.length - 1, previousIndex + 1)
-                    )
-                  }
+                    );
+                  }}
                   aria-label="Proxima imagem"
-                  className={cn("right-2", navButtonClassName)}
+                  className="canhoes-tap absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.5)] p-1.5 text-[var(--text-primary)] opacity-0 shadow-lg transition-all group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35"
                   disabled={currentIndex === media.length - 1}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </>
-            ) : null}
+            )}
 
-            {media.length > 1 ? (
-              <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-medium text-stone-100">
+            {media.length > 1 && (
+              <span
+                className="pointer-events-none absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 {currentIndex + 1} / {media.length}
               </span>
-            ) : null}
-
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="absolute bottom-3 right-3 z-10 h-8 rounded-full border border-stone-200 bg-stone-100 px-3 text-xs font-medium text-stone-900 shadow-md hover:bg-stone-200"
-              onClick={() => setIsImageExpanded((currentValue) => !currentValue)}
-            >
-              {isImageExpanded ? "Compactar" : "Ver imagem completa"}
-            </Button>
+            )}
           </div>
         </div>
       </div>
 
-      {media.length > 1 ? (
-        <div className="mt-2 flex items-center justify-center gap-1.5">
+      {media.length > 1 && (
+        <div className="mt-1.5 flex items-center justify-center gap-1.5">
           {media.map((url, index) => (
             <button
               key={`dot-${url}-${index}`}
@@ -219,24 +224,24 @@ export function MediaCarousel({
               className={cn(
                 "canhoes-tap h-1.5 rounded-full transition-all",
                 index === currentIndex
-                  ? "w-6 bg-green-400 shadow-[0_0_14px_rgba(74,222,128,0.5)]"
-                  : "w-2 bg-stone-400/50 hover:bg-stone-300/70"
+                  ? "w-6 bg-[var(--moss-glow)]"
+                  : "w-2 bg-[var(--text-muted)]/30 hover:bg-[var(--text-muted)]/50"
               )}
               onClick={() => setCurrentIndex(index)}
             />
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
 
 function MediaFallback() {
   return (
-    <div className="flex min-h-64 w-full flex-col items-center justify-center gap-2 bg-stone-100 px-4 text-center">
-      <ImageOff className="h-5 w-5 text-stone-700" />
-      <p className="text-sm font-medium text-stone-900">{feedCopy.media.unavailable}</p>
-      <p className="max-w-[18rem] text-xs text-stone-700">{feedCopy.media.detail}</p>
+    <div className="flex min-h-48 w-full flex-col items-center justify-center gap-2 bg-[var(--bg-deep)] px-4 text-center">
+      <ImageOff className="h-5 w-5 text-[var(--text-muted)]" />
+      <p className="text-sm font-medium text-[var(--text-muted)]">{feedCopy.media.unavailable}</p>
+      <p className="max-w-[18rem] text-xs text-[var(--text-muted)]/70">{feedCopy.media.detail}</p>
     </div>
   );
 }

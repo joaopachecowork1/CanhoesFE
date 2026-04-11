@@ -7,10 +7,11 @@ import {
   CanhoesMediaThumb,
   CanhoesModuleHeader,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import type { CanhoesCategoryResultDto } from "@/lib/api/types";
 
@@ -67,16 +68,20 @@ function NomineeRankCard({
 }
 
 export function CanhoesGalaModule() {
+  const { event } = useEventOverview();
+  const eventId = event?.id ?? null;
+
   const [resultsByCategory, setResultsByCategory] = useState<CanhoesCategoryResultDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadResults = useCallback(() => {
+    if (!eventId) return;
     setIsLoading(true);
     setErrorMessage(null);
 
-    return canhoesRepo
-      .getResults()
+    return canhoesEventsRepo
+      .getResults(eventId)
       .then(setResultsByCategory)
       .catch((error: unknown) => {
         const message = getErrorMessage(
@@ -88,7 +93,7 @@ export function CanhoesGalaModule() {
         setErrorMessage(message);
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [eventId]);
 
   useEffect(() => {
     void loadResults();
@@ -155,5 +160,3 @@ export function CanhoesGalaModule() {
     </div>
   );
 }
-
-

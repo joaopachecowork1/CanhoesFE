@@ -686,3 +686,27 @@ export type CreateEventWishlistItemRequest = {
   link?: string | null;
   notes?: string | null;
 };
+
+// ─── Feed interaction types (placeholders — will be generated when BE endpoints exist) ───
+
+export type FeedCommentDto = {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  createdAtUtc: string;
+};
+
+export type CreateFeedCommentRequest = {
+  content: string;
+};
+
+export type FeedReactionDto = {
+  emoji: string;
+  count: number;
+};
+
+export type FeedPollVoteDto = {
+  optionId: string;
+  voteCount: number;
+};

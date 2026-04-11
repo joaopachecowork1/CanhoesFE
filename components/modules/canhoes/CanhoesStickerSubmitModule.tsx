@@ -11,12 +11,12 @@ import {
   formatEventPhaseLabel,
   getNomineeStatusBadgeVariant,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import { useEventOverview } from "@/hooks/useEventOverview";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type {
   AwardCategoryDto,
   NomineeDto,
@@ -35,7 +35,9 @@ import {
 } from "@/components/ui/select";
 
 export function CanhoesStickerSubmitModule() {
-  const { overview } = useEventOverview();
+  const { overview, event } = useEventOverview();
+  const eventId = event?.id ?? null;
+
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -60,13 +62,14 @@ export function CanhoesStickerSubmitModule() {
   }, [selectedFilePreviewUrl]);
 
   const loadStickerData = useCallback(async () => {
+    if (!eventId) return;
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
       const [nextCategories, nextNominees] = await Promise.all([
-        canhoesRepo.getCategories(),
-        canhoesRepo.getNominees(undefined, "stickers"),
+        canhoesEventsRepo.getAwardCategories(eventId),
+        canhoesEventsRepo.getApprovedNominees(eventId),
       ]);
 
       setCategoryList(Array.isArray(nextCategories) ? nextCategories : []);
@@ -91,7 +94,7 @@ export function CanhoesStickerSubmitModule() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [eventId]);
 
   useEffect(() => {
     void loadStickerData();
@@ -131,19 +134,19 @@ export function CanhoesStickerSubmitModule() {
   };
 
   const handleSubmit = async () => {
-    if (!nominationPhase || !canSubmit) return;
+    if (!nominationPhase || !canSubmit || !eventId) return;
 
     setIsSubmitting(true);
 
     try {
-      const createdNominee = await canhoesRepo.createNominee({
+      const createdNominee = await canhoesEventsRepo.createNomination(eventId, {
         categoryId: selectedCategoryId || null,
         kind: "stickers",
         title: stickerTitle.trim(),
       });
 
       if (selectedFile) {
-        await canhoesRepo.uploadNomineeImage(createdNominee.id, selectedFile);
+        await canhoesEventsRepo.uploadNomineeImage(eventId, createdNominee.id, selectedFile);
       }
 
       setStickerTitle("");

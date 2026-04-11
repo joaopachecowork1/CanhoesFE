@@ -1,11 +1,10 @@
 "use client";
 
 import { Smile } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-
 import { Button } from "./button";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { ReactionPicker } from "@/components/modules/hub/components/ReactionPicker";
+import { HUB_REACTIONS } from "@/lib/reactions";
+import { cn } from "@/lib/utils";
 
 export interface ReactionBarProps {
   emojis: readonly string[];
@@ -16,10 +15,10 @@ export interface ReactionBarProps {
 }
 
 /**
- * ReactionBar — social-feed style emoji reactions.
+ * ReactionBar — social-feed style emoji reactions for comments.
  *
  * Displays active reactions as compact pills (emoji + count).
- * A "+" Popover (shadcn) opens an emoji picker to add or remove reactions.
+ * Uses the animated ReactionPicker for the "+" button to add more reactions.
  */
 export function ReactionBar({
   emojis,
@@ -56,48 +55,24 @@ export function ReactionBar({
         );
       })}
 
-      <Popover>
-        <PopoverTrigger asChild>
+      {/* Animated reaction picker */}
+      <ReactionPicker
+        reactions={HUB_REACTIONS}
+        myReactions={myReactions}
+        onToggle={onToggle}
+        trigger={(open) => (
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className="h-6 w-6 rounded-full border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] p-0 text-[rgba(242,234,216,0.76)] hover:bg-[rgba(255,255,255,0.12)] hover:text-[var(--bg-paper)]"
+            onClick={open}
             aria-label="Adicionar reação"
           >
             <Smile className="h-3.5 w-3.5" />
           </Button>
-        </PopoverTrigger>
-
-        <PopoverContent
-          align="start"
-          sideOffset={6}
-          className="w-auto min-w-0 rounded-2xl border border-[var(--border-subtle)] bg-[rgba(22,28,14,0.97)] p-2 shadow-lg backdrop-blur-sm"
-        >
-          <div className="flex gap-1">
-            {emojis.map((emoji) => {
-              const isActive = myReactions.includes(emoji);
-
-              return (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => onToggle(emoji)}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-xl text-lg transition-all hover:scale-110 active:scale-95",
-                    isActive
-                      ? "bg-[rgba(122,173,58,0.2)] ring-1 ring-[rgba(122,173,58,0.5)]"
-                      : "hover:bg-[rgba(255,255,255,0.08)]"
-                  )}
-                  title={emoji}
-                >
-                  {emoji}
-                </button>
-              );
-            })}
-          </div>
-        </PopoverContent>
-      </Popover>
+        )}
+      />
     </div>
   );
 }

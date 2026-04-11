@@ -11,12 +11,13 @@ import {
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { useAuth } from "@/hooks/useAuth";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
-import type { PublicUserDto, WishlistItemDto } from "@/lib/api/types";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import type { PublicUserDto, EventWishlistItemDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-function groupWishlistItemsByUser(items: WishlistItemDto[]) {
-  const wishlistByUser = new Map<string, WishlistItemDto[]>();
+function groupWishlistItemsByUser(items: EventWishlistItemDto[]) {
+  const wishlistByUser = new Map<string, EventWishlistItemDto[]>();
 
   for (const wishlistItem of items) {
     const itemsForUser = wishlistByUser.get(wishlistItem.userId) ?? [];
@@ -34,7 +35,9 @@ function groupWishlistItemsByUser(items: WishlistItemDto[]) {
   }
 
   for (const itemsForUser of wishlistByUser.values()) {
-    itemsForUser.sort((leftItem, rightItem) => (rightItem.updatedAtUtc || "").localeCompare(leftItem.updatedAtUtc || ""));
+    itemsForUser.sort((leftItem, rightItem) =>
+      (rightItem.updatedAt || "").localeCompare(leftItem.updatedAt || "")
+    );
   }
 
   return wishlistByUser;
@@ -42,9 +45,11 @@ function groupWishlistItemsByUser(items: WishlistItemDto[]) {
 
 export function CanhoesWishlistModule() {
   const { user } = useAuth();
+  const { event } = useEventOverview();
+  const eventId = event?.id ?? null;
 
   const [memberList, setMemberList] = useState<PublicUserDto[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<WishlistItemDto[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<EventWishlistItemDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,7 +58,7 @@ export function CanhoesWishlistModule() {
 
   const [formState, setFormState] = useState({
     title: "",
-    url: "",
+    link: "",
     notes: "",
     selectedFile: null as File | null,
   });
@@ -78,13 +83,14 @@ export function CanhoesWishlistModule() {
   const selectedMemberItems = selectedMember ? wishlistByUser.get(selectedMember.id) ?? [] : [];
 
   const loadWishlist = async () => {
+    if (!eventId) return;
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
       const [nextMembers, nextWishlistItems] = await Promise.all([
-        canhoesRepo.getMembers(),
-        canhoesRepo.getWishlist(),
+        canhoesEventsRepo.getMembers(eventId),
+        canhoesEventsRepo.getWishlist(eventId),
       ]);
 
       setMemberList(Array.isArray(nextMembers) ? nextMembers : []);
@@ -105,24 +111,25 @@ export function CanhoesWishlistModule() {
 
   useEffect(() => {
     void loadWishlist();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId]);
 
   const handleCreate = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !eventId) return;
 
     setIsSaving(true);
     try {
-      const createdItem = await canhoesRepo.createWishlistItem({
+      const createdItem = await canhoesEventsRepo.createWishlistItem(eventId, {
         notes: formState.notes.trim() || null,
         title: formState.title.trim(),
-        url: formState.url.trim() || null,
+        link: formState.link.trim() || null,
       });
 
       if (formState.selectedFile) {
-        await canhoesRepo.uploadWishlistImage(createdItem.id, formState.selectedFile);
+        await canhoesEventsRepo.uploadWishlistImage(eventId, createdItem.id, formState.selectedFile);
       }
 
-      setFormState({ title: "", url: "", notes: "", selectedFile: null });
+      setFormState({ title: "", link: "", notes: "", selectedFile: null });
       await loadWishlist();
       toast.success("Item adicionado");
     } catch (error) {
@@ -138,11 +145,14 @@ export function CanhoesWishlistModule() {
   };
 
   const handleDelete = async (wishlistItemId: string) => {
+    if (!eventId) return;
     setDeletingItemId(wishlistItemId);
 
     try {
-      await canhoesRepo.deleteWishlistItem(wishlistItemId);
-      setWishlistItems((currentItems) => currentItems.filter((wishlistItem) => wishlistItem.id !== wishlistItemId));
+      await canhoesEventsRepo.deleteWishlistItem(eventId, wishlistItemId);
+      setWishlistItems((currentItems) =>
+        currentItems.filter((wishlistItem) => wishlistItem.id !== wishlistItemId)
+      );
       toast.success("Item removido");
     } catch (error) {
       const message = getErrorMessage(
@@ -220,8 +230,8 @@ export function CanhoesWishlistModule() {
               <label htmlFor="wishlist-url-input" className="canhoes-field-label">URL</label>
               <Input
                 id="wishlist-url-input"
-                value={formState.url}
-                onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
+                value={formState.link}
+                onChange={(event) => setFormState((prev) => ({ ...prev, link: event.target.value }))}
                 placeholder="URL opcional"
               />
             </div>
@@ -276,7 +286,7 @@ function WishlistMemberPanel({
   userId,
 }: Readonly<{
   deletingItemId: string | null;
-  items: WishlistItemDto[];
+  items: EventWishlistItemDto[];
   member: PublicUserDto;
   onDelete: (wishlistItemId: string) => Promise<void>;
   userId: string | null;
@@ -308,8 +318,8 @@ function WishlistMemberPanel({
                   {wishlistItem.notes ? (
                     <p className="line-clamp-2 text-xs text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
                   ) : null}
-                  {wishlistItem.url ? (
-                    <a href={wishlistItem.url} target="_blank" rel="noreferrer" className="canhoes-link mt-1.5 inline-flex items-center gap-1 text-xs">
+                  {wishlistItem.link ? (
+                    <a href={wishlistItem.link} target="_blank" rel="noreferrer" className="canhoes-link mt-1.5 inline-flex items-center gap-1 text-xs">
                       <LinkIcon className="h-3.5 w-3.5" />
                       Abrir link
                     </a>
@@ -318,7 +328,7 @@ function WishlistMemberPanel({
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-2">
                   <p className="text-[11px] text-[var(--color-text-muted)]">
-                    {new Date(wishlistItem.updatedAtUtc).toLocaleDateString()}
+                    {new Date(wishlistItem.updatedAt).toLocaleDateString()}
                   </p>
 
                   {isCurrentUser ? (
@@ -341,5 +351,3 @@ function WishlistMemberPanel({
     </Card>
   );
 }
-
-

@@ -828,6 +828,32 @@ h3,
     --zone-text: var(--ink-primary);
     --zone-border-accent: var(--border-moss);
   }
+
+  /* =============================================
+     REDDIT-STYLE FEED
+     ============================================= */
+
+  .reddit-post {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-deep);
+    transition: border-color 150ms ease;
+  }
+  .reddit-post:hover {
+    border-color: var(--border-moss);
+  }
+
+  .reddit-vote-sidebar {
+    min-width: 44px;
+    max-width: 48px;
+  }
+
+  .reddit-score {
+    line-height: 1;
+    min-height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @layer utilities {

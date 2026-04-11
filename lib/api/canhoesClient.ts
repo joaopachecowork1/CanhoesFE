@@ -22,8 +22,40 @@ const RETRY_CONFIG = {
 };
 
 // Track requests per endpoint for rate limiting
+// Use bounded maps with periodic cleanup to prevent memory leaks in long sessions
+const MAX_MAP_SIZE = 500;
+const CLEANUP_INTERVAL_MS = 60_000; // Clean up every 60 seconds
+
 const requestCounts = new Map<string, number>();
 const lastRequestTimes = new Map<string, number>();
+
+// Periodic cleanup to prevent unbounded growth in long sessions
+let cleanupScheduled = false;
+function scheduleCleanup() {
+  if (cleanupScheduled || typeof globalThis === "undefined") return;
+  cleanupScheduled = true;
+  const cleanup = () => {
+    const now = Date.now();
+    for (const [key, time] of lastRequestTimes.entries()) {
+      if (now - time > 120_000) { // Remove entries older than 2 minutes
+        lastRequestTimes.delete(key);
+        requestCounts.delete(key);
+      }
+    }
+    // Also cap map size if cleanup didn't remove enough
+    if (lastRequestTimes.size > MAX_MAP_SIZE) {
+      const entries = [...lastRequestTimes.entries()].sort((a, b) => b[1] - a[1]);
+      for (let i = MAX_MAP_SIZE; i < entries.length; i++) {
+        lastRequestTimes.delete(entries[i][0]);
+        requestCounts.delete(entries[i][0]);
+      }
+    }
+    cleanupScheduled = false;
+    scheduleCleanup(); // Reschedule for next cleanup
+  };
+  setTimeout(cleanup, CLEANUP_INTERVAL_MS);
+}
+scheduleCleanup();
 
 /**
  * Check if a request should be rate limited
@@ -179,6 +211,18 @@ function isUnauthorizedStatus(status: number) {
 
 // Pending GET requests for deduplication
 const pendingGetRequests = new Map<string, Promise<unknown>>();
+const PENDING_MAX_AGE_MS = 30_000; // Clean up pending promises older than 30s
+
+// Clean up stale pending promises periodically (they should resolve quickly)
+setInterval(() => {
+  // Pending promises that haven't resolved are likely stuck — clear them
+  // This is safe because the finally block in fetchPromise should delete them
+  // If they're still here, something went wrong and we should free the memory
+  if (pendingGetRequests.size > 100) {
+    // If we somehow have more than 100 pending, clear all (they're likely stuck)
+    pendingGetRequests.clear();
+  }
+}, PENDING_MAX_AGE_MS);
 
 function getDeduplicationKey(path: string, init?: CanhoesRequestInit): string | null {
   const method = (init?.method || "GET").toUpperCase();

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Cigarette, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { AwardCategoryDto, NomineeDto } from "@/lib/api/types";
 import {
   CanhoesFileTrigger,
@@ -28,13 +28,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const NO_CATEGORY = "__none__";
 
-/** Map backend phase type to legacy display label */
 function isNominationPhase(phaseType?: string): boolean {
   return phaseType === "PROPOSALS";
 }
 
 export function CanhoesNomineesModule() {
-  const { overview } = useEventOverview();
+  const { overview, event } = useEventOverview();
+  const eventId = event?.id ?? null;
+
   const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -48,14 +49,15 @@ export function CanhoesNomineesModule() {
 
   const canSubmit = nomineeTitle.trim().length >= 2;
 
-  const loadNominees = async () => {
+  const loadNominees = useCallback(async () => {
+    if (!eventId) return;
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
       const [nextCategories, nextNominees] = await Promise.all([
-        canhoesRepo.getCategories(),
-        canhoesRepo.getNominees(undefined, "nominees"),
+        canhoesEventsRepo.getAwardCategories(eventId),
+        canhoesEventsRepo.getApprovedNominees(eventId),
       ]);
 
       setCategoryList(nextCategories);
@@ -72,11 +74,11 @@ export function CanhoesNomineesModule() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [eventId]);
 
   useEffect(() => {
     void loadNominees();
-  }, []);
+  }, [loadNominees]);
 
   const nomineesByCategory = useMemo(() => {
     const nomineesMap = new Map<string, NomineeDto[]>();
@@ -187,7 +189,7 @@ export function CanhoesNomineesModule() {
   }
 
   const handleSubmit = async () => {
-    if (!canSubmit || !nominationPhase) return;
+    if (!canSubmit || !nominationPhase || !eventId) return;
 
     if (selectedFile && !selectedFile.type.startsWith("image/")) {
       toast.error("Só é permitido upload de imagens.");
@@ -201,14 +203,14 @@ export function CanhoesNomineesModule() {
 
     setIsSubmitting(true);
     try {
-      const createdNominee = await canhoesRepo.createNominee({
+      const createdNominee = await canhoesEventsRepo.createNomination(eventId, {
         categoryId: selectedCategoryId === NO_CATEGORY ? null : selectedCategoryId,
         kind: "nominees",
         title: nomineeTitle.trim(),
       });
 
       if (selectedFile) {
-        await canhoesRepo.uploadNomineeImage(createdNominee.id, selectedFile);
+        await canhoesEventsRepo.uploadNomineeImage(eventId, createdNominee.id, selectedFile);
       }
 
       setNomineeTitle("");
@@ -305,5 +307,3 @@ export function CanhoesNomineesModule() {
     </div>
   );
 }
-
-

@@ -1,12 +1,11 @@
 "use client";
 
+import { NumberTicker } from "@/components/animations/NumberTicker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { NumberTicker } from "@/components/animations/NumberTicker";
 import { feedCopy } from "@/lib/canhoesCopy";
-
-const HUB_EMOJIS = ["❤️", "🔥", "😂"] as const;
-const HUB_EMOJI_LABELS = ["❤️", "🔥", "😂"] as const;
+import { HUB_REACTIONS, QUICK_REACTIONS } from "@/lib/reactions";
+import { ReactionPicker } from "./ReactionPicker";
 
 const reactionButtonGroupClassName =
   "flex flex-wrap gap-1.5 [&>button]:border-[rgba(74,92,47,0.3)] [&>button]:bg-[rgba(255,255,255,0.07)] [&>button]:text-[var(--bg-paper)] [&>button]:shadow-[0_8px_18px_rgba(0,0,0,0.14)] [&>button:hover]:bg-[rgba(255,255,255,0.12)]";
@@ -16,10 +15,9 @@ type HubPostActionsProps = {
   commentCount: number;
   reactionCounts: Record<string, number>;
   myReactions: string[];
-  likeCount: number;
   isPinned?: boolean;
   commentsExpanded: boolean;
-  onToggleReaction: (postId: string, emoji: string) => void;
+  onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
   onToggleComments: (postId: string) => void;
 };
 
@@ -28,7 +26,6 @@ export function HubPostActions({
   commentCount,
   reactionCounts,
   myReactions,
-  likeCount,
   isPinned,
   commentsExpanded,
   onToggleReaction,
@@ -36,10 +33,11 @@ export function HubPostActions({
 }: Readonly<HubPostActionsProps>) {
   return (
     <div className={reactionButtonGroupClassName}>
-      {HUB_EMOJIS.map((emoji, emojiIndex) => {
+      {/* Quick reaction buttons (first 3) */}
+      {QUICK_REACTIONS.map((reaction) => {
+        const { emoji, label } = reaction;
         const isActive = myReactions.includes(emoji);
-        const reactionCount =
-          reactionCounts[emoji] ?? (emojiIndex === 0 ? likeCount : 0);
+        const reactionCount = reactionCounts[emoji] ?? 0;
 
         return (
           <Button
@@ -47,17 +45,36 @@ export function HubPostActions({
             type="button"
             variant={isActive ? "secondary" : "outline"}
             size="sm"
-            onClick={() => onToggleReaction(postId, emoji)}
+            onClick={(e) => onToggleReaction(postId, emoji, e)}
             className="rounded-full px-2.5"
+            aria-label={`${isActive ? "Remover" : "Adicionar"} reação ${label} (${reactionCount})`}
           >
-            <span className="text-sm leading-none">
-              {HUB_EMOJI_LABELS[emojiIndex]}
-            </span>
+            <span className="text-sm leading-none">{emoji}</span>
             <NumberTicker value={reactionCount} className="text-xs text-current" />
           </Button>
         );
       })}
 
+      {/* More reactions picker */}
+      <ReactionPicker
+        reactions={HUB_REACTIONS}
+        myReactions={myReactions}
+        onToggle={(emoji) => onToggleReaction(postId, emoji)}
+        trigger={(open) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="rounded-full px-1.5 text-[var(--text-muted)] hover:text-[var(--bg-paper)]"
+            onClick={open}
+            aria-label="Mais reações"
+          >
+            <span className="text-base">😊</span>
+          </Button>
+        )}
+      />
+
+      {/* Comments toggle */}
       <Button
         type="button"
         variant={commentsExpanded ? "secondary" : "outline"}
@@ -72,6 +89,7 @@ export function HubPostActions({
         </span>
       </Button>
 
+      {/* Pinned badge */}
       {isPinned ? <Badge variant="secondary">{feedCopy.post.pinned}</Badge> : null}
     </div>
   );

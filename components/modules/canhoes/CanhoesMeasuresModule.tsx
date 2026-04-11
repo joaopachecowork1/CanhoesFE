@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flame, Gavel, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
@@ -9,9 +9,9 @@ import {
   CanhoesModuleHeader,
   formatEventPhaseLabel,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesRepo } from "@/lib/repositories/canhoesRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function CanhoesMeasuresModule() {
-  const { overview } = useEventOverview();
+  const { overview, event } = useEventOverview();
+  const eventId = event?.id ?? null;
+
   const [measures, setMeasures] = useState<GalaMeasureDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,12 +32,13 @@ export function CanhoesMeasuresModule() {
   const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (!eventId) return;
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const nextMeasures = await canhoesRepo.getMeasures();
+      const nextMeasures = await canhoesEventsRepo.getMeasures(eventId);
       setMeasures(nextMeasures);
     } catch (error) {
       const message = getErrorMessage(
@@ -48,11 +51,11 @@ export function CanhoesMeasuresModule() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [eventId]);
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [loadData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -64,11 +67,11 @@ export function CanhoesMeasuresModule() {
     : "Propostas fechadas";
 
   const handleProposalSubmit = async () => {
-    if (!canSubmitProposal) return;
+    if (!canSubmitProposal || !eventId) return;
 
     setIsSubmitting(true);
     try {
-      await canhoesRepo.createMeasureProposal({ text: proposalText.trim() });
+      await canhoesEventsRepo.createMeasureProposal(eventId, { text: proposalText.trim() });
       setProposalText("");
       toast.success("Medida proposta");
     } catch (error) {

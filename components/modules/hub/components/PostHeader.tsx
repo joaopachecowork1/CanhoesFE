@@ -74,7 +74,7 @@ export function PostHeader({
             size="sm"
             className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
             onClick={onAdminPin}
-            title="Fixar ou desafixar"
+            aria-label={isPinned ? "Desafixar post" : "Fixar post"}
           >
             <Pin className="h-3.5 w-3.5" />
           </Button>
@@ -83,7 +83,7 @@ export function PostHeader({
             size="sm"
             className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--color-danger)]"
             onClick={onAdminDelete}
-            title="Eliminar"
+            aria-label="Eliminar post"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
