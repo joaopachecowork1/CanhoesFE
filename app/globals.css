@@ -76,6 +76,11 @@
   --text-ghost: #8a9772;
   --text-ink: #261d14;
 
+  /* Ink tokens — for text on paper surfaces */
+  --ink-primary: #261d14;
+  --ink-secondary: #503e2d;
+  --ink-muted: #6b5744;
+
   --moss: #4a5c2f;
   --moss-light: #6b7c45;
   --moss-glow: #7aad3a;
@@ -786,6 +791,42 @@ h3,
 
   .canhoes-link:hover {
     color: var(--color-brown-dark);
+  }
+
+  /* =============================================
+     PRODUCT ZONE IDENTITIES
+     Feed = social, lightweight, neutral
+     Voting = official, structured, moss/neon
+     Admin = operational, compact, paper-first
+     ============================================= */
+
+  /* Feed zone: neutral dark cards, minimal glow, social tone */
+  .zone-feed {
+    --zone-accent: var(--moss-glow);
+    --zone-accent-soft: rgba(122, 173, 58, 0.12);
+    --zone-surface: var(--bg-surface);
+    --zone-card-bg: linear-gradient(180deg, rgba(28, 36, 18, 0.97), rgba(19, 25, 13, 0.99));
+    --zone-text: var(--text-primary);
+  }
+
+  /* Voting zone: official moss/neon identity, structured, green feedback */
+  .zone-voting {
+    --zone-accent: var(--neon-green);
+    --zone-accent-soft: rgba(0, 255, 136, 0.06);
+    --zone-surface: var(--bg-surface);
+    --zone-card-bg: var(--bg-surface);
+    --zone-text: var(--text-primary);
+    --zone-border-accent: var(--border-neon);
+  }
+
+  /* Admin zone: paper surfaces, ink text, compact, operational */
+  .zone-admin {
+    --zone-accent: var(--moss);
+    --zone-accent-soft: rgba(74, 92, 47, 0.12);
+    --zone-surface: var(--bg-paper);
+    --zone-card-bg: var(--bg-paper);
+    --zone-text: var(--ink-primary);
+    --zone-border-accent: var(--border-moss);
   }
 }
 

@@ -28,10 +28,10 @@ export function AdminStatusFilters<TFilter extends string>({
           size="sm"
           variant={active === filterKey ? "secondary" : "outline"}
           className={cn(
-            "rounded-full px-4",
+            "min-h-11 rounded-full px-4",
             active === filterKey
-              ? "border-[var(--border-purple)] bg-[linear-gradient(180deg,rgba(86,62,122,0.96),rgba(54,39,78,0.98))] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
-              : "border-[rgba(212,184,150,0.16)] bg-[rgba(18,23,12,0.84)] text-[var(--text-primary)] hover:border-[var(--border-purple)] hover:text-[var(--bg-paper)]"
+              ? "border-[var(--border-moss)] bg-[var(--moss)] text-white"
+              : "border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] text-[var(--ink-secondary)] hover:border-[var(--border-moss)] hover:text-[var(--ink-primary)]"
           )}
           onClick={() => onChange(filterKey)}
         >
@@ -41,8 +41,8 @@ export function AdminStatusFilters<TFilter extends string>({
             className={cn(
               "ml-2 min-w-5 justify-center px-1.5 text-[11px]",
               active === filterKey
-                ? "border-[rgba(245,237,224,0.24)] bg-[rgba(245,237,224,0.12)] text-[var(--bg-paper)]"
-                : "border-[var(--border-purple)] bg-[rgba(177,140,255,0.18)] text-[var(--accent-purple-deep)] shadow-[var(--glow-purple-sm)]"
+                ? "border-[rgba(255,255,255,0.24)] bg-[rgba(255,255,255,0.12)] text-white"
+                : "border-[var(--border-subtle)] bg-[rgba(74,92,47,0.12)] text-[var(--ink-muted)]"
             )}
           >
             {counts[filterKey]}

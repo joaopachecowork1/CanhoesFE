@@ -37,18 +37,18 @@ type AdminSectionDefinition = {
 
 const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
-    id: "dashboard",
-    label: "Resumo",
-    description: "Leitura rapida da edicao, da fila e dos sinais operacionais.",
-    icon: Layers3,
-    count: () => 0,
-  },
-  {
     id: "conteudo",
     label: "Conteúdo",
     description: "Fila, categorias e resultados oficiais.",
     icon: FolderTree,
     count: (context) => context.pendingReviewCount + context.pendingNominationsCount,
+  },
+  {
+    id: "configuracoes",
+    label: "Evento",
+    description: "Evento ativo, fase e visibilidade dos modulos.",
+    icon: Settings2,
+    count: (context) => context.visibleModuleCount,
   },
   {
     id: "membros",
@@ -58,11 +58,11 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
     count: (context) => context.memberCount,
   },
   {
-    id: "configuracoes",
-    label: "Evento",
-    description: "Evento ativo, fase e visibilidade dos modulos.",
-    icon: Settings2,
-    count: (context) => context.visibleModuleCount,
+    id: "dashboard",
+    label: "Resumo",
+    description: "Leitura rapida da edicao, da fila e dos sinais operacionais.",
+    icon: Layers3,
+    count: () => 0,
   },
 ] as const;
 

@@ -83,17 +83,17 @@ export function AdminDashboard({
   return (
     <div className="space-y-5">
       {!loading && pendingReviews > 0 ? (
-        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(224,90,58,0.12),transparent_34%),linear-gradient(180deg,rgba(30,18,12,0.94),rgba(17,11,8,0.96))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.2)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[var(--neon-amber)]">
+            <div className="flex items-center gap-2 text-[var(--danger)]">
               <AlertTriangle className="h-4 w-4" />
-              <span className="editorial-kicker text-[var(--neon-amber)]">
+              <span className="editorial-kicker text-[var(--danger)]">
                 {adminCopy.dashboard.queueKicker}
               </span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="heading-3 text-[var(--bg-paper)]">
+              <h3 className="heading-3 text-[var(--ink-primary)]">
                 {adminCopy.dashboard.queueTitle}
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -117,14 +117,14 @@ export function AdminDashboard({
           {recentNominees.map((nominee) => (
             <article
               key={nominee.id}
-              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-4 py-4 text-[var(--bg-paper)]"
+              className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)]"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
-                  <p className="truncate font-semibold text-[var(--bg-paper)]">
+                  <p className="truncate font-semibold text-[var(--ink-primary)]">
                     {nominee.title}
                   </p>
-                  <p className="text-xs text-[rgba(245,237,224,0.66)]">
+                  <p className="text-xs text-[var(--ink-muted)]">
                     {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
                       day: "numeric",
                       hour: "2-digit",

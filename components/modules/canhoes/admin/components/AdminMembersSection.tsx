@@ -40,10 +40,10 @@ export function AdminMembersSection({
         state={secretSantaState}
       />
 
-      <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+      <Card className="border-[var(--border-subtle)] bg-[var(--bg-paper)]">
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Roster</p>
-          <CardTitle>
+          <p className="editorial-kicker text-[var(--moss-glow)]">Roster</p>
+          <CardTitle className="text-[var(--ink-primary)]">
             {members.length} {members.length === 1 ? "membro" : "membros"}
           </CardTitle>
         </CardHeader>
@@ -59,13 +59,13 @@ export function AdminMembersSection({
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(11,14,8,0.72)] px-3 py-2.5"
+                  className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                    <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
                       {member.displayName || member.email}
                     </p>
-                    <p className="text-xs text-[rgba(245,237,224,0.64)]">{member.email}</p>
+                    <p className="text-xs text-[var(--ink-muted)]">{member.email}</p>
                   </div>
                   {member.isAdmin ? (
                     <Badge variant="outline" className="shrink-0">

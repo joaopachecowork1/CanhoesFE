@@ -16,7 +16,7 @@ export function AdminSectionShell({
   children,
 }: Readonly<AdminSectionShellProps>) {
   return (
-    <div className="space-y-2">
+    <div className="zone-admin space-y-2">
       <AdminRouteTabs activeId={activeId} />
       <div>{children}</div>
     </div>

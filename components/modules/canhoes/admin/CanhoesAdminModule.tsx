@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, lazy, Suspense, type ReactElement } from "react";
+import { useCallback, useEffect, lazy, Suspense, useState, type ReactElement } from "react";
+import { ChevronDown } from "lucide-react";
 
 import { AsyncStatusCard } from "@/components/ui/async-status-card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,67 @@ type CanhoesAdminModuleProps = {
   section: AdminSectionId;
 };
 
+/** Collapsible secondary metrics for mobile admin summary. */
+function CollapsibleMobileMetrics({
+  phase,
+  memberCount,
+  moduleCount,
+  totalCategories,
+  totalNominees,
+}: Readonly<{
+  phase: string | null;
+  memberCount: number;
+  moduleCount: number;
+  totalCategories: number;
+  totalNominees: number;
+}>) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)]">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="canhoes-tap flex w-full min-h-[44px] items-center justify-between px-3 py-2 text-xs text-[var(--text-muted)]"
+      >
+        <span>Detalhes do evento</span>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="grid grid-cols-3 gap-1.5 border-t border-[var(--border-subtle)] px-3 py-2">
+          <MetricTile label="Fase" value={phase ? formatPhaseShort(phase) : "—"} />
+          <MetricTile label="Membros" value={String(memberCount)} />
+          <MetricTile label="Módulos" value={String(moduleCount)} />
+          <MetricTile label="Categorias" value={String(totalCategories)} />
+          <MetricTile label="Nomeações" value={String(totalNominees)} />
+          <MetricTile label="Edição" value={memberCount > 0 ? "Ativa" : "—"} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatPhaseShort(type: string): string {
+  const map: Record<string, string> = {
+    DRAW: "Sorteio",
+    PROPOSALS: "Propostas",
+    VOTING: "Votação",
+    RESULTS: "Resultados",
+  };
+  return map[type] ?? type;
+}
+
+function MetricTile({ label, value }: Readonly<{ label: string; value: string }>) {
+  return (
+    <div className="rounded-md border border-[rgba(212,184,150,0.1)] bg-[rgba(12,16,8,0.5)] px-2 py-1.5">
+      <p className="text-[0.55rem] leading-none text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--text-primary)]">{value}</p>
+    </div>
+  );
+}
+
 export default function CanhoesAdminModule({
   section,
 }: Readonly<CanhoesAdminModuleProps>) {
@@ -54,7 +116,6 @@ export default function CanhoesAdminModule({
     officialResults,
     pendingCategoryProposals,
     pendingMeasureProposals,
-    pendingNominationCount,
     pendingNominees,
     secretSanta,
     state: eventState,
@@ -195,41 +256,39 @@ export default function CanhoesAdminModule({
 
       {showMobileSummary && (
         <div className="sm:hidden">
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
-                Candidatos
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {summary.totalNominees} total
-              </p>
-              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {pendingNominationCount} pendentes
-              </p>
-            </div>
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
-                Categorias
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {summary.totalCategories} total
-              </p>
-              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {summary.pendingCategoryProposalCount} pendentes
-              </p>
-            </div>
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
-              <p className="text-[var(--text-subtle)] text-[0.62rem] leading-none">
-                Membros
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {summary.memberCount}
-              </p>
-              <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {summary.visibleModuleCount} módulos
-              </p>
+          {/* Pending count — primary metric, always visible */}
+          <div className="mb-2 rounded-xl border border-[rgba(224,90,58,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(224,90,58,0.1),transparent_34%),linear-gradient(180deg,rgba(30,18,12,0.96),rgba(17,11,8,0.98))] px-3 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">
+                  Pendentes
+                </p>
+                <p className="mt-0.5 text-2xl font-extrabold text-[var(--bg-paper)] tabular-nums">
+                  {summary.pendingNominationCount + summary.pendingCategoryProposalCount + summary.pendingMeasureProposalCount}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[0.6rem] text-[rgba(245,237,224,0.6)]">
+                  {summary.pendingNominationCount} nomeações
+                </p>
+                <p className="text-[0.6rem] text-[rgba(245,237,224,0.6)]">
+                  {summary.pendingCategoryProposalCount} categorias
+                </p>
+                <p className="text-[0.6rem] text-[rgba(245,237,224,0.6)]">
+                  {summary.pendingMeasureProposalCount} medidas
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* Secondary metrics — collapsible */}
+          <CollapsibleMobileMetrics
+            phase={eventState?.activePhase?.type ?? null}
+            memberCount={summary.memberCount}
+            moduleCount={summary.visibleModuleCount}
+            totalCategories={summary.totalCategories}
+            totalNominees={summary.totalNominees}
+          />
         </div>
       )}
 

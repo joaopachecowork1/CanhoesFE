@@ -11,8 +11,10 @@ const HubFeedModule = dynamic(
 
 export default function CanhoesFeedPage() {
   return (
-    <EventModuleGate moduleKey="feed">
-      <HubFeedModule showComposer={false} />
-    </EventModuleGate>
+    <div className="zone-feed">
+      <EventModuleGate moduleKey="feed">
+        <HubFeedModule showComposer={false} />
+      </EventModuleGate>
+    </div>
   );
 }

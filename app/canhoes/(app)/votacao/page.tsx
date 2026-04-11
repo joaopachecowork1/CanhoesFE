@@ -11,8 +11,10 @@ const CanhoesOfficialVotingModule = dynamic(
 
 export default function VotacaoPage() {
   return (
-    <EventModuleGate moduleKey="voting">
-      <CanhoesOfficialVotingModule />
-    </EventModuleGate>
+    <div className="zone-voting">
+      <EventModuleGate moduleKey="voting">
+        <CanhoesOfficialVotingModule />
+      </EventModuleGate>
+    </div>
   );
 }

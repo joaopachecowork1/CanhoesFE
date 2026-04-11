@@ -84,3 +84,24 @@ Thumbs.db
 .claude/
 .github/
 
+# Qwen Code local files
+.qwen/
+
+# Documents / pessoal
+*.docx
+*.pdf
+*.xlsx
+*.pptx
+*.pages
+*.numbers
+
+# Notes / vaults
+*.obsidian/
+vault/
+canhoes-vault/
+
+# Temp / cache
+*.tmp
+*.temp
+.cache/
+

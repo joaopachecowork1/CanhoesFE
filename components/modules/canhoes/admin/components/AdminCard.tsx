@@ -8,7 +8,7 @@ type AdminCardProps = {
 
 /**
  * Standard card styling for admin sections.
- * Unifies the repeated dark gradient + border pattern used across 10+ admin components.
+ * Paper surface for readability — operational, compact, low-noise.
  *
  * Usage:
  * ```tsx
@@ -22,7 +22,7 @@ export function AdminCard({ children, className }: AdminCardProps) {
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
+        "rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
         className
       )}
     >

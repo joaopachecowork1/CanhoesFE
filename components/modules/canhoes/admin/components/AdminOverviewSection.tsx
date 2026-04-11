@@ -43,14 +43,14 @@ export function AdminOverviewSection({
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.16)] bg-[radial-gradient(circle_at_top_right,rgba(177,140,255,0.16),transparent_36%),linear-gradient(180deg,rgba(18,24,11,0.95),rgba(11,14,8,0.97))] px-4 py-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:px-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
         <div className="space-y-5">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--neon-green)]">Admin</p>
-            <h2 className="text-lg font-semibold text-[var(--bg-paper)]">
+            <p className="editorial-kicker text-[var(--moss-glow)]">Admin</p>
+            <h2 className="text-lg font-semibold text-[var(--ink-primary)]">
               Painel operacional da edicao
             </h2>
-            <p className="text-sm leading-6 text-[rgba(245,237,224,0.78)]">
+            <p className="text-sm leading-6 text-[var(--ink-muted)]">
               Leitura rapida do evento, da fila e dos sinais principais sem misturar
               controlos com o conteudo operacional.
             </p>
@@ -113,22 +113,22 @@ function OverviewMetric({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.68)] px-4 py-4">
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-4 py-4">
       <div className="flex items-center justify-between gap-3">
         <span
           className={
             tone === "highlight"
-              ? "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(177,140,255,0.34)] bg-[rgba(177,140,255,0.2)] text-[var(--bg-paper)] shadow-[var(--glow-purple-sm)]"
-              : "flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(122,173,58,0.26)] bg-[rgba(122,173,58,0.16)] text-[var(--bg-paper)]"
+              ? "flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[rgba(122,173,58,0.16)] text-[var(--ink-primary)]"
+              : "flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[rgba(74,92,47,0.12)] text-[var(--ink-primary)]"
           }
         >
           {icon}
         </span>
-        <p className="max-w-[11rem] text-right text-base font-semibold text-[var(--bg-paper)]">
+        <p className="max-w-[11rem] text-right text-base font-semibold text-[var(--ink-primary)]">
           {value}
         </p>
       </div>
-      <p className="mt-3 font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.66)]">
+      <p className="mt-3 font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
         {label}
       </p>
     </div>
