@@ -3,7 +3,6 @@
 import { ChevronRight, Layers, Settings2, Timer, ToggleRight } from "lucide-react";
 
 import type {
-  EventAdminSecretSantaStateDto,
   EventAdminStateDto,
   EventPhaseDto,
 } from "@/lib/api/types";
@@ -19,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { SecretSantaAdmin } from "./SecretSantaAdmin";
 import { ADMIN_CONTENT_CARD_CLASS, AdminDetailSheet } from "./adminContentUi";
 import {
   ControlBlock,
@@ -64,20 +62,15 @@ type MainPanelProps = SharedProps & {
 };
 
 type AdvancedSheetProps = SharedProps & {
-  activeEventName: string | null;
   advancedModuleItems: ModuleVisibilityItem[];
   allDisabled: boolean;
   allEnabled: boolean;
-  eventId: string | null;
-  loading: boolean;
   onOpenChange: (open: boolean) => void;
-  onRefresh: () => Promise<void>;
   onSetAllModules: (visible: boolean) => void;
   onSetNominationsVisible: (checked: boolean) => void;
   onSetResultsVisible: (checked: boolean) => void;
   onToggleAdvancedModule: (item: ModuleVisibilityItem, checked: boolean) => void;
   open: boolean;
-  secretSantaState: EventAdminSecretSantaStateDto | null;
   state: EventAdminStateDto;
 };
 
@@ -110,7 +103,7 @@ export function AdminSettingsMainPanel({
             <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
             <CardTitle className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-[var(--neon-green)]" />
-              Configurações
+              Evento
             </CardTitle>
           </div>
 
@@ -222,21 +215,16 @@ export function AdminSettingsMainPanel({
 }
 
 export function AdminSettingsAdvancedSheet({
-  activeEventName,
   advancedModuleItems,
   allDisabled,
   allEnabled,
-  eventId,
   feedback,
-  loading,
   onOpenChange,
-  onRefresh,
   onSetAllModules,
   onSetNominationsVisible,
   onSetResultsVisible,
   onToggleAdvancedModule,
   open,
-  secretSantaState,
   state,
   visibilitySavingKey,
 }: Readonly<AdvancedSheetProps>) {
@@ -320,14 +308,6 @@ export function AdminSettingsAdvancedSheet({
               ))}
             </div>
           </ControlBlock>
-
-          <SecretSantaAdmin
-            activeEventName={activeEventName}
-            eventId={eventId}
-            loading={loading}
-            onUpdate={onRefresh}
-            state={secretSantaState}
-          />
         </>
       ) : null}
     </AdminDetailSheet>

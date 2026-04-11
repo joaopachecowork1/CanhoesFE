@@ -46,7 +46,7 @@ export default async function AdminSectionPage({
   return (
     <AdminGate>
       <AdminSectionShell activeId={section}>
-        <CanhoesAdminModule forcedSection={section} showTabs={false} />
+        <CanhoesAdminModule section={section} />
       </AdminSectionShell>
     </AdminGate>
   );

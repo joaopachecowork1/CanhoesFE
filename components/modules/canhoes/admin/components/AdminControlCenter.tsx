@@ -5,7 +5,6 @@ import { toast } from "sonner";
 
 import type {
   AdminModuleKey,
-  EventAdminSecretSantaStateDto,
   EventAdminStateDto,
   EventPhaseDto,
 } from "@/lib/api/types";
@@ -34,7 +33,6 @@ type AdminControlCenterProps = {
   events: Array<{ id: string; name: string }>;
   loading: boolean;
   onRefresh: () => Promise<void>;
-  secretSantaState: EventAdminSecretSantaStateDto | null;
   state: EventAdminStateDto | null;
 };
 
@@ -53,7 +51,6 @@ export function AdminControlCenter({
   events,
   loading,
   onRefresh,
-  secretSantaState,
   state,
 }: Readonly<AdminControlCenterProps>) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -223,21 +220,16 @@ export function AdminControlCenter({
       />
 
       <AdminSettingsAdvancedSheet
-        activeEventName={activeEventName}
         advancedModuleItems={advancedModuleItems}
         allDisabled={allDisabled}
         allEnabled={allEnabled}
-        eventId={eventId}
         feedback={feedback}
-        loading={loading}
         onOpenChange={setAdvancedOpen}
-        onRefresh={onRefresh}
         onSetAllModules={handleSetAllModules}
         onSetNominationsVisible={handleNominationsVisibility}
         onSetResultsVisible={handleResultsVisibility}
         onToggleAdvancedModule={handleModuleToggle}
         open={advancedOpen}
-        secretSantaState={secretSantaState}
         state={currentState}
         visibilitySavingKey={visibilitySavingKey}
       />

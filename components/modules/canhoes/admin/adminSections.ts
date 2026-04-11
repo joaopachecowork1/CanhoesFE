@@ -38,8 +38,8 @@ type AdminSectionDefinition = {
 const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   {
     id: "dashboard",
-    label: "Painel",
-    description: "Leitura rapida da edicao e da fila operacional.",
+    label: "Resumo",
+    description: "Leitura rapida da edicao, da fila e dos sinais operacionais.",
     icon: Layers3,
     count: () => 0,
   },
@@ -52,14 +52,14 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
   },
   {
     id: "membros",
-    label: "Membros",
-    description: "Membros e permissoes desta edicao.",
+    label: "Amigos",
+    description: "Amigo secreto e roster operacional desta edicao.",
     icon: Users,
     count: (context) => context.memberCount,
   },
   {
     id: "configuracoes",
-    label: "Configurações",
+    label: "Evento",
     description: "Evento ativo, fase e visibilidade dos modulos.",
     icon: Settings2,
     count: (context) => context.visibleModuleCount,
@@ -80,6 +80,10 @@ export function getAdminSectionMeta() {
     label: sectionDefinition.label,
     icon: sectionDefinition.icon,
   }));
+}
+
+export function getAdminSectionItem(id: AdminSectionId) {
+  return ADMIN_SECTION_REGISTRY.find((sectionDefinition) => sectionDefinition.id === id) ?? null;
 }
 
 export function getAdminAdjacentSection(
@@ -108,5 +112,5 @@ export function buildAdminSectionItems(
 }
 
 export function getDefaultAdminSection(): AdminSectionId {
-  return "dashboard";
+  return "conteudo";
 }

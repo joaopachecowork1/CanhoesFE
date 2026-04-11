@@ -273,10 +273,6 @@ function isNavItemAvailable({
 
   if (isAdmin) return true;
 
-  const activePhaseType = overview?.activePhase?.type;
-  if (moduleKey === "nominees") return activePhaseType === "PROPOSALS";
-  if (moduleKey === "voting") return activePhaseType === "VOTING";
-
   return true;
 }
 

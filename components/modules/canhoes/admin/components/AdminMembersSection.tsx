@@ -1,55 +1,83 @@
 "use client";
 
-import type { PublicUserDto } from "@/lib/api/types";
+import type {
+  EventAdminSecretSantaStateDto,
+  PublicUserDto,
+} from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminStateMessage } from "./AdminStateMessage";
+import { SecretSantaAdmin } from "./SecretSantaAdmin";
 
 type AdminMembersSectionProps = {
+  activeEventName: string | null;
+  eventId: string | null;
   loading: boolean;
   members: PublicUserDto[];
+  onUpdate: () => Promise<void>;
+  secretSantaState: EventAdminSecretSantaStateDto | null;
 };
 
 export function AdminMembersSection({
+  activeEventName,
+  eventId,
   loading,
   members,
+  onUpdate,
+  secretSantaState,
 }: Readonly<AdminMembersSectionProps>) {
-  if (loading) {
-    return <AdminStateMessage>A carregar membros...</AdminStateMessage>;
-  }
-
-  if (members.length === 0) {
-    return <AdminStateMessage>Nenhum membro nesta edicao.</AdminStateMessage>;
+  if (!eventId) {
+    return <AdminStateMessage>Falta uma edicao ativa para gerir amigos.</AdminStateMessage>;
   }
 
   return (
-    <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
-      <CardHeader className="space-y-1">
-        <p className="editorial-kicker">Membros</p>
-        <CardTitle>
-          {members.length} {members.length === 1 ? "membro" : "membros"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="max-h-[60svh] space-y-2 overflow-y-auto pr-1">
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(11,14,8,0.72)] px-3 py-2.5"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
-                  {member.displayName || member.email}
-                </p>
-                <p className="text-xs text-[rgba(245,237,224,0.64)]">{member.email}</p>
-              </div>
-              {member.isAdmin && (
-                <Badge variant="outline" className="shrink-0">Admin</Badge>
-              )}
+    <div className="space-y-4">
+      <SecretSantaAdmin
+        activeEventName={activeEventName}
+        eventId={eventId}
+        loading={loading}
+        onUpdate={onUpdate}
+        state={secretSantaState}
+      />
+
+      <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+        <CardHeader className="space-y-1">
+          <p className="editorial-kicker">Roster</p>
+          <CardTitle>
+            {members.length} {members.length === 1 ? "membro" : "membros"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? <AdminStateMessage>A carregar membros...</AdminStateMessage> : null}
+
+          {!loading && members.length === 0 ? (
+            <AdminStateMessage>Nenhum membro nesta edicao.</AdminStateMessage>
+          ) : null}
+
+          {!loading && members.length > 0 ? (
+            <div className="max-h-[60svh] space-y-2 overflow-y-auto pr-1">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(11,14,8,0.72)] px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                      {member.displayName || member.email}
+                    </p>
+                    <p className="text-xs text-[rgba(245,237,224,0.64)]">{member.email}</p>
+                  </div>
+                  {member.isAdmin ? (
+                    <Badge variant="outline" className="shrink-0">
+                      Admin
+                    </Badge>
+                  ) : null}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

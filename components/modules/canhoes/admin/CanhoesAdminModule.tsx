@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense, type ReactElement } from "react";
+import { useCallback, useEffect, lazy, Suspense, type ReactElement } from "react";
 
 import { AsyncStatusCard } from "@/components/ui/async-status-card";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,13 @@ import { useEventOverview } from "@/hooks/useEventOverview";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { countVisibleModules } from "@/lib/modules";
 import { ApiError } from "@/lib/api/canhoesClient";
 
 import {
   type AdminSectionId,
-  buildAdminSectionItems,
-  getDefaultAdminSection,
+  getAdminSectionItem,
 } from "./adminSections";
 import { AdminStateMessage } from "./components/AdminStateMessage";
-import { AdminTabs } from "./components/AdminTabs";
 
 // OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
 const AdminContentSection = lazy(() => import("./components/AdminContentSection").then(m => ({ default: m.AdminContentSection })));
@@ -37,13 +34,11 @@ function getAdminErrorMessage(error: unknown) {
 }
 
 type CanhoesAdminModuleProps = {
-  forcedSection?: AdminSectionId;
-  showTabs?: boolean;
+  section: AdminSectionId;
 };
 
 export default function CanhoesAdminModule({
-  forcedSection,
-  showTabs = true,
+  section,
 }: Readonly<CanhoesAdminModuleProps>) {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
   const {
@@ -57,53 +52,16 @@ export default function CanhoesAdminModule({
     loading,
     members: eventMembers,
     officialResults,
+    pendingCategoryProposals,
+    pendingMeasureProposals,
+    pendingNominationCount,
+    pendingNominees,
     secretSanta,
     state: eventState,
+    summary,
     votes: voteAuditRows,
     refresh,
   } = useAdminBootstrap(activeEvent?.id ?? null);
-
-  const [activeTab, setActiveTab] = useState<AdminSectionId>(
-    forcedSection ?? getDefaultAdminSection()
-  );
-
-  useEffect(() => {
-    if (!forcedSection) return;
-    setActiveTab(forcedSection);
-  }, [forcedSection]);
-
-  const pendingReviewCounts = useMemo(
-    () => ({
-      nominees: allNominees.filter((n) => n.status === "pending").length,
-      categories: allCategoryProposals.filter((p) => p.status === "pending").length,
-      measures: measureProposals.filter((p) => p.status === "pending").length,
-    }),
-    [allNominees, allCategoryProposals, measureProposals]
-  );
-
-  const pendingNominationCount = adminNominees.length > 0
-    ? adminNominees.filter((nominee) => nominee.status === "pending").length
-    : pendingReviewCounts.nominees;
-  const pendingReviewCount = pendingReviewCounts.categories + pendingReviewCounts.measures;
-
-  const stats = useMemo(
-    () => ({
-      totalNominees: allNominees.length,
-      pendingNominees: pendingReviewCounts.nominees,
-      totalCategories: categories.length,
-      pendingCategories: pendingReviewCounts.categories,
-      memberCount: eventMembers.length,
-      visibleModules: countVisibleModules(eventState?.effectiveModules),
-    }),
-    [
-      allNominees,
-      pendingReviewCounts.nominees,
-      categories.length,
-      pendingReviewCounts.categories,
-      eventMembers.length,
-      eventState?.effectiveModules,
-    ]
-  );
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -127,26 +85,10 @@ export default function CanhoesAdminModule({
     logFrontendError("Admin.bootstrap", error);
   }, [error]);
 
-  const pendingNominees = allNominees.filter((n) => n.status === "pending");
-  const pendingCategoryProposals = allCategoryProposals.filter((p) => p.status === "pending");
-  const pendingMeasureProposals = measureProposals.filter((p) => p.status === "pending");
-
-  const adminTabs = useMemo(
-    () =>
-      buildAdminSectionItems({
-        memberCount: eventMembers.length,
-        pendingNominationsCount: pendingNominationCount,
-        pendingReviewCount,
-        visibleModuleCount: countVisibleModules(eventState?.effectiveModules),
-      }),
-    [eventMembers.length, eventState?.effectiveModules, pendingNominationCount, pendingReviewCount]
-  );
-
-  const activeSectionMeta =
-    adminTabs.find((section) => section.id === activeTab) ?? null;
+  const activeSectionMeta = getAdminSectionItem(section);
 
   const showMobileSummary = Boolean(
-    !loading && activeEvent && showTabs && activeTab !== "configuracoes"
+    !loading && activeEvent && section !== "configuracoes"
   );
 
   const SECTION_CONFIG: Record<AdminSectionId, () => ReactElement> = {
@@ -178,7 +120,14 @@ export default function CanhoesAdminModule({
     ),
     membros: () => (
       <Suspense fallback={loadingFallback}>
-        <AdminMembersSection loading={loading} members={eventMembers} />
+        <AdminMembersSection
+          activeEventName={activeEvent?.name ?? null}
+          eventId={activeEvent?.id ?? null}
+          loading={loading}
+          members={eventMembers}
+          onUpdate={handleRefresh}
+          secretSantaState={secretSanta}
+        />
       </Suspense>
     ),
     configuracoes: () => (
@@ -189,7 +138,6 @@ export default function CanhoesAdminModule({
           events={events}
           loading={loading}
           onRefresh={handleRefresh}
-          secretSantaState={secretSanta}
           state={eventState}
         />
       </Suspense>
@@ -205,13 +153,13 @@ export default function CanhoesAdminModule({
       onAction={() => globalThis.location.reload()}
     />
   );
-  const sectionRenderer = SECTION_CONFIG[activeTab];
+  const sectionRenderer = SECTION_CONFIG[section];
   const activeSectionContent = sectionRenderer ? (
     <SectionBoundary
       title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta secao"}`}
       description="Esta secao do admin falhou ao renderizar, mas o resto do painel continua disponivel."
       onRetry={() => void handleRefresh()}
-      resetKey={activeTab}
+      resetKey={section}
     >
       <Suspense fallback={loadingFallback}>{sectionRenderer()}</Suspense>
     </SectionBoundary>
@@ -253,10 +201,10 @@ export default function CanhoesAdminModule({
                 Candidatos
               </p>
               <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {stats.totalNominees} total
+                {summary.totalNominees} total
               </p>
               <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {stats.pendingNominees} pendentes
+                {pendingNominationCount} pendentes
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
@@ -264,10 +212,10 @@ export default function CanhoesAdminModule({
                 Categorias
               </p>
               <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {stats.totalCategories} total
+                {summary.totalCategories} total
               </p>
               <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {stats.pendingCategories} pendentes
+                {summary.pendingCategoryProposalCount} pendentes
               </p>
             </div>
             <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--layer-card)] p-2">
@@ -275,21 +223,15 @@ export default function CanhoesAdminModule({
                 Membros
               </p>
               <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                {stats.memberCount}
+                {summary.memberCount}
               </p>
               <p className="text-[var(--text-subtle)] text-[0.58rem] leading-none">
-                {stats.visibleModules} módulos
+                {summary.visibleModuleCount} módulos
               </p>
             </div>
           </div>
         </div>
       )}
-
-      {showTabs ? (
-        <div className="sticky top-[5.2rem] z-20 pb-1 sm:top-[5.45rem]">
-          <AdminTabs activeId={activeTab} items={adminTabs} onSelect={setActiveTab} />
-        </div>
-      ) : null}
 
       {activeSectionContent}
     </div>

@@ -17,9 +17,11 @@ type AuthContextType = {
   isLogged: boolean;
   loading: boolean;
   profileLoading: boolean;
+  profileError: Error | null;
   isDevAuthBypass: boolean;
   loginGoogle: () => void;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
 };
 
 type MeResponse = {
@@ -30,6 +32,36 @@ type MeResponse = {
     isAdmin: boolean;
   } | null;
 };
+
+type ErrorResponse = {
+  detail?: string;
+  message?: string;
+};
+
+async function resolveAuthErrorMessage(response: Response) {
+  const fallback = `Failed to load /api/me (${response.status})`;
+  const contentType = response.headers.get("content-type") || "";
+
+  try {
+    if (contentType.includes("application/json")) {
+      const payload = (await response.json()) as ErrorResponse;
+      if (typeof payload?.message === "string" && payload.message.trim()) {
+        return payload.message.trim();
+      }
+
+      if (typeof payload?.detail === "string" && payload.detail.trim()) {
+        return payload.detail.trim();
+      }
+
+      return fallback;
+    }
+
+    const text = (await response.text()).trim();
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -59,11 +91,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     retry: false,
     queryFn: async ({ signal }) => {
       const response = await fetch("/api/me", { signal });
-      if (response.status === 401 || response.status === 403) {
-        return null;
-      }
       if (!response.ok) {
-        throw new Error(`Failed to load /api/me (${response.status})`);
+        throw new Error(await resolveAuthErrorMessage(response));
       }
 
       const payload = (await response.json()) as MeResponse;
@@ -107,17 +136,40 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     };
   }, [backendUserQuery.data, devBypassUser, session?.user, isLoggedIn]);
 
+  const profileError = useMemo<Error | null>(() => {
+    if (backendUserQuery.error instanceof Error) {
+      return backendUserQuery.error;
+    }
+
+    if (backendUserQuery.error) {
+      return new Error(String(backendUserQuery.error));
+    }
+
+    return null;
+  }, [backendUserQuery.error]);
+
   const value = useMemo<AuthContextType>(
     () => ({
       user,
       isLogged: isLoggedIn || isDevAuthBypass,
       loading: !isDevAuthBypass && status === "loading",
       profileLoading: !isDevAuthBypass && isLoggedIn && backendUserQuery.isLoading,
+      profileError,
       isDevAuthBypass,
       loginGoogle: () => void signIn("google", { callbackUrl: "/canhoes" }),
       logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
+      refreshProfile: async () => {
+        await backendUserQuery.refetch();
+      },
     }),
-    [isLoggedIn, isDevAuthBypass, status, backendUserQuery.isLoading, user]
+    [
+      backendUserQuery,
+      isLoggedIn,
+      isDevAuthBypass,
+      profileError,
+      status,
+      user,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

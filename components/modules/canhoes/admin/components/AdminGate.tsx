@@ -34,7 +34,16 @@ function AdminStateCard({
 }
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
-  const { loading, profileLoading, isLogged, user, loginGoogle } = useAuth();
+  const {
+    loading,
+    profileError,
+    profileLoading,
+    isLogged,
+    refreshProfile,
+    user,
+    loginGoogle,
+    logout,
+  } = useAuth();
   const eventOverview = useEventOverview();
   const isAdmin = useIsAdmin();
   const hasAdminAccess = isAdmin || Boolean(eventOverview.overview?.permissions.isAdmin);
@@ -71,6 +80,35 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
         description="A conta ja tem sessao, mas o perfil ainda esta a ser sincronizado com o contexto do evento."
         action={
           <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
+        }
+      />
+    );
+  }
+
+  if (isLogged && profileError && !hasAdminAccess) {
+    return (
+      <AdminStateCard
+        title="Perfil nao validado"
+        description={`A sessao autenticou, mas o backend nao conseguiu validar o teu perfil agora: ${profileError.message}`}
+        action={
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => {
+                void refreshProfile();
+                void eventOverview.refresh();
+              }}
+            >
+              Tentar novamente
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => logout()}
+            >
+              Terminar sessao
+            </Button>
+          </div>
         }
       />
     );
