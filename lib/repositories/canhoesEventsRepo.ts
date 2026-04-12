@@ -25,13 +25,84 @@ export const canhoesEventsRepo = {
 
   // FEED
   getFeedPosts: (eventId: string) =>
-    canhoesFetch<T.EventFeedPostDto[]>(`/v1/events/${eventId}/feed/posts`),
+    canhoesFetch<T.EventFeedPostFullDto[]>(`/v1/events/${eventId}/feed/posts`),
 
-  createFeedPost: (eventId: string, payload: T.CreateEventPostRequest) =>
-    canhoesFetch<T.EventFeedPostDto>(`/v1/events/${eventId}/feed/posts`, {
+  createFeedPost: (eventId: string, payload: T.CreateEventFeedPostRequest) =>
+    canhoesFetch<T.EventFeedPostFullDto>(`/v1/events/${eventId}/feed/posts`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  toggleFeedPostLike: (eventId: string, postId: string) =>
+    canhoesFetch<{ liked: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/like`, {
+      method: "POST",
+    }),
+
+  toggleFeedPostDownvote: (eventId: string, postId: string) =>
+    canhoesFetch<{ downvoted: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/downvote`, {
+      method: "POST",
+    }),
+
+  toggleFeedPostReaction: (eventId: string, postId: string, emoji: string) =>
+    canhoesFetch<{ emoji: string; active: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/reactions`, {
+      method: "POST",
+      body: JSON.stringify({ emoji }),
+    }),
+
+  getFeedPostComments: (eventId: string, postId: string) =>
+    canhoesFetch<T.HubCommentDto[]>(`/v1/events/${eventId}/feed/posts/${postId}/comments`),
+
+  createFeedPostComment: (eventId: string, postId: string, payload: { text: string }) =>
+    canhoesFetch<T.HubCommentDto>(`/v1/events/${eventId}/feed/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteFeedPostComment: (eventId: string, postId: string, commentId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}/comments/${commentId}`, {
+      method: "DELETE",
+    }),
+
+  toggleFeedCommentReaction: (eventId: string, postId: string, commentId: string, emoji: string) =>
+    canhoesFetch<{ emoji: string; active: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/comments/${commentId}/reactions`, {
+      method: "POST",
+      body: JSON.stringify({ emoji }),
+    }),
+
+  voteFeedPoll: (eventId: string, postId: string, optionId: string) =>
+    canhoesFetch<{ optionId: string }>(`/v1/events/${eventId}/feed/posts/${postId}/poll/vote`, {
+      method: "POST",
+      body: JSON.stringify({ optionId }),
+    }),
+
+  adminPinFeedPost: (eventId: string, postId: string) =>
+    canhoesFetch<{ pinned: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, {
+      method: "POST",
+    }),
+
+  adminDeleteFeedPost: (eventId: string, postId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}`, {
+      method: "DELETE",
+    }),
+
+  uploadFeedImages: async (eventId: string, files: File[]) => {
+    const form = new FormData();
+    files.forEach((file) => form.append("files", file));
+    const res = await fetch(`/api/proxy/v1/events/${eventId}/feed/uploads`, {
+      method: "POST",
+      body: form,
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error((await res.text().catch(() => "")) || res.statusText);
+    const text = await res.text().catch(() => "");
+    if (!text) return [];
+    try {
+      return JSON.parse(text) as string[];
+    } catch {
+      return [];
+    }
+  },
 
   // EVENT CATEGORIES (user-facing)
   getCategories: (eventId: string) =>
@@ -72,8 +143,49 @@ export const canhoesEventsRepo = {
   getAdminState: (eventId: string) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`),
 
-  getAdminBootstrap: (eventId: string) =>
-    canhoesFetch<T.EventAdminBootstrapDto>(`/v1/events/${eventId}/admin/bootstrap`),
+  getAdminBootstrap: (eventId: string, includeLists = false) =>
+    canhoesFetch<T.EventAdminBootstrapDto>(
+      `/v1/events/${eventId}/admin/bootstrap?includeLists=${includeLists}`
+    ),
+
+  // Paginated admin endpoints
+  getAdminVotesPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.AdminVotesPagedDto>(
+      `/v1/events/${eventId}/admin/votes/paged?skip=${skip}&take=${take}`
+    ),
+
+  getAdminNominationsPaged: (eventId: string, skip = 0, take = 50, status?: string) =>
+    canhoesFetch<T.AdminNomineesPagedDto>(
+      `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${status}` : ""}`
+    ),
+
+  getAdminProposalsPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.AdminProposalsPagedDto>(
+      `/v1/events/${eventId}/admin/proposals/paged?skip=${skip}&take=${take}`
+    ),
+
+  getAdminMembersPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResultPublicUserDto>(
+      `/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`
+    ),
+
+  getAdminOfficialResultsPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResultAdminCategoryResultDto>(
+      `/v1/events/${eventId}/admin/official-results/paged?skip=${skip}&take=${take}`
+    ),
+
+  getAdminCategoriesSummary: (eventId: string) =>
+    canhoesFetch<T.AwardCategorySummaryDto[]>(`/v1/events/${eventId}/admin/categories/summary`),
+
+  getAdminNomineesSummary: (eventId: string, status?: string) =>
+    canhoesFetch<T.NomineeSummaryDto[]>(
+      `/v1/events/${eventId}/admin/nominees/summary${status ? `?status=${status}` : ""}`
+    ),
+
+  getAdminNominationsSummary: (eventId: string, status?: string) =>
+    canhoesFetch<T.AdminNomineeSummaryDto[]>(
+      `/v1/events/${eventId}/admin/nominations/summary${status ? `?status=${status}` : ""}`
+    ),
 
   updateAdminState: (eventId: string, payload: T.UpdateEventAdminStateRequest) =>
     canhoesFetch<T.EventAdminStateDto>(`/v1/events/${eventId}/admin/state`, {
@@ -365,65 +477,6 @@ export const canhoesEventsRepo = {
   // CATEGORIES (user-facing, alias to existing getCategories but returns AwardCategoryDto for legacy compat)
   getUserCategories: (eventId: string) =>
     canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/categories`),
-
-  // FEED INTERACTIONS — placeholder methods for future event-scoped feed migration
-  // These mirror hubRepo endpoints but use /v1/events/:id/feed/... prefix
-  // Backend must implement these endpoints before the frontend can switch over.
-
-  createFeedPostComment: (eventId: string, postId: string, payload: T.CreateFeedCommentRequest) =>
-    canhoesFetch<T.FeedCommentDto>(`/v1/events/${eventId}/feed/posts/${postId}/comments`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  getFeedPostComments: (eventId: string, postId: string) =>
-    canhoesFetch<T.FeedCommentDto[]>(`/v1/events/${eventId}/feed/posts/${postId}/comments`),
-
-  toggleFeedPostReaction: (eventId: string, postId: string, emoji: string) =>
-    canhoesFetch<T.FeedReactionDto>(`/v1/events/${eventId}/feed/posts/${postId}/reactions`, {
-      method: "POST",
-      body: JSON.stringify({ emoji }),
-    }),
-
-  voteFeedPoll: (eventId: string, postId: string, optionId: string) =>
-    canhoesFetch<T.FeedPollVoteDto>(`/v1/events/${eventId}/feed/posts/${postId}/poll/vote`, {
-      method: "POST",
-      body: JSON.stringify({ optionId }),
-    }),
-
-  uploadFeedImage: async (eventId: string, file: File) => {
-    const form = new FormData();
-    form.append("file", file);
-    const res = await fetch(`/api/proxy/v1/events/${eventId}/feed/uploads`, {
-      method: "POST",
-      body: form,
-      credentials: "include",
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error((await res.text().catch(() => "")) || res.statusText);
-    const text = await res.text().catch(() => "");
-    if (!text) return undefined;
-    try {
-      return JSON.parse(text) as { url: string };
-    } catch {
-      return undefined;
-    }
-  },
-
-  deleteFeedPostComment: (eventId: string, postId: string, commentId: string) =>
-    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}/comments/${commentId}`, {
-      method: "DELETE",
-    }),
-
-  adminPinFeedPost: (eventId: string, postId: string) =>
-    canhoesFetch<T.EventFeedPostDto>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, {
-      method: "POST",
-    }),
-
-  adminDeleteFeedPost: (eventId: string, postId: string) =>
-    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}`, {
-      method: "DELETE",
-    }),
 };
 
 export default canhoesEventsRepo;

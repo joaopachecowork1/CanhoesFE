@@ -5,47 +5,41 @@ import { useMemo, useState } from "react";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { AdminCard } from "./AdminCard";
-import { AdminDetailPanel } from "./adminContentUi";
-import type { AwardCategoryDto } from "@/lib/api/types";
 
 type VoteAuditRow = {
   categoryId: string;
+  categoryName: string;
   nomineeId: string;
   userId: string;
+  userName: string;
   updatedAtUtc: string;
 };
 
 type Props = {
   votes: VoteAuditRow[];
-  categories: AwardCategoryDto[];
+  /** @deprecated Category names now resolved in vote payload from backend */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  categories?: any[];
   loading: boolean;
 };
 
-const MAX_DISPLAY = 200;
-
-export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
+export function VotesAudit({ votes, loading }: Readonly<Props>) {
   const [search, setSearch] = useState("");
 
-  const categoryMap = useMemo(
-    () => new Map(categories.map((category) => [category.id, category.name])),
-    [categories]
-  );
-
   const filteredVotes = useMemo(() => {
-    if (!search.trim()) return votes.slice(0, MAX_DISPLAY);
+    if (!search.trim()) return votes;
 
     const normalizedTerm = search.toLowerCase();
-    return votes
-      .filter(
-        (vote) =>
-          vote.nomineeId.toLowerCase().includes(normalizedTerm) ||
-          vote.userId.toLowerCase().includes(normalizedTerm) ||
-          categoryMap.get(vote.categoryId)?.toLowerCase().includes(normalizedTerm)
-      )
-      .slice(0, MAX_DISPLAY);
-  }, [votes, search, categoryMap]);
+    return votes.filter(
+      (vote) =>
+        vote.categoryName.toLowerCase().includes(normalizedTerm) ||
+        vote.userName.toLowerCase().includes(normalizedTerm) ||
+        vote.nomineeId.toLowerCase().includes(normalizedTerm)
+    );
+  }, [votes, search]);
 
   if (loading) {
     return (
@@ -91,32 +85,32 @@ export function VotesAudit({ votes, categories, loading }: Readonly<Props>) {
 
         <div className="body-small text-[rgba(245,237,224,0.68)]">
           {filteredVotes.length} de {votes.length} votos
-          {filteredVotes.length >= MAX_DISPLAY
-            ? ` (a mostrar no maximo ${MAX_DISPLAY})`
-            : ""}
         </div>
 
         <Separator className="bg-[rgba(212,184,150,0.12)]" />
 
-        <AdminDetailPanel className="max-h-[58svh] overflow-y-auto px-0 py-0">
-          {filteredVotes.map((vote, index) => (
-            <article
-              key={`${vote.userId}:${vote.categoryId}:${index}`}
-              className="grid gap-1 border-b border-[rgba(212,184,150,0.1)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3"
-            >
-              <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
-                {categoryMap.get(vote.categoryId) ?? vote.categoryId}
-              </p>
-              <div className="space-y-0.5 text-xs text-[rgba(245,237,224,0.74)] sm:text-sm">
-                <p className="truncate">Nomeado: {vote.nomineeId}</p>
-                <p className="truncate">Utilizador: {vote.userId}</p>
-              </div>
-              <p className="text-[11px] text-[rgba(245,237,224,0.62)] sm:text-right">
-                {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
-              </p>
-            </article>
-          ))}
-        </AdminDetailPanel>
+        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)]">
+          <VirtualizedList
+            className="px-0 py-0"
+            estimateSize={() => 52}
+            items={filteredVotes}
+            renderItem={(vote) => (
+              <article
+                className="grid gap-1 border-b border-[rgba(212,184,150,0.1)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3"
+              >
+                <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                  {vote.categoryName}
+                </p>
+                <div className="space-y-0.5 text-xs text-[rgba(245,237,224,0.74)] sm:text-sm">
+                  <p className="truncate">Votou: {vote.userName}</p>
+                </div>
+                <p className="text-[11px] text-[rgba(245,237,224,0.62)] sm:text-right">
+                  {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
+                </p>
+              </article>
+            )}
+          />
+        </div>
       </CardContent>
     </AdminCard>
   );

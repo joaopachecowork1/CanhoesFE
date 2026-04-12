@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, lazy, Suspense, useState, type ReactElement } from "react";
+import { useCallback, useEffect, lazy, Suspense, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { AsyncStatusCard } from "@/components/ui/async-status-card";
@@ -37,6 +37,17 @@ function getAdminErrorMessage(error: unknown) {
 type CanhoesAdminModuleProps = {
   section: AdminSectionId;
 };
+
+// OPTIMIZATION: Moved outside component to avoid recreation on every render
+const LOADING_FALLBACK = (
+  <AsyncStatusCard
+    label="A abrir secao do admin"
+    hint="A preparar os dados e o layout desta area."
+    timeoutHint="Se esta secao nao abrir, recarrega a pagina para recuperar o admin."
+    actionLabel="Recarregar"
+    onAction={() => globalThis.location.reload()}
+  />
+);
 
 /** Collapsible secondary metrics for mobile admin summary. */
 function CollapsibleMobileMetrics({
@@ -152,77 +163,95 @@ export default function CanhoesAdminModule({
     !loading && activeEvent && section !== "configuracoes"
   );
 
-  const SECTION_CONFIG: Record<AdminSectionId, () => ReactElement> = {
-    dashboard: () => (
-      <AdminOverviewSection
-        activeEventName={activeEvent?.name ?? null}
-        allNominees={allNominees}
-        loading={loading}
-        pendingCategoryProposals={pendingCategoryProposals}
-        pendingMeasureProposals={pendingMeasureProposals}
-        pendingNominees={pendingNominees}
-        state={eventState}
-      />
-    ),
-    conteudo: () => (
-      <Suspense fallback={loadingFallback}>
-        <AdminContentSection
-          adminNominees={adminNominees}
-          categories={categories}
-          categoryProposals={allCategoryProposals}
-          eventId={activeEvent?.id ?? null}
-          initialResults={officialResults}
-          loading={loading}
-          measureProposals={measureProposals}
-          onUpdate={handleRefresh}
-          votes={voteAuditRows}
-        />
-      </Suspense>
-    ),
-    membros: () => (
-      <Suspense fallback={loadingFallback}>
-        <AdminMembersSection
-          activeEventName={activeEvent?.name ?? null}
-          eventId={activeEvent?.id ?? null}
-          loading={loading}
-          members={eventMembers}
-          onUpdate={handleRefresh}
-          secretSantaState={secretSanta}
-        />
-      </Suspense>
-    ),
-    configuracoes: () => (
-      <Suspense fallback={loadingFallback}>
-        <AdminControlCenter
-          activeEventName={activeEvent?.name ?? null}
-          eventId={activeEvent?.id ?? null}
-          events={events}
-          loading={loading}
-          onRefresh={handleRefresh}
-          state={eventState}
-        />
-      </Suspense>
-    ),
-  };
-
-  const loadingFallback = (
-    <AsyncStatusCard
-      label="A abrir secao do admin"
-      hint="A preparar os dados e o layout desta area."
-      timeoutHint="Se esta secao nao abrir, recarrega a pagina para recuperar o admin."
-      actionLabel="Recarregar"
-      onAction={() => globalThis.location.reload()}
-    />
-  );
-  const sectionRenderer = SECTION_CONFIG[section];
-  const activeSectionContent = sectionRenderer ? (
+  // OPTIMIZATION: Memoized to avoid recreation on every render
+  const sectionContent = useMemo(() => {
+    switch (section) {
+      case "dashboard":
+        return (
+          <AdminOverviewSection
+            activeEventName={activeEvent?.name ?? null}
+            allNominees={allNominees}
+            loading={loading}
+            pendingCategoryProposals={pendingCategoryProposals}
+            pendingMeasureProposals={pendingMeasureProposals}
+            pendingNominees={pendingNominees}
+            state={eventState}
+          />
+        );
+      case "conteudo":
+        return (
+          <Suspense fallback={LOADING_FALLBACK}>
+            <AdminContentSection
+              adminNominees={adminNominees}
+              categories={categories}
+              categoryProposals={allCategoryProposals}
+              eventId={activeEvent?.id ?? null}
+              initialResults={officialResults}
+              loading={loading}
+              measureProposals={measureProposals}
+              onUpdate={handleRefresh}
+              votes={voteAuditRows}
+            />
+          </Suspense>
+        );
+      case "membros":
+        return (
+          <Suspense fallback={LOADING_FALLBACK}>
+            <AdminMembersSection
+              activeEventName={activeEvent?.name ?? null}
+              eventId={activeEvent?.id ?? null}
+              loading={loading}
+              members={eventMembers}
+              onUpdate={handleRefresh}
+              secretSantaState={secretSanta}
+            />
+          </Suspense>
+        );
+      case "configuracoes":
+        return (
+          <Suspense fallback={LOADING_FALLBACK}>
+            <AdminControlCenter
+              activeEventName={activeEvent?.name ?? null}
+              eventId={activeEvent?.id ?? null}
+              events={events}
+              loading={loading}
+              onRefresh={handleRefresh}
+              state={eventState}
+            />
+          </Suspense>
+        );
+      default:
+        return null;
+    }
+  }, [
+    section,
+    activeEvent?.name,
+    activeEvent?.id,
+    loading,
+    allNominees,
+    pendingCategoryProposals,
+    pendingMeasureProposals,
+    pendingNominees,
+    eventState,
+    adminNominees,
+    categories,
+    allCategoryProposals,
+    officialResults,
+    measureProposals,
+    handleRefresh,
+    voteAuditRows,
+    eventMembers,
+    secretSanta,
+    events,
+  ]);
+  const activeSectionContent = sectionContent ? (
     <SectionBoundary
       title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta secao"}`}
       description="Esta secao do admin falhou ao renderizar, mas o resto do painel continua disponivel."
       onRetry={() => void handleRefresh()}
       resetKey={section}
     >
-      <Suspense fallback={loadingFallback}>{sectionRenderer()}</Suspense>
+      <Suspense fallback={LOADING_FALLBACK}>{sectionContent}</Suspense>
     </SectionBoundary>
   ) : null;
 

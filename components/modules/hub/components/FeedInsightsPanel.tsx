@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Camera, Pin, ScrollText, Vote } from "lucide-react";
 
 import { feedCopy } from "@/lib/canhoesCopy";
-import type { HubPostDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 
 function getPostMediaCount(post: {
@@ -17,7 +17,7 @@ function getPostMediaCount(post: {
 export function FeedInsightsPanel({
   posts,
 }: Readonly<{
-  posts: readonly HubPostDto[];
+  posts: readonly EventFeedPostFullDto[];
 }>) {
   const pinnedPostCount = posts.filter((post) => post.isPinned).length;
   const postsWithMediaCount = posts.filter((post) => getPostMediaCount(post) > 0).length;

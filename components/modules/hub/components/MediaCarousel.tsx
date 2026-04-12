@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
 import { feedCopy } from "@/lib/canhoesCopy";
@@ -117,18 +118,20 @@ export function MediaCarousel({
               failedMedia[currentImageUrl] ? (
                 <MediaFallback />
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={absMediaUrl(currentImageUrl)}
-                  alt={authorName ? `Imagem de ${authorName}` : "Media do post"}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  className="w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
-                  onError={() => markAsFailed(currentImageUrl)}
-                  onClick={() => handleClick(0)}
-                />
+                <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+                  <Image
+                    src={absMediaUrl(currentImageUrl)}
+                    alt={authorName ? `Imagem de ${authorName}` : "Media do post"}
+                    fill
+                    loading="lazy"
+                    decoding="async"
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    className="cursor-pointer object-contain transition-opacity hover:opacity-90"
+                    onError={() => markAsFailed(currentImageUrl)}
+                    onClick={() => handleClick(0)}
+                    unoptimized
+                  />
+                </div>
               )
             ) : (
               <div
@@ -150,18 +153,20 @@ export function MediaCarousel({
                     {failedMedia[url] ? (
                       <MediaFallback />
                     ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={absMediaUrl(url)}
-                        alt={`Imagem ${index + 1} de ${media.length}`}
-                        loading={isActive || isAdjacent ? "eager" : "lazy"}
-                        decoding="async"
-                        draggable={false}
-                        sizes="(max-width: 768px) 100vw, 768px"
-                        className="w-full cursor-pointer object-contain transition-opacity hover:opacity-90"
-                        onError={() => markAsFailed(url)}
-                        onClick={() => handleClick(index)}
-                      />
+                      <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+                        <Image
+                          src={absMediaUrl(url)}
+                          alt={`Imagem ${index + 1} de ${media.length}`}
+                          fill
+                          loading={isActive || isAdjacent ? "eager" : "lazy"}
+                          decoding="async"
+                          sizes="(max-width: 640px) 100vw, 400px"
+                          className="cursor-pointer object-contain transition-opacity hover:opacity-90"
+                          onError={() => markAsFailed(url)}
+                          onClick={() => handleClick(index)}
+                          unoptimized
+                        />
+                      </div>
                     )}
                   </div>
                   );

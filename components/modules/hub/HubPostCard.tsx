@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
 import { BlurFade } from "@/components/animations/BlurFade";
-import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { parsePostText } from "@/lib/postUtils";
 
@@ -41,7 +41,7 @@ const LazyPollBox = dynamic(
 );
 
 interface HubPostCardProps {
-  post: HubPostDto;
+  post: EventFeedPostFullDto;
   index: number;
   isAdmin: boolean;
   openComments: boolean;
@@ -51,6 +51,7 @@ interface HubPostCardProps {
   currentUserName: string;
   currentUserImage?: string | null;
   onToggleReaction: (postId: string, emoji: string) => void;
+  onToggleDownvote: (postId: string) => void;
   onToggleComments: (postId: string) => void;
   onVotePoll: (postId: string, optionId: string) => void;
   onAddComment: (postId: string) => void;
@@ -76,6 +77,7 @@ function HubPostCardComponent({
   currentUserName,
   currentUserImage,
   onToggleReaction,
+  onToggleDownvote,
   onToggleComments,
   onVotePoll,
   onAddComment,
@@ -88,7 +90,6 @@ function HubPostCardComponent({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const { bursts, trigger: triggerBurst, clear: clearBursts } = useEmojiBurst();
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
   // Scroll to comments when they open
@@ -112,7 +113,6 @@ function HubPostCardComponent({
 
   const resolvedMediaUrls = mediaUrls();
   const reactionCounts = post.reactionCounts || {};
-  const likeCount = post.likeCount ?? reactionCounts["❤️"] ?? 0;
 
   const hasMedia = resolvedMediaUrls.length > 0;
   const hasText = !!(post.text?.trim());
@@ -134,31 +134,18 @@ function HubPostCardComponent({
   );
 
   const handleUpvote = useCallback(() => {
-    if (userVote === "up") {
-      setUserVote(null);
+    if (post.likedByMe) {
       onToggleReaction(post.id, HEART_REACTION);
     } else {
-      if (userVote === "down") {
-        onToggleReaction(post.id, HEART_REACTION);
-      } else {
-        onToggleReaction(post.id, HEART_REACTION);
-      }
-      setUserVote("up");
+      onToggleReaction(post.id, HEART_REACTION);
     }
-  }, [userVote, post.id, onToggleReaction]);
+  }, [post.likedByMe, post.id, onToggleReaction]);
 
   const handleDownvote = useCallback(() => {
-    if (userVote === "down") {
-      setUserVote(null);
-    } else {
-      if (userVote === "up") {
-        onToggleReaction(post.id, HEART_REACTION);
-      }
-      setUserVote("down");
-    }
-  }, [userVote, post.id, onToggleReaction]);
+    onToggleDownvote(post.id);
+  }, [post.id, onToggleDownvote]);
 
-  const displayScore = likeCount + (userVote === "up" ? 1 : 0) - (userVote === "down" ? 1 : 0);
+  const displayScore = (post.likeCount ?? 0) - (post.downvoteCount ?? 0);
 
   const commentCount = post.commentCount ?? 0;
 
@@ -172,19 +159,19 @@ function HubPostCardComponent({
             onClick={handleUpvote}
             className={cn(
               "canhoes-tap rounded p-0.5 transition-colors",
-              userVote === "up"
+              post.likedByMe
                 ? "text-[var(--neon-green)]"
                 : "text-[var(--text-muted)] hover:text-[var(--neon-green)]"
             )}
-            aria-label={userVote === "up" ? "Remover upvote" : "Upvote"}
+            aria-label={post.likedByMe ? "Remover upvote" : "Upvote"}
           >
             <ArrowBigUp className="h-5 w-5" />
           </button>
 
           <span className={cn(
             "reddit-score font-mono text-xs font-bold tabular-nums",
-            userVote === "up" ? "text-[var(--neon-green)]" :
-            userVote === "down" ? "text-[var(--neon-red)]" :
+            post.likedByMe ? "text-[var(--neon-green)]" :
+            post.downvotedByMe ? "text-[var(--neon-red)]" :
             "text-[var(--text-primary)]"
           )}>
             {displayScore}
@@ -195,11 +182,11 @@ function HubPostCardComponent({
             onClick={handleDownvote}
             className={cn(
               "canhoes-tap rounded p-0.5 transition-colors",
-              userVote === "down"
+              post.downvotedByMe
                 ? "text-[var(--neon-red)]"
                 : "text-[var(--text-muted)] hover:text-[var(--neon-red)]"
             )}
-            aria-label={userVote === "down" ? "Remover downvote" : "Downvote"}
+            aria-label={post.downvotedByMe ? "Remover downvote" : "Downvote"}
           >
             <ArrowBigUp className="h-5 w-5 rotate-180" />
           </button>

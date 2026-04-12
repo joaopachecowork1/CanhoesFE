@@ -19,7 +19,7 @@ import {
 } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type {
-  EventFeedPostDto,
+  EventFeedPostFullDto,
   EventOverviewDto,
   EventSecretSantaOverviewDto,
   EventVotingOverviewDto,
@@ -45,7 +45,7 @@ export type CanhoesEventHomeViewModel = {
   phaseDeadline: string;
   phaseLabel: string;
   phaseSummary: string;
-  recentPosts: EventFeedPostDto[];
+  recentPosts: EventFeedPostFullDto[];
   secretSanta: EventSecretSantaOverviewDto;
   secretSantaAction: ActionLink;
   voting: EventVotingOverviewDto;

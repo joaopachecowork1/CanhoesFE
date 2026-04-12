@@ -67,6 +67,13 @@ export type PendingProposalPanel = {
   type: ProposalType;
 };
 
+export type DeleteConfirmationRequest = {
+  id: string;
+  title: string;
+  type: ProposalType;
+  onConfirm: () => void;
+};
+
 const PANEL_META: Record<
   ProposalType,
   { description: string; emptyMessage: string; title: string }
@@ -121,6 +128,7 @@ export function usePendingProposalModeration({
   const [measureFilter, setMeasureFilter] = useState<ProposalFilter>("pending");
   const [categoryDrafts, setCategoryDrafts] = useState<Record<string, CategoryDraft>>({});
   const [measureDrafts, setMeasureDrafts] = useState<Record<string, string>>({});
+  const [deleteRequest, setDeleteRequest] = useState<DeleteConfirmationRequest | null>(null);
 
   const controlsDisabled = !eventId;
 
@@ -257,14 +265,21 @@ export function usePendingProposalModeration({
           ? () => runCategoryStatusChange(proposal, "approved")
           : undefined,
       onDelete: () => {
-        if (!eventId || !window.confirm(`Apagar a proposta "${proposal.name}"?`)) return;
+        if (!eventId) return;
 
-        void withProcessing(
-          proposal.id,
-          () => canhoesEventsRepo.adminDeleteCategoryProposal(eventId, proposal.id),
-          "Proposta removida",
-          "Nao foi possivel apagar a proposta de categoria."
-        );
+        setDeleteRequest({
+          id: proposal.id,
+          title: proposal.name,
+          type: "category",
+          onConfirm: () => {
+            void withProcessing(
+              proposal.id,
+              () => canhoesEventsRepo.adminDeleteCategoryProposal(eventId, proposal.id),
+              "Proposta removida",
+              "Nao foi possivel apagar a proposta de categoria."
+            );
+          },
+        });
       },
       onReject:
         proposal.status !== "rejected"
@@ -411,7 +426,9 @@ export function usePendingProposalModeration({
   return {
     categoryCounts,
     controlsDisabled,
+    deleteRequest,
     measureCounts,
     panels,
+    clearDeleteRequest: () => setDeleteRequest(null),
   };
 }

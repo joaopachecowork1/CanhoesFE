@@ -21,22 +21,22 @@ import type {
 import { countVisibleModules } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
-function flattenByStatus<T>(items?: ProposalsByStatusDto<T> | null) {
+function flattenByStatus<T>(items?: ProposalsByStatusDto<T> | null | undefined) {
   if (!items) return [] as T[];
   return [...items.pending, ...items.approved, ...items.rejected];
 }
 
 /**
- * Loads all admin data for an event in a single request.
- * This is the single source of truth for admin state.
- * 
- * Returns event state, categories, nominees, proposals, votes, members, etc.
+ * Loads admin bootstrap data — now lightweight by default.
+ * Returns counts only (not full lists) so the admin panel loads fast.
+ * Lists are loaded lazily per section via dedicated paginated queries.
+ *
  * Data is cached for 5 minutes to avoid unnecessary refetches.
  */
 export function useAdminBootstrap(eventId: string | null) {
   const bootstrapQuery = useQuery<EventAdminBootstrapDto>({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getAdminBootstrap(eventId!),
+    queryFn: () => canhoesEventsRepo.getAdminBootstrap(eventId!, false /* includeLists */),
     queryKey: ["canhoes", "admin-bootstrap", eventId],
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
@@ -44,6 +44,7 @@ export function useAdminBootstrap(eventId: string | null) {
   });
 
   const bootstrap = bootstrapQuery.data ?? null;
+  const counts = bootstrap?.counts ?? null;
   const proposals = bootstrap?.proposals ?? null;
   const voteAudit = bootstrap?.votes ?? null;
   const state: EventAdminStateDto | null = bootstrap?.state ?? null;
@@ -57,7 +58,7 @@ export function useAdminBootstrap(eventId: string | null) {
     () => bootstrap?.adminNominees ?? [],
     [bootstrap?.adminNominees]
   );
-  const officialResults: AdminOfficialResultsDto | undefined = bootstrap?.officialResults;
+  const officialResults: AdminOfficialResultsDto | undefined = bootstrap?.officialResults ?? undefined;
   const votes: AdminVoteAuditRowDto[] = voteAudit?.votes ?? [];
   const members: PublicUserDto[] = bootstrap?.members ?? [];
   const secretSanta: EventAdminSecretSantaStateDto | null = bootstrap?.secretSanta ?? null;
@@ -89,25 +90,30 @@ export function useAdminBootstrap(eventId: string | null) {
 
   const pendingNominationCount = useMemo(
     () =>
-      adminNominees.length > 0
+      counts?.adminNomineesTotal ??
+      (adminNominees.length > 0
         ? adminNominees.filter((nominee) => nominee.status === "pending").length
-        : pendingNominees.length,
-    [adminNominees, pendingNominees]
+        : pendingNominees.length),
+    [counts?.adminNomineesTotal, adminNominees, pendingNominees]
   );
 
   const summary = useMemo(
     () => ({
-      memberCount: members.length,
-      pendingCategoryProposalCount: pendingCategoryProposals.length,
-      pendingMeasureProposalCount: pendingMeasureProposals.length,
+      memberCount: counts?.membersTotal ?? members.length,
+      pendingCategoryProposalCount: counts?.categoryProposalsPendingTotal ?? pendingCategoryProposals.length,
+      pendingMeasureProposalCount: counts?.measureProposalsPendingTotal ?? pendingMeasureProposals.length,
       pendingNominationCount,
-      totalCategories: categories.length,
-      totalNominees: allNominees.length,
+      totalCategories: bootstrap?.categories?.length ?? 0,
+      totalNominees: counts?.nomineesTotal ?? allNominees.length,
       visibleModuleCount: countVisibleModules(state?.effectiveModules),
     }),
     [
+      counts?.membersTotal,
+      counts?.categoryProposalsPendingTotal,
+      counts?.measureProposalsPendingTotal,
+      counts?.nomineesTotal,
+      bootstrap?.categories?.length,
       allNominees.length,
-      categories.length,
       members.length,
       pendingCategoryProposals.length,
       pendingMeasureProposals.length,
@@ -127,6 +133,7 @@ export function useAdminBootstrap(eventId: string | null) {
     adminNominees,
     bootstrap,
     categories,
+    counts,
     error: bootstrapQuery.error ?? null,
     events,
     loading: Boolean(eventId) && (bootstrapQuery.isLoading || (bootstrapQuery.isFetching && !bootstrap)),

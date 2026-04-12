@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ import {
     EmptyHeader,
 } from "@/components/ui/empty";
 import { useHubFeed, type FeedSortOrder } from "@/hooks/useHubFeed";
+import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -68,6 +69,8 @@ export function HubFeedModule({
     const { data: session, status } = useSession();
     const { user } = useAuth();
     const isAdmin = useIsAdmin();
+    const { event: activeEvent } = useEventOverview();
+    const eventId = activeEvent?.id ?? null;
 
     const {
         posts,
@@ -84,6 +87,7 @@ export function HubFeedModule({
         showParticles,
         setShowParticles,
         toggleReaction,
+        toggleDownvote,
         votePoll,
         toggleComments,
         addComment,
@@ -93,7 +97,7 @@ export function HubFeedModule({
         adminPin,
         adminDelete,
         refresh,
-    } = useHubFeed();
+    } = useHubFeed(eventId);
     const currentUserName =
         session?.user?.name?.trim() ||
         session?.user?.email?.trim() ||
@@ -117,24 +121,28 @@ export function HubFeedModule({
         return () => window.clearTimeout(timeoutId);
     }, [showComposer]);
 
-    const handleCreatePost = async (data: PostComposerSubmitData) => {
+    const handleCreatePost = useCallback(async (data: PostComposerSubmitData) => {
+        if (!eventId) {
+            toast.error("Nao ha evento ativo para publicar no mural.");
+            return;
+        }
+
         const trimmedText = data.text.trim();
         if (!trimmedText) return;
 
         try {
+            const { canhoesEventsRepo } = await import("@/lib/repositories/canhoesEventsRepo");
             let mediaUrls: string[] = [];
             if (data.files.length > 0) {
-                const { hubRepo } = await import("@/lib/repositories/hubRepo");
-                mediaUrls = await hubRepo.uploadImages(data.files);
+                mediaUrls = await canhoesEventsRepo.uploadFeedImages(eventId, data.files);
             }
 
-            const { hubRepo } = await import("@/lib/repositories/hubRepo");
             const pollQuestion = data.pollOn ? data.pollQuestion.trim() : "";
             const pollOptions = data.pollOn
                 ? data.pollOptions.map((option) => option.trim()).filter(Boolean)
                 : [];
 
-            const createdPost = await hubRepo.createPost({
+            const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
                 text: trimmedText,
                 mediaUrls,
                 pollQuestion: data.pollOn && pollQuestion ? pollQuestion : null,
@@ -154,7 +162,7 @@ export function HubFeedModule({
             toast.error(message);
             throw error;
         }
-    };
+    }, [eventId]);
 
     return (
         <div className="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
@@ -230,6 +238,7 @@ export function HubFeedModule({
                                     currentUserName={currentUserName}
                                     currentUserImage={currentUserImage}
                                     onToggleReaction={toggleReaction}
+                                    onToggleDownvote={toggleDownvote}
                                     onToggleComments={toggleComments}
                                     onVotePoll={votePoll}
                                     onAddComment={addComment}

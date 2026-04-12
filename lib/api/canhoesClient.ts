@@ -21,6 +21,9 @@ const RETRY_CONFIG = {
   retryableStatusCodes: [429, 500, 502, 503, 504],
 };
 
+// Request timeout (10 seconds)
+const REQUEST_TIMEOUT_MS = 10_000;
+
 // Track requests per endpoint for rate limiting
 // Use bounded maps with periodic cleanup to prevent memory leaks in long sessions
 const MAX_MAP_SIZE = 500;
@@ -245,6 +248,49 @@ function getDeduplicationKey(path: string, init?: CanhoesRequestInit): string | 
 }
 
 /**
+ * Creates an AbortController that automatically aborts after the given timeout.
+ * Returns the signal and a cleanup function.
+ */
+function createTimeoutSignal(timeoutMs: number): { signal: AbortSignal; cleanup: () => void } {
+  const controller = new AbortController();
+  const timerId = setTimeout(() => controller.abort(), timeoutMs);
+  return {
+    signal: controller.signal,
+    cleanup: () => clearTimeout(timerId),
+  };
+}
+
+/**
+ * Fetch wrapper with automatic timeout and AbortController.
+ * Aborts the request if it takes longer than REQUEST_TIMEOUT_MS.
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const { signal, cleanup } = createTimeoutSignal(timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      signal,
+    });
+    return response;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError(
+        `O pedido demorou demasiado (> ${timeoutMs / 1000}s). Tenta novamente.`,
+        408 // Request Timeout
+      );
+    }
+    throw error;
+  } finally {
+    cleanup();
+  }
+}
+
+/**
  * Fetches data from the Canhoes backend via proxy with rate limiting and retry logic.
  *
  * Default behavior:
@@ -293,7 +339,7 @@ export async function canhoesFetch<T>(
   const fetchPromise = (async () => {
     try {
       const res = await withRetry(() =>
-        fetch(proxyUrl, {
+        fetchWithTimeout(proxyUrl, {
           ...restInit,
           headers,
           credentials: "include",

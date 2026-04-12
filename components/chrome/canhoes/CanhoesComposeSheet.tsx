@@ -7,9 +7,10 @@ import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
 
 import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { hubRepo } from "@/lib/repositories/hubRepo";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/hooks/useComposer";
+import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -36,6 +37,8 @@ export function CanhoesComposeSheet({
 }>) {
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
+  const { event: activeEvent } = useEventOverview();
+  const eventId = activeEvent?.id ?? null;
   const composeCopy = feedCopy.composer;
 
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -135,6 +138,11 @@ export function CanhoesComposeSheet({
     const trimmedText = text.trim();
     if (!trimmedText) return;
 
+    if (!eventId) {
+      toast.error("Nao ha evento ativo para publicar no mural.");
+      return;
+    }
+
     setIsSubmitting(true);
     setUploadProgress(0);
     setUploadLabel("");
@@ -146,7 +154,7 @@ export function CanhoesComposeSheet({
         setUploadLabel(composeCopy.uploading);
         setUploadProgress(0);
 
-        const uploadedUrls = await hubRepo.uploadImages(files);
+        const uploadedUrls = await canhoesEventsRepo.uploadFeedImages(eventId, files);
 
         if (!uploadedUrls || uploadedUrls.length !== files.length) {
           throw new Error("Falha ao enviar as imagens");
@@ -161,7 +169,7 @@ export function CanhoesComposeSheet({
         ? pollOptions.map((option) => option.trim()).filter(Boolean)
         : [];
 
-      const createdPost = await hubRepo.createPost({
+      const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
         mediaUrls,
         pollOptions: isPollEnabled ? trimmedPollOptions : null,
         pollQuestion: isPollEnabled && trimmedPollQuestion ? trimmedPollQuestion : null,

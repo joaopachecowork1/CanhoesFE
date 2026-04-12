@@ -177,8 +177,10 @@ export type SetNomineeCategoryRequest = {
 
 export type AdminVoteAuditRowDto = {
   categoryId: string;
+  categoryName: string;
   nomineeId: string;
   userId: string;
+  userName: string;
   updatedAtUtc: string;
 };
 
@@ -272,6 +274,8 @@ export type HubPostDto = {
   likedByMe: boolean;
   likeCount: number;
   commentCount: number;
+  downvoteCount: number;
+  downvotedByMe: boolean;
   reactionCounts: Record<string, number>;
   myReactions: string[];
   createdAtUtc: string;
@@ -441,14 +445,86 @@ export type EventAdminStateDto = {
 export type EventAdminBootstrapDto = {
   events: EventSummaryDto[];
   state: EventAdminStateDto;
-  categories: AwardCategoryDto[];
-  nominees: NomineeDto[];
-  adminNominees?: AdminNomineeDto[];
-  proposals: AdminProposalsHistoryDto;
-  votes: AdminVotesDto;
-  members: PublicUserDto[];
-  secretSanta: EventAdminSecretSantaStateDto;
-  officialResults?: AdminOfficialResultsDto;
+  counts: AdminListCountsDto;
+  categories?: AwardCategoryDto[] | null;
+  nominees?: NomineeDto[] | null;
+  adminNominees?: AdminNomineeDto[] | null;
+  proposals?: AdminProposalsHistoryDto | null;
+  votes?: AdminVotesDto | null;
+  members?: PublicUserDto[] | null;
+  secretSanta?: EventAdminSecretSantaStateDto | null;
+  officialResults?: AdminOfficialResultsDto | null;
+};
+
+export type AdminListCountsDto = {
+  nomineesTotal: number;
+  adminNomineesTotal: number;
+  votesTotal: number;
+  categoryProposalsTotal: number;
+  categoryProposalsPendingTotal: number;
+  measureProposalsTotal: number;
+  measureProposalsPendingTotal: number;
+  membersTotal: number;
+  officialResultsCategoriesCount: number;
+};
+
+export type PagedResult<T> = {
+  items: T[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminVotesPagedDto = {
+  total: number;
+  votes: AdminVoteAuditRowDto[];
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminNomineesPagedDto = {
+  total: number;
+  nominations: AdminNomineeDto[];
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminProposalsPagedDto = {
+  categoryProposalsTotal: number;
+  categoryProposals: ProposalsByStatusDto<CategoryProposalDto>;
+  measureProposalsTotal: number;
+  measureProposals: ProposalsByStatusDto<MeasureProposalDto>;
+};
+
+export type PagedResultPublicUserDto = PagedResult<PublicUserDto>;
+export type PagedResultAdminCategoryResultDto = PagedResult<AdminCategoryResultDto>;
+
+// Summary DTOs (lightweight for list views)
+export type NomineeSummaryDto = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  status: string;
+};
+
+export type AwardCategorySummaryDto = {
+  id: string;
+  name: string;
+  sortOrder: number;
+  isActive: boolean;
+  kind: string;
+};
+
+export type AdminNomineeSummaryDto = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  status: string;
+  submittedByUserId: string;
+  submittedByName: string;
 };
 
 export type UpdateEventAdminStateRequest = {
@@ -530,9 +606,58 @@ export type EventFeedPostDto = {
   createdAt: string;
 };
 
+export type EventFeedPostFullDto = {
+  id: string;
+  eventId: string;
+  authorUserId: string;
+  authorName: string;
+  text: string;
+  mediaUrl?: string | null;
+  mediaUrls: string[];
+  isPinned: boolean;
+  createdAtUtc: string;
+  likeCount: number;
+  commentCount: number;
+  downvoteCount: number;
+  reactionCounts: Record<string, number>;
+  myReactions: string[];
+  likedByMe: boolean;
+  downvotedByMe: boolean;
+  poll?: EventFeedPollDto | null;
+};
+
+export type EventFeedPollDto = {
+  question: string;
+  options: EventFeedPollOptionDto[];
+  myOptionId?: string | null;
+  totalVotes: number;
+};
+
+export type EventFeedPollOptionDto = {
+  id: string;
+  text: string;
+  voteCount: number;
+};
+
 export type CreateEventPostRequest = {
   content: string;
   imageUrl?: string | null;
+};
+
+export type CreateEventFeedPostRequest = {
+  text: string;
+  mediaUrl?: string | null;
+  mediaUrls?: string[] | null;
+  pollQuestion?: string | null;
+  pollOptions?: string[] | null;
+};
+
+export type CreateFeedCommentRequest = {
+  text: string;
+};
+
+export type ToggleFeedReactionRequest = {
+  emoji?: string | null;
 };
 
 export type EventCategoryDto = {
@@ -695,10 +820,6 @@ export type FeedCommentDto = {
   userId: string;
   content: string;
   createdAtUtc: string;
-};
-
-export type CreateFeedCommentRequest = {
-  content: string;
 };
 
 export type FeedReactionDto = {

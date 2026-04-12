@@ -24,6 +24,16 @@ import {
   type PendingProposalField,
 } from "./usePendingProposalModeration";
 import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "./proposalConstants";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type PendingProposalsProps = {
   eventId: string | null;
@@ -280,6 +290,33 @@ export function PendingProposals({
           </ProposalShell>
         ))}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog
+        open={moderation.deleteRequest !== null}
+        onOpenChange={(open) => !open && moderation.clearDeleteRequest()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar proposta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acao remove a proposta &ldquo;
+              {moderation.deleteRequest?.title ?? ""}
+              &rdquo; permanentemente. Esta acao nao pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => moderation.clearDeleteRequest()}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => moderation.deleteRequest?.onConfirm()}
+            >
+              Apagar proposta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

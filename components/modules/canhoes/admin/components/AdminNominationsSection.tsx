@@ -14,6 +14,7 @@ import { AdminStateMessage } from "@/components/modules/canhoes/admin/components
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import {
   Select,
   SelectContent,
@@ -35,7 +36,6 @@ import {
   ADMIN_CONTENT_CARD_CLASS,
   AdminDetailPanel,
   AdminDetailSheet,
-  AdminListPanel,
   AdminSelectableButton,
 } from "./adminContentUi";
 
@@ -88,6 +88,13 @@ export function AdminNominationsSection({
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(queryEventId),
     initialData: initialRows,
+    // Poll when there are pending nominations (every 30s), stop when queue is empty
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      const hasPending = data.some((n) => n.status === "pending");
+      return hasPending ? 30_000 : false;
+    },
   });
 
   const invalidate = async () => {
@@ -260,36 +267,40 @@ export function AdminNominationsSection({
               {statusFilter === "all" ? "pendente" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
             </AdminStateMessage>
           ) : (
-            <AdminListPanel bodyClassName="max-h-[56svh]">
-              {filteredNominations.map((nomination) => {
-                const isSelected = nomination.id === selectedNominationId;
-                const categoryName = getCategoryName(nomination.categoryId, categories);
+            <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
+              <VirtualizedList
+                className="px-0 py-0"
+                estimateSize={() => 52}
+                items={filteredNominations}
+                renderItem={(nomination) => {
+                  const isSelected = nomination.id === selectedNominationId;
+                  const categoryName = getCategoryName(nomination.categoryId, categories);
 
-                return (
-                  <AdminSelectableButton
-                    key={nomination.id}
-                    type="button"
-                    onClick={() => setSelectedNominationId(nomination.id)}
-                    selected={isSelected}
-                    aria-pressed={isSelected}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
-                          {nomination.title}
-                        </p>
-                        <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
-                          {categoryName}
-                        </p>
+                  return (
+                    <AdminSelectableButton
+                      type="button"
+                      onClick={() => setSelectedNominationId(nomination.id)}
+                      selected={isSelected}
+                      aria-pressed={isSelected}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                            {nomination.title}
+                          </p>
+                          <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
+                            {categoryName}
+                          </p>
+                        </div>
+                        <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}>
+                          {nomination.status}
+                        </Badge>
                       </div>
-                      <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}>
-                        {nomination.status}
-                      </Badge>
-                    </div>
-                  </AdminSelectableButton>
-                );
-              })}
-            </AdminListPanel>
+                    </AdminSelectableButton>
+                  );
+                }}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

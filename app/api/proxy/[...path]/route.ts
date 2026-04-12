@@ -148,11 +148,33 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
   const headers = buildBackendHeaders(request, idToken);
   const body = hasRequestBody(method) ? await request.arrayBuffer() : undefined;
 
-  return fetch(backendUrl, {
-    method,
-    headers,
-    body,
-  });
+  // 15s timeout for backend requests
+  const controller = new AbortController();
+  const timerId = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const response = await fetch(backendUrl, {
+      method,
+      headers,
+      body,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      const timeoutResponse = new Response(
+        JSON.stringify({
+          code: "BACKEND_TIMEOUT",
+          message: "O servidor demorou demasiado a responder. Tenta novamente.",
+        }),
+        { status: 504, headers: { "Content-Type": "application/json" } }
+      );
+      return timeoutResponse;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timerId);
+  }
 }
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }, method: string) {
@@ -169,12 +191,19 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
     );
   }
 
+  const startMs = Date.now();
+
   try {
     if (IS_MOCK_MODE) {
       return handleMockRequest(request, proxyPath, method, traceId);
     }
 
     const response = await forwardToBackend(request, proxyPath, method);
+
+    const duration = Date.now() - startMs;
+    if (duration > 500) {
+      console.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms`);
+    }
 
     if (response.status === 204) {
       return new NextResponse(null, {
@@ -190,9 +219,14 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       },
     });
   } catch (error) {
+    const duration = Date.now() - startMs;
     const detail = error instanceof Error ? error.message : String(error);
     const isBackendUnreachable =
       /fetch failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|socket hang up/i.test(detail);
+
+    if (duration > 500) {
+      console.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms (error)`);
+    }
 
     if (isBackendUnreachable) {
       return createProxyErrorResponse(

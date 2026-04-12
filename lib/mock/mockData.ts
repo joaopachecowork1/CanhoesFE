@@ -16,7 +16,7 @@ import type {
   CategoryProposalDto,
   MeasureProposalDto,
   PublicUserDto,
-  HubPostDto,
+  EventFeedPostFullDto,
   EventCategoryDto,
   EventContextDto,
   EventFeedPostDto,
@@ -417,18 +417,21 @@ export const MOCK_ADMIN_OFFICIAL_RESULTS: AdminOfficialResultsDto = {
 
 // ─── Hub Posts ───────────────────────────────────────────────────────────────
 
-export const MOCK_HUB_POSTS: HubPostDto[] = [
+export const MOCK_HUB_POSTS: EventFeedPostFullDto[] = [
   {
     id: "post-001",
+    eventId: "mock-event",
     authorUserId: "user-002",
     authorName: "João P.",
-    text: "🎵 Finalmente começaram as nomeações! Quem é o vosso álbum favorito do ano?",
+    text: "🎵 Finalmente começam as nomeações! Quem é o vosso álbum favorito do ano?",
     mediaUrl: null,
     mediaUrls: [],
     isPinned: true,
     likedByMe: false,
     likeCount: 3,
     commentCount: 2,
+    downvoteCount: 0,
+    downvotedByMe: false,
     reactionCounts: { "❤️": 3, "🔥": 2 },
     myReactions: [],
     createdAtUtc: new Date(Date.now() - 3600000 * 2).toISOString(),
@@ -436,6 +439,7 @@ export const MOCK_HUB_POSTS: HubPostDto[] = [
   },
   {
     id: "post-002",
+    eventId: "mock-event",
     authorUserId: "user-003",
     authorName: "Maria S.",
     text: "Já nomeei o meu top 3 🏆 Estão todos a dormir?",
@@ -445,6 +449,8 @@ export const MOCK_HUB_POSTS: HubPostDto[] = [
     likedByMe: true,
     likeCount: 5,
     commentCount: 1,
+    downvoteCount: 1,
+    downvotedByMe: false,
     reactionCounts: { "❤️": 5, "😂": 1 },
     myReactions: ["❤️"],
     createdAtUtc: new Date(Date.now() - 1800000).toISOString(),
