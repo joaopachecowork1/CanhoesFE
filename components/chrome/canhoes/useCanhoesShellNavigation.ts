@@ -40,6 +40,7 @@ export function useCanhoesShellNavigation({
   isLocalMode,
   isMenuOpen,
   onOpenMenu,
+  onNavigateAdmin,
   overview,
   pathname,
   router,
@@ -49,6 +50,7 @@ export function useCanhoesShellNavigation({
   isLocalMode: boolean;
   isMenuOpen: boolean;
   onOpenMenu: () => void;
+  onNavigateAdmin: () => void;
   overview?: EventOverviewDto | null;
   pathname: string | null;
   router: AppRouterInstance;
@@ -117,7 +119,7 @@ export function useCanhoesShellNavigation({
       onClick:
         fixedRightItem.id === MORE_NAV_ITEM.id
           ? onOpenMenu
-          : () => router.push(fixedRightItem.href),
+          : onNavigateAdmin,
     },
   ];
 

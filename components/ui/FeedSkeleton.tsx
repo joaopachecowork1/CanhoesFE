@@ -27,22 +27,22 @@ function FeedPostSkeleton({ index }: FeedPostSkeletonProps) {
     >
       <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-[var(--color-moss)]/12 animate-pulse" />
+          <div className="h-10 w-10 rounded-full bg-[var(--color-moss)]/12 animate-pulse shimmer" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-32 rounded bg-[var(--color-moss)]/12 animate-pulse" />
-            <div className="h-2.5 w-24 rounded bg-[var(--color-brown)]/10 animate-pulse" />
+            <div className="h-3 w-32 rounded bg-[var(--color-moss)]/12 animate-pulse shimmer" />
+            <div className="h-2.5 w-24 rounded bg-[var(--color-brown)]/10 animate-pulse shimmer" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <div className="h-3 w-full rounded bg-[var(--color-moss)]/10 animate-pulse" />
-          <div className="h-3 w-5/6 rounded bg-[var(--color-moss)]/10 animate-pulse" />
-          <div className="h-3 w-3/5 rounded bg-[var(--color-brown)]/10 animate-pulse" />
+          <div className="h-3 w-full rounded bg-[var(--color-moss)]/10 animate-pulse shimmer" />
+          <div className="h-3 w-5/6 rounded bg-[var(--color-moss)]/10 animate-pulse shimmer" />
+          <div className="h-3 w-3/5 rounded bg-[var(--color-brown)]/10 animate-pulse shimmer" />
         </div>
       </div>
 
       <div className="px-4 pb-4 sm:px-5">
-        <div className="aspect-[4/3] w-full rounded-[var(--radius-md-token)] bg-[var(--color-bg-surface)] animate-pulse" />
+        <div className="aspect-[4/3] w-full rounded-[var(--radius-md-token)] bg-[var(--color-bg-surface)] animate-pulse shimmer" />
       </div>
 
       <div className="px-4 pb-4 sm:px-5">
@@ -51,7 +51,7 @@ function FeedPostSkeleton({ index }: FeedPostSkeletonProps) {
           {Array.from({ length: 4 }).map((_, actionIndex) => (
             <div
               key={actionIndex}
-              className="h-9 w-20 rounded-full bg-[var(--color-bg-surface)] animate-pulse"
+              className="h-9 w-20 rounded-full bg-[var(--color-bg-surface)] animate-pulse shimmer"
             />
           ))}
         </div>

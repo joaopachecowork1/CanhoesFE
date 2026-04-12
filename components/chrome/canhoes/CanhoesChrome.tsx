@@ -9,8 +9,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -57,9 +59,25 @@ export function CanhoesChrome({
   const { isLogged, logout, user } = useAuth();
   const isLocalMode = IS_LOCAL_MODE;
   const eventOverview = useEventOverview();
-  const isAdmin =
-    Boolean(user?.isAdmin) || Boolean(eventOverview.overview?.permissions.isAdmin);
+  const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const canCompose = Boolean(eventOverview.overview?.modules.feed);
+
+  const handleNavigateAdmin = () => {
+    if (adminLoading || !eventOverview.overview) {
+      toast.info("A preparar admin...");
+      // Wait for overview to load, then navigate
+      const checkReady = () => {
+        if (eventOverview.overview) {
+          router.push("/canhoes/admin/conteudo");
+        } else {
+          setTimeout(checkReady, 200);
+        }
+      };
+      checkReady();
+    } else {
+      router.push("/canhoes/admin/conteudo");
+    }
+  };
   const prefersReducedMotion = useReducedMotion();
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
@@ -140,6 +158,7 @@ export function CanhoesChrome({
     isAdmin,
     isLocalMode,
     isMenuOpen,
+    onNavigateAdmin: handleNavigateAdmin,
     onOpenMenu: () => handleMenuOpenChange(true),
     overview: eventOverview.overview,
     pathname,

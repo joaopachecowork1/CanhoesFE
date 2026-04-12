@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import { ScrollText } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,11 +15,12 @@ import {
     EmptyDescription,
     EmptyHeader,
 } from "@/components/ui/empty";
-import { useHubFeed } from "@/hooks/useHubFeed";
+import { useHubFeed, type FeedSortOrder } from "@/hooks/useHubFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
+import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { SectionBoundary } from "@/components/ui/section-boundary";
 
@@ -69,8 +71,13 @@ export function HubFeedModule({
 
     const {
         posts,
+        allPostsCount,
         errorMessage,
         loading,
+        sort,
+        setSort,
+        hasMore,
+        loadMore,
         comments,
         openComments,
         commentDrafts,
@@ -177,7 +184,39 @@ export function HubFeedModule({
                     ) : null}
 
                     {loading ? <FeedSkeleton count={3} /> : (
-                        <div className="space-y-3">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={sort}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                                className="space-y-3"
+                            >
+                            {/* Sort bar */}
+                            {!loading && posts.length > 0 && (
+                                <div className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-3 py-2">
+                                    <span className="text-xs font-medium text-[var(--text-muted)]">Ordenar:</span>
+                                    {(["hot", "new", "top"] as FeedSortOrder[]).map((s) => (
+                                        <motion.button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => setSort(s)}
+                                            whileTap={{ scale: 0.95 }}
+                                            className={cn(
+                                                "sort-pill rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                                                sort === s ? "sort-pill-active" : ""
+                                            )}
+                                        >
+                                            {s === "hot" ? "🔥 Popular" : s === "new" ? "🕐 Novo" : "⭐ Topo"}
+                                        </motion.button>
+                                    ))}
+                                    {allPostsCount > 0 && (
+                                        <span className="ml-auto text-[10px] text-[var(--text-muted)]">
+                                            {allPostsCount} post{allPostsCount !== 1 ? "s" : ""}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                             {posts.map((post, index) => (
                                 <HubPostCard
                                     key={post.id}
@@ -202,6 +241,25 @@ export function HubFeedModule({
                                 />
                             ))}
 
+                            {/* Load more button */}
+                            {hasMore && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex justify-center py-4"
+                                >
+                                    <motion.button
+                                        type="button"
+                                        onClick={() => loadMore()}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-6 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-moss)] hover:bg-[var(--bg-surface)]"
+                                    >
+                                        Carregar mais ({allPostsCount - posts.length} restantes)
+                                    </motion.button>
+                                </motion.div>
+                            )}
+
                             {posts.length === 0 ? (
                                 <Empty className="editorial-shell rounded-[var(--radius-lg-token)] py-10">
                                     <EmptyHeader>
@@ -217,7 +275,8 @@ export function HubFeedModule({
                                     </EmptyHeader>
                                 </Empty>
                             ) : null}
-                        </div>
+                            </motion.div>
+                        </AnimatePresence>
                     )}
                 </div>
             </SectionBoundary>

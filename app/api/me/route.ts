@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 type AuthMeErrorPayload = {
   code: string;
@@ -28,7 +27,7 @@ function createAuthMeErrorResponse(
   );
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const traceId = request.headers.get("x-request-id") || crypto.randomUUID();
   const backend = process.env.CANHOES_API_URL || process.env.NEXT_PUBLIC_CANHOES_API_URL;
   if (!backend) {
@@ -42,8 +41,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const session = await getServerSession(authOptions);
-  const idToken = session?.idToken;
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const idToken = token?.idToken as string | undefined;
   if (!idToken) {
     return createAuthMeErrorResponse(
       401,

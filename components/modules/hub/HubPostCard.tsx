@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
@@ -8,6 +8,7 @@ import { ArrowBigUp, MessageSquare } from "lucide-react";
 import { BlurFade } from "@/components/animations/BlurFade";
 import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { parsePostText } from "@/lib/postUtils";
 
 import { HubPostActions } from "./components/HubPostActions";
 import { PostHeader } from "./components/PostHeader";
@@ -88,6 +89,14 @@ function HubPostCardComponent({
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const { bursts, trigger: triggerBurst, clear: clearBursts } = useEmojiBurst();
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to comments when they open
+  useEffect(() => {
+    if (openComments && commentsRef.current) {
+      commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [openComments]);
 
   const mediaUrls = useCallback(
     () =>
@@ -218,11 +227,25 @@ function HubPostCardComponent({
               onAdminDelete={() => onAdminDelete(post.id)}
             />
 
-            {hasText && (
-              <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
-                {post.text}
-              </p>
-            )}
+            {hasText && (() => {
+              const { title, body } = parsePostText(post.text);
+              return title ? (
+                <div className="space-y-1">
+                  <p className="post-title text-[var(--text-primary)]">
+                    {title}
+                  </p>
+                  {body && (
+                    <p className="post-body whitespace-pre-wrap break-words">
+                      {body}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
+                  {post.text}
+                </p>
+              );
+            })()}
 
             {hasMedia ? (
               <LazyMediaCarousel
@@ -262,6 +285,7 @@ function HubPostCardComponent({
             <AnimatePresence initial={false}>
               {openComments ? (
                 <motion.div
+                  ref={commentsRef}
                   key={`${post.id}-comments`}
                   initial={{ opacity: 0, height: 0, y: -6 }}
                   animate={{ opacity: 1, height: "auto", y: 0 }}

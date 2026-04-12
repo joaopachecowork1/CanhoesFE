@@ -31,7 +31,7 @@ export function CanhoesNominationsModule() {
     queryKey: ["nominations", queryEventId, "categories"],
     enabled: Boolean(eventId),
     queryFn: async () => {
-      const categories = await canhoesEventsRepo.adminGetCategories(queryEventId);
+      const categories = await canhoesEventsRepo.getUserCategories(queryEventId);
       return categories.filter((category) => category.isActive);
     },
   });

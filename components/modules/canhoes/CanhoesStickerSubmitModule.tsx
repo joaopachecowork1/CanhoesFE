@@ -68,7 +68,7 @@ export function CanhoesStickerSubmitModule() {
 
     try {
       const [nextCategories, nextNominees] = await Promise.all([
-        canhoesEventsRepo.getAwardCategories(eventId),
+        canhoesEventsRepo.getUserCategories(eventId),
         canhoesEventsRepo.getApprovedNominees(eventId),
       ]);
 

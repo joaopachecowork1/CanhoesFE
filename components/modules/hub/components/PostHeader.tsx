@@ -5,6 +5,7 @@ import { Pin, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDateTime, initials } from "./hubUtils";
+import { useRelativeTime } from "@/lib/postUtils";
 
 const AVATAR_ACCENTS = [
   "var(--color-moss)",
@@ -38,6 +39,7 @@ export function PostHeader({
   onAdminDelete?: () => void;
 }>) {
   const accent = accentForName(authorName);
+  const relativeTime = useRelativeTime(createdAtUtc);
 
   return (
     <div className="flex items-start justify-between gap-2">
@@ -61,8 +63,8 @@ export function PostHeader({
             </p>
             {isPinned ? <Badge variant="secondary">Fixado</Badge> : null}
           </div>
-          <p className="text-xs text-[rgba(242,234,216,0.74)]">
-            {formatDateTime(createdAtUtc)}
+          <p className="text-xs text-[var(--text-muted)]" title={formatDateTime(createdAtUtc)}>
+            {relativeTime}
           </p>
         </div>
       </div>
@@ -72,7 +74,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
             onClick={onAdminPin}
             aria-label={isPinned ? "Desafixar post" : "Fixar post"}
           >
@@ -81,7 +83,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[rgba(242,234,216,0.72)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--color-danger)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--danger)]"
             onClick={onAdminDelete}
             aria-label="Eliminar post"
           >

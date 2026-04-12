@@ -7,7 +7,44 @@ import type { HubCommentDto, HubPostDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { hubRepo } from "@/lib/repositories/hubRepo";
 
+export type FeedSortOrder = "hot" | "new" | "top";
+
+const PAGE_SIZE = 15;
 const HEART_REACTION = "\u2764\uFE0F";
+
+/**
+ * Reddit-style hot scoring: (reactions + comments * 2) / (hours + 2)^1.5
+ */
+function hotScore(post: HubPostDto): number {
+  const reactionCount = Object.values(post.reactionCounts ?? {}).reduce((a, b) => a + b, 0);
+  const commentCount = post.commentCount ?? 0;
+  const hoursAgo = Math.max(0, (Date.now() - new Date(post.createdAtUtc).getTime()) / 3600000);
+  return (reactionCount + commentCount * 2) / Math.pow(hoursAgo + 2, 1.5);
+}
+
+function sortPosts(posts: HubPostDto[], sort: FeedSortOrder): HubPostDto[] {
+  const sorted = [...posts];
+  // Always pin pinned posts to top
+  const [pinned, rest] = [
+    sorted.filter((p) => p.isPinned),
+    sorted.filter((p) => !p.isPinned),
+  ];
+
+  switch (sort) {
+    case "hot":
+      rest.sort((a, b) => hotScore(b) - hotScore(a));
+      break;
+    case "top":
+      rest.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
+      break;
+    case "new":
+    default:
+      rest.sort((a, b) => String(b.createdAtUtc).localeCompare(String(a.createdAtUtc)));
+      break;
+  }
+
+  return [...pinned, ...rest];
+}
 
 function sanitizePosts(posts: HubPostDto[] | null | undefined) {
   return (Array.isArray(posts) ? posts : []).filter(
@@ -21,14 +58,6 @@ function updatePostById(
   updater: (post: HubPostDto) => HubPostDto
 ) {
   return posts.map((post) => (post.id === postId ? updater(post) : post));
-}
-
-function sortPinnedPosts(posts: HubPostDto[]) {
-  return [...posts].sort(
-    (left, right) =>
-      Number(Boolean(right.isPinned)) - Number(Boolean(left.isPinned)) ||
-      String(right.createdAtUtc).localeCompare(String(left.createdAtUtc))
-  );
 }
 
 function applyPostReaction(post: HubPostDto, emoji: string) {
@@ -114,6 +143,7 @@ export function useHubFeed() {
   const [posts, setPosts] = useState<HubPostDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<FeedSortOrder>("hot");
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
@@ -123,7 +153,28 @@ export function useHubFeed() {
     y: number;
   } | null>(null);
 
+  // Pagination state
+  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+
   const safePosts = useMemo(() => sanitizePosts(posts), [posts]);
+
+  // Apply sorting
+  const sortedPosts = useMemo(
+    () => sortPosts(safePosts, sort),
+    [safePosts, sort]
+  );
+
+  // Apply pagination
+  const displayedPosts = useMemo(
+    () => sortedPosts.slice(0, displayedCount),
+    [sortedPosts, displayedCount]
+  );
+
+  const hasMore = displayedCount < sortedPosts.length;
+
+  const loadMore = useCallback(() => {
+    setDisplayedCount((prev) => Math.min(prev + PAGE_SIZE, sortedPosts.length));
+  }, [sortedPosts.length]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -429,12 +480,15 @@ export function useHubFeed() {
     try {
       const result = await hubRepo.adminTogglePin(postId);
       setPosts((currentPosts) =>
-        sortPinnedPosts(
-          updatePostById(currentPosts, postId, (post) => ({
-            ...post,
-            isPinned: result.pinned,
-          }))
-        )
+        [...currentPosts]
+          .map((post) =>
+            post.id === postId ? { ...post, isPinned: result.pinned } : post
+          )
+          .sort(
+            (a, b) =>
+              Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned)) ||
+              String(b.createdAtUtc).localeCompare(String(a.createdAtUtc))
+          )
       );
     } catch (error) {
       const message = getErrorMessage(error, "Nao foi possivel atualizar o destaque do post.");
@@ -462,9 +516,14 @@ export function useHubFeed() {
   }, []);
 
   return {
-    posts: safePosts,
+    posts: displayedPosts,
+    allPostsCount: sortedPosts.length,
     errorMessage,
     loading,
+    sort,
+    setSort,
+    hasMore,
+    loadMore,
     comments,
     openComments,
     commentDrafts,

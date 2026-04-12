@@ -854,6 +854,64 @@ h3,
     align-items: center;
     justify-content: center;
   }
+
+  .post-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .post-body {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* Shimmer animation for skeleton loading */
+  @keyframes shimmer-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.04) 40%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.04) 60%,
+      transparent 100%
+    );
+    animation: shimmer-slide 1.5s ease-in-out infinite;
+  }
+
+  /* Sort dropdown styling */
+  .sort-pill {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-deep);
+    transition: all 150ms ease;
+  }
+  .sort-pill:hover {
+    border-color: var(--border-moss);
+  }
+  .sort-pill-active {
+    border-color: var(--border-moss);
+    background: var(--moss);
+    color: white;
+  }
+
+  /* Post hover effect */
+  .reddit-post:hover {
+    border-color: var(--border-moss);
+  }
 }
 
 @layer utilities {

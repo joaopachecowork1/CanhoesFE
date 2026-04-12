@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useEventOverview } from "@/hooks/useEventOverview";
-import { useIsAdmin } from "@/lib/auth/useIsAdmin";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 function AdminStateCard({
   action,
@@ -37,23 +36,21 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
   const {
     loading,
     profileError,
-    profileLoading,
     isLogged,
     refreshProfile,
     user,
     loginGoogle,
     logout,
   } = useAuth();
-  const eventOverview = useEventOverview();
-  const isAdmin = useIsAdmin();
-  const hasAdminAccess = isAdmin || Boolean(eventOverview.overview?.permissions.isAdmin);
+  const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const router = useRouter();
 
-  if (loading) {
+  // Unified loading state
+  if (loading || (isLogged && !user) || adminLoading) {
     return (
       <AdminStateCard
-        title="A verificar permissoes"
-        description="A secao de administracao so abre depois de validar a sessao e as regras do evento."
+        title="A preparar o admin"
+        description="A verificar a sessao e as permissoes administrativas deste evento."
         action={
           <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
         }
@@ -61,31 +58,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
     );
   }
 
-  if (isLogged && !user) {
-    return (
-      <AdminStateCard
-        title="A sincronizar perfil"
-        description="A conta ja tem sessao, mas o perfil ainda esta a ser sincronizado com o contexto do evento."
-        action={
-          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
-        }
-      />
-    );
-  }
-
-  if (profileLoading) {
-    return (
-      <AdminStateCard
-        title="A sincronizar perfil"
-        description="A conta ja tem sessao, mas o perfil ainda esta a ser sincronizado com o contexto do evento."
-        action={
-          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
-        }
-      />
-    );
-  }
-
-  if (isLogged && profileError && !hasAdminAccess) {
+  if (isLogged && profileError && !isAdmin) {
     return (
       <AdminStateCard
         title="Perfil nao validado"
@@ -94,10 +67,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button
               className="w-full sm:w-auto"
-              onClick={() => {
-                void refreshProfile();
-                void eventOverview.refresh();
-              }}
+              onClick={() => void refreshProfile()}
             >
               Tentar novamente
             </Button>
@@ -109,18 +79,6 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
               Terminar sessao
             </Button>
           </div>
-        }
-      />
-    );
-  }
-
-  if (isLogged && !isAdmin && eventOverview.isLoading) {
-    return (
-      <AdminStateCard
-        title="A validar permissões"
-        description="A confirmar as permissões administrativas deste evento antes de abrir o centro de controlo."
-        action={
-          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
         }
       />
     );
@@ -140,7 +98,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
     );
   }
 
-  if (!hasAdminAccess) {
+  if (!isAdmin) {
     return (
       <AdminStateCard
         title="Acesso restrito"

@@ -209,6 +209,17 @@ function isUnauthorizedStatus(status: number) {
   return status === 401 || status === 403;
 }
 
+// Track consecutive 401s to detect expired sessions
+let consecutive401Count = 0;
+const MAX_CONSECUTIVE_401S = 3;
+
+/**
+ * Reset the 401 counter on any successful request.
+ */
+export function resetAuthFailureCounter() {
+  consecutive401Count = 0;
+}
+
 // Pending GET requests for deduplication
 const pendingGetRequests = new Map<string, Promise<unknown>>();
 const PENDING_MAX_AGE_MS = 30_000; // Clean up pending promises older than 30s
@@ -291,6 +302,7 @@ export async function canhoesFetch<T>(
       );
 
       if (res.ok) {
+        consecutive401Count = 0;
         return (await readBody(res)) as T;
       }
 
@@ -303,8 +315,18 @@ export async function canhoesFetch<T>(
       // Default: don't crash on 401/403 (bootstrap loads safely)
       const throwOnUnauthorized = Boolean(canhoes?.throwOnUnauthorized);
       if (isUnauthorizedStatus(res.status) && !throwOnUnauthorized) {
+        consecutive401Count += 1;
+        if (consecutive401Count >= MAX_CONSECUTIVE_401S) {
+          // Session likely expired — redirect to login
+          if (typeof window !== "undefined") {
+            window.location.href = "/canhoes/login?error=SessionExpired";
+          }
+        }
         return null as unknown as T;
       }
+
+      // Reset counter on any successful (non-401) response
+      consecutive401Count = 0;
 
       throw new ApiError(msg, res.status, details);
     } finally {

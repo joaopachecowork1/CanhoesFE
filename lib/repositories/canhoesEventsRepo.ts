@@ -363,7 +363,7 @@ export const canhoesEventsRepo = {
     canhoesFetch<T.PublicUserDto[]>(`/v1/events/${eventId}/members`),
 
   // CATEGORIES (user-facing, alias to existing getCategories but returns AwardCategoryDto for legacy compat)
-  getAwardCategories: (eventId: string) =>
+  getUserCategories: (eventId: string) =>
     canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/categories`),
 
   // FEED INTERACTIONS — placeholder methods for future event-scoped feed migration
