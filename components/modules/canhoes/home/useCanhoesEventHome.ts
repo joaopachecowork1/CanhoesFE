@@ -25,6 +25,14 @@ import type {
   EventVotingOverviewDto,
 } from "@/lib/api/types";
 
+type FeedPostsResponse = {
+  items: EventFeedPostFullDto[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
 type ActionLink = {
   href?: string;
   label: string;
@@ -213,11 +221,11 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
           : Promise.resolve(buildVotingFallbackState(overview)),
         overview.modules.feed
           ? canhoesEventsRepo.getFeedPosts(event.id, { take: 3 })
-          : Promise.resolve({ posts: [], nextCursor: null }),
+          : Promise.resolve({ items: [], total: 0, skip: 0, take: 0, hasMore: false } as FeedPostsResponse),
       ]);
 
       return {
-        recentPosts: recentPosts.posts?.slice(0, 3) ?? [],
+        recentPosts: (recentPosts as FeedPostsResponse).items?.slice(0, 3) ?? [],
         secretSanta,
         voting,
       };

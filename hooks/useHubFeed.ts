@@ -15,6 +15,14 @@ type FeedPageData = {
   nextCursor: number | null;
 };
 
+type FeedApiResponse = {
+  items: EventFeedPostFullDto[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
 type FeedInfiniteData = InfiniteData<FeedPageData>;
 
 /**
@@ -198,12 +206,14 @@ export function useHubFeed(eventId: string | null) {
       const data = await canhoesEventsRepo.getFeedPosts(eventId!, {
         skip: pageParam,
         take: PAGE_SIZE,
-      });
+      }) as FeedApiResponse;
 
-      const posts = sanitizePosts(data.posts ?? []);
+      const posts = sanitizePosts(data.items ?? []);
+      const nextSkip = data.hasMore ? pageParam + PAGE_SIZE : null;
+      
       return {
         posts,
-        nextCursor: data.nextCursor ?? (posts.length < PAGE_SIZE ? null : pageParam + PAGE_SIZE),
+        nextCursor: nextSkip,
       };
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
