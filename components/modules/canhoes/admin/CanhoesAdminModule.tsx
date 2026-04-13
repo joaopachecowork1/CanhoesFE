@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SectionBoundary } from "@/components/ui/section-boundary";
 import { useAdminBootstrap } from "@/hooks/useAdminBootstrap";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { usePendingProposals } from "@/hooks/usePendingProposals";
 import { refreshEventOverview } from "@/lib/canhoesEvent";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -115,14 +116,12 @@ export default function CanhoesAdminModule({
 }: Readonly<CanhoesAdminModuleProps>) {
   const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
   const {
-    allCategoryProposals,
-    allMeasureProposals: measureProposals,
     allNominees,
     adminNominees,
     categories,
     error,
     events,
-    loading,
+    loading: bootstrapLoading,
     members: eventMembers,
     officialResults,
     pendingCategoryProposals,
@@ -132,14 +131,24 @@ export default function CanhoesAdminModule({
     state: eventState,
     summary,
     votes: voteAuditRows,
-    refresh,
+    refresh: refreshBootstrap,
   } = useAdminBootstrap(activeEvent?.id ?? null);
 
+  const {
+    categoryProposals,
+    measureProposals,
+    loading: proposalsLoading,
+    refresh: refreshProposals,
+  } = usePendingProposals(activeEvent?.id ?? null);
+
+  const loading = bootstrapLoading || proposalsLoading;
+
   const handleRefresh = useCallback(async () => {
-    await refresh();
+    await refreshBootstrap();
+    await refreshProposals();
     refreshEventOverview();
     await refreshOverview();
-  }, [refresh, refreshOverview]);
+  }, [refreshBootstrap, refreshProposals, refreshOverview]);
 
   const dashboardError = getAdminErrorMessage(error);
 
@@ -184,7 +193,7 @@ export default function CanhoesAdminModule({
             <AdminContentSection
               adminNominees={adminNominees}
               categories={categories}
-              categoryProposals={allCategoryProposals}
+              categoryProposals={categoryProposals}
               eventId={activeEvent?.id ?? null}
               initialResults={officialResults}
               loading={loading}
@@ -235,7 +244,7 @@ export default function CanhoesAdminModule({
     eventState,
     adminNominees,
     categories,
-    allCategoryProposals,
+    categoryProposals,
     officialResults,
     measureProposals,
     handleRefresh,
