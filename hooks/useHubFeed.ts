@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -7,10 +5,10 @@ import { toast } from "sonner";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { HEART_REACTION } from "@/lib/reactions";
 
 export type FeedSortOrder = "hot" | "new" | "top";
 const PAGE_SIZE = 15;
-const HEART_REACTION = "\u2764\uFE0F";
 
 type FeedPageData = {
   posts: EventFeedPostFullDto[];
@@ -56,19 +54,7 @@ function sanitizePosts(posts: EventFeedPostFullDto[] | null | undefined) {
   const sanitized = (Array.isArray(posts) ? posts : []).filter(
     (post): post is EventFeedPostFullDto => Boolean(post?.id)
   );
-  
-  // DEBUG: Log sanitization
-  console.log('[sanitizePosts] Input/Output:', {
-    inputLength: Array.isArray(posts) ? posts.length : 0,
-    outputLength: sanitized.length,
-    filteredOut: (Array.isArray(posts) ? posts.length : 0) - sanitized.length,
-    samplePost: sanitized[0] ? {
-      id: sanitized[0].id,
-      hasText: Boolean(sanitized[0].text),
-      hasAuthor: Boolean(sanitized[0].authorName),
-    } : null,
-  });
-  
+
   return sanitized;
 }
 
@@ -213,16 +199,7 @@ export function useHubFeed(eventId: string | null) {
         skip: pageParam,
         take: PAGE_SIZE,
       });
-      
-      // DEBUG: Log raw response
-      console.log('[useHubFeed] Raw API response:', {
-        hasData: Boolean(data),
-        hasPosts: Boolean(data?.posts),
-        postsLength: data?.posts?.length ?? 0,
-        nextCursor: data?.nextCursor,
-        samplePost: data?.posts?.[0],
-      });
-      
+
       const posts = sanitizePosts(data.posts ?? []);
       return {
         posts,
@@ -242,17 +219,6 @@ export function useHubFeed(eventId: string | null) {
     [postsQuery.data?.pages]
   );
 
-  // DEBUG: Log posts data
-  useEffect(() => {
-    console.log('[useHubFeed] Query status:', {
-      isLoading: postsQuery.isLoading,
-      isError: postsQuery.isError,
-      error: postsQuery.error,
-      data: postsQuery.data,
-      safePosts: safePosts.length,
-    });
-  }, [postsQuery.data, postsQuery.isLoading, postsQuery.isError, postsQuery.error, safePosts]);
-
   // Apply sorting client-side (backend should handle this in future)
   const sortedPosts = useMemo(
     () => sortPosts(safePosts, sort),
@@ -262,15 +228,6 @@ export function useHubFeed(eventId: string | null) {
   const displayedPosts = sortedPosts;
   const allPostsCount = sortedPosts.length;
 
-  // DEBUG: Log sorted posts
-  useEffect(() => {
-    console.log('[useHubFeed] Sorted posts:', {
-      sort,
-      safePostsCount: safePosts.length,
-      sortedPostsCount: sortedPosts.length,
-      displayedPostsCount: displayedPosts.length,
-    });
-  }, [sort, safePosts.length, sortedPosts.length, displayedPosts.length]);
   const hasMore = postsQuery.hasNextPage ?? false;
   const isFetchingNextPage = postsQuery.isFetchingNextPage;
 
@@ -298,7 +255,7 @@ export function useHubFeed(eventId: string | null) {
     globalThis.addEventListener("hub:postCreated", handlePostCreated);
     return () =>
       globalThis.removeEventListener("hub:postCreated", handlePostCreated);
-  }, [queryClient, eventId, postsQuery.data?.pages]);
+  }, [queryClient, eventId]);
 
   // Pre-fetch comments for posts that have them
   const fetchedCommentPostsRef = useRef<Set<string>>(new Set());

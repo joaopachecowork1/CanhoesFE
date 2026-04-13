@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type EmojiBurst = {
@@ -75,10 +75,10 @@ export function EmojiBurstContainer({ bursts, onClear }: Readonly<EmojiBurstCont
  */
 export function useEmojiBurst() {
   const [bursts, setBursts] = useState<EmojiBurst[]>([]);
-  let nextId = 0;
+  const nextIdRef = useRef(0);
 
   const trigger = (emoji: string, x: number, y: number) => {
-    const id = Date.now() + (nextId++);
+    const id = Date.now() + (nextIdRef.current++);
     setBursts((prev) => [...prev, { id, emoji, x, y }]);
   };
 

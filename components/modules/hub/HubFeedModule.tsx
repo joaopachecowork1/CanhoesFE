@@ -110,16 +110,6 @@ export function HubFeedModule({
         }
     }, [session?.idToken, status]);
 
-    useEffect(() => {
-        if (!showComposer) return undefined;
-
-        const timeoutId = window.setTimeout(() => {
-            void loadPostComposer();
-        }, 900);
-
-        return () => window.clearTimeout(timeoutId);
-    }, [showComposer]);
-
     return (
         <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
             <SectionBoundary
