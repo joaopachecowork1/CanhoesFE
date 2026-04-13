@@ -21,14 +21,17 @@ The backend is the **single source of truth** for module visibility. It must:
 
 3. **Return computed visibility** in TWO places:
    - **Admin bootstrap**: `/v1/events/{eventId}/admin/bootstrap`
-     - Returns `state.effectiveModules` (10 keys, includes "admin")
-     - Shows admins what modules are actually visible to members
+     - Returns `state.effectiveModules` as a **member-facing preview**
+     - This preview should reflect what a regular member sees after phase rules + admin overrides
+     - `admin` should stay `false` here because the payload is not describing admin access
 
    - **Member overview**: `/v1/events/{eventId}/overview`
-     - Returns `modules` (10 keys, includes "admin")
+     - Returns `modules` for the **current authenticated user**
      - Used by frontend navigation and access control
 
-**CRITICAL**: The `effectiveModules` in admin response and `modules` in member overview MUST be computed identically. Any mismatch will cause navigation/access inconsistency.
+**CRITICAL**: The admin preview (`state.effectiveModules`) and the member overview (`modules`) MUST use the same member-facing rules. Any mismatch will cause navigation/access inconsistency.
+
+**Important nuance**: an admin user's own `/overview.modules` may still differ because admins keep direct access to all modules. Compare the admin preview to a member overview, not to the admin's own overview payload.
 
 ### Frontend Responsibilities
 
@@ -40,11 +43,11 @@ The frontend **consumes** backend-computed visibility and enforces it at multipl
    - Uses `isNavItemAvailable()` function
 
 2. **Route access guards** (all module pages)
-   - `ModuleAccessGuard` component wraps each module
-   - Checks access via `useEventAccess()` hook
+   - `EventModuleGate` component wraps each module
+   - Checks access via `useEventModuleAccess()` hook
    - Shows locked UI or redirects if module not accessible
 
-3. **Centralized access logic** (`useEventAccess` hook)
+3. **Centralized access logic** (`useEventModuleAccess` hook)
    - Single hook consuming `EventOverviewDto`
    - Provides `checkModuleAccess()` for per-module checks
    - Includes defensive logic and fallback messaging
@@ -81,12 +84,22 @@ The frontend **consumes** backend-computed visibility and enforces it at multipl
 
 ```
 1. Page component renders (e.g., /canhoes/votacao)
-2. ModuleAccessGuard wraps module content
-3. Guard calls useEventAccess(overview)
+2. EventModuleGate wraps module content
+3. Guard calls useEventModuleAccess(moduleKey)
 4. Hook checks overview.modules.voting
 5a. If true: renders module content
 5b. If false: shows locked UI with phase-appropriate message
 ```
+
+### Phase Window Note
+
+`EndDateUtc` already affects behaviour today, but not everywhere in the same way:
+
+- `IsPhaseOpen()` uses `StartDateUtc <= now <= EndDateUtc`
+- `canSubmitProposal` / `canVote` and write endpoints depend on `IsPhaseOpen()`
+- `BuildModuleVisibility()` currently depends on the active phase type and admin overrides, not directly on the time window
+
+That means a module can remain visible while the active phase window is already closed for writes. Do not "fix" that casually without an explicit product decision on `EndDateUtc`.
 
 ## Key Files
 
@@ -101,19 +114,19 @@ The frontend **consumes** backend-computed visibility and enforces it at multipl
 
 **Core Hooks:**
 - `/hooks/useEventOverview.ts` - Loads and refreshes event overview for members
-- `/hooks/useEventAccess.ts` - Centralized access control logic
+- `/hooks/useEventModuleAccess.ts` - Centralized access control logic
 - `/hooks/useModuleVisibility.ts` - Admin module configuration management
 - `/hooks/useAdminBootstrap.ts` - Loads admin state
 
 **Access Control:**
-- `/components/modules/canhoes/ModuleAccessGuard.tsx` - Route-level access guard component
+- `/components/modules/canhoes/EventModuleGate.tsx` - Route-level access guard component
 
 **Navigation:**
 - `/components/chrome/canhoes/canhoesNavigation.ts` - Navigation item filtering logic
 - `/components/chrome/canhoes/useCanhoesShellNavigation.ts` - Shell navigation composition
 - `/components/chrome/canhoes/CanhoesChrome.tsx` - Main chrome component
 
-**Module Pages (all protected with ModuleAccessGuard):**
+**Module Pages (all protected with EventModuleGate):**
 - `/app/canhoes/(app)/votacao/page.tsx` - Voting module
 - `/app/canhoes/(app)/amigo-secreto/page.tsx` - Secret Santa module
 - `/app/canhoes/(app)/wishlist/page.tsx` - Wishlist module
@@ -145,11 +158,11 @@ The frontend **consumes** backend-computed visibility and enforces it at multipl
 ### Issue: Navigation shows module but clicking gives 404 or blocked UI
 
 **Root Cause:**
-- Module page doesn't have `ModuleAccessGuard` wrapper
+- Module page doesn't have `EventModuleGate` wrapper
 - OR guard uses different module key than navigation
 
 **Solution:**
-1. Add `ModuleAccessGuard` to page component
+1. Add `EventModuleGate` to page component
 2. Verify `moduleKey` matches mapping in `MODULE_KEY_BY_ITEM_ID`
 
 ### Issue: Phase change doesn't update member navigation
@@ -192,6 +205,11 @@ The frontend **consumes** backend-computed visibility and enforces it at multipl
    - [ ] Member navigation shows module
    - [ ] Member can access and use module
 
+5. **Expired phase window:**
+   - [ ] Active phase remains selected but `EndDateUtc` is in the past
+   - [ ] `overview.permissions.canVote` / `canSubmitProposal` close correctly
+   - [ ] Navigation behaviour matches the current product decision instead of ad-hoc client logic
+
 ### Expected Behavior by Phase
 
 **DRAW Phase:**
@@ -227,12 +245,12 @@ Instead, frontend trusts backend-computed `modules` field as single source of tr
 
 ### Defensive Programming
 
-The `useEventAccess` hook includes defensive logic:
+The `useEventModuleAccess` hook includes defensive logic:
 - Returns permissive state while data loads (avoid blocking UI)
 - Provides fallback messages for blocked states
 - Includes phase-aware hints for better UX
 
-The `ModuleAccessGuard` component:
+The `EventModuleGate` component:
 - Shows loading state during data fetch
 - Renders clear locked UI with explanation
 - Supports redirect mode for critical restrictions
