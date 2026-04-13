@@ -29,7 +29,7 @@ export function CategoryListItem({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-2">
+        <div className="min-w-0 space-y-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
               {category.name}
@@ -41,15 +41,17 @@ export function CategoryListItem({
           </div>
 
           {category.description ? (
-            <p className="text-sm text-[var(--ink-muted)]">{category.description}</p>
-          ) : null}
+            <p className="text-sm leading-6 text-[var(--ink-muted)]">{category.description}</p>
+          ) : (
+            <p className="text-sm text-[var(--ink-muted)]">Sem descrição editorial definida.</p>
+          )}
 
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.08em] text-[var(--ink-muted)]">
             <span>Ordem {category.sortOrder}</span>
-            {usage.nomineeCount > 0 ? <span>{usage.nomineeCount} nomeações</span> : null}
-            {usage.voteCount > 0 ? <span>{usage.voteCount} votos</span> : null}
+            <span>{usage.nomineeCount} nomeações</span>
+            <span>{usage.voteCount} votos</span>
             {category.kind === "UserVote" && category.voteQuestion ? (
-              <span>{category.voteQuestion}</span>
+              <span className="normal-case tracking-normal">{category.voteQuestion}</span>
             ) : null}
           </div>
         </div>

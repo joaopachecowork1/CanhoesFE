@@ -147,7 +147,7 @@ function ProposalCardActions({
 
   return (
     <>
-      <Button variant="outline" disabled={isBusy || saveDisabled} onClick={onSave}>
+      <Button variant="outline" disabled={isBusy || saveDisabled} onClick={onSave} className="w-full sm:w-auto">
         {saveLabel}
       </Button>
       {actions.map((action) => (
@@ -156,6 +156,8 @@ function ProposalCardActions({
           variant={action.variant}
           disabled={isBusy}
           onClick={action.onClick}
+          aria-label={`${action.label} proposta`}
+          className="w-full sm:w-auto"
         >
           {action.label}
         </Button>
@@ -163,7 +165,7 @@ function ProposalCardActions({
       <Button
         variant="outline"
         disabled={isBusy}
-        className={deleteIcon ? "gap-2" : undefined}
+        className={deleteIcon ? "w-full gap-2 sm:w-auto" : "w-full sm:w-auto"}
         onClick={onDelete}
       >
         {deleteIcon}
@@ -291,7 +293,6 @@ export function PendingProposals({
         ))}
       </div>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog
         open={moderation.deleteRequest !== null}
         onOpenChange={(open) => !open && moderation.clearDeleteRequest()}

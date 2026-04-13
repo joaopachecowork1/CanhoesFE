@@ -1,27 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-/**
- * Summary section for displaying statistics and counts.
- * Matches the dark paper theme with moose-inspired border colors.
- * Used for proposal counts, phase summaries, and other admin metrics.
- *
- * @param description - Brief description of the summary section
- * @param items - Array of stat items with label, value, and optional tone styling
- * @param kicker - Short label above the title (editorial kicker style)
- * @param title - Main title for the summary section
- * @example
- * ```tsx
- * <AdminSectionSummary
- *   kicker="Visao geral"
- *   title="Resumo da edicao"
- *   description="Acompanhe o progresso das propostas por fase."
- *   items={[
- *     { label: "Propostas aprovadas", value: 23, tone: "success" },
- *     { label: "Propostas pendentes", value: 8, tone: "warning" },
- *   ]}
- * />
- * ```
- */
 export function AdminSectionSummary({
   description,
   items,
@@ -42,38 +21,44 @@ export function AdminSectionSummary({
       <CardHeader className="space-y-2">
         <p className="editorial-kicker">{kicker}</p>
         <CardTitle>{title}</CardTitle>
-        <p className="body-small text-[var(--color-text-muted)]">{description}</p>
+        <p className="body-small max-w-[68ch] text-[var(--color-text-muted)]">{description}</p>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {items.map((item) => (
-          <div
-            key={item.label}
-            className={`flex flex-wrap items-center justify-between gap-2 rounded-md border border-[rgba(212,184,150,0.12)] px-3 py-2 ${
-              item.tone === "highlight"
-                ? "bg-gradient-to-r from-[rgba(177,140,255,0.08)] to-transparent"
-                : item.tone === "success"
-                ? "bg-[rgba(97,220,168,0.08)]"
-                : item.tone === "warning"
-                ? "bg-[rgba(253,224,71,0.08)]"
-                : ""
-            }`}
-          >
-            <span className="text-[var(--color-text-muted)]">{item.label}</span>
-            <span
-              className={`heading-4 ${
+      <CardContent>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {items.map((item) => (
+            <div
+              key={item.label}
+              className={cn(
+                "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] px-3 py-3",
                 item.tone === "highlight"
-                  ? "text-[var(--color-accent)]"
+                  ? "bg-gradient-to-r from-[rgba(177,140,255,0.08)] to-transparent"
                   : item.tone === "success"
-                  ? "text-[var(--color-success)]"
-                  : item.tone === "warning"
-                  ? "text-[var(--color-warning)]"
-                  : "text-[var(--bg-paper)]"
-              }`}
+                    ? "bg-[rgba(97,220,168,0.08)]"
+                    : item.tone === "warning"
+                      ? "bg-[rgba(253,224,71,0.08)]"
+                      : "bg-[rgba(11,14,8,0.46)]"
+              )}
             >
-              {item.value}
-            </span>
-          </div>
-        ))}
+              <div className="space-y-1">
+                <p className="text-xs text-[var(--color-text-muted)]">{item.label}</p>
+                <p
+                  className={cn(
+                    "heading-4",
+                    item.tone === "highlight"
+                      ? "text-[var(--color-accent)]"
+                      : item.tone === "success"
+                        ? "text-[var(--color-success)]"
+                        : item.tone === "warning"
+                          ? "text-[var(--color-warning)]"
+                          : "text-[var(--bg-paper)]"
+                  )}
+                >
+                  {item.value}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

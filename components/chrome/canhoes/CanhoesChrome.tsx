@@ -10,11 +10,12 @@ import { OPEN_COMPOSE_SHEET_EVENT } from "@/lib/canhoesEvent";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { useAdminNavigation } from "@/hooks/useAdminNavigation";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
@@ -61,23 +62,11 @@ export function CanhoesChrome({
   const eventOverview = useEventOverview();
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const canCompose = Boolean(eventOverview.overview?.modules.feed);
-
-  const handleNavigateAdmin = () => {
-    if (adminLoading || !eventOverview.overview) {
-      toast.info("A preparar admin...");
-      // Wait for overview to load, then navigate
-      const checkReady = () => {
-        if (eventOverview.overview) {
-          router.push("/canhoes/admin/conteudo");
-        } else {
-          setTimeout(checkReady, 200);
-        }
-      };
-      checkReady();
-    } else {
-      router.push("/canhoes/admin/conteudo");
-    }
-  };
+  const { navigateToAdmin: handleNavigateAdmin } = useAdminNavigation({
+    adminLoading,
+    overviewReady: Boolean(eventOverview.overview),
+    router,
+  });
   const prefersReducedMotion = useReducedMotion();
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
@@ -165,6 +154,14 @@ export function CanhoesChrome({
     router,
     user,
   });
+  const headerTone =
+    pageContext.tone === "social"
+      ? "social"
+      : pageContext.tone === "official"
+        ? "official"
+        : pageContext.tone === "admin"
+          ? "admin"
+          : "shell";
 
   useEffect(() => {
     const eventName = eventOverview.event?.name?.trim();
@@ -191,8 +188,10 @@ export function CanhoesChrome({
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
             animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="page-hero editorial-shell border-[var(--border-subtle)] bg-[var(--bg-deep)]/94 px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-4 sm:py-4"
+            className="page-hero canhoes-bits-panel canhoes-bits-panel--shell editorial-shell border-[var(--border-subtle)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-4 sm:py-4"
           >
+            <CanhoesGlowBackdrop tone={headerTone} />
+
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
                 <CanhoesBrandMark compact subtitle="Premios da edicao" />
@@ -259,6 +258,11 @@ export function CanhoesChrome({
                 </Button>
               </div>
             </div>
+
+            <CanhoesDecorativeDivider
+              tone={pageContext.tone === "social" ? "purple" : "moss"}
+              className="mt-3"
+            />
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5">

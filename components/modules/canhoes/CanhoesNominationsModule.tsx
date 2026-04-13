@@ -14,7 +14,9 @@ import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleP
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { Input } from "@/components/ui/input";
@@ -92,6 +94,7 @@ export function CanhoesNominationsModule() {
         title="Erro ao carregar nomeacoes oficiais"
         description={getErrorMessage(error, "Nao foi possivel carregar a area oficial de nomeacoes.")}
         actionLabel="Tentar novamente"
+        tone="official"
         onAction={() => {
           void categoriesQuery.refetch();
           void myStatusQuery.refetch();
@@ -103,23 +106,25 @@ export function CanhoesNominationsModule() {
 
   if (categories.length === 0) {
     return (
-      <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl">
-        <CardContent className="py-8 text-center text-[var(--text-muted)]">
-          Ainda nao ha categorias oficiais abertas.
-        </CardContent>
-      </Card>
+      <EmptyState
+        className="py-8"
+        icon={Trophy}
+        title="Sem categorias oficiais abertas"
+        description="A area oficial de nomeacoes fica disponivel quando existirem categorias ativas."
+        tone="official"
+      />
     );
   }
 
   if (!isPhaseOpen) {
     return (
-      <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl opacity-80">
-        <CardContent className="py-10 text-center text-[var(--text-muted)] space-y-2">
-          <Lock className="mx-auto h-5 w-5" />
-          <p className="font-semibold">Nomeacoes oficiais fechadas</p>
-          <p className="text-sm">Esta area oficial volta a abrir na fase de propostas.</p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        className="py-10 opacity-90"
+        icon={Lock}
+        title="Nomeacoes oficiais fechadas"
+        description="Esta area oficial volta a abrir na fase de propostas."
+        tone="official"
+      />
     );
   }
 
@@ -209,7 +214,7 @@ function CategoryNominationCard({
   });
 
   return (
-    <Card className="bg-[var(--bg-surface)] border border-[var(--border-moss)] rounded-2xl">
+    <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl">
       <CardHeader className="space-y-1 pb-3">
         <CardTitle className="text-[var(--text-primary)]">{category.name}</CardTitle>
         {category.description ? (
@@ -270,6 +275,8 @@ function CategoryNominationCard({
             </Button>
           </div>
         )}
+
+        <CanhoesDecorativeDivider tone="moss" />
 
         <div className="pt-1 space-y-2">
           <div className="flex items-center justify-between">

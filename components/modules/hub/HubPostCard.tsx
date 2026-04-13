@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
 import { BlurFade } from "@/components/animations/BlurFade";
+import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { parsePostText } from "@/lib/postUtils";
@@ -92,7 +93,6 @@ function HubPostCardComponent({
   const { bursts, trigger: triggerBurst, clear: clearBursts } = useEmojiBurst();
   const commentsRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to comments when they open
   useEffect(() => {
     if (openComments && commentsRef.current) {
       commentsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -115,7 +115,9 @@ function HubPostCardComponent({
   const reactionCounts = post.reactionCounts || {};
 
   const hasMedia = resolvedMediaUrls.length > 0;
-  const hasText = !!(post.text?.trim());
+  const hasText = !!post.text?.trim();
+  const displayScore = (post.likeCount ?? 0) - (post.downvoteCount ?? 0);
+  const commentCount = post.commentCount ?? 0;
 
   const handleImageClick = (imageIndex: number) => {
     setLightboxIndex(imageIndex);
@@ -134,175 +136,173 @@ function HubPostCardComponent({
   );
 
   const handleUpvote = useCallback(() => {
-    if (post.likedByMe) {
-      onToggleReaction(post.id, HEART_REACTION);
-    } else {
-      onToggleReaction(post.id, HEART_REACTION);
-    }
-  }, [post.likedByMe, post.id, onToggleReaction]);
+    onToggleReaction(post.id, HEART_REACTION);
+  }, [post.id, onToggleReaction]);
 
   const handleDownvote = useCallback(() => {
     onToggleDownvote(post.id);
   }, [post.id, onToggleDownvote]);
 
-  const displayScore = (post.likeCount ?? 0) - (post.downvoteCount ?? 0);
-
-  const commentCount = post.commentCount ?? 0;
-
   return (
     <BlurFade delay={index * 50}>
-      <article className="reddit-post flex overflow-hidden rounded-[var(--radius-md-token)]">
-        {/* Vote sidebar (Reddit-style) */}
-        <div className="reddit-vote-sidebar flex flex-col items-center gap-0.5 border-r border-[var(--border-subtle)] bg-[var(--bg-void)] px-1.5 py-2 sm:px-2 sm:py-3">
-          <button
-            type="button"
-            onClick={handleUpvote}
-            className={cn(
-              "canhoes-tap rounded p-0.5 transition-colors",
-              post.likedByMe
-                ? "text-[var(--neon-green)]"
-                : "text-[var(--text-muted)] hover:text-[var(--neon-green)]"
-            )}
-            aria-label={post.likedByMe ? "Remover upvote" : "Upvote"}
-          >
-            <ArrowBigUp className="h-5 w-5" />
-          </button>
+      <article className="reddit-post canhoes-bits-panel canhoes-bits-panel--social overflow-hidden rounded-[var(--radius-md-token)]">
+        <CanhoesGlowBackdrop tone="social" />
 
-          <span className={cn(
-            "reddit-score font-mono text-xs font-bold tabular-nums",
-            post.likedByMe ? "text-[var(--neon-green)]" :
-            post.downvotedByMe ? "text-[var(--neon-red)]" :
-            "text-[var(--text-primary)]"
-          )}>
-            {displayScore}
-          </span>
+        <div className="flex flex-col sm:flex-row">
+          <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-void)] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
+            <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5">
+              <button
+                type="button"
+                onClick={handleUpvote}
+                className={cn(
+                  "canhoes-tap rounded p-1 transition-colors",
+                  post.likedByMe
+                    ? "text-[var(--neon-green)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--neon-green)]"
+                )}
+                aria-label={post.likedByMe ? "Remover upvote" : "Upvote"}
+              >
+                <ArrowBigUp className="h-5 w-5" />
+              </button>
 
-          <button
-            type="button"
-            onClick={handleDownvote}
-            className={cn(
-              "canhoes-tap rounded p-0.5 transition-colors",
-              post.downvotedByMe
-                ? "text-[var(--neon-red)]"
-                : "text-[var(--text-muted)] hover:text-[var(--neon-red)]"
-            )}
-            aria-label={post.downvotedByMe ? "Remover downvote" : "Downvote"}
-          >
-            <ArrowBigUp className="h-5 w-5 rotate-180" />
-          </button>
+              <span
+                className={cn(
+                  "reddit-score min-w-[2.25rem] text-center font-mono text-xs font-bold tabular-nums sm:min-w-0",
+                  post.likedByMe
+                    ? "text-[var(--neon-green)]"
+                    : post.downvotedByMe
+                      ? "text-[var(--neon-red)]"
+                      : "text-[var(--text-primary)]"
+                )}
+              >
+                {displayScore}
+              </span>
 
-          <button
-            type="button"
-            className="canhoes-tap mt-2 flex flex-col items-center gap-0.5 rounded p-0.5 text-[var(--text-muted)] transition-colors hover:text-[var(--moss-glow)]"
-            onClick={() => onToggleComments(post.id)}
-            aria-label={`${commentCount} comentários`}
-          >
-            <MessageSquare className="h-4 w-4" />
-            <span className="text-[10px] font-medium tabular-nums">{commentCount}</span>
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={handleDownvote}
+                className={cn(
+                  "canhoes-tap rounded p-1 transition-colors",
+                  post.downvotedByMe
+                    ? "text-[var(--neon-red)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--neon-red)]"
+                )}
+                aria-label={post.downvotedByMe ? "Remover downvote" : "Downvote"}
+              >
+                <ArrowBigUp className="h-5 w-5 rotate-180" />
+              </button>
+            </div>
 
-        {/* Content area */}
-        <div className="min-w-0 flex-1">
-          <div className="space-y-2 px-3 pt-2.5 sm:px-4">
-            <PostHeader
-              authorName={post.authorName}
-              createdAtUtc={post.createdAtUtc}
-              isPinned={post.isPinned}
-              isAdmin={isAdmin}
-              onAdminPin={() => onAdminPin(post.id)}
-              onAdminDelete={() => onAdminDelete(post.id)}
-            />
+            <button
+              type="button"
+              className="canhoes-tap flex items-center gap-1.5 rounded px-1 py-1 text-[var(--text-muted)] transition-colors hover:text-[var(--moss-glow)] sm:mt-2 sm:flex-col sm:gap-0.5 sm:px-0.5"
+              onClick={() => onToggleComments(post.id)}
+              aria-label={`${commentCount} comentários`}
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="text-[10px] font-medium tabular-nums">{commentCount}</span>
+            </button>
+          </div>
 
-            {hasText && (() => {
-              const { title, body } = parsePostText(post.text);
-              return title ? (
-                <div className="space-y-1">
-                  <p className="post-title text-[var(--text-primary)]">
-                    {title}
-                  </p>
-                  {body && (
-                    <p className="post-body whitespace-pre-wrap break-words">
-                      {body}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
-                  {post.text}
-                </p>
-              );
-            })()}
-
-            {hasMedia ? (
-              <LazyMediaCarousel
-                urls={resolvedMediaUrls}
-                aspect="video"
-                onImageClick={handleImageClick}
+          <div className="min-w-0 flex-1">
+            <div className="space-y-2 px-3 pt-3 sm:px-4 sm:pt-2.5">
+              <PostHeader
                 authorName={post.authorName}
-              />
-            ) : null}
-          </div>
-
-          {post.poll && (
-            <div className="px-3 pb-2 pt-1 sm:px-4">
-              <LazyPollBox
-                poll={post.poll}
-                onVote={(optionId) => onVotePoll(post.id, optionId)}
-              />
-            </div>
-          )}
-
-          {/* Action bar */}
-          <div className="px-3 pb-2.5 pt-2 sm:px-4">
-            <div className="mt-1 h-px w-full bg-[var(--border-subtle)]" />
-            <div className="mt-2">
-              <HubPostActions
-                postId={post.id}
-                commentCount={commentCount}
-                reactionCounts={reactionCounts}
-                myReactions={post.myReactions ?? []}
+                createdAtUtc={post.createdAtUtc}
                 isPinned={post.isPinned}
-                commentsExpanded={openComments}
-                onToggleReaction={handleReaction}
-                onToggleComments={onToggleComments}
+                isAdmin={isAdmin}
+                onAdminPin={() => onAdminPin(post.id)}
+                onAdminDelete={() => onAdminDelete(post.id)}
               />
+
+              {hasText && (() => {
+                const { title, body } = parsePostText(post.text);
+                return title ? (
+                  <div className="space-y-1.5">
+                    <p className="post-title text-[var(--text-primary)]">
+                      {title}
+                    </p>
+                    {body ? (
+                      <p className="post-body whitespace-pre-wrap break-words">
+                        {body}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
+                    {post.text}
+                  </p>
+                );
+              })()}
+
+              {hasMedia ? (
+                <LazyMediaCarousel
+                  urls={resolvedMediaUrls}
+                  aspect="video"
+                  onImageClick={handleImageClick}
+                  authorName={post.authorName}
+                />
+              ) : null}
             </div>
 
-            <AnimatePresence initial={false}>
-              {openComments ? (
-                <motion.div
-                  ref={commentsRef}
-                  key={`${post.id}-comments`}
-                  initial={{ opacity: 0, height: 0, y: -6 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -6 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  className="mt-2 overflow-hidden"
-                >
-                  <LazyHubPostComments
-                    postId={post.id}
-                    postAuthorName={post.authorName}
-                    comments={comments}
-                    commentCount={commentCount}
-                    openComments={openComments}
-                    commentDraft={commentDraft}
-                    currentUserId={currentUserId}
-                    currentUserName={currentUserName}
-                    currentUserImage={currentUserImage}
-                    onToggleComments={onToggleComments}
-                    onAddComment={onAddComment}
-                    onDeleteComment={onDeleteComment}
-                    onCommentDraftChange={onCommentDraftChange}
-                    onToggleCommentReaction={onToggleCommentReaction}
-                  />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            {post.poll ? (
+              <div className="px-3 pb-2 pt-1 sm:px-4">
+                <LazyPollBox
+                  poll={post.poll}
+                  onVote={(optionId) => onVotePoll(post.id, optionId)}
+                />
+              </div>
+            ) : null}
+
+            <div className="px-3 pb-3 pt-2 sm:px-4 sm:pb-2.5">
+              <CanhoesDecorativeDivider tone="purple" className="mt-1" />
+              <div className="mt-2">
+                <HubPostActions
+                  postId={post.id}
+                  commentCount={commentCount}
+                  reactionCounts={reactionCounts}
+                  myReactions={post.myReactions ?? []}
+                  isPinned={post.isPinned}
+                  commentsExpanded={openComments}
+                  onToggleReaction={handleReaction}
+                  onToggleComments={onToggleComments}
+                />
+              </div>
+
+              <AnimatePresence initial={false}>
+                {openComments ? (
+                  <motion.div
+                    ref={commentsRef}
+                    key={`${post.id}-comments`}
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="mt-2 overflow-hidden"
+                  >
+                    <LazyHubPostComments
+                      postId={post.id}
+                      postAuthorName={post.authorName}
+                      comments={comments}
+                      commentCount={commentCount}
+                      openComments={openComments}
+                      commentDraft={commentDraft}
+                      currentUserId={currentUserId}
+                      currentUserName={currentUserName}
+                      currentUserImage={currentUserImage}
+                      onToggleComments={onToggleComments}
+                      onAddComment={onAddComment}
+                      onDeleteComment={onDeleteComment}
+                      onCommentDraftChange={onCommentDraftChange}
+                      onToggleCommentReaction={onToggleCommentReaction}
+                    />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
-        {/* Image Lightbox */}
         <ImageLightbox
           images={resolvedMediaUrls}
           initialIndex={lightboxIndex}
@@ -313,31 +313,18 @@ function HubPostCardComponent({
         />
       </article>
 
-      {/* Emoji burst particles */}
       <EmojiBurstContainer bursts={bursts} onClear={clearBursts} />
     </BlurFade>
   );
 }
 
-export const HubPostCard = memo(HubPostCardComponent);
-
 function FeedMediaFallback() {
-  return (
-    <div className="overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)]">
-      <div className="h-48 w-full animate-pulse bg-[rgba(245,237,224,0.06)]" />
-    </div>
-  );
+  return <div className="skeleton-shimmer h-64 w-full rounded-[var(--radius-md-token)]" />;
 }
 
 function FeedPollFallback() {
-  return (
-    <div className="rounded-[var(--radius-lg-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)] p-4 sm:p-5">
-      <div className="space-y-3">
-        <div className="h-3 w-20 animate-pulse rounded bg-[rgba(74,92,47,0.18)]" />
-        <div className="h-6 w-2/3 animate-pulse rounded bg-[rgba(74,92,47,0.12)]" />
-        <div className="h-12 animate-pulse rounded-[var(--radius-md-token)] bg-[rgba(245,237,224,0.08)]" />
-        <div className="h-12 animate-pulse rounded-[var(--radius-md-token)] bg-[rgba(245,237,224,0.08)]" />
-      </div>
-    </div>
-  );
+  return <div className="skeleton-shimmer h-32 w-full rounded-[var(--radius-md-token)]" />;
 }
+
+export const HubPostCard = memo(HubPostCardComponent);
+HubPostCard.displayName = "HubPostCard";

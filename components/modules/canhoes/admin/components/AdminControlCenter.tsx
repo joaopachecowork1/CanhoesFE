@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type {
@@ -36,13 +36,25 @@ type AdminControlCenterProps = {
   state: EventAdminStateDto | null;
 };
 
-function getModuleFeedback(label: string) {
+type VisibilityActionMessages = {
+  error: string;
+  saving: string;
+  success: string;
+};
+
+function getModuleFeedback(label: string): VisibilityActionMessages {
   const labelLower = label.toLowerCase();
   return {
     saving: `A guardar ${labelLower}...`,
     success: `${label} atualizado.`,
     error: `Falha ao guardar ${labelLower}.`,
   };
+}
+
+function buildModuleItemsByKey(moduleItems: ModuleVisibilityItem[]) {
+  return Object.fromEntries(moduleItems.map((item) => [item.key, item])) as Partial<
+    Record<AdminModuleKey, ModuleVisibilityItem>
+  >;
 }
 
 export function AdminControlCenter({
@@ -73,31 +85,30 @@ export function AdminControlCenter({
     state,
   });
 
+  const moduleItemsByKey = useMemo(() => buildModuleItemsByKey(moduleItems), [moduleItems]);
+  const quickModuleItems = useMemo(
+    () => selectModuleItems(QUICK_MODULE_ORDER, moduleItemsByKey),
+    [moduleItemsByKey]
+  );
+  const advancedModuleItems = useMemo(
+    () => selectModuleItems(ADVANCED_MODULE_ORDER, moduleItemsByKey),
+    [moduleItemsByKey]
+  );
+
   if (!state) {
     return <AdminStateMessage variant="panel">Falta uma edição ativa para abrir os controlos.</AdminStateMessage>;
   }
 
   const currentState = state;
-  const moduleItemsByKey = Object.fromEntries(
-    moduleItems.map((item) => [item.key, item])
-  ) as Partial<Record<AdminModuleKey, ModuleVisibilityItem>>;
-
-  const quickModuleItems = selectModuleItems(QUICK_MODULE_ORDER, moduleItemsByKey);
-  const advancedModuleItems = selectModuleItems(ADVANCED_MODULE_ORDER, moduleItemsByKey);
   const activeEventLabel = activeEventName ?? "Sem edição ativa";
   const currentPhaseLabel = formatPhaseLabel(currentState.activePhase?.type);
   const pendingCount = currentState.counts.pendingProposalCount ?? 0;
 
-  async function runVisibilityAction(
-    savingMessage: string,
-    successMessage: string,
-    errorMessage: string,
-    action: () => Promise<boolean>
-  ) {
-    setFeedback({ message: savingMessage, tone: "default" });
+  async function runVisibilityAction(messages: VisibilityActionMessages, action: () => Promise<boolean>) {
+    setFeedback({ message: messages.saving, tone: "default" });
     const ok = await action();
     setFeedback({
-      message: ok ? successMessage : errorMessage,
+      message: ok ? messages.success : messages.error,
       tone: ok ? "success" : "error",
     });
     return ok;
@@ -162,35 +173,38 @@ export function AdminControlCenter({
   }
 
   function handleModuleToggle(item: ModuleVisibilityItem, checked: boolean) {
-    const messages = getModuleFeedback(item.label);
-    void runVisibilityAction(messages.saving, messages.success, messages.error, () =>
-      toggleModule(item.key, checked)
-    );
+    void runVisibilityAction(getModuleFeedback(item.label), () => toggleModule(item.key, checked));
   }
 
   function handleNominationsVisibility(checked: boolean) {
     void runVisibilityAction(
-      "A guardar exposição de nomeações...",
-      checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.",
-      "Falha ao guardar a exposição de nomeações.",
+      {
+        saving: "A guardar exposição de nomeações...",
+        success: checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.",
+        error: "Falha ao guardar a exposição de nomeações.",
+      },
       () => setNominationsVisible(checked)
     );
   }
 
   function handleResultsVisibility(checked: boolean) {
     void runVisibilityAction(
-      "A guardar exposição de resultados...",
-      checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.",
-      "Falha ao guardar a exposição de resultados.",
+      {
+        saving: "A guardar exposição de resultados...",
+        success: checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.",
+        error: "Falha ao guardar a exposição de resultados.",
+      },
       () => setResultsVisible(checked)
     );
   }
 
   function handleSetAllModules(visible: boolean) {
     void runVisibilityAction(
-      visible ? "A ativar todos os módulos..." : "A desativar todos os módulos...",
-      visible ? "Todos os módulos ficaram ativos." : "Todos os módulos ficaram ocultos.",
-      visible ? "Falha ao ativar todos os módulos." : "Falha ao desativar todos os módulos.",
+      {
+        saving: visible ? "A ativar todos os módulos..." : "A desativar todos os módulos...",
+        success: visible ? "Todos os módulos ficaram ativos." : "Todos os módulos ficaram ocultos.",
+        error: visible ? "Falha ao ativar todos os módulos." : "Falha ao desativar todos os módulos.",
+      },
       () => setAllModules(visible)
     );
   }

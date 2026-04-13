@@ -13,6 +13,7 @@ import {
     formatEventPhaseLabel,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 
+import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -121,7 +122,7 @@ export function CanhoesCategoriesModule() {
                 }
             />
 
-            <Card>
+            <Card className="canhoes-bits-panel canhoes-bits-panel--official">
                 <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2">
                         <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
@@ -161,7 +162,7 @@ export function CanhoesCategoriesModule() {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="canhoes-bits-panel canhoes-bits-panel--official">
                 <CardHeader className="pb-2">
                     <CardTitle>Categorias oficiais</CardTitle>
                 </CardHeader>
@@ -179,6 +180,7 @@ export function CanhoesCategoriesModule() {
                             title="Erro ao carregar categorias oficiais"
                             description={errorMessage}
                             actionLabel="Tentar novamente"
+                            tone="official"
                             onAction={() => void loadCategories()}
                         />
                     ) : null}
@@ -188,7 +190,12 @@ export function CanhoesCategoriesModule() {
                     ) : null}
 
                     {!isLoading && !isOverviewLoading && !errorMessage && filteredCategoryList.length === 0 ? (
-                        <EmptyState icon={Inbox} title="Sem categorias oficiais" description="Ainda nao ha categorias oficiais nesta edicao." />
+                        <EmptyState
+                            icon={Inbox}
+                            title="Sem categorias oficiais"
+                            description="Ainda nao ha categorias oficiais nesta edicao."
+                            tone="official"
+                        />
                     ) : null}
 
                     {isLoading || isOverviewLoading ? null : (
@@ -208,6 +215,10 @@ export function CanhoesCategoriesModule() {
                             ))}
                         </div>
                     )}
+
+                    {!isLoading && !isOverviewLoading && filteredCategoryList.length > 0 ? (
+                        <CanhoesDecorativeDivider tone="moss" />
+                    ) : null}
                 </CardContent>
             </Card>
         </div>

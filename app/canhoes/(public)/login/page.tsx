@@ -6,6 +6,7 @@ import { AlertTriangle, Leaf } from "lucide-react";
 
 import { CanhoesBrandMark } from "@/components/chrome/canhoes/CanhoesBrandMark";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
+import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -68,6 +69,13 @@ export default function CanhoesLoginPage() {
 
   return (
     <div className="relative isolate min-h-[100svh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.16),transparent_30rem),linear-gradient(180deg,var(--bg-deep)_0%,var(--bg-void)_100%)]">
+      <CanhoesGlowBackdrop tone="shell" className="opacity-90" />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[linear-gradient(180deg,rgba(177,140,255,0.12),transparent)]"
+      />
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {leafParticles.map((particle) => (
           <div
@@ -85,13 +93,15 @@ export default function CanhoesLoginPage() {
 
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-4 py-10">
         <section
-          className="w-full max-w-md rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[rgba(22,28,14,0.9)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-modal)] backdrop-blur-xl sm:p-8"
+          className="canhoes-bits-panel canhoes-bits-panel--shell editorial-shell w-full max-w-md rounded-[var(--radius-xl-token)] border p-6 text-[var(--text-primary)] shadow-[var(--shadow-modal)] backdrop-blur-xl sm:p-8"
           style={{
             opacity: isVisible ? 1 : 0,
             transform: isVisible ? "translateY(0)" : "translateY(24px)",
             transition: "opacity 420ms ease, transform 420ms ease",
           }}
         >
+          <CanhoesGlowBackdrop tone="shell" />
+
           <div className="space-y-6">
             <div className="flex items-center justify-center">
               <CanhoesHeroEmblem />
@@ -110,14 +120,30 @@ export default function CanhoesLoginPage() {
               </p>
             </div>
 
-            <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,136,0.18),transparent)]" />
+            <CanhoesDecorativeDivider tone="purple" />
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="canhoes-shell-chip rounded-[var(--radius-md-token)] px-3 py-2">
+                <p className="editorial-kicker text-[10px]">Mural</p>
+                <p className="text-xs font-medium text-[var(--bg-paper)]">Social</p>
+              </div>
+              <div className="canhoes-shell-chip rounded-[var(--radius-md-token)] px-3 py-2">
+                <p className="editorial-kicker text-[10px]">Boletim</p>
+                <p className="text-xs font-medium text-[var(--bg-paper)]">Oficial</p>
+              </div>
+              <div className="canhoes-shell-chip rounded-[var(--radius-md-token)] px-3 py-2">
+                <p className="editorial-kicker text-[10px]">Arquivo</p>
+                <p className="text-xs font-medium text-[var(--bg-paper)]">Privado</p>
+              </div>
+            </div>
 
             <div className="space-y-3">
               {authErrorMessage ? (
                 <div
-                  className="rounded-lg border border-[rgba(255,107,107,0.38)] bg-[rgba(66,20,20,0.76)] px-3 py-3 text-sm text-[rgba(255,228,228,0.94)]"
+                  className="canhoes-bits-panel canhoes-bits-panel--danger rounded-lg border px-3 py-3 text-sm text-[rgba(255,228,228,0.94)]"
                   role="alert"
                 >
+                  <CanhoesGlowBackdrop tone="danger" />
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="space-y-1">
@@ -134,7 +160,7 @@ export default function CanhoesLoginPage() {
               ) : null}
 
               {isDevAuthBypass ? (
-                <div className="rounded-lg border border-[rgba(255,209,102,0.32)] bg-[rgba(62,38,12,0.72)] px-3 py-2 text-xs text-[rgba(255,236,188,0.92)]">
+                <div className="canhoes-bits-panel rounded-lg border border-[rgba(255,209,102,0.32)] bg-[rgba(62,38,12,0.72)] px-3 py-2 text-xs text-[rgba(255,236,188,0.92)]">
                   Modo desenvolvimento ativo. Bypass auth local ligado.
                 </div>
               ) : null}

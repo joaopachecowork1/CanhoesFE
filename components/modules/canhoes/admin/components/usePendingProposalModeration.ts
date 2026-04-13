@@ -231,12 +231,22 @@ export function usePendingProposalModeration({
     );
   };
 
+  const requestDelete = ({
+    id,
+    title,
+    type,
+    onConfirm,
+  }: DeleteConfirmationRequest) => {
+    setDeleteRequest({ id, title, type, onConfirm });
+  };
+
   const buildCategoryCard = (proposal: CategoryProposalDto): PendingProposalCard => {
     const draft = getCategoryDraft(proposal);
     const isBusy = processingIds.has(proposal.id);
 
     return {
       deleteIcon: "trash",
+      deleteLabel: "Apagar proposta",
       fields: [
         {
           disabled: isBusy,
@@ -267,7 +277,7 @@ export function usePendingProposalModeration({
       onDelete: () => {
         if (!eventId) return;
 
-        setDeleteRequest({
+        requestDelete({
           id: proposal.id,
           title: proposal.name,
           type: "category",
@@ -335,6 +345,8 @@ export function usePendingProposalModeration({
     const isBusy = processingIds.has(proposal.id);
 
     return {
+      deleteIcon: "trash",
+      deleteLabel: "Apagar proposta",
       fields: [
         {
           disabled: isBusy,
@@ -355,11 +367,18 @@ export function usePendingProposalModeration({
       onDelete: () => {
         if (!eventId) return;
 
-        void withProcessing(
-          proposal.id,
-          () => canhoesEventsRepo.adminDeleteMeasureProposal(eventId, proposal.id),
-          "Proposta removida"
-        );
+        requestDelete({
+          id: proposal.id,
+          title: "Medida proposta",
+          type: "measure",
+          onConfirm: () => {
+            void withProcessing(
+              proposal.id,
+              () => canhoesEventsRepo.adminDeleteMeasureProposal(eventId, proposal.id),
+              "Proposta removida"
+            );
+          },
+        });
       },
       onReject:
         proposal.status !== "rejected" ? () => setMeasureStatus(proposal, "rejected") : undefined,

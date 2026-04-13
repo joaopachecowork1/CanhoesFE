@@ -1,3 +1,5 @@
+@import "../lib/theme/design-tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,17 +64,17 @@
    * - primary live controls: moss + neon green
    * - secondary cyber accent only: accent-purple*
    */
-  --bg-void: #0f1209;
-  --bg-deep: #161c0e;
-  --bg-surface: #1e2614;
+  --bg-void: var(--color-bg-base);
+  --bg-deep: var(--color-bg-surface);
+  --bg-surface: var(--color-bg-elevated);
   --bg-paper: #efe4cf;
   --bg-paper-alt: #e4d5bc;
   --bg-paper-soft: #f4ead9;
   --bg-paper-olive: #e7dcc7;
 
-  --text-primary: #f2ead8;
+  --text-primary: var(--color-text-primary);
   --text-dark: #1a1f14;
-  --text-muted: #bcc7a8;
+  --text-muted: var(--color-text-muted);
   --text-ghost: #8a9772;
   --text-ink: #261d14;
 
@@ -81,8 +83,8 @@
   --ink-secondary: #503e2d;
   --ink-muted: #6b5744;
 
-  --moss: #4a5c2f;
-  --moss-light: #6b7c45;
+  --moss: var(--color-accent);
+  --moss-light: var(--color-accent-hover);
   --moss-glow: #7aad3a;
   --bark: #6b4c2a;
   --bark-dark: #3d2b18;
@@ -108,8 +110,8 @@
   --glow-moss: 0 10px 30px rgba(74, 92, 47, 0.4);
   --glow-paper: 0 18px 40px rgba(10, 12, 8, 0.2);
 
-  --success: #4caf50;
-  --danger: #e05a3a;
+  --success: var(--color-success);
+  --danger: var(--color-danger);
   --fire: #ff6b35;
 
   --psycho-1: #ff6b9d;
@@ -119,9 +121,9 @@
   --psycho-5: #c77dff;
   --gradient-psycho: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4d96ff, #c77dff);
 
-  --border-subtle: rgba(74, 92, 47, 0.2);
+  --border-subtle: var(--color-border);
   --border-moss: rgba(74, 92, 47, 0.5);
-  --border-neon: rgba(0, 255, 136, 0.4);
+  --border-neon: var(--color-border-strong);
   --border-paper: rgba(212, 184, 150, 0.5);
   --border-purple: rgba(177, 140, 255, 0.36);
   --border-default: var(--border-moss);
@@ -139,16 +141,16 @@
   --shadow-modal: 0 28px 80px rgba(0, 0, 0, 0.45);
   --shadow-glow-title: var(--glow-green-sm);
 
-  --font-display: var(--font-orbitron);
-  --font-body: var(--font-dm-sans);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
   --font-app: var(--font-dm-sans);
 
   --page-max-width: 72rem;
   --page-content-width: 60rem;
-  --radius-sm-token: 12px;
-  --radius-md-token: 14px;
-  --radius-lg-token: 20px;
+  --radius-sm-token: var(--radius-sm);
+  --radius-md-token: var(--radius-md);
+  --radius-lg-token: var(--radius-lg);
   --radius-xl-token: 26px;
 
   /* shadcn theme mapping */
@@ -647,6 +649,281 @@ h3,
     var(--glow-purple-sm);
 }
 
+.canhoes-bits-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.canhoes-bits-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.canhoes-bits-panel::before,
+.canhoes-bits-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.canhoes-bits-panel::before {
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  opacity: 0.66;
+}
+
+.canhoes-bits-panel::after {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.04), transparent 24%);
+}
+
+.canhoes-bits-panel--shell {
+  border-color: rgba(212, 184, 150, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(0, 255, 136, 0.16), transparent 30%),
+    radial-gradient(circle at left bottom, rgba(177, 140, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(28, 35, 18, 0.98), rgba(14, 18, 9, 0.98));
+  box-shadow: var(--shadow-panel);
+}
+
+.canhoes-bits-panel--shell::before {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 136, 0.7),
+    rgba(177, 140, 255, 0.55),
+    rgba(255, 184, 0, 0.5),
+    transparent
+  );
+}
+
+.canhoes-bits-panel--social {
+  border-color: rgba(122, 173, 58, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(177, 140, 255, 0.18), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(0, 255, 136, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(27, 34, 18, 0.98), rgba(17, 22, 11, 0.98));
+  box-shadow:
+    0 20px 42px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.canhoes-bits-panel--social::before {
+  background: linear-gradient(
+    90deg,
+    rgba(177, 140, 255, 0.72),
+    rgba(0, 255, 136, 0.56),
+    rgba(255, 184, 0, 0.38),
+    transparent
+  );
+}
+
+.canhoes-bits-panel--official {
+  border-color: rgba(0, 255, 136, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(0, 255, 136, 0.12), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(255, 184, 0, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(19, 25, 12, 0.98), rgba(11, 15, 8, 0.98));
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.canhoes-bits-panel--official::before {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 136, 0.82),
+    rgba(0, 212, 170, 0.52),
+    rgba(255, 184, 0, 0.34),
+    transparent
+  );
+}
+
+.canhoes-bits-panel--admin {
+  border-color: rgba(84, 64, 40, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(122, 173, 58, 0.08), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(107, 76, 42, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(239, 228, 207, 0.98), rgba(225, 211, 186, 0.98));
+  box-shadow: var(--shadow-paper);
+}
+
+.canhoes-bits-panel--admin::before {
+  background: linear-gradient(
+    90deg,
+    rgba(74, 92, 47, 0.72),
+    rgba(212, 184, 150, 0.44),
+    transparent
+  );
+}
+
+.canhoes-bits-panel--danger {
+  border-color: rgba(224, 90, 58, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(255, 107, 107, 0.18), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(255, 184, 0, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(41, 18, 14, 0.96), rgba(26, 11, 10, 0.98));
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.canhoes-bits-panel--danger::before {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 107, 107, 0.82),
+    rgba(255, 184, 0, 0.38),
+    transparent
+  );
+}
+
+.canhoes-bits-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.canhoes-bits-backdrop__orb {
+  position: absolute;
+  height: 16rem;
+  width: 16rem;
+  border-radius: 9999px;
+  filter: blur(56px);
+  opacity: 0.42;
+  animation: ambient-drift 15s ease-in-out infinite;
+}
+
+.canhoes-bits-backdrop__orb--one {
+  right: -4rem;
+  top: -4rem;
+}
+
+.canhoes-bits-backdrop__orb--two {
+  bottom: -5rem;
+  left: -3rem;
+  animation-delay: -4s;
+}
+
+.canhoes-bits-backdrop__orb--three {
+  left: 28%;
+  top: 42%;
+  height: 11rem;
+  width: 11rem;
+  animation-delay: -8s;
+}
+
+.canhoes-bits-backdrop__grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.34), transparent 85%);
+  opacity: 0.36;
+}
+
+.canhoes-bits-backdrop--shell .canhoes-bits-backdrop__orb--one {
+  background: rgba(0, 255, 136, 0.34);
+}
+
+.canhoes-bits-backdrop--shell .canhoes-bits-backdrop__orb--two {
+  background: rgba(177, 140, 255, 0.24);
+}
+
+.canhoes-bits-backdrop--shell .canhoes-bits-backdrop__orb--three {
+  background: rgba(255, 184, 0, 0.2);
+}
+
+.canhoes-bits-backdrop--social .canhoes-bits-backdrop__orb--one {
+  background: rgba(177, 140, 255, 0.32);
+}
+
+.canhoes-bits-backdrop--social .canhoes-bits-backdrop__orb--two {
+  background: rgba(0, 255, 136, 0.22);
+}
+
+.canhoes-bits-backdrop--social .canhoes-bits-backdrop__orb--three {
+  background: rgba(255, 184, 0, 0.18);
+}
+
+.canhoes-bits-backdrop--official .canhoes-bits-backdrop__orb--one {
+  background: rgba(0, 255, 136, 0.3);
+}
+
+.canhoes-bits-backdrop--official .canhoes-bits-backdrop__orb--two {
+  background: rgba(0, 212, 170, 0.22);
+}
+
+.canhoes-bits-backdrop--official .canhoes-bits-backdrop__orb--three {
+  background: rgba(255, 184, 0, 0.16);
+}
+
+.canhoes-bits-backdrop--admin .canhoes-bits-backdrop__orb--one {
+  background: rgba(122, 173, 58, 0.14);
+}
+
+.canhoes-bits-backdrop--admin .canhoes-bits-backdrop__orb--two {
+  background: rgba(212, 184, 150, 0.18);
+}
+
+.canhoes-bits-backdrop--admin .canhoes-bits-backdrop__orb--three {
+  background: rgba(107, 76, 42, 0.12);
+}
+
+.canhoes-bits-backdrop--danger .canhoes-bits-backdrop__orb--one {
+  background: rgba(255, 107, 107, 0.34);
+}
+
+.canhoes-bits-backdrop--danger .canhoes-bits-backdrop__orb--two {
+  background: rgba(255, 184, 0, 0.18);
+}
+
+.canhoes-bits-backdrop--danger .canhoes-bits-backdrop__orb--three {
+  background: rgba(255, 58, 58, 0.12);
+}
+
+.canhoes-bits-divider {
+  height: 1px;
+  width: 100%;
+}
+
+.canhoes-bits-divider--moss {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 136, 0.26),
+    rgba(212, 184, 150, 0.16),
+    transparent
+  );
+}
+
+.canhoes-bits-divider--purple {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(177, 140, 255, 0.34),
+    rgba(0, 255, 136, 0.18),
+    transparent
+  );
+}
+
+.canhoes-bits-divider--amber {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 184, 0, 0.36),
+    rgba(245, 237, 224, 0.18),
+    transparent
+  );
+}
+
 .editorial-shell {
   position: relative;
   overflow: hidden;
@@ -830,6 +1107,67 @@ h3,
   }
 
   /* =============================================
+     ZONE-SPECIFIC COMPONENT STYLES
+     ============================================= */
+
+  /* Feed zone: card surfaces with minimal decoration */
+  .zone-feed .canhoes-feed-card,
+  .zone-feed .reddit-post {
+    background: var(--zone-card-bg);
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .zone-feed .canhoes-feed-card:hover {
+    border-color: rgba(122, 173, 58, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+  }
+
+  /* Voting zone: structured panels with clear hierarchy */
+  .zone-voting .canhoes-paper-panel,
+  .zone-voting .editorial-shell {
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .zone-voting .editorial-kicker {
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+  }
+
+  /* Admin zone: paper-first, compact, operational */
+  .zone-admin .canhoes-paper-panel,
+  .zone-admin .editorial-shell {
+    background: var(--bg-paper);
+    border-color: rgba(84, 64, 40, 0.16);
+    box-shadow: var(--shadow-paper);
+    color: var(--ink-primary);
+  }
+
+  .zone-admin .editorial-kicker {
+    color: var(--moss);
+  }
+
+  .zone-admin .heading-1,
+  .zone-admin .heading-2,
+  .zone-admin .heading-3,
+  .zone-admin .canhoes-title {
+    color: var(--ink-primary);
+  }
+
+  .zone-admin .body-small,
+  .zone-admin p,
+  .zone-admin span {
+    color: var(--ink-primary);
+  }
+
+  .zone-admin .text-\[var\(--text-muted\)\] {
+    color: var(--ink-muted);
+  }
+
+  /* =============================================
      REDDIT-STYLE FEED
      ============================================= */
 
@@ -974,6 +1312,16 @@ h3,
   }
 }
 
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5rem, -1rem, 0) scale(1.06);
+  }
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -1021,7 +1369,8 @@ h3,
   }
 
   .particle,
-  .podium-pulse {
+  .podium-pulse,
+  .canhoes-bits-backdrop__orb {
     animation: none !important;
   }
 }

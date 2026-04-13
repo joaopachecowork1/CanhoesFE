@@ -14,6 +14,7 @@ import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
+import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
@@ -95,6 +96,7 @@ export function CanhoesOfficialVotingModule() {
         title="Erro ao carregar boletim oficial"
         description={getErrorMessage(boardQuery.error, "Nao foi possivel abrir o boletim oficial.")}
         actionLabel="Tentar novamente"
+        tone="official"
         onAction={() => void boardQuery.refetch()}
       />
     );
@@ -118,7 +120,7 @@ export function CanhoesOfficialVotingModule() {
         badgeLabel={`${votedCategories}/${totalCategories}`}
       />
 
-      <Card className="border-[var(--border-moss)] bg-[var(--bg-surface)] rounded-2xl">
+      <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl">
         <CardContent className="space-y-3 py-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--text-muted)]">Votaste em {votedCategories} de {totalCategories} categorias oficiais</span>
@@ -148,7 +150,7 @@ export function CanhoesOfficialVotingModule() {
       ) : null}
 
       {votedCategories === totalCategories && totalCategories > 0 ? (
-        <Card className="border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)] rounded-2xl">
+        <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)]">
           <CardContent className="py-6 text-center text-[var(--neon-green)] font-semibold">
             Boletim oficial completo
           </CardContent>
@@ -181,7 +183,7 @@ function OfficialVotingCategoryCard({
   }, [category.nominees, category.totalVotes]);
 
   return (
-    <Card className="border-[var(--border-moss)] bg-[var(--bg-surface)] rounded-2xl relative">
+    <Card className="canhoes-bits-panel canhoes-bits-panel--official relative rounded-2xl">
       {canVote ? null : (
         <div className="absolute inset-0 z-10 rounded-2xl bg-black/35 backdrop-blur-[1px] flex items-center justify-center text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
           Boletim encerrado
@@ -199,6 +201,8 @@ function OfficialVotingCategoryCard({
       </CardHeader>
 
       <CardContent className="space-y-2">
+        <CanhoesDecorativeDivider tone="moss" />
+
         {category.nominees.map((nominee) => {
           const selected = category.myNomineeId === nominee.id;
           const pending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;

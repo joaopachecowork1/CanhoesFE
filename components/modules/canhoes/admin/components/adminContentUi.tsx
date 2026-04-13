@@ -23,7 +23,7 @@ const ADMIN_CONTENT_LIST_PANEL_CLASS =
 const ADMIN_CONTENT_LIST_BODY_CLASS = "max-h-[58svh] space-y-1 overflow-y-auto pr-1";
 
 const ADMIN_CONTENT_ROW_CLASS =
-  "w-full rounded-[var(--radius-md-token)] border px-3 py-2.5 text-left transition-colors";
+  "w-full rounded-[var(--radius-md-token)] border px-3 py-2.5 text-left transition-colors min-h-11";
 
 const ADMIN_CONTENT_ROW_ACTIVE_CLASS =
   "border-[rgba(122,173,58,0.36)] bg-[rgba(36,49,23,0.9)]";

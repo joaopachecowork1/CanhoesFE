@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Trophy, User } from "lucide-react";
+import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -42,7 +42,8 @@ import {
 type NominationStatus = "pending" | "approved" | "rejected";
 type NominationListFilter = "all" | NominationStatus;
 
-const NOMINATION_STATUS_LABELS: Record<NominationStatus, string> = {
+const NOMINATION_STATUS_LABELS: Record<NominationListFilter, string> = {
+  all: "Todas",
   pending: "Pendentes",
   approved: "Aprovadas",
   rejected: "Rejeitadas",
@@ -67,6 +68,18 @@ function getCategoryName(categoryId: string | null | undefined, categories: Awar
   return categories.find((category) => category.id === categoryId)?.name ?? "Sem categoria";
 }
 
+function getNominationStatusIcon(status: NominationStatus) {
+  switch (status) {
+    case "approved":
+      return <CheckCircle2 className="h-3.5 w-3.5" />;
+    case "rejected":
+      return <XCircle className="h-3.5 w-3.5" />;
+    case "pending":
+    default:
+      return <Layers3 className="h-3.5 w-3.5" />;
+  }
+}
+
 export function AdminNominationsSection({
   categories,
   eventId,
@@ -88,11 +101,10 @@ export function AdminNominationsSection({
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(queryEventId),
     initialData: initialRows,
-    // Poll when there are pending nominations (every 30s), stop when queue is empty
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return false;
-      const hasPending = data.some((n) => n.status === "pending");
+      const hasPending = data.some((nomination) => nomination.status === "pending");
       return hasPending ? 30_000 : false;
     },
   });
@@ -211,40 +223,46 @@ export function AdminNominationsSection({
         </CardHeader>
 
         <CardContent className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            {(["pending", "approved", "rejected"] as const).map((status) => {
-              const isActive = statusFilter === status;
-              const label = NOMINATION_STATUS_LABELS[status];
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
+            <div className="flex flex-wrap gap-2">
+              {(["all", "pending", "approved", "rejected"] as const).map((status) => {
+                const isActive = statusFilter === status;
+                const badgeCount =
+                  status === "all"
+                    ? nominations.length
+                    : statusCounts[status as NominationStatus];
 
-              return (
-                <Button
-                  key={status}
-                  size="sm"
-                  variant={isActive ? "secondary" : "outline"}
-                  className={cn(
-                    isActive ? "border-[var(--border-neon)]" : "",
-                    status === "pending" && statusCounts.pending > 0
-                      ? "text-[var(--neon-amber)]"
-                      : ""
-                  )}
-                  onClick={() => setStatusFilter(status)}
-                >
-                  {label}
-                  <Badge
+                return (
+                  <Button
+                    key={status}
+                    size="sm"
+                    variant={isActive ? "secondary" : "outline"}
                     className={cn(
-                      "ml-2",
+                      "min-h-10 rounded-full",
+                      isActive ? "border-[var(--border-neon)]" : "",
                       status === "pending" && statusCounts.pending > 0
-                        ? "animate-pulse bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)]"
+                        ? "text-[var(--neon-amber)]"
                         : ""
                     )}
+                    onClick={() => setStatusFilter(status)}
                   >
-                    {statusCounts[status]}
-                  </Badge>
-                </Button>
-              );
-            })}
+                    {NOMINATION_STATUS_LABELS[status]}
+                    <Badge
+                      className={cn(
+                        "ml-2",
+                        status === "pending" && statusCounts.pending > 0
+                          ? "animate-pulse bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)]"
+                          : ""
+                      )}
+                    >
+                      {badgeCount}
+                    </Badge>
+                  </Button>
+                );
+              })}
+            </div>
 
-            <div className="ml-auto w-full sm:w-64">
+            <div className="w-full">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar categoria" />
@@ -264,13 +282,13 @@ export function AdminNominationsSection({
           {filteredNominations.length === 0 ? (
             <AdminStateMessage variant="panel">
               Fila limpa - nenhuma nomeacao{" "}
-              {statusFilter === "all" ? "pendente" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
+              {statusFilter === "all" ? "disponivel neste filtro" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
             </AdminStateMessage>
           ) : (
             <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
               <VirtualizedList
                 className="px-0 py-0"
-                estimateSize={() => 52}
+                estimateSize={() => 72}
                 items={filteredNominations}
                 renderItem={(nomination) => {
                   const isSelected = nomination.id === selectedNominationId;
@@ -283,16 +301,23 @@ export function AdminNominationsSection({
                       selected={isSelected}
                       aria-pressed={isSelected}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 space-y-1">
                           <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
                             {nomination.title}
                           </p>
-                          <p className="mt-1 truncate text-xs text-[rgba(245,237,224,0.72)]">
+                          <p className="truncate text-xs text-[rgba(245,237,224,0.72)]">
                             {categoryName}
                           </p>
+                          <p className="text-[11px] text-[var(--text-muted)]">
+                            {formatDateTimeUtc(nomination.createdAtUtc)}
+                          </p>
                         </div>
-                        <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}>
+                        <Badge
+                          variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}
+                          className="inline-flex items-center gap-1"
+                        >
+                          {getNominationStatusIcon(nomination.status)}
                           {nomination.status}
                         </Badge>
                       </div>
@@ -319,7 +344,7 @@ export function AdminNominationsSection({
         {selectedNomination ? (
           <>
             <AdminDetailPanel>
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1">
                   <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
                     {formatDateTimeUtc(selectedNomination.createdAtUtc)}
@@ -329,7 +354,11 @@ export function AdminNominationsSection({
                     Submetido por {selectedNomination.submittedByName}
                   </p>
                 </div>
-                <Badge variant={NOMINATION_BADGE_VARIANT_BY_STATUS[selectedNomination.status]}>
+                <Badge
+                  variant={NOMINATION_BADGE_VARIANT_BY_STATUS[selectedNomination.status]}
+                  className="inline-flex items-center gap-1 self-start"
+                >
+                  {getNominationStatusIcon(selectedNomination.status)}
                   {selectedNomination.status}
                 </Badge>
               </div>
@@ -366,8 +395,9 @@ export function AdminNominationsSection({
               <Button
                 type="button"
                 disabled={anyMutationPending || selectedNomination.status === "approved"}
-                className="border-[var(--border-neon)] bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                className="min-h-11 border-[var(--border-neon)] bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
                 onClick={() => approveNomination.mutate(selectedNomination.id)}
+                aria-label={`Aprovar nomeação "${selectedNomination.title || selectedNomination.id}"`}
               >
                 Aprovar
               </Button>
@@ -376,8 +406,9 @@ export function AdminNominationsSection({
                 type="button"
                 variant="outline"
                 disabled={anyMutationPending || selectedNomination.status === "rejected"}
-                className="border-[var(--neon-red)] bg-[rgba(255,58,58,0.08)] text-[var(--neon-red)]"
+                className="min-h-11 border-[var(--neon-red)] bg-[rgba(255,58,58,0.08)] text-[var(--neon-red)]"
                 onClick={() => setRejectingNominationId(selectedNomination.id)}
+                aria-label={`Rejeitar nomeação "${selectedNomination.title || selectedNomination.id}"`}
               >
                 Rejeitar
               </Button>

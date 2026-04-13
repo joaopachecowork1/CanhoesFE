@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { FolderTree, Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,14 +26,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 
 import { AdminSectionSummary } from "./AdminSectionSummary";
 import { AdminStateMessage } from "./AdminStateMessage";
 import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
 import { CategoryEditorSheet } from "./CategoryEditorSheet";
 import { CategoryListItem } from "./CategoryListItem";
-
-// ─── Types ───────────────────────────────────────────────────────────
 
 type CategoriesAdminProps = {
   adminNominees: AdminNomineeDto[];
@@ -60,7 +59,12 @@ type CategorySheetState =
   | { mode: "create" }
   | { category: AwardCategoryDto; mode: "edit" };
 
-// ─── Form helpers ────────────────────────────────────────────────────
+type CategoryUsage = {
+  canDelete: boolean;
+  deleteReason: string | null;
+  nomineeCount: number;
+  voteCount: number;
+};
 
 function buildInitialForm(sortOrder: number): CategoryFormState {
   return {
@@ -119,14 +123,51 @@ function buildUpdatePayload(form: Readonly<CategoryFormState>): UpdateAwardCateg
   };
 }
 
-// ─── Usage computation ───────────────────────────────────────────────
+function CategoryList({
+  categories,
+  categoryUsageById,
+  onEdit,
+}: Readonly<{
+  categories: AwardCategoryDto[];
+  categoryUsageById: Record<string, CategoryUsage>;
+  onEdit: (category: AwardCategoryDto) => void;
+}>) {
+  const renderItem = useCallback(
+    (category: AwardCategoryDto) => (
+      <CategoryListItem
+        category={category}
+        onEdit={onEdit}
+        usage={categoryUsageById[category.id]}
+      />
+    ),
+    [categoryUsageById, onEdit]
+  );
 
-type CategoryUsage = {
-  canDelete: boolean;
-  deleteReason: string | null;
-  nomineeCount: number;
-  voteCount: number;
-};
+  if (categories.length > 10) {
+    return (
+      <VirtualizedList
+        items={categories}
+        estimateSize={() => 88}
+        getKey={(category) => category.id}
+        className="max-h-[400px]"
+        renderItem={renderItem}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {categories.map((category) => (
+        <CategoryListItem
+          key={category.id}
+          category={category}
+          onEdit={onEdit}
+          usage={categoryUsageById[category.id]}
+        />
+      ))}
+    </div>
+  );
+}
 
 function formatKnownDependencyCount(label: string, count: number) {
   if (count === 0) return null;
@@ -171,8 +212,6 @@ function buildCategoryUsage(
     voteCount,
   };
 }
-
-// ─── Main component ──────────────────────────────────────────────────
 
 export function CategoriesAdmin({
   adminNominees,
@@ -338,7 +377,7 @@ export function CategoriesAdmin({
 
       <Card className={ADMIN_CONTENT_CARD_CLASS}>
         <CardHeader className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
               <p className="editorial-kicker">Categorias</p>
               <CardTitle className="flex items-center gap-2">
@@ -346,11 +385,11 @@ export function CategoriesAdmin({
                 Catalogo oficial
               </CardTitle>
               <p className="text-sm text-[var(--text-muted)]">
-                Toca numa categoria para editar ou abre uma nova ficha para criar.
+                Toca numa categoria para editar, rever dependências e ajustar o estado sem sair do contexto admin.
               </p>
             </div>
 
-            <Button type="button" onClick={openCreateSheet} className="gap-2" disabled={isBusy}>
+            <Button type="button" onClick={openCreateSheet} className="min-h-11 gap-2 sm:self-start" disabled={isBusy}>
               <Plus className="h-4 w-4" />
               Nova categoria
             </Button>
@@ -366,17 +405,12 @@ export function CategoriesAdmin({
             </AdminStateMessage>
           ) : null}
 
-          {!loading ? (
-            <div className="space-y-2">
-              {sortedCategories.map((category) => (
-                <CategoryListItem
-                  key={category.id}
-                  category={category}
-                  onEdit={openEditSheet}
-                  usage={categoryUsageById[category.id]}
-                />
-              ))}
-            </div>
+          {!loading && sortedCategories.length > 0 ? (
+            <CategoryList
+              categories={sortedCategories}
+              categoryUsageById={categoryUsageById}
+              onEdit={openEditSheet}
+            />
           ) : null}
         </CardContent>
       </Card>

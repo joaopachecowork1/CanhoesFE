@@ -1,0 +1,104 @@
+  :root {
+    --color-bg-base: #0f1209;
+    --color-bg-surface: #161c0e;
+    --color-bg-elevated: #1e2614;
+    --color-border: rgba(74, 92, 47, 0.2);
+    --color-border-strong: rgba(0, 255, 136, 0.4);
+    --color-text-primary: #f2ead8;
+    --color-text-secondary: #dccfb8;
+    --color-text-muted: #bcc7a8;
+    --color-accent: #4a5c2f;
+    --color-accent-hover: #5f7440;
+    --color-danger: #e05a3a;
+    --color-success: #4caf50;
+    --color-warning: #ffb800;
+
+    --font-display: var(--font-orbitron);
+    --font-body: var(--font-dm-sans);
+    --font-mono: var(--font-jetbrains-mono);
+
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+
+    --line-height-xs: 1rem;
+    --line-height-sm: 1.25rem;
+    --line-height-base: 1.5rem;
+    --line-height-lg: 1.75rem;
+    --line-height-xl: 1.75rem;
+    --line-height-2xl: 2rem;
+    --line-height-3xl: 2.25rem;
+
+    --letter-spacing-xs: 0.02em;
+    --letter-spacing-sm: 0.01em;
+    --letter-spacing-base: 0;
+    --letter-spacing-lg: -0.01em;
+    --letter-spacing-xl: -0.015em;
+    --letter-spacing-2xl: -0.02em;
+    --letter-spacing-3xl: -0.03em;
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    --radius-sm: 0.75rem;
+    --radius-md: 0.875rem;
+    --radius-lg: 1.25rem;
+    --radius-full: 9999px;
+
+    --duration-fast: 120ms;
+    --duration-base: 220ms;
+    --duration-slow: 380ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  @keyframes fadeSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-slide-up {
+    animation: fadeSlideUp var(--duration-base) var(--ease-out);
+    animation-delay: calc(var(--item-index, 0) * 40ms);
+    animation-fill-mode: both;
+  }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.4s var(--ease-in-out) infinite;
+  }
+
+  @keyframes skeletonShimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }

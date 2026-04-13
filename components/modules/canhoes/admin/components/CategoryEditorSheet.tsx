@@ -71,7 +71,7 @@ export function CategoryEditorSheet({
       {sheetState ? (
         <>
           {!isCreateMode ? (
-            <AdminDetailPanel className="space-y-1.5">
+            <AdminDetailPanel className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">
                   {categoryUsage.nomineeCount} nomeaç{categoryUsage.nomineeCount === 1 ? "ão" : "ões"}
@@ -81,11 +81,11 @@ export function CategoryEditorSheet({
                 </Badge>
               </div>
               {categoryUsage.deleteReason ? (
-                <p className="text-xs text-[var(--ink-muted)]">
+                <p className="text-xs leading-5 text-[var(--ink-muted)]">
                   {categoryUsage.deleteReason}
                 </p>
               ) : (
-                <p className="text-xs text-[var(--ink-muted)]">
+                <p className="text-xs leading-5 text-[var(--ink-muted)]">
                   Sem dependências conhecidas. O backend confirma o apagamento final.
                 </p>
               )}
@@ -174,7 +174,7 @@ export function CategoryEditorSheet({
           ) : null}
 
           {!isCreateMode ? (
-            <AdminDetailPanel className="flex items-center justify-between">
+            <AdminDetailPanel className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-[var(--ink-primary)]">Categoria ativa</p>
                 <p className="text-xs text-[var(--ink-muted)]">
@@ -190,30 +190,33 @@ export function CategoryEditorSheet({
             </AdminDetailPanel>
           ) : null}
 
-          <div className="flex flex-col gap-2 border-t border-[var(--border-subtle)] pt-4 sm:flex-row sm:items-center sm:justify-between">
-            {!isCreateMode && categoryUsage.canDelete ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2 border-[rgba(255,96,96,0.22)] text-[var(--danger)]"
-                onClick={onDelete}
-                disabled={isBusy}
-              >
-                <Trash2 className="h-4 w-4" />
-                Apagar
-              </Button>
-            ) : (
-              <div className="text-xs text-[var(--ink-muted)]">
-                {!isCreateMode ? "Apagamento indisponível nesta categoria." : null}
-              </div>
-            )}
+          <div className="flex flex-col gap-3 border-t border-[var(--border-subtle)] pt-4">
+            {!isCreateMode ? (
+              categoryUsage.canDelete ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2 border-[rgba(255,96,96,0.22)] text-[var(--danger)] sm:w-auto"
+                  onClick={onDelete}
+                  disabled={isBusy}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Apagar categoria
+                </Button>
+              ) : (
+                <p className="text-xs leading-5 text-[var(--ink-muted)]">
+                  Apagamento indisponível nesta categoria.
+                </p>
+              )
+            ) : null}
 
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isBusy}
+                className="w-full sm:w-auto"
               >
                 Cancelar
               </Button>
@@ -221,6 +224,7 @@ export function CategoryEditorSheet({
                 type="button"
                 onClick={onSave}
                 disabled={isBusy || form.name.trim().length === 0}
+                className="w-full sm:w-auto"
               >
                 {isCreateMode ? "Criar categoria" : "Guardar alteracoes"}
               </Button>

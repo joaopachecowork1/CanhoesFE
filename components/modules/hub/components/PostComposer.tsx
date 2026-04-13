@@ -76,7 +76,7 @@ export function PostComposer({
   return (
     <section className="editorial-shell bg-circuit rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[var(--neon-green)]">
               <ScrollText className="h-4 w-4" />
@@ -86,18 +86,18 @@ export function PostComposer({
               <h3 className="heading-3 text-[var(--text-dark)]">
                 {feedCopy.composer.title}
               </h3>
-              <p className="body-small text-[var(--text-muted)]">
+              <p className="body-small max-w-[60ch] text-[var(--text-muted)]">
                 {feedCopy.composer.description}
               </p>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant={files.length > 0 ? "secondary" : "outline"}
               size="sm"
-              className={cn("gap-2 rounded-full px-4", mediaButtonActiveClassName)}
+              className={cn("min-h-10 gap-2 rounded-full px-4", mediaButtonActiveClassName)}
               onClick={() => fileInputRef.current?.click()}
               disabled={isSubmitting}
             >
@@ -110,7 +110,7 @@ export function PostComposer({
               type="button"
               variant={isPollEnabled ? "secondary" : "outline"}
               size="sm"
-              className={cn("gap-2 rounded-full px-4", pollButtonActiveClassName)}
+              className={cn("min-h-10 gap-2 rounded-full px-4", pollButtonActiveClassName)}
               onClick={() => setIsPollEnabled((currentValue) => !currentValue)}
               disabled={isSubmitting}
             >
@@ -139,7 +139,7 @@ export function PostComposer({
         {files.length > 0 ? (
           <div className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] p-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:p-5">
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">
                   {feedCopy.composer.mediaSelected}
                 </p>
@@ -261,7 +261,7 @@ export function PostComposer({
 
         <div className="editorial-divider" />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3">
           <p className="body-small text-[var(--text-muted)]">
             {feedCopy.composer.helper}
           </p>
@@ -271,7 +271,7 @@ export function PostComposer({
             onClick={() => void handleSubmit()}
             disabled={isSubmitting || !text.trim()}
             className={cn(
-              "w-full gap-2 sm:w-auto sm:min-w-[150px]",
+              "min-h-11 w-full gap-2 sm:w-auto sm:min-w-[150px]",
               isSubmitting && "cursor-wait"
             )}
           >

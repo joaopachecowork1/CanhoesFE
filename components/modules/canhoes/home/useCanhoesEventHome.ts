@@ -212,12 +212,12 @@ export function useCanhoesEventHome(): UseCanhoesEventHomeResult {
           ? canhoesEventsRepo.getVotingOverview(event.id)
           : Promise.resolve(buildVotingFallbackState(overview)),
         overview.modules.feed
-          ? canhoesEventsRepo.getFeedPosts(event.id)
-          : Promise.resolve([]),
+          ? canhoesEventsRepo.getFeedPosts(event.id, { take: 3 })
+          : Promise.resolve({ posts: [], nextCursor: null }),
       ]);
 
       return {
-        recentPosts: recentPosts.slice(0, 3),
+        recentPosts: recentPosts.posts?.slice(0, 3) ?? [],
         secretSanta,
         voting,
       };

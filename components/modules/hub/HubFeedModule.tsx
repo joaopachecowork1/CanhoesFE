@@ -1,33 +1,24 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
 import { ScrollText } from "lucide-react";
-import { toast } from "sonner";
 
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
-import {
-    Empty,
-    EmptyMedia,
-    EmptyTitle,
-    EmptyDescription,
-    EmptyHeader,
-} from "@/components/ui/empty";
-import { useHubFeed, type FeedSortOrder } from "@/hooks/useHubFeed";
+import { useHubFeed } from "@/hooks/useHubFeed";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
-import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { SectionBoundary } from "@/components/ui/section-boundary";
 
+import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { HubPostCard } from "./HubPostCard";
-import type { PostComposerSubmitData } from "./components/PostComposer";
+import { HubFeedList } from "./HubFeedList";
+import { useCreateFeedPost } from "./useCreateFeedPost";
+import { useFeedInfiniteScroll } from "./useFeedInfiniteScroll";
 
 const loadParticles = () =>
   import("@/components/animations/Particles").then((module) => ({
@@ -81,6 +72,7 @@ export function HubFeedModule({
         setSort,
         hasMore,
         loadMore,
+        isFetchingNextPage,
         comments,
         openComments,
         commentDrafts,
@@ -98,10 +90,17 @@ export function HubFeedModule({
         adminDelete,
         refresh,
     } = useHubFeed(eventId);
+
+    const sentinelRef = useFeedInfiniteScroll({
+        enabled: hasMore,
+        isFetchingNextPage,
+        onLoadMore: loadMore,
+    });
     const currentUserName =
         session?.user?.name?.trim() ||
         session?.user?.email?.trim() ||
         "Tu";
+    const handleCreatePost = useCreateFeedPost({ eventId });
     const currentUserId = user?.id ?? null;
     const currentUserImage = session?.user?.image ?? null;
 
@@ -121,51 +120,8 @@ export function HubFeedModule({
         return () => window.clearTimeout(timeoutId);
     }, [showComposer]);
 
-    const handleCreatePost = useCallback(async (data: PostComposerSubmitData) => {
-        if (!eventId) {
-            toast.error("Nao ha evento ativo para publicar no mural.");
-            return;
-        }
-
-        const trimmedText = data.text.trim();
-        if (!trimmedText) return;
-
-        try {
-            const { canhoesEventsRepo } = await import("@/lib/repositories/canhoesEventsRepo");
-            let mediaUrls: string[] = [];
-            if (data.files.length > 0) {
-                mediaUrls = await canhoesEventsRepo.uploadFeedImages(eventId, data.files);
-            }
-
-            const pollQuestion = data.pollOn ? data.pollQuestion.trim() : "";
-            const pollOptions = data.pollOn
-                ? data.pollOptions.map((option) => option.trim()).filter(Boolean)
-                : [];
-
-            const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
-                text: trimmedText,
-                mediaUrls,
-                pollQuestion: data.pollOn && pollQuestion ? pollQuestion : null,
-                pollOptions: data.pollOn ? pollOptions : null,
-            });
-
-            if (createdPost?.id && typeof window !== "undefined") {
-                window.dispatchEvent(
-                    new CustomEvent("hub:postCreated", { detail: createdPost })
-                );
-            }
-
-            toast.success("Post publicado");
-        } catch (error) {
-            const message = getErrorMessage(error, "Nao foi possivel publicar no mural.");
-            logFrontendError("HubFeedModule.createPost", error);
-            toast.error(message);
-            throw error;
-        }
-    }, [eventId]);
-
     return (
-        <div className="space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
+        <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
             <SectionBoundary
                 title="Erro no mural social"
                 description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis."
@@ -187,105 +143,39 @@ export function HubFeedModule({
                             title="Erro ao carregar o mural"
                             description={errorMessage}
                             actionLabel="Tentar novamente"
+                            tone="social"
                             onAction={() => void refresh()}
                         />
                     ) : null}
 
                     {loading ? <FeedSkeleton count={3} /> : (
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={sort}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.2 }}
-                                className="space-y-3"
-                            >
-                            {/* Sort bar */}
-                            {!loading && posts.length > 0 && (
-                                <div className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-3 py-2">
-                                    <span className="text-xs font-medium text-[var(--text-muted)]">Ordenar:</span>
-                                    {(["hot", "new", "top"] as FeedSortOrder[]).map((s) => (
-                                        <motion.button
-                                            key={s}
-                                            type="button"
-                                            onClick={() => setSort(s)}
-                                            whileTap={{ scale: 0.95 }}
-                                            className={cn(
-                                                "sort-pill rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                                                sort === s ? "sort-pill-active" : ""
-                                            )}
-                                        >
-                                            {s === "hot" ? "🔥 Popular" : s === "new" ? "🕐 Novo" : "⭐ Topo"}
-                                        </motion.button>
-                                    ))}
-                                    {allPostsCount > 0 && (
-                                        <span className="ml-auto text-[10px] text-[var(--text-muted)]">
-                                            {allPostsCount} post{allPostsCount !== 1 ? "s" : ""}
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                            {posts.map((post, index) => (
-                                <HubPostCard
-                                    key={post.id}
-                                    post={post}
-                                    index={index}
-                                    isAdmin={isAdmin}
-                                    openComments={openComments[post.id] ?? false}
-                                    commentDraft={commentDrafts[post.id] ?? ""}
-                                    comments={comments[post.id] ?? []}
-                                    currentUserId={currentUserId}
-                                    currentUserName={currentUserName}
-                                    currentUserImage={currentUserImage}
-                                    onToggleReaction={toggleReaction}
-                                    onToggleDownvote={toggleDownvote}
-                                    onToggleComments={toggleComments}
-                                    onVotePoll={votePoll}
-                                    onAddComment={addComment}
-                                    onDeleteComment={deleteComment}
-                                    onCommentDraftChange={setCommentDraft}
-                                    onToggleCommentReaction={toggleCommentReaction}
-                                    onAdminPin={adminPin}
-                                    onAdminDelete={adminDelete}
-                                />
-                            ))}
-
-                            {/* Load more button */}
-                            {hasMore && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex justify-center py-4"
-                                >
-                                    <motion.button
-                                        type="button"
-                                        onClick={() => loadMore()}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-6 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-moss)] hover:bg-[var(--bg-surface)]"
-                                    >
-                                        Carregar mais ({allPostsCount - posts.length} restantes)
-                                    </motion.button>
-                                </motion.div>
-                            )}
-
-                            {posts.length === 0 ? (
-                                <Empty className="editorial-shell rounded-[var(--radius-lg-token)] py-10">
-                                    <EmptyHeader>
-                                        <EmptyMedia variant="icon">
-                                            <ScrollText className="h-6 w-6" />
-                                        </EmptyMedia>
-                                        <EmptyTitle className="heading-3 text-[var(--text-primary)]">
-                                            {feedCopy.empty.title}
-                                        </EmptyTitle>
-                                        <EmptyDescription className="body-small text-[var(--text-muted)]">
-                                            {feedCopy.empty.description}
-                                        </EmptyDescription>
-                                    </EmptyHeader>
-                                </Empty>
-                            ) : null}
-                            </motion.div>
-                        </AnimatePresence>
+                        <HubFeedList
+                            posts={posts}
+                            sort={sort}
+                            allPostsCount={allPostsCount}
+                            isAdmin={isAdmin}
+                            hasMore={hasMore}
+                            isFetchingNextPage={isFetchingNextPage}
+                            currentUserId={currentUserId}
+                            currentUserImage={currentUserImage}
+                            currentUserName={currentUserName}
+                            comments={comments}
+                            openComments={openComments}
+                            commentDrafts={commentDrafts}
+                            onSortChange={setSort}
+                            onLoadMore={loadMore}
+                            onToggleReaction={toggleReaction}
+                            onToggleDownvote={toggleDownvote}
+                            onToggleComments={toggleComments}
+                            onVotePoll={votePoll}
+                            onAddComment={addComment}
+                            onDeleteComment={deleteComment}
+                            onCommentDraftChange={setCommentDraft}
+                            onToggleCommentReaction={toggleCommentReaction}
+                            onAdminPin={adminPin}
+                            onAdminDelete={adminDelete}
+                            sentinelRef={sentinelRef}
+                        />
                     )}
                 </div>
             </SectionBoundary>
@@ -310,15 +200,17 @@ export function HubFeedModule({
 
 function ComposerFallback() {
     return (
-        <div className="editorial-shell space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+        <div className="canhoes-bits-panel canhoes-bits-panel--social editorial-shell space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+            <CanhoesGlowBackdrop tone="social" />
             <div className="space-y-2">
-                <div className="h-3 w-24 rounded bg-[rgba(74,92,47,0.18)] animate-pulse" />
-                <div className="h-8 w-48 rounded bg-[rgba(74,92,47,0.12)] animate-pulse" />
+                <div className="skeleton-shimmer h-3 w-24 rounded" />
+                <div className="skeleton-shimmer h-8 w-48 rounded" />
             </div>
-            <div className="h-32 rounded-[var(--radius-md-token)] bg-[rgba(18,24,11,0.72)] animate-pulse" />
+            <CanhoesDecorativeDivider tone="purple" />
+            <div className="skeleton-shimmer h-32 rounded-[var(--radius-md-token)]" />
             <div className="flex gap-2">
-                <div className="h-10 w-24 rounded-full bg-[rgba(74,92,47,0.12)] animate-pulse" />
-                <div className="h-10 w-24 rounded-full bg-[rgba(74,92,47,0.12)] animate-pulse" />
+                <div className="skeleton-shimmer h-10 w-24 rounded-full" />
+                <div className="skeleton-shimmer h-10 w-24 rounded-full" />
             </div>
         </div>
     );
@@ -330,16 +222,17 @@ function FeedInsightsFallback() {
             {Array.from({ length: 4 }).map((_, index) => (
                 <div
                     key={index}
-                    className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] px-4 py-4 shadow-[var(--shadow-panel)] sm:px-5"
+                    className="canhoes-bits-panel canhoes-bits-panel--social rounded-[var(--radius-lg-token)] border px-4 py-4 shadow-[var(--shadow-panel)] sm:px-5"
                 >
+                    <CanhoesGlowBackdrop tone="social" />
                     <div className="flex items-center justify-between gap-3">
                         <div className="space-y-2">
-                            <div className="h-3 w-20 rounded bg-[rgba(74,92,47,0.18)] animate-pulse" />
-                            <div className="h-8 w-14 rounded bg-[rgba(74,92,47,0.12)] animate-pulse" />
+                            <div className="skeleton-shimmer h-3 w-20 rounded" />
+                            <div className="skeleton-shimmer h-8 w-14 rounded" />
                         </div>
-                        <div className="h-11 w-11 rounded-full bg-[rgba(245,237,224,0.08)] animate-pulse" />
+                        <div className="skeleton-shimmer h-11 w-11 rounded-full" />
                     </div>
-                    <div className="mt-3 h-3 w-4/5 rounded bg-[rgba(245,237,224,0.08)] animate-pulse" />
+                    <div className="skeleton-shimmer mt-3 h-3 w-4/5 rounded" />
                 </div>
             ))}
         </aside>

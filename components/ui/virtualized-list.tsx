@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 type VirtualizedListProps<T> = {
   className?: string;
   estimateSize?: () => number;
+  getKey?: (item: T, index: number) => string | number;
   overscan?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   items: T[];
@@ -19,10 +20,14 @@ type VirtualizedListProps<T> = {
  * regardless of total item count.
  *
  * Default estimateSize is 60px — tune per use case.
+ * 
+ * Use `getKey` to provide stable keys when items can be reordered
+ * or removed. Falls back to index if not provided.
  */
 export function VirtualizedList<T>({
   className,
   estimateSize = () => 60,
+  getKey,
   items,
   overscan = 5,
   renderItem,
@@ -48,22 +53,27 @@ export function VirtualizedList<T>({
           position: "relative",
         }}
       >
-        {virtualizer.getVirtualItems().map((virtualRow) => (
-          <div
-            key={virtualRow.index}
-            data-index={virtualRow.index}
-            ref={virtualizer.measureElement}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              transform: `translateY(${virtualRow.start}px)`,
-            }}
-          >
-            {renderItem(items[virtualRow.index], virtualRow.index)}
-          </div>
-        ))}
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const item = items[virtualRow.index];
+          const key = getKey ? getKey(item, virtualRow.index) : virtualRow.index;
+
+          return (
+            <div
+              key={key}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              {renderItem(item, virtualRow.index)}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

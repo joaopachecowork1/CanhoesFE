@@ -24,8 +24,13 @@ export const canhoesEventsRepo = {
     canhoesFetch<T.EventSecretSantaOverviewDto>(`/v1/events/${eventId}/secret-santa/overview`),
 
   // FEED
-  getFeedPosts: (eventId: string) =>
-    canhoesFetch<T.EventFeedPostFullDto[]>(`/v1/events/${eventId}/feed/posts`),
+  getFeedPosts: (eventId: string, options?: { skip?: number; take?: number }) => {
+    const skip = options?.skip ?? 0;
+    const take = options?.take ?? 20;
+    return canhoesFetch<{ posts: T.EventFeedPostFullDto[]; nextCursor: number | null }>(
+      `/v1/events/${eventId}/feed/posts?skip=${skip}&take=${take}`
+    );
+  },
 
   createFeedPost: (eventId: string, payload: T.CreateEventFeedPostRequest) =>
     canhoesFetch<T.EventFeedPostFullDto>(`/v1/events/${eventId}/feed/posts`, {

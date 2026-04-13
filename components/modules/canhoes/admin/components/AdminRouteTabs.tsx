@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import { cn } from "@/lib/utils";
 
 import type { AdminSectionId, AdminSectionItem } from "../adminSections";
@@ -46,7 +47,9 @@ export function AdminRouteTabs({
   }, [activeId]);
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-2 py-1.5 shadow-[var(--shadow-paper)]">
+    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border px-2 py-1.5 shadow-[var(--shadow-paper)]">
+      <CanhoesGlowBackdrop tone="admin" />
+
       <div
         ref={scrollRef}
         className="-mx-1 overflow-x-auto px-1 scrollbar-none snap-x snap-mandatory"

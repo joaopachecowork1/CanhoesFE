@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart2, ChevronDown, ChevronUp } from "lucide-react";
+import { Award, BarChart2, ChevronDown, ChevronUp, Medal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import type { AdminOfficialResultsDto } from "@/lib/api/types";
@@ -18,6 +18,120 @@ import {
   AdminListPanel,
   AdminSelectableButton,
 } from "./adminContentUi";
+
+function getParticipationClass(rate: number) {
+  if (rate < 0.5) return "text-[var(--neon-red)]";
+  if (rate < 0.8) return "text-[var(--neon-amber)]";
+  return "text-[var(--neon-green)]";
+}
+
+function getRankMeta(index: number) {
+  if (index === 0) {
+    return {
+      fillClass: "bg-[var(--neon-amber)]",
+      iconClassName: "text-[var(--neon-amber)]",
+      Icon: Award,
+    };
+  }
+
+  if (index === 1) {
+    return {
+      fillClass: "bg-[var(--text-muted)]",
+      iconClassName: "text-[var(--text-muted)]",
+      Icon: Medal,
+    };
+  }
+
+  if (index === 2) {
+    return {
+      fillClass: "bg-[var(--bark)]",
+      iconClassName: "text-[var(--bark)]",
+      Icon: Medal,
+    };
+  }
+
+  return {
+    fillClass: "bg-[var(--bark)]",
+    iconClassName: "text-[var(--text-muted)]",
+    Icon: null,
+  };
+}
+
+function ResultsCategoryButton({
+  category,
+  isSelected,
+  totalMembers,
+  onSelect,
+}: Readonly<{
+  category: AdminOfficialResultsDto["categories"][number];
+  isSelected: boolean;
+  totalMembers: number;
+  onSelect: (categoryId: string) => void;
+}>) {
+  const participationRate = Math.round(category.participationRate * 100);
+
+  return (
+    <AdminSelectableButton
+      type="button"
+      onClick={() => onSelect(category.categoryId)}
+      selected={isSelected}
+      aria-pressed={isSelected}
+    >
+      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+        {category.categoryName}
+      </p>
+      <p className="mt-1 text-xs text-[var(--text-muted)]">
+        {category.totalVotes}/{totalMembers} votaram ({participationRate}%)
+      </p>
+    </AdminSelectableButton>
+  );
+}
+
+function ResultsNomineeBar({
+  nominee,
+  index,
+  totalVotes,
+}: Readonly<{
+  nominee: AdminOfficialResultsDto["categories"][number]["nominees"][number];
+  index: number;
+  totalVotes: number;
+}>) {
+  const { fillClass, iconClassName, Icon } = getRankMeta(index);
+  const percentage = totalVotes > 0 ? Math.round((nominee.voteCount / totalVotes) * 100) : 0;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          {Icon ? <Icon className={cn("h-4 w-4 shrink-0", iconClassName)} /> : null}
+          <p className="truncate text-sm text-[var(--text-primary)]">{nominee.nomineeTitle}</p>
+        </div>
+        <span className="text-xs text-[var(--text-muted)]">
+          {nominee.voteCount} votos ({percentage}%)
+        </span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function ResultsVotersList({
+  nominees,
+}: Readonly<{
+  nominees: AdminOfficialResultsDto["categories"][number]["nominees"];
+}>) {
+  return (
+    <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
+      {nominees.map((nominee) => (
+        <p key={nominee.nomineeId} className="text-xs text-[var(--text-muted)]">
+          <span className="text-[var(--text-primary)]">{nominee.nomineeTitle}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}
+        </p>
+      ))}
+    </AdminDetailPanel>
+  );
+}
 
 export function AdminOfficialResultsSection({
   eventId,
@@ -47,6 +161,14 @@ export function AdminOfficialResultsSection({
     () =>
       resultCategories.find((category) => category.categoryId === selectedCategoryId) ?? null,
     [resultCategories, selectedCategoryId]
+  );
+
+  const sortedNominees = useMemo(
+    () =>
+      selectedCategory
+        ? [...selectedCategory.nominees].sort((left, right) => right.voteCount - left.voteCount)
+        : [],
+    [selectedCategory]
   );
 
   useEffect(() => {
@@ -80,19 +202,6 @@ export function AdminOfficialResultsSection({
 
   const results = resultsQuery.data;
 
-  const getParticipationClass = (rate: number) => {
-    if (rate < 0.5) return "text-[var(--neon-red)]";
-    if (rate < 0.8) return "text-[var(--neon-amber)]";
-    return "text-[var(--neon-green)]";
-  };
-
-  const getRankMeta = (index: number) => {
-    if (index === 0) return { medal: "🥇", fillClass: "bg-[var(--neon-amber)]" };
-    if (index === 1) return { medal: "🥈", fillClass: "bg-[var(--text-muted)]" };
-    if (index === 2) return { medal: "🥉", fillClass: "bg-[var(--bark)]" };
-    return { medal: "", fillClass: "bg-[var(--bark)]" };
-  };
-
   return (
     <div className="space-y-4">
       <Card className={ADMIN_CONTENT_CARD_CLASS}>
@@ -116,27 +225,15 @@ export function AdminOfficialResultsSection({
 
       {results.categories.length > 0 ? (
         <AdminListPanel>
-          {results.categories.map((category) => {
-            const isSelected = category.categoryId === selectedCategoryId;
-            const participationRate = Math.round(category.participationRate * 100);
-
-            return (
-              <AdminSelectableButton
-                key={category.categoryId}
-                type="button"
-                onClick={() => setSelectedCategoryId(category.categoryId)}
-                selected={isSelected}
-                aria-pressed={isSelected}
-              >
-                <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                  {category.categoryName}
-                </p>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  {category.totalVotes}/{results.totalMembers} votaram ({participationRate}%)
-                </p>
-              </AdminSelectableButton>
-            );
-          })}
+          {results.categories.map((category) => (
+            <ResultsCategoryButton
+              key={category.categoryId}
+              category={category}
+              isSelected={category.categoryId === selectedCategoryId}
+              totalMembers={results.totalMembers}
+              onSelect={setSelectedCategoryId}
+            />
+          ))}
         </AdminListPanel>
       ) : null}
 
@@ -160,31 +257,14 @@ export function AdminOfficialResultsSection({
             </AdminDetailPanel>
 
             <div className="space-y-3">
-              {[...selectedCategory.nominees]
-                .sort((left, right) => right.voteCount - left.voteCount)
-                .map((nominee, index) => {
-                  const { medal, fillClass } = getRankMeta(index);
-                  const percentage =
-                    selectedCategory.totalVotes > 0
-                      ? Math.round((nominee.voteCount / selectedCategory.totalVotes) * 100)
-                      : 0;
-
-                  return (
-                    <div key={nominee.nomineeId} className="space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-sm text-[var(--text-primary)]">
-                          {medal} {nominee.nomineeTitle}
-                        </p>
-                        <span className="text-xs text-[var(--text-muted)]">
-                          {nominee.voteCount} votos ({percentage}%)
-                        </span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+              {sortedNominees.map((nominee, index) => (
+                <ResultsNomineeBar
+                  key={nominee.nomineeId}
+                  nominee={nominee}
+                  index={index}
+                  totalVotes={selectedCategory.totalVotes}
+                />
+              ))}
             </div>
 
             <Button
@@ -201,18 +281,7 @@ export function AdminOfficialResultsSection({
               Ver eleitores
             </Button>
 
-            {isVotersVisible ? (
-              <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
-                {[...selectedCategory.nominees]
-                  .sort((left, right) => right.voteCount - left.voteCount)
-                  .map((nominee) => (
-                    <p key={nominee.nomineeId} className="text-xs text-[var(--text-muted)]">
-                      <span className="text-[var(--text-primary)]">{nominee.nomineeTitle}</span>:{" "}
-                      {nominee.voterUserIds.join(", ") || "Sem votos"}
-                    </p>
-                  ))}
-              </AdminDetailPanel>
-            ) : null}
+            {isVotersVisible ? <ResultsVotersList nominees={sortedNominees} /> : null}
           </>
         ) : null}
       </AdminDetailSheet>
