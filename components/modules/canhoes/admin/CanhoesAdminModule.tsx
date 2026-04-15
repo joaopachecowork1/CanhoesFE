@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, lazy, Suspense, useState, useMemo } from "react";
+import { useCallback, useEffect, lazy, Suspense, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { AsyncStatusCard } from "@/components/ui/async-status-card";
@@ -172,8 +172,7 @@ export default function CanhoesAdminModule({
     !loading && activeEvent && section !== "configuracoes"
   );
 
-  // OPTIMIZATION: Memoized to avoid recreation on every render
-  const sectionContent = useMemo(() => {
+  function renderSection() {
     switch (section) {
       case "dashboard":
         return (
@@ -232,28 +231,10 @@ export default function CanhoesAdminModule({
       default:
         return null;
     }
-  }, [
-    section,
-    activeEvent?.name,
-    activeEvent?.id,
-    loading,
-    allNominees,
-    pendingCategoryProposals,
-    pendingMeasureProposals,
-    pendingNominees,
-    eventState,
-    adminNominees,
-    categories,
-    categoryProposals,
-    officialResults,
-    measureProposals,
-    handleRefresh,
-    voteAuditRows,
-    eventMembers,
-    secretSanta,
-    events,
-  ]);
-  const activeSectionContent = sectionContent ? (
+  }
+
+  const sectionContent = renderSection();
+  const activeSectionContent = (
     <SectionBoundary
       title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta secao"}`}
       description="Esta secao do admin falhou ao renderizar, mas o resto do painel continua disponivel."
@@ -262,7 +243,7 @@ export default function CanhoesAdminModule({
     >
       <Suspense fallback={LOADING_FALLBACK}>{sectionContent}</Suspense>
     </SectionBoundary>
-  ) : null;
+  );
 
   return (
     <div className="space-y-5">

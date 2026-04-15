@@ -86,31 +86,6 @@ export function getAdminSectionItem(id: AdminSectionId) {
   return ADMIN_SECTION_REGISTRY.find((sectionDefinition) => sectionDefinition.id === id) ?? null;
 }
 
-export function getAdminAdjacentSection(
-  current: AdminSectionId,
-  direction: "prev" | "next"
-): AdminSectionId | null {
-  const index = ADMIN_SECTION_IDS.indexOf(current);
-  if (index < 0) return null;
-
-  const targetIndex = direction === "next" ? index + 1 : index - 1;
-  if (targetIndex < 0 || targetIndex >= ADMIN_SECTION_IDS.length) return null;
-
-  return ADMIN_SECTION_IDS[targetIndex] ?? null;
-}
-
-export function buildAdminSectionItems(
-  context: Readonly<AdminSectionCountContext>
-): AdminSectionItem[] {
-  return ADMIN_SECTION_REGISTRY.map((sectionDefinition) => ({
-    id: sectionDefinition.id,
-    label: sectionDefinition.label,
-    description: sectionDefinition.description,
-    icon: sectionDefinition.icon,
-    count: sectionDefinition.count(context),
-  }));
-}
-
 export function getDefaultAdminSection(): AdminSectionId {
   return "conteudo";
 }

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useCategorySelection } from "./useCategorySelection";
-import { CategoryTabs } from "./CategoryTabs";
+import { CompactSegmentTabs } from "./CompactSegmentTabs";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -132,11 +132,14 @@ export function CanhoesOfficialVotingModule() {
         </CardContent>
       </Card>
 
-      <CategoryTabs
-        categories={boardCategories}
-        selectedId={selectedCategoryId ?? ""}
+      <CompactSegmentTabs
+        activeId={selectedCategoryId ?? ""}
+        items={boardCategories.map((category) => ({
+          id: category.id,
+          label: category.title,
+          badge: category.myNomineeId ? "Votado" : undefined,
+        }))}
         onSelect={setSelectedCategoryId}
-        getBadge={(cat) => cat.myNomineeId ? "Votado" : undefined}
       />
 
       {selectedCategory ? (

@@ -17,10 +17,12 @@ import {
   isAdminContentSectionId,
   type AdminContentSectionId,
 } from "../adminContentSections";
-import { AdminCategoriesSection } from "./AdminCategoriesSection";
+import { AdminNominationsSection } from "./AdminNominationsSection";
 import { AdminContentTabs } from "./AdminContentTabs";
-import { AdminQueueSection } from "./AdminQueueSection";
-import { AdminResultsSection } from "./AdminResultsSection";
+import { AdminOfficialResultsSection } from "./AdminOfficialResultsSection";
+import { CategoriesAdmin } from "./CategoriesAdmin";
+import { PendingProposals } from "./PendingProposals";
+import { VotesAudit } from "./VotesAudit";
 
 type AdminContentSectionProps = {
   adminNominees: AdminNomineeDto[];
@@ -97,7 +99,7 @@ export function AdminContentSection({
   switch (activeView) {
     case "categorias":
       content = (
-        <AdminCategoriesSection
+        <CategoriesAdmin
           adminNominees={adminNominees}
           categories={categories}
           eventId={eventId}
@@ -109,26 +111,37 @@ export function AdminContentSection({
       break;
     case "resultados":
       content = (
-        <AdminResultsSection
-          categories={categories}
-          eventId={eventId}
-          initialResults={initialResults}
-          loading={loading}
-          votes={votes}
-        />
+        <div className="space-y-6">
+          <AdminOfficialResultsSection
+            eventId={eventId}
+            initialResults={initialResults}
+          />
+
+          <VotesAudit
+            categories={categories}
+            loading={loading}
+            votes={votes}
+          />
+        </div>
       );
       break;
     default:
       content = (
-        <AdminQueueSection
-          adminNominees={adminNominees}
-          categories={categories}
-          categoryProposals={categoryProposals}
-          eventId={eventId}
-          loading={loading}
-          measureProposals={measureProposals}
-          onUpdate={onUpdate}
-        />
+        <div className="space-y-6">
+          <AdminNominationsSection
+            categories={categories}
+            eventId={eventId}
+            initialRows={adminNominees}
+          />
+
+          <PendingProposals
+            categoryProposals={categoryProposals}
+            eventId={eventId}
+            loading={loading}
+            measureProposalsAll={measureProposals}
+            onUpdate={onUpdate}
+          />
+        </div>
       );
       break;
   }

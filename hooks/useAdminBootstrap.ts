@@ -127,13 +127,9 @@ export function useAdminBootstrap(eventId: string | null) {
   }, [bootstrapQuery]);
 
   return {
-    allCategoryProposals,
-    allMeasureProposals,
     allNominees,
     adminNominees,
-    bootstrap,
     categories,
-    counts,
     error: bootstrapQuery.error ?? null,
     events,
     loading: Boolean(eventId) && (bootstrapQuery.isLoading || (bootstrapQuery.isFetching && !bootstrap)),
@@ -141,7 +137,6 @@ export function useAdminBootstrap(eventId: string | null) {
     officialResults,
     pendingCategoryProposals,
     pendingMeasureProposals,
-    pendingNominationCount,
     pendingNominees,
     secretSanta,
     summary,
