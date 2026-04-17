@@ -41,10 +41,10 @@ export function AdminMembersSection({
         state={secretSantaState}
       />
 
-      <Card className="border-[var(--border-subtle)] bg-[var(--bg-paper)]">
+      <Card className="canhoes-paper-panel">
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker text-[var(--moss-glow)]">Roster</p>
-          <CardTitle className="text-[var(--ink-primary)]">
+          <p className="editorial-kicker">Roster</p>
+          <CardTitle>
             {members.length} {members.length === 1 ? "membro" : "membros"}
           </CardTitle>
         </CardHeader>
@@ -63,7 +63,7 @@ export function AdminMembersSection({
                 items={members}
                 renderItem={(member) => (
                   <div
-                    className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2"
+                    className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] min-h-11 px-3 py-2"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">

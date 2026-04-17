@@ -15,16 +15,14 @@ import type {
   EventSummaryDto,
   MeasureProposalDto,
   NomineeDto,
-  ProposalsByStatusDto,
   PublicUserDto,
 } from "@/lib/api/types";
+import {
+  normalizeCategoryProposalList,
+  normalizeMeasureProposalList,
+} from "@/lib/api/responseNormalization";
 import { countVisibleModules } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-
-function flattenByStatus<T>(items?: ProposalsByStatusDto<T> | null | undefined) {
-  if (!items) return [] as T[];
-  return [...items.pending, ...items.approved, ...items.rejected];
-}
 
 /**
  * Loads admin bootstrap data — now lightweight by default.
@@ -64,12 +62,12 @@ export function useAdminBootstrap(eventId: string | null) {
   const secretSanta: EventAdminSecretSantaStateDto | null = bootstrap?.secretSanta ?? null;
 
   const allCategoryProposals = useMemo<CategoryProposalDto[]>(
-    () => flattenByStatus(proposals?.categoryProposals),
+    () => normalizeCategoryProposalList(proposals?.categoryProposals),
     [proposals]
   );
 
   const allMeasureProposals = useMemo<MeasureProposalDto[]>(
-    () => flattenByStatus(proposals?.measureProposals),
+    () => normalizeMeasureProposalList(proposals?.measureProposals),
     [proposals]
   );
 

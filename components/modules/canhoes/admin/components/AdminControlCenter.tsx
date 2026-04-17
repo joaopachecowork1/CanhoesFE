@@ -25,7 +25,14 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-import { ADMIN_CONTENT_CARD_CLASS, AdminDetailSheet } from "./adminContentUi";
+import {
+  ADMIN_CONTENT_CARD_CLASS,
+  ADMIN_OUTLINE_BUTTON_CLASS,
+  ADMIN_SELECT_CONTENT_CLASS,
+  ADMIN_SELECT_ITEM_CLASS,
+  ADMIN_SELECT_TRIGGER_CLASS,
+  AdminDetailSheet,
+} from "./adminContentUi";
 import { AdminStateMessage } from "./AdminStateMessage";
 
 export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
@@ -297,14 +304,13 @@ export function AdminControlCenter({
 
 export type FeedbackTone = "default" | "error" | "success";
 
-export const SELECT_TRIGGER_CLASS =
-  "border-[var(--border-subtle)] bg-[var(--bg-paper)] text-[var(--ink-primary)] data-[placeholder]:text-[var(--ink-muted)] [&_svg:not([class*='text-'])]:text-[var(--ink-muted)] focus-visible:bg-[var(--bg-paper-soft)]";
+export const SELECT_TRIGGER_CLASS = ADMIN_SELECT_TRIGGER_CLASS;
 
-export const SELECT_CONTENT_CLASS =
-  "border-[var(--border-subtle)] bg-[var(--bg-paper)] text-[var(--ink-primary)]";
+export const SELECT_CONTENT_CLASS = ADMIN_SELECT_CONTENT_CLASS;
 
-export const OUTLINE_BUTTON_CLASS =
-  "border-[var(--border-subtle)] bg-[var(--bg-paper)] text-[var(--ink-primary)] hover:bg-[var(--bg-paper-soft)]";
+export const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
+
+export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =
   "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-2.5";
@@ -555,7 +561,7 @@ function AdminSettingsMainPanel({
               </SelectTrigger>
               <SelectContent className={SELECT_CONTENT_CLASS}>
                 {events.map((event) => (
-                  <SelectItem key={event.id} value={event.id} className="text-[var(--bg-paper)]">
+                  <SelectItem key={event.id} value={event.id} className={SELECT_ITEM_CLASS}>
                     {event.name}
                   </SelectItem>
                 ))}
@@ -578,7 +584,7 @@ function AdminSettingsMainPanel({
               </SelectTrigger>
               <SelectContent className={SELECT_CONTENT_CLASS}>
                 {phaseOptions.map((phase) => (
-                  <SelectItem key={phase} value={phase} className="text-[var(--bg-paper)]">
+                  <SelectItem key={phase} value={phase} className={SELECT_ITEM_CLASS}>
                     {phaseLabels[phase]}
                   </SelectItem>
                 ))}

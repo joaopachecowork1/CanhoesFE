@@ -43,7 +43,15 @@ import { cn } from "@/lib/utils";
 
 import { AdminSectionSummary } from "./AdminSectionSummary";
 import { AdminStateMessage } from "./AdminStateMessage";
-import { ADMIN_CONTENT_CARD_CLASS, AdminDetailPanel, AdminDetailSheet } from "./adminContentUi";
+import {
+  ADMIN_CONTENT_CARD_CLASS,
+  ADMIN_OUTLINE_BUTTON_CLASS,
+  ADMIN_SELECT_CONTENT_CLASS,
+  ADMIN_SELECT_ITEM_CLASS,
+  ADMIN_SELECT_TRIGGER_CLASS,
+  AdminDetailPanel,
+  AdminDetailSheet,
+} from "./adminContentUi";
 
 type CategoriesAdminProps = {
   adminNominees: AdminNomineeDto[];
@@ -383,12 +391,16 @@ function CategoryEditorSheet({
                 onValueChange={(value: AwardCategoryDto["kind"]) => onChange({ kind: value })}
                 disabled={isBusy}
               >
-                <SelectTrigger>
+                <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}>
                   <SelectValue placeholder="Selecionar tipo" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sticker">Sticker</SelectItem>
-                  <SelectItem value="UserVote">Voto oficial</SelectItem>
+                <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
+                  <SelectItem value="Sticker" className={ADMIN_SELECT_ITEM_CLASS}>
+                    Sticker
+                  </SelectItem>
+                  <SelectItem value="UserVote" className={ADMIN_SELECT_ITEM_CLASS}>
+                    Voto oficial
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -444,7 +456,7 @@ function CategoryEditorSheet({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full gap-2 border-[rgba(255,96,96,0.22)] text-[var(--danger)] sm:w-auto"
+                  className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full gap-2 border-[rgba(255,96,96,0.22)] text-[var(--danger)] sm:w-auto`}
                   onClick={onDelete}
                   disabled={isBusy}
                 >
@@ -464,7 +476,7 @@ function CategoryEditorSheet({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isBusy}
-                className="w-full sm:w-auto"
+                className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
               >
                 Cancelar
               </Button>
@@ -655,7 +667,7 @@ export function CategoriesAdmin({
                 <FolderTree className="h-4 w-4" />
                 Catalogo oficial
               </CardTitle>
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-sm text-[var(--ink-muted)]">
                 Toca numa categoria para editar, rever dependências e ajustar o estado sem sair do contexto admin.
               </p>
             </div>

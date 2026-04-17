@@ -1,5 +1,7 @@
 import { BarChart2, FolderTree, Gavel, type LucideIcon } from "lucide-react";
 
+import { createAdminSectionRegistry } from "./adminSectionRegistry";
+
 export type AdminContentSectionId = "queue" | "categorias" | "resultados";
 
 export type AdminContentSectionCountContext = {
@@ -18,15 +20,10 @@ export type AdminContentSectionItem = {
   label: string;
 };
 
-type AdminContentSectionDefinition = {
-  count: (context: Readonly<AdminContentSectionCountContext>) => number;
-  description: string;
-  icon: LucideIcon;
-  id: AdminContentSectionId;
-  label: string;
-};
-
-const ADMIN_CONTENT_SECTION_REGISTRY: readonly AdminContentSectionDefinition[] = [
+const ADMIN_CONTENT_SECTION_REGISTRY = createAdminSectionRegistry<
+  AdminContentSectionId,
+  AdminContentSectionCountContext
+>([
   {
     id: "queue",
     label: "Queue",
@@ -51,25 +48,18 @@ const ADMIN_CONTENT_SECTION_REGISTRY: readonly AdminContentSectionDefinition[] =
     icon: BarChart2,
     count: (context) => context.resultsCount,
   },
-] as const;
+] as const);
 
-export const ADMIN_CONTENT_SECTION_IDS: readonly AdminContentSectionId[] =
-  ADMIN_CONTENT_SECTION_REGISTRY.map((sectionDefinition) => sectionDefinition.id);
+export const ADMIN_CONTENT_SECTION_IDS = ADMIN_CONTENT_SECTION_REGISTRY.ids;
 
 export function isAdminContentSectionId(value: string): value is AdminContentSectionId {
-  return (ADMIN_CONTENT_SECTION_IDS as readonly string[]).includes(value);
+  return ADMIN_CONTENT_SECTION_REGISTRY.isId(value);
 }
 
 export function buildAdminContentSectionItems(
   context: Readonly<AdminContentSectionCountContext>
 ): AdminContentSectionItem[] {
-  return ADMIN_CONTENT_SECTION_REGISTRY.map((sectionDefinition) => ({
-    id: sectionDefinition.id,
-    label: sectionDefinition.label,
-    description: sectionDefinition.description,
-    icon: sectionDefinition.icon,
-    count: sectionDefinition.count(context),
-  }));
+  return ADMIN_CONTENT_SECTION_REGISTRY.buildItems(context);
 }
 
 export function getDefaultAdminContentSection(): AdminContentSectionId {

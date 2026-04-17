@@ -13,6 +13,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ADMIN_CONTENT_CARD_CLASS,
+  ADMIN_OUTLINE_BUTTON_CLASS,
   AdminDetailPanel,
   AdminDetailSheet,
   AdminListPanel,
@@ -37,7 +38,7 @@ function getRankMeta(index: number) {
   if (index === 1) {
     return {
       fillClass: "bg-[var(--text-muted)]",
-      iconClassName: "text-[var(--text-muted)]",
+      iconClassName: "text-[var(--ink-muted)]",
       Icon: Medal,
     };
   }
@@ -52,7 +53,7 @@ function getRankMeta(index: number) {
 
   return {
     fillClass: "bg-[var(--bark)]",
-    iconClassName: "text-[var(--text-muted)]",
+    iconClassName: "text-[var(--ink-muted)]",
     Icon: null,
   };
 }
@@ -77,10 +78,10 @@ function ResultsCategoryButton({
       selected={isSelected}
       aria-pressed={isSelected}
     >
-      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
         {category.categoryName}
       </p>
-      <p className="mt-1 text-xs text-[var(--text-muted)]">
+      <p className="mt-1 text-xs text-[var(--ink-muted)]">
         {category.totalVotes}/{totalMembers} votaram ({participationRate}%)
       </p>
     </AdminSelectableButton>
@@ -104,13 +105,13 @@ function ResultsNomineeBar({
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           {Icon ? <Icon className={cn("h-4 w-4 shrink-0", iconClassName)} /> : null}
-          <p className="truncate text-sm text-[var(--text-primary)]">{nominee.nomineeTitle}</p>
+          <p className="truncate text-sm text-[var(--ink-primary)]">{nominee.nomineeTitle}</p>
         </div>
-        <span className="text-xs text-[var(--text-muted)]">
+        <span className="text-xs text-[var(--ink-muted)]">
           {nominee.voteCount} votos ({percentage}%)
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+      <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-paper-soft)]">
         <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
       </div>
     </div>
@@ -125,8 +126,9 @@ function ResultsVotersList({
   return (
     <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
       {nominees.map((nominee) => (
-        <p key={nominee.nomineeId} className="text-xs text-[var(--text-muted)]">
-          <span className="text-[var(--text-primary)]">{nominee.nomineeTitle}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}
+        <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]">
+          <span className="text-[var(--ink-primary)]">{nominee.nomineeTitle}</span>:{" "}
+          {nominee.voterUserIds.join(", ") || "Sem votos"}
         </p>
       ))}
     </AdminDetailPanel>
@@ -193,7 +195,11 @@ export function AdminOfficialResultsSection({
     return (
       <AdminStateMessage
         tone="warning"
-        action={<Button onClick={() => void resultsQuery.refetch()}>Tentar novamente</Button>}
+        action={
+          <Button onClick={() => void resultsQuery.refetch()} className={ADMIN_OUTLINE_BUTTON_CLASS}>
+            Tentar novamente
+          </Button>
+        }
       >
         Sem resultados para mostrar neste momento.
       </AdminStateMessage>
@@ -211,7 +217,7 @@ export function AdminOfficialResultsSection({
             <BarChart2 className="h-4 w-4" />
             Resultados oficiais
           </CardTitle>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-[var(--ink-muted)]">
             Gerado em {new Date(results.generatedAt).toLocaleString("pt-PT")}
           </p>
         </CardHeader>
@@ -270,7 +276,7 @@ export function AdminOfficialResultsSection({
             <Button
               type="button"
               variant="outline"
-              className="w-full justify-center"
+              className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full justify-center`}
               onClick={() => setIsVotersVisible((current) => !current)}
             >
               {isVotersVisible ? (

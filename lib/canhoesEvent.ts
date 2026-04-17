@@ -60,8 +60,8 @@ export function pickActiveEvent(events: readonly EventSummaryDto[]) {
  * CTA should use this helper so post creation always lands in the same place.
  */
 export function openComposeSheet() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
+  if (globalThis.window === undefined) return;
+  globalThis.window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
 }
 
 /**
@@ -69,6 +69,6 @@ export function openComposeSheet() {
  * overview should be reloaded after a phase or module-visibility change.
  */
 export function refreshEventOverview() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(REFRESH_EVENT_OVERVIEW_EVENT));
+  if (globalThis.window === undefined) return;
+  globalThis.window.dispatchEvent(new CustomEvent(REFRESH_EVENT_OVERVIEW_EVENT));
 }

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 
 type SecretSantaAdminProps = {
   activeEventName: string | null;
@@ -82,14 +83,14 @@ export function SecretSantaAdmin({
 
   return (
     <div className="space-y-4">
-      <Card className="border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+      <Card className="canhoes-paper-panel">
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <Gift className="h-4 w-4" />
             <span className="label">{adminCopy.secretSanta.kicker}</span>
           </div>
           <CardTitle>{adminCopy.secretSanta.title}</CardTitle>
-          <p className="body-small text-[rgba(245,237,224,0.82)]">
+          <p className="body-small text-[var(--ink-muted)]">
             {adminCopy.secretSanta.description}
           </p>
         </CardHeader>
@@ -108,7 +109,7 @@ export function SecretSantaAdmin({
               variant="outline"
               onClick={() => void handleRefresh()}
               disabled={!eventId || busy === "refresh" || loading}
-              className="gap-2"
+              className={`gap-2 ${ADMIN_OUTLINE_BUTTON_CLASS}`}
             >
               <RefreshCw className={busy === "refresh" ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
               {adminCopy.secretSanta.refresh}
@@ -188,12 +189,12 @@ function StatusMetric({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] px-3 py-3 text-[var(--bg-paper)]">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.62)]">
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-3 text-[var(--ink-primary)]">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-[var(--bg-paper)]">{value}</p>
-      <p className="mt-1 text-xs text-[rgba(245,237,224,0.72)]">{hint}</p>
+      <p className="mt-2 text-lg font-semibold text-[var(--ink-primary)]">{value}</p>
+      <p className="mt-1 text-xs text-[var(--ink-muted)]">{hint}</p>
     </div>
   );
 }

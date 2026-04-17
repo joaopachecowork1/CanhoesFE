@@ -57,13 +57,26 @@ export function AdminContentSection({
       ? activeViewParam
       : getDefaultAdminContentSection();
 
+  const safeAdminNominees = useMemo(
+    () => (Array.isArray(adminNominees) ? adminNominees : []),
+    [adminNominees]
+  );
+  const safeCategoryProposals = useMemo(
+    () => (Array.isArray(categoryProposals) ? categoryProposals : []),
+    [categoryProposals]
+  );
+  const safeMeasureProposals = useMemo(
+    () => (Array.isArray(measureProposals) ? measureProposals : []),
+    [measureProposals]
+  );
+
   const pendingCounts = useMemo(
     () => ({
-      categoryProposals: categoryProposals.filter((proposal) => proposal.status === "pending").length,
-      measureProposals: measureProposals.filter((proposal) => proposal.status === "pending").length,
-      nominations: adminNominees.filter((nominee) => nominee.status === "pending").length,
+      categoryProposals: safeCategoryProposals.filter((proposal) => proposal.status === "pending").length,
+      measureProposals: safeMeasureProposals.filter((proposal) => proposal.status === "pending").length,
+      nominations: safeAdminNominees.filter((nominee) => nominee.status === "pending").length,
     }),
-    [adminNominees, categoryProposals, measureProposals]
+    [safeAdminNominees, safeCategoryProposals, safeMeasureProposals]
   );
 
   const contentItems = useMemo(
@@ -100,7 +113,7 @@ export function AdminContentSection({
     case "categorias":
       content = (
         <CategoriesAdmin
-          adminNominees={adminNominees}
+          adminNominees={safeAdminNominees}
           categories={categories}
           eventId={eventId}
           loading={loading}
@@ -131,14 +144,14 @@ export function AdminContentSection({
           <AdminNominationsSection
             categories={categories}
             eventId={eventId}
-            initialRows={adminNominees}
+            initialRows={safeAdminNominees}
           />
 
           <PendingProposals
-            categoryProposals={categoryProposals}
+            categoryProposals={safeCategoryProposals}
             eventId={eventId}
             loading={loading}
-            measureProposalsAll={measureProposals}
+            measureProposalsAll={safeMeasureProposals}
             onUpdate={onUpdate}
           />
         </div>

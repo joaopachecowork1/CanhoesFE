@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { adminCopy } from "@/lib/canhoesCopy";
-import { AdminCard } from "./AdminCard";
 
 type VoteAuditRow = {
   categoryId: string;
@@ -28,28 +27,28 @@ type Props = {
 
 function VotesAuditShell({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <AdminCard>
+    <article className="canhoes-paper-panel relative overflow-hidden rounded-[var(--radius-md-token)] px-4 py-3.5 text-[var(--ink-primary)]">
       <CardHeader className="space-y-1">
-        <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{adminCopy.audit.kicker}</p>
-        <CardTitle className="text-[var(--bg-paper)]">{adminCopy.audit.title}</CardTitle>
+        <p className="editorial-kicker">{adminCopy.audit.kicker}</p>
+        <CardTitle>{adminCopy.audit.title}</CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
-    </AdminCard>
+    </article>
   );
 }
 
 function VotesAuditState({ message }: Readonly<{ message: string }>) {
-  return <div className="body-small text-[rgba(245,237,224,0.68)]">{message}</div>;
+  return <div className="body-small text-[var(--ink-muted)]">{message}</div>;
 }
 
 function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
   return (
-    <article className="grid gap-1 border-b border-[rgba(212,184,150,0.1)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
-      <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">{vote.categoryName}</p>
-      <div className="space-y-0.5 text-xs text-[rgba(245,237,224,0.74)] sm:text-sm">
+    <article className="grid gap-1 border-b border-[rgba(84,64,40,0.12)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
+      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{vote.categoryName}</p>
+      <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm">
         <p className="truncate">Votou: {vote.userName}</p>
       </div>
-      <p className="text-[11px] text-[rgba(245,237,224,0.62)] sm:text-right">
+      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">
         {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
       </p>
     </article>
@@ -96,13 +95,13 @@ export function VotesAudit({ votes, loading }: Readonly<Props>) {
           onChange={(event) => setSearch(event.target.value)}
         />
 
-        <div className="body-small text-[rgba(245,237,224,0.68)]">
+        <div className="body-small text-[var(--ink-muted)]">
           {filteredVotes.length} de {votes.length} votos
         </div>
 
-        <Separator className="bg-[rgba(212,184,150,0.12)]" />
+        <Separator className="bg-[rgba(84,64,40,0.12)]" />
 
-        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)]">
+        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)]">
           <VirtualizedList
             className="px-0 py-0"
             estimateSize={() => 52}

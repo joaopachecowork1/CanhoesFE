@@ -32,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 
 type PendingProposalsProps = {
   eventId: string | null;
@@ -244,7 +245,12 @@ function ProposalCardActions({
 
   return (
     <>
-      <Button variant="outline" disabled={isBusy || saveDisabled} onClick={onSave} className="w-full sm:w-auto">
+      <Button
+        variant="outline"
+        disabled={isBusy || saveDisabled}
+        onClick={onSave}
+        className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
+      >
         {saveLabel}
       </Button>
       {actions.map((action) => (
@@ -254,7 +260,7 @@ function ProposalCardActions({
           disabled={isBusy}
           onClick={action.onClick}
           aria-label={`${action.label} proposta`}
-          className="w-full sm:w-auto"
+          className={`${action.variant === "outline" ? ADMIN_OUTLINE_BUTTON_CLASS : ""} w-full sm:w-auto`}
         >
           {action.label}
         </Button>
@@ -262,7 +268,7 @@ function ProposalCardActions({
       <Button
         variant="outline"
         disabled={isBusy}
-        className={deleteIcon ? "w-full gap-2 sm:w-auto" : "w-full sm:w-auto"}
+        className={`${ADMIN_OUTLINE_BUTTON_CLASS} ${deleteIcon ? "w-full gap-2 sm:w-auto" : "w-full sm:w-auto"}`}
         onClick={onDelete}
       >
         {deleteIcon}
@@ -298,7 +304,7 @@ function ProposalReviewCard({ proposal }: Readonly<{ proposal: PendingProposalCa
       }
     >
       {proposal.note ? (
-        <div className="flex items-center gap-2 text-[var(--color-title)]">
+        <div className="flex items-center gap-2 text-[var(--ink-primary)]">
           <Gavel className="h-4 w-4" />
           <span className="editorial-kicker">
             {PROPOSAL_STATUS_LABELS[proposal.note as keyof typeof PROPOSAL_STATUS_LABELS] ?? proposal.note}

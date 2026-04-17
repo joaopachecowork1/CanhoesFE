@@ -6,6 +6,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { createAdminSectionRegistry } from "./adminSectionRegistry";
+
 export type AdminSectionId =
   | "dashboard"
   | "conteudo"
@@ -27,15 +29,7 @@ export type AdminSectionItem = {
   label: string;
 };
 
-type AdminSectionDefinition = {
-  count: (context: AdminSectionCountContext) => number;
-  description: string;
-  icon: LucideIcon;
-  id: AdminSectionId;
-  label: string;
-};
-
-const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
+const ADMIN_SECTION_REGISTRY = createAdminSectionRegistry<AdminSectionId, AdminSectionCountContext>([
   {
     id: "conteudo",
     label: "Conteúdo",
@@ -64,26 +58,20 @@ const ADMIN_SECTION_REGISTRY: readonly AdminSectionDefinition[] = [
     icon: Layers3,
     count: () => 0,
   },
-] as const;
+] as const);
 
-export const ADMIN_SECTION_IDS: readonly AdminSectionId[] = ADMIN_SECTION_REGISTRY.map(
-  (sectionDefinition) => sectionDefinition.id
-);
+export const ADMIN_SECTION_IDS = ADMIN_SECTION_REGISTRY.ids;
 
 export function isAdminSectionId(value: string): value is AdminSectionId {
-  return (ADMIN_SECTION_IDS as readonly string[]).includes(value);
+  return ADMIN_SECTION_REGISTRY.isId(value);
 }
 
 export function getAdminSectionMeta() {
-  return ADMIN_SECTION_REGISTRY.map((sectionDefinition) => ({
-    id: sectionDefinition.id,
-    label: sectionDefinition.label,
-    icon: sectionDefinition.icon,
-  }));
+  return ADMIN_SECTION_REGISTRY.getMeta();
 }
 
 export function getAdminSectionItem(id: AdminSectionId) {
-  return ADMIN_SECTION_REGISTRY.find((sectionDefinition) => sectionDefinition.id === id) ?? null;
+  return ADMIN_SECTION_REGISTRY.getItem(id);
 }
 
 export function getDefaultAdminSection(): AdminSectionId {

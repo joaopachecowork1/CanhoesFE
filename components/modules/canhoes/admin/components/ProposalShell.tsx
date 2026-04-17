@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
 
 export function ProposalShell({
   children,
@@ -12,7 +13,7 @@ export function ProposalShell({
   title: string;
 }>) {
   return (
-    <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+    <Card className={ADMIN_CONTENT_CARD_CLASS}>
       <CardHeader className="space-y-2">
         <p className="editorial-kicker">{subtitle}</p>
         <CardTitle>{title}</CardTitle>

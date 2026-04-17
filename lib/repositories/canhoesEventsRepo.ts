@@ -1,4 +1,9 @@
 import { canhoesFetch } from "@/lib/api/canhoesClient";
+import {
+  normalizeCategoryProposalList,
+  normalizeMeasureProposalList,
+  normalizeWishlistItems,
+} from "@/lib/api/responseNormalization";
 import type * as T from "@/lib/api/types";
 
 // ============================================================================
@@ -230,9 +235,14 @@ export const canhoesEventsRepo = {
   adminVotes: (eventId: string) =>
     canhoesFetch<T.AdminVotesDto>(`/v1/events/${eventId}/admin/votes`),
 
-  adminGetCategoryProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
-    canhoesFetch<T.CategoryProposalDto[]>(
-      `/v1/events/${eventId}/admin/category-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+  adminGetCategoryProposals: async (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    normalizeCategoryProposalList(
+      await canhoesFetch<unknown>(
+        `/v1/events/${eventId}/admin/category-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+      )
     ),
 
   adminUpdateCategoryProposal: (
@@ -256,9 +266,14 @@ export const canhoesEventsRepo = {
   adminProposalsHistory: (eventId: string) =>
     canhoesFetch<T.AdminProposalsHistoryDto>(`/v1/events/${eventId}/admin/proposals`),
 
-  adminGetMeasureProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
-    canhoesFetch<T.MeasureProposalDto[]>(
-      `/v1/events/${eventId}/admin/measure-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+  adminGetMeasureProposals: async (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    normalizeMeasureProposalList(
+      await canhoesFetch<unknown>(
+        `/v1/events/${eventId}/admin/measure-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+      )
     ),
 
   adminUpdateMeasureProposal: (
@@ -408,8 +423,10 @@ export const canhoesEventsRepo = {
     }),
 
   // WISHLIST
-  getWishlist: (eventId: string) =>
-    canhoesFetch<T.EventWishlistItemDto[]>(`/v1/events/${eventId}/wishlist`),
+  getWishlist: async (eventId: string) =>
+    normalizeWishlistItems(
+      await canhoesFetch<unknown>(`/v1/events/${eventId}/wishlist`)
+    ),
 
   createWishlistItem: (eventId: string, payload: T.CreateEventWishlistItemRequest) =>
     canhoesFetch<T.EventWishlistItemDto>(`/v1/events/${eventId}/wishlist`, {

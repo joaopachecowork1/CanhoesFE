@@ -547,6 +547,63 @@ h3,
   color: #7d6752;
 }
 
+.canhoes-admin-outline-button {
+  border-color: rgba(84, 64, 40, 0.18);
+  background: var(--bg-paper);
+  color: var(--ink-primary);
+  box-shadow: none;
+}
+
+.canhoes-admin-outline-button:hover {
+  border-color: var(--border-moss);
+  background: var(--bg-paper-soft);
+}
+
+.canhoes-admin-outline-button:focus-visible {
+  background: var(--bg-paper-soft);
+  box-shadow: 0 0 0 3px rgba(122, 173, 58, 0.14);
+}
+
+.canhoes-admin-select-trigger {
+  border-color: rgba(84, 64, 40, 0.16);
+  background: var(--bg-paper);
+  color: var(--ink-primary);
+}
+
+.canhoes-admin-select-trigger[data-placeholder] {
+  color: var(--ink-muted);
+}
+
+.canhoes-admin-select-trigger svg {
+  color: var(--ink-muted);
+}
+
+.canhoes-admin-select-trigger:focus-visible {
+  border-color: var(--border-moss);
+  background: var(--bg-paper-soft);
+  box-shadow: 0 0 0 3px rgba(122, 173, 58, 0.14);
+}
+
+.canhoes-admin-select-content {
+  border: 1px solid rgba(84, 64, 40, 0.16);
+  background: var(--bg-paper);
+  color: var(--ink-primary);
+  box-shadow: var(--shadow-paper);
+}
+
+.canhoes-admin-select-item {
+  color: var(--ink-primary);
+}
+
+.canhoes-admin-select-item[data-highlighted] {
+  background: var(--bg-paper-soft);
+  color: var(--ink-primary);
+}
+
+.canhoes-admin-select-item[data-disabled] {
+  opacity: 0.5;
+}
+
 .canhoes-feed-card {
   border: 1px solid rgba(74, 92, 47, 0.28);
   background:
@@ -1135,36 +1192,6 @@ h3,
   .zone-voting .editorial-kicker {
     color: var(--neon-green);
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
-  }
-
-  /* Admin zone: paper-first, compact, operational */
-  .zone-admin .canhoes-paper-panel,
-  .zone-admin .editorial-shell {
-    background: var(--bg-paper);
-    border-color: rgba(84, 64, 40, 0.16);
-    box-shadow: var(--shadow-paper);
-    color: var(--ink-primary);
-  }
-
-  .zone-admin .editorial-kicker {
-    color: var(--moss);
-  }
-
-  .zone-admin .heading-1,
-  .zone-admin .heading-2,
-  .zone-admin .heading-3,
-  .zone-admin .canhoes-title {
-    color: var(--ink-primary);
-  }
-
-  .zone-admin .body-small,
-  .zone-admin p,
-  .zone-admin span {
-    color: var(--ink-primary);
-  }
-
-  .zone-admin .text-\[var\(--text-muted\)\] {
-    color: var(--ink-muted);
   }
 
   /* =============================================

@@ -13,7 +13,6 @@ import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
 import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -21,11 +20,10 @@ import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 export function CanhoesOfficialVotingModule() {
   const queryClient = useQueryClient();
-  const { event, overview } = useEventOverview();
+  const { event } = useEventOverview();
 
   const eventId = event?.id ?? null;
   const queryEventId = eventId ?? "";
-  const isOfficialVotingPhase = overview?.activePhase?.type === "VOTING";
 
   const boardQuery = useQuery({
     queryKey: ["official-voting", queryEventId],
@@ -106,10 +104,6 @@ export function CanhoesOfficialVotingModule() {
   const totalCategories = board.categories.length;
   const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
   const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
-
-  if (!isOfficialVotingPhase) {
-    return <CanhoesVotingModule />;
-  }
 
   return (
     <div className="space-y-4">
