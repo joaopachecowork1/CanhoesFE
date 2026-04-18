@@ -8,24 +8,17 @@ import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 
-function AdminStateCard({
-  action,
-  description,
-  title,
-}: Readonly<{
-  action?: ReactNode;
-  description: string;
-  title: string;
-}>) {
+function AdminStateCard({ action, description, title }: Readonly<{ action?: ReactNode; description: string; title: string }>) {
   return (
-    <section className="page-hero mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(0,255,136,0.18)] bg-[rgba(38,54,26,0.72)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
+    <section className="canhoes-paper-panel mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
         <Shield className="h-7 w-7" />
       </div>
       <div className="mt-5 space-y-2">
-        <h2 className="heading-2 text-[var(--bg-paper)]">{title}</h2>
-        <p className="body-small text-[rgba(245,237,224,0.74)]">{description}</p>
+        <h2 className="heading-2 text-[var(--ink-primary)]">{title}</h2>
+        <p className="body-small text-[var(--ink-muted)]">{description}</p>
       </div>
       {action ? <div className="mt-6">{action}</div> : null}
     </section>
@@ -33,19 +26,10 @@ function AdminStateCard({
 }
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
-  const {
-    loading,
-    profileError,
-    isLogged,
-    refreshProfile,
-    user,
-    loginGoogle,
-    logout,
-  } = useAuth();
+  const { loading, profileError, isLogged, refreshProfile, user, loginGoogle, logout } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const router = useRouter();
 
-  // Unified loading state
   if (loading || (isLogged && !user) || adminLoading) {
     return (
       <AdminStateCard
@@ -73,7 +57,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
             </Button>
             <Button
               variant="outline"
-              className="w-full sm:w-auto"
+              className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
               onClick={() => logout()}
             >
               Terminar sessao
@@ -104,7 +88,11 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
         title="Acesso restrito"
         description="Esta area continua visivel, mas so os admins confirmados conseguem moderar propostas, votos e fases do evento."
         action={
-          <Button variant="outline" onClick={() => router.push("/canhoes")}>
+          <Button
+            variant="outline"
+            className={ADMIN_OUTLINE_BUTTON_CLASS}
+            onClick={() => router.push("/canhoes")}
+          >
             Voltar ao feed
           </Button>
         }

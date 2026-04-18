@@ -25,12 +25,7 @@ export function AdminRouteTabs({
 }: Readonly<AdminRouteTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const sections = useMemo<ReadonlyArray<AdminRouteTabItem>>(
-    () =>
-      items ??
-      getAdminSectionMeta().map((section) => ({
-        ...section,
-        count: 0,
-      })),
+    () => items ?? getAdminSectionMeta().map((section) => ({ ...section, count: 0 })),
     [items]
   );
 

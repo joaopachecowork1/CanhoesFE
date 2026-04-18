@@ -20,9 +20,7 @@ import {
   MOCK_MEASURE_PROPOSALS,
   MOCK_MEMBERS,
   MOCK_HUB_POSTS,
-  MOCK_PENDING,
   MOCK_VOTES,
-  MOCK_PROPOSALS_HISTORY,
   MOCK_EVENT_CATEGORIES,
   MOCK_EVENT_CONTEXT,
   MOCK_EVENT_OVERVIEW,
@@ -81,6 +79,24 @@ function parseBody<TBody>(options?: { body?: string | null }) {
   }
 }
 
+function parsePagedQuery(path: string) {
+  const url = new URL(`http://x/${path}`);
+  const skip = Math.max(0, Number.parseInt(url.searchParams.get("skip") ?? "0", 10) || 0);
+  const take = Math.max(1, Number.parseInt(url.searchParams.get("take") ?? "50", 10) || 50);
+  return { skip, take, url };
+}
+
+function paginateItems<T>(items: T[], skip: number, take: number) {
+  const pagedItems = items.slice(skip, skip + take);
+  return {
+    items: pagedItems,
+    total: items.length,
+    skip,
+    take,
+    hasMore: skip + pagedItems.length < items.length,
+  };
+}
+
 function handleWrite<T>(path: string, options?: { body?: string | null }): T {
   if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/nominations`) {
     const body = parseBody<{ categoryId?: string | null; title?: string }>(options);
@@ -134,45 +150,6 @@ function handleWrite<T>(path: string, options?: { body?: string | null }): T {
     return { ...nominee, categoryId: body.categoryId ?? null } as unknown as T;
   }
 
-  // nominees approve/reject
-  if (/^canhoes\/admin\/nominees\/.+\/approve$/.test(path)) {
-    const id = path.split("/")[3];
-    const nom = MOCK_NOMINEES.find((n) => n.id === id);
-    return { ...(nom ?? {}), status: "approved" } as unknown as T;
-  }
-  if (/^canhoes\/admin\/nominees\/.+\/reject$/.test(path)) {
-    const id = path.split("/")[3];
-    const nom = MOCK_NOMINEES.find((n) => n.id === id);
-    return { ...(nom ?? {}), status: "rejected" } as unknown as T;
-  }
-
-  // category proposal approve/reject
-  if (/^canhoes\/admin\/categories\/.+\/approve$/.test(path)) {
-    return MOCK_CATEGORIES[0] as unknown as T;
-  }
-  if (/^canhoes\/admin\/categories\/.+\/reject$/.test(path)) {
-    return MOCK_CATEGORY_PROPOSALS[0] as unknown as T;
-  }
-
-  // measure proposal approve/reject
-  if (/^canhoes\/admin\/measures\/.+\/approve$/.test(path)) {
-    return { id: "mock-measure", text: "Mock measure", isActive: true, createdAtUtc: new Date().toISOString() } as unknown as T;
-  }
-  if (/^canhoes\/admin\/measures\/.+\/reject$/.test(path)) {
-    return MOCK_MEASURE_PROPOSALS[0] as unknown as T;
-  }
-
-  // create category
-  if (/^canhoes\/admin\/categories$/.test(path)) {
-    return {
-      id: `cat-new-${Date.now()}`,
-      name: "Nova Categoria",
-      sortOrder: 99,
-      isActive: true,
-      kind: "Sticker",
-    } as unknown as T;
-  }
-
   // create nominee
   if (/^canhoes\/nominees$/.test(path)) {
     return {
@@ -192,11 +169,6 @@ function handleWrite<T>(path: string, options?: { body?: string | null }): T {
       nomineeId: "nom-001",
       updatedAtUtc: new Date().toISOString(),
     } as unknown as T;
-  }
-
-  // state update
-  if (/^canhoes\/admin\/state$/.test(path)) {
-    return MOCK_STATE as unknown as T;
   }
 
   // hub post create
@@ -280,15 +252,118 @@ function handleRead<T>(path: string): T {
     return MOCK_OFFICIAL_VOTING_BOARD as unknown as T;
   }
 
-  if (path.startsWith(`v1/events/${MOCK_EVENT_SUMMARY.id}/admin/nominations`)) {
-    return MOCK_ADMIN_NOMINEES as unknown as T;
+  if (/^v1\/events\/[^/]+\/admin\/votes\/paged/.test(path)) {
+    const { skip, take } = parsePagedQuery(path);
+    const pagedVotes = MOCK_VOTES.votes.slice(skip, skip + take);
+    return {
+      total: MOCK_VOTES.votes.length,
+      votes: pagedVotes,
+      skip,
+      take,
+      hasMore: skip + pagedVotes.length < MOCK_VOTES.votes.length,
+    } as unknown as T;
   }
 
-  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/admin/official-results`) {
-    return MOCK_ADMIN_OFFICIAL_RESULTS as unknown as T;
+  if (/^v1\/events\/[^/]+\/admin\/nominations\/paged/.test(path)) {
+    const { skip, take, url } = parsePagedQuery(path);
+    const status = url.searchParams.get("status");
+    const nominations = status
+      ? MOCK_ADMIN_NOMINEES.filter((nominee) => nominee.status === status)
+      : MOCK_ADMIN_NOMINEES;
+    const pagedNominations = nominations.slice(skip, skip + take);
+    return {
+      total: nominations.length,
+      nominations: pagedNominations,
+      skip,
+      take,
+      hasMore: skip + pagedNominations.length < nominations.length,
+    } as unknown as T;
   }
 
-  if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/admin/bootstrap`) {
+  if (/^v1\/events\/[^/]+\/admin\/members\/paged/.test(path)) {
+    const { skip, take } = parsePagedQuery(path);
+    return paginateItems(MOCK_MEMBERS, skip, take) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/official-results\/paged/.test(path)) {
+    const { skip, take } = parsePagedQuery(path);
+    return paginateItems(MOCK_ADMIN_OFFICIAL_RESULTS.categories, skip, take) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/categories$/.test(path)) {
+    return MOCK_CATEGORIES as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/categories\/summary/.test(path)) {
+    return MOCK_CATEGORIES.map((category) => ({
+      id: category.id,
+      name: category.name,
+      sortOrder: category.sortOrder,
+      isActive: category.isActive,
+      kind: category.kind,
+    })) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/nominees\/summary/.test(path)) {
+    const url = new URL(`http://x/${path}`);
+    const status = url.searchParams.get("status");
+    return MOCK_NOMINEES
+      .filter((nominee) => !status || nominee.status === status)
+      .map((nominee) => ({
+        id: nominee.id,
+        categoryId: nominee.categoryId ?? null,
+        title: nominee.title,
+        status: nominee.status,
+      })) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/nominations\/summary/.test(path)) {
+    const url = new URL(`http://x/${path}`);
+    const status = url.searchParams.get("status");
+    return MOCK_ADMIN_NOMINEES
+      .filter((nominee) => !status || nominee.status === status)
+      .map((nominee) => ({
+        id: nominee.id,
+        categoryId: nominee.categoryId ?? null,
+        title: nominee.title,
+        status: nominee.status,
+        submittedByUserId: nominee.submittedByUserId,
+        submittedByName: nominee.submittedByName,
+      })) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/category-proposals/.test(path)) {
+    const { skip, take, url } = parsePagedQuery(path);
+    const status = url.searchParams.get("status");
+    const proposals = status
+      ? MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === status)
+      : MOCK_CATEGORY_PROPOSALS;
+    return paginateItems(proposals, skip, take) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/measure-proposals/.test(path)) {
+    const { skip, take, url } = parsePagedQuery(path);
+    const status = url.searchParams.get("status");
+    const proposals = status
+      ? MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === status)
+      : MOCK_MEASURE_PROPOSALS;
+    return paginateItems(proposals, skip, take) as unknown as T;
+  }
+
+  if (/^v1\/events\/[^/]+\/admin\/secret-santa\/state/.test(path)) {
+    return {
+      eventId: MOCK_EVENT_SUMMARY.id,
+      eventCode: "canhoes2026",
+      hasDraw: true,
+      drawId: "draw-001",
+      createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
+      isLocked: false,
+      memberCount: MOCK_MEMBERS.length,
+      assignmentCount: MOCK_MEMBERS.length,
+    } as unknown as T;
+  }
+
+  if (path.startsWith(`v1/events/${MOCK_EVENT_SUMMARY.id}/admin/bootstrap`)) {
     return {
       events: [MOCK_EVENT_SUMMARY],
       state: {
@@ -314,34 +389,17 @@ function handleRead<T>(path: string): T {
         },
         counts: MOCK_EVENT_OVERVIEW.counts,
       },
-      categories: MOCK_CATEGORIES,
-      nominees: MOCK_NOMINEES,
-      adminNominees: MOCK_ADMIN_NOMINEES,
-      proposals: {
-        categoryProposals: {
-          pending: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "pending"),
-          approved: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "approved"),
-          rejected: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "rejected"),
-        },
-        measureProposals: {
-          pending: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "pending"),
-          approved: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "approved"),
-          rejected: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "rejected"),
-        },
+      counts: {
+        nomineesTotal: MOCK_NOMINEES.length,
+        adminNomineesTotal: MOCK_ADMIN_NOMINEES.length,
+        votesTotal: MOCK_VOTES.votes.length,
+        categoryProposalsTotal: MOCK_CATEGORY_PROPOSALS.length,
+        categoryProposalsPendingTotal: MOCK_CATEGORY_PROPOSALS.filter((proposal) => proposal.status === "pending").length,
+        measureProposalsTotal: MOCK_MEASURE_PROPOSALS.length,
+        measureProposalsPendingTotal: MOCK_MEASURE_PROPOSALS.filter((proposal) => proposal.status === "pending").length,
+        membersTotal: MOCK_MEMBERS.length,
+        officialResultsCategoriesCount: MOCK_ADMIN_OFFICIAL_RESULTS.categories.length,
       },
-      votes: MOCK_VOTES,
-      members: MOCK_MEMBERS,
-      secretSanta: {
-        eventId: MOCK_EVENT_SUMMARY.id,
-        eventCode: "canhoes2026",
-        hasDraw: true,
-        drawId: "draw-001",
-        createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
-        isLocked: false,
-        memberCount: MOCK_MEMBERS.length,
-        assignmentCount: MOCK_MEMBERS.length,
-      },
-      officialResults: MOCK_ADMIN_OFFICIAL_RESULTS,
     } as unknown as T;
   }
 
@@ -353,45 +411,12 @@ function handleRead<T>(path: string): T {
     return MOCK_CATEGORIES.filter((c) => c.isActive) as unknown as T;
   }
 
-  // admin categories
-  if (path === "canhoes/admin/categories") return MOCK_CATEGORIES as unknown as T;
-
   // nominees (public) – handle optional ?categoryId query
   if (path.startsWith("canhoes/nominees")) {
     const url = new URL(`http://x/${path}`);
     const catId = url.searchParams.get("categoryId");
     const approved = MOCK_NOMINEES.filter((n) => n.status === "approved");
     return (catId ? approved.filter((n) => n.categoryId === catId) : approved) as unknown as T;
-  }
-
-  // admin nominees
-  if (path.startsWith("canhoes/admin/nominees")) {
-    const url = new URL(`http://x/${path}`);
-    const status = url.searchParams.get("status");
-    return (
-      status ? MOCK_NOMINEES.filter((n) => n.status === status) : MOCK_NOMINEES
-    ) as unknown as T;
-  }
-
-  // pending admin
-  if (path === "canhoes/admin/pending") return MOCK_PENDING as unknown as T;
-
-  // votes audit
-  if (path === "canhoes/admin/votes") return MOCK_VOTES as unknown as T;
-
-  // proposals history
-  if (path === "canhoes/admin/proposals")
-    return MOCK_PROPOSALS_HISTORY as unknown as T;
-
-  // measure proposals admin
-  if (path.startsWith("canhoes/admin/measures/proposals")) {
-    const url = new URL(`http://x/${path}`);
-    const status = url.searchParams.get("status");
-    return (
-      status
-        ? MOCK_MEASURE_PROPOSALS.filter((p) => p.status === status)
-        : MOCK_MEASURE_PROPOSALS
-    ) as unknown as T;
   }
 
   // members

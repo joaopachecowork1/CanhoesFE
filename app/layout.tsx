@@ -62,7 +62,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt" suppressHydrationWarning>
+    <html lang="pt" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${orbitron.variable} ${dmSans.variable} ${jetBrainsMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >

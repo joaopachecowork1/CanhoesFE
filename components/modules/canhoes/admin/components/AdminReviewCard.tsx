@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge } from "@/components/ui/badge";
 
 export function AdminReviewCard({
@@ -7,14 +9,14 @@ export function AdminReviewCard({
   status,
   title,
 }: Readonly<{
-  actions?: React.ReactNode;
-  children?: React.ReactNode;
+  actions?: ReactNode;
+  children?: ReactNode;
   meta?: string;
-  status?: React.ReactNode;
+  status?: ReactNode;
   title: string;
 }>) {
   return (
-    <article className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
+    <article className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
       <div className="relative space-y-3">
         <div className="min-w-0 space-y-1.5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -26,7 +28,7 @@ export function AdminReviewCard({
               {meta ? (
                 <Badge
                   variant="outline"
-                  className="w-fit border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] text-[0.75rem] text-[var(--ink-muted)] shadow-none"
+                  className="w-fit border-[var(--border-subtle)] bg-[var(--bg-paper)] text-[0.75rem] text-[var(--ink-muted)] shadow-none"
                 >
                   {meta}
                 </Badge>

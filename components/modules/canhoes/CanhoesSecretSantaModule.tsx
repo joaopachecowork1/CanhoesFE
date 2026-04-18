@@ -17,6 +17,7 @@ import type {
 } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
+import { normalizeWishlistItems } from "@/lib/api/responseNormalization";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { InlineLoader } from "@/components/ui/inline-loader";
@@ -207,7 +208,7 @@ export function CanhoesSecretSantaModule() {
           setScreenState({
             status: "ready",
             overview: nextOverview,
-            wishlistItems,
+            wishlistItems: normalizeWishlistItems(wishlistItems),
           });
           setDrawEventCode(nextOverview.drawEventCode || buildDefaultEventCode(activeEvent.id));
         }
@@ -229,7 +230,7 @@ export function CanhoesSecretSantaModule() {
 
   const assignedWishlistItems = useMemo(() => {
     if (screenState.status !== "ready" || !screenState.overview.assignedUser) return [];
-    return screenState.wishlistItems.filter(
+    return normalizeWishlistItems(screenState.wishlistItems).filter(
       (item) => item.userId === screenState.overview.assignedUser?.id
     );
   }, [screenState]);
@@ -248,7 +249,7 @@ export function CanhoesSecretSantaModule() {
         setScreenState({
           status: "ready",
           overview: nextOverview,
-          wishlistItems,
+          wishlistItems: normalizeWishlistItems(wishlistItems),
         });
         setDrawEventCode(nextOverview.drawEventCode || buildDefaultEventCode(event.id));
       } catch (error) {

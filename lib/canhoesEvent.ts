@@ -1,12 +1,9 @@
 import type { EventPhaseDto, EventSummaryDto } from "@/lib/api/types";
 
-/**
- * Global event used by the shell to open the compose sheet from any module
- * without threading callbacks through the page tree.
- */
 export const OPEN_COMPOSE_SHEET_EVENT = "canhoes:openCompose";
 export const REFRESH_EVENT_OVERVIEW_EVENT = "canhoes:refreshOverview";
 
+// --- Phase helpers ---
 export function getPhaseLabel(phaseType?: string | null) {
   switch (phaseType) {
     case "DRAW":
@@ -46,6 +43,7 @@ export function formatPhaseWindow(phase?: EventPhaseDto | null) {
   }).format(new Date(phase.endDate));
 }
 
+// --- Event helpers ---
 /**
  * The shell and event home both need the same "active event or first fallback"
  * rule. Keep that decision in one place so the dashboard and navigation do not
@@ -60,15 +58,6 @@ export function pickActiveEvent(events: readonly EventSummaryDto[]) {
  * CTA should use this helper so post creation always lands in the same place.
  */
 export function openComposeSheet() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
-}
-
-/**
- * Lets admin actions notify the chrome and any other listeners that the event
- * overview should be reloaded after a phase or module-visibility change.
- */
-export function refreshEventOverview() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(REFRESH_EVENT_OVERVIEW_EVENT));
+  if (globalThis.window === undefined) return;
+  globalThis.window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
 }

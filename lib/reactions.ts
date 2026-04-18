@@ -38,17 +38,3 @@ export const QUICK_REACTIONS = HUB_REACTIONS.slice(0, 3) as readonly FeedReactio
  * All emoji strings (for type safety in components that just need the string).
  */
 export const HUB_EMOJI_STRINGS = HUB_REACTIONS.map((r) => r.emoji) as readonly string[];
-
-/**
- * Look up a reaction by emoji.
- */
-export function getReactionByEmoji(emoji: string): FeedReaction | undefined {
-  return HUB_REACTIONS.find((r) => r.emoji === emoji);
-}
-
-/**
- * Look up a reaction by key.
- */
-export function getReactionByKey(key: string): FeedReaction | undefined {
-  return HUB_REACTIONS.find((r) => r.key === key);
-}

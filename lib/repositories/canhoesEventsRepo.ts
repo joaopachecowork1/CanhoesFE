@@ -1,5 +1,29 @@
 import { canhoesFetch } from "@/lib/api/canhoesClient";
+import {
+  normalizeWishlistItems,
+} from "@/lib/api/responseNormalization";
 import type * as T from "@/lib/api/types";
+
+async function loadAllPagedRecords<TItem, TPage extends { hasMore: boolean; skip: number; take: number }>(
+  loadPage: (skip: number, take: number) => Promise<TPage>,
+  getItems: (page: TPage) => readonly TItem[],
+  take = 200
+): Promise<TItem[]> {
+  const items: TItem[] = [];
+  let skip = 0;
+
+  for (;;) {
+    const page = await loadPage(skip, take);
+    const pageItems = Array.from(getItems(page));
+    items.push(...pageItems);
+
+    if (!page.hasMore || pageItems.length === 0) {
+      return items;
+    }
+
+    skip = page.skip + page.take;
+  }
+}
 
 // ============================================================================
 // EVENT CONTEXT & OVERVIEW
@@ -164,11 +188,6 @@ export const canhoesEventsRepo = {
       `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${status}` : ""}`
     ),
 
-  getAdminProposalsPaged: (eventId: string, skip = 0, take = 50) =>
-    canhoesFetch<T.AdminProposalsPagedDto>(
-      `/v1/events/${eventId}/admin/proposals/paged?skip=${skip}&take=${take}`
-    ),
-
   getAdminMembersPaged: (eventId: string, skip = 0, take = 50) =>
     canhoesFetch<T.PagedResultPublicUserDto>(
       `/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`
@@ -224,15 +243,43 @@ export const canhoesEventsRepo = {
       method: "PUT",
     }),
 
-  adminGetMembers: (eventId: string) =>
-    canhoesFetch<T.PublicUserDto[]>(`/v1/events/${eventId}/admin/members`),
+  loadAllAdminMembers: async (eventId: string) =>
+    loadAllPagedRecords(
+      (skip, take) => canhoesEventsRepo.getAdminMembersPaged(eventId, skip, take),
+      (page) => page.items
+    ),
 
-  adminVotes: (eventId: string) =>
-    canhoesFetch<T.AdminVotesDto>(`/v1/events/${eventId}/admin/votes`),
+  loadAllAdminNominations: async (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    loadAllPagedRecords(
+      (skip, take) => canhoesEventsRepo.getAdminNominationsPaged(eventId, skip, take, status),
+      (page) => page.nominations
+    ),
 
-  adminGetCategoryProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
-    canhoesFetch<T.CategoryProposalDto[]>(
-      `/v1/events/${eventId}/admin/category-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+  loadAllAdminVotes: async (eventId: string) =>
+    loadAllPagedRecords(
+      (skip, take) => canhoesEventsRepo.getAdminVotesPaged(eventId, skip, take),
+      (page) => page.votes
+    ),
+
+  loadAllAdminOfficialResults: async (eventId: string) =>
+    loadAllPagedRecords(
+      (skip, take) => canhoesEventsRepo.getAdminOfficialResultsPaged(eventId, skip, take),
+      (page) => page.items
+    ),
+
+  adminGetCategoryProposals: async (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    loadAllPagedRecords(
+      (skip, take) =>
+        canhoesFetch<T.PagedResult<T.CategoryProposalDto>>(
+          `/v1/events/${eventId}/admin/category-proposals?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+        ),
+      (page) => page.items
     ),
 
   adminUpdateCategoryProposal: (
@@ -253,12 +300,16 @@ export const canhoesEventsRepo = {
       method: "DELETE",
     }),
 
-  adminProposalsHistory: (eventId: string) =>
-    canhoesFetch<T.AdminProposalsHistoryDto>(`/v1/events/${eventId}/admin/proposals`),
-
-  adminGetMeasureProposals: (eventId: string, status?: "pending" | "approved" | "rejected") =>
-    canhoesFetch<T.MeasureProposalDto[]>(
-      `/v1/events/${eventId}/admin/measure-proposals${status ? `?status=${encodeURIComponent(status)}` : ""}`
+  adminGetMeasureProposals: async (
+    eventId: string,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    loadAllPagedRecords(
+      (skip, take) =>
+        canhoesFetch<T.PagedResult<T.MeasureProposalDto>>(
+          `/v1/events/${eventId}/admin/measure-proposals?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+        ),
+      (page) => page.items
     ),
 
   adminUpdateMeasureProposal: (
@@ -286,31 +337,6 @@ export const canhoesEventsRepo = {
 
   adminRejectMeasureProposal: (eventId: string, proposalId: string) =>
     canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}/reject`, {
-      method: "POST",
-    }),
-
-  adminGetNominees: (eventId: string, status?: "pending" | "approved" | "rejected") =>
-    canhoesFetch<T.NomineeDto[]>(
-      `/v1/events/${eventId}/admin/nominees${status ? `?status=${encodeURIComponent(status)}` : ""}`
-    ),
-
-  adminSetNomineeCategory: (
-    eventId: string,
-    nomineeId: string,
-    payload: T.SetNomineeCategoryRequest
-  ) =>
-    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/set-category`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  adminApproveNominee: (eventId: string, nomineeId: string) =>
-    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/approve`, {
-      method: "POST",
-    }),
-
-  adminRejectNominee: (eventId: string, nomineeId: string) =>
-    canhoesFetch<T.NomineeDto>(`/v1/events/${eventId}/admin/nominees/${nomineeId}/reject`, {
       method: "POST",
     }),
 
@@ -349,16 +375,6 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
 
-  adminGetNominationsWithAuthors: (
-    eventId: string,
-    status?: "pending" | "approved" | "rejected"
-  ) =>
-    canhoesFetch<T.AdminNomineeDto[]>(
-      `/v1/events/${eventId}/admin/nominations${
-        status ? `?status=${encodeURIComponent(status)}` : ""
-      }`
-    ),
-
   adminApproveNomination: (eventId: string, nomineeId: string) =>
     canhoesFetch<T.AdminNomineeDto>(
       `/v1/events/${eventId}/admin/nominations/${nomineeId}/approve`,
@@ -388,9 +404,6 @@ export const canhoesEventsRepo = {
       }
     ),
 
-  adminGetOfficialResults: (eventId: string) =>
-    canhoesFetch<T.AdminOfficialResultsDto>(`/v1/events/${eventId}/admin/official-results`),
-
   // PROPOSALS (user-facing)
   getProposals: (eventId: string) =>
     canhoesFetch<T.EventProposalDto[]>(`/v1/events/${eventId}/proposals`),
@@ -408,8 +421,10 @@ export const canhoesEventsRepo = {
     }),
 
   // WISHLIST
-  getWishlist: (eventId: string) =>
-    canhoesFetch<T.EventWishlistItemDto[]>(`/v1/events/${eventId}/wishlist`),
+  getWishlist: async (eventId: string) =>
+    normalizeWishlistItems(
+      await canhoesFetch<unknown>(`/v1/events/${eventId}/wishlist`)
+    ),
 
   createWishlistItem: (eventId: string, payload: T.CreateEventWishlistItemRequest) =>
     canhoesFetch<T.EventWishlistItemDto>(`/v1/events/${eventId}/wishlist`, {

@@ -3,15 +3,11 @@ import dynamic from "next/dynamic";
 
 import CanhoesAdminModule from "@/components/modules/canhoes/admin/CanhoesAdminModule";
 import { isAdminSectionId } from "@/components/modules/canhoes/admin/adminSections";
+import { AdminRouteTabs } from "@/components/modules/canhoes/admin/components/AdminRouteTabs";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 const AdminGate = dynamic(
   () => import("@/components/modules/canhoes/admin/components/AdminGate").then((m) => ({ default: m.AdminGate })),
-  { loading: () => <FeedSkeleton /> }
-);
-
-const AdminSectionShell = dynamic(
-  () => import("@/components/modules/canhoes/admin/components/AdminSectionShell").then((m) => ({ default: m.AdminSectionShell })),
   { loading: () => <FeedSkeleton /> }
 );
 
@@ -45,9 +41,10 @@ export default async function AdminSectionPage({
 
   return (
     <AdminGate>
-      <AdminSectionShell activeId={section}>
+      <div className="zone-admin space-y-2">
+        <AdminRouteTabs activeId={section} />
         <CanhoesAdminModule section={section} />
-      </AdminSectionShell>
+      </div>
     </AdminGate>
   );
 }

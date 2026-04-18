@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import type { AdminNomineeDto, AwardCategoryDto } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { formatDateTimeUtc } from "./dateUtils";
-import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
+import { AdminStateMessage } from "./AdminStateMessage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   ADMIN_CONTENT_CARD_CLASS,
+  ADMIN_OUTLINE_BUTTON_CLASS,
+  ADMIN_SELECT_CONTENT_CLASS,
+  ADMIN_SELECT_ITEM_CLASS,
+  ADMIN_SELECT_TRIGGER_CLASS,
   AdminDetailPanel,
   AdminDetailSheet,
   AdminSelectableButton,
@@ -81,12 +85,12 @@ function getNominationStatusIcon(status: NominationStatus) {
 }
 
 export function AdminNominationsSection({
-  categories,
   eventId,
+  loading,
   initialRows,
 }: Readonly<{
-  categories: AwardCategoryDto[];
   eventId: string | null;
+  loading: boolean;
   initialRows?: AdminNomineeDto[];
 }>) {
   const queryClient = useQueryClient();
@@ -96,25 +100,67 @@ export function AdminNominationsSection({
   const [selectedNominationId, setSelectedNominationId] = useState<string | null>(null);
   const queryEventId = eventId ?? "";
 
-  const nominationsQuery = useQuery({
-    queryKey: ["admin-nominations", queryEventId],
+  const categoriesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(queryEventId),
-    initialData: initialRows,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (!data) return false;
-      const hasPending = data.some((nomination) => nomination.status === "pending");
-      return hasPending ? 30_000 : false;
-    },
+    queryFn: () => canhoesEventsRepo.adminGetCategories(queryEventId),
+    queryKey: ["canhoes", "admin", "categories", queryEventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
   });
 
+  const nominationsQuery = useQuery({
+    enabled: Boolean(eventId),
+    initialData: initialRows?.length ? initialRows : undefined,
+    queryFn: () => canhoesEventsRepo.loadAllAdminNominations(queryEventId),
+    queryKey: ["canhoes", "admin", "nominations", queryEventId],
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!Array.isArray(data) || data.length === 0) return false;
+      return data.some((nomination) => nomination.status === "pending") ? 30_000 : false;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const categories = categoriesQuery.data ?? [];
+  const nominations = useMemo(
+    () => (Array.isArray(nominationsQuery.data) ? nominationsQuery.data : []),
+    [nominationsQuery.data]
+  );
+
+  const statusCounts = useMemo(
+    () =>
+      nominations.reduce(
+        (accumulator, nomination) => {
+          accumulator[nomination.status]++;
+          return accumulator;
+        },
+        { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
+      ),
+    [nominations]
+  );
+
+  const filteredNominations = useMemo(() => {
+    return nominations
+      .filter((nomination) => (statusFilter === "all" ? true : nomination.status === statusFilter))
+      .filter((nomination) => categoryFilter === "all" ? true : nomination.categoryId === categoryFilter)
+      .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
+  }, [categoryFilter, nominations, statusFilter]);
+
+  const selectedNomination = useMemo(
+    () => filteredNominations.find((nomination) => nomination.id === selectedNominationId) ?? null,
+    [filteredNominations, selectedNominationId]
+  );
+
+  const isLoading = loading || categoriesQuery.isLoading || nominationsQuery.isLoading;
+  const queryError = nominationsQuery.error ?? categoriesQuery.error;
+
   const invalidate = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-nominations", queryEventId] }),
-      queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId] }),
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin-bootstrap", queryEventId] }),
-    ]);
+    await queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] });
+  };
+
+  const refresh = async () => {
+    await Promise.all([categoriesQuery.refetch(), nominationsQuery.refetch()]);
   };
 
   const approveNomination = useMutation({
@@ -156,38 +202,6 @@ export function AdminNominationsSection({
     },
   });
 
-  const nominations = useMemo(() => nominationsQuery.data ?? [], [nominationsQuery.data]);
-
-  const statusCounts = useMemo(
-    () =>
-      nominations.reduce(
-        (accumulator, nomination) => {
-          accumulator[nomination.status]++;
-          return accumulator;
-        },
-        { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
-      ),
-    [nominations]
-  );
-
-  const filteredNominations = useMemo(() => {
-    return nominations
-      .filter((nomination) => {
-        if (statusFilter === "all") return true;
-        return nomination.status === statusFilter;
-      })
-      .filter((nomination) => {
-        if (categoryFilter === "all") return true;
-        return nomination.categoryId === categoryFilter;
-      })
-      .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
-  }, [categoryFilter, nominations, statusFilter]);
-
-  const selectedNomination = useMemo(
-    () => filteredNominations.find((nomination) => nomination.id === selectedNominationId) ?? null,
-    [filteredNominations, selectedNominationId]
-  );
-
   const anyMutationPending =
     approveNomination.isPending || rejectNomination.isPending || setCategory.isPending;
 
@@ -195,16 +209,20 @@ export function AdminNominationsSection({
     return <AdminStateMessage>Falta uma edicao ativa para moderar nomeacoes.</AdminStateMessage>;
   }
 
-  if (nominationsQuery.isLoading) {
+  if (isLoading && nominations.length === 0) {
     return <AdminStateMessage>A carregar nomeacoes...</AdminStateMessage>;
   }
 
-  if (nominationsQuery.error) {
-    logFrontendError("AdminNominationsSection.query", nominationsQuery.error, { eventId });
+  if (queryError) {
+    logFrontendError("AdminNominationsSection.query", queryError, { eventId });
     return (
       <AdminStateMessage
         tone="error"
-        action={<Button onClick={() => void nominationsQuery.refetch()}>Tentar novamente</Button>}
+        action={
+          <Button onClick={() => void refresh()} className={ADMIN_OUTLINE_BUTTON_CLASS}>
+            Tentar novamente
+          </Button>
+        }
       >
         Nao foi possivel carregar as nomeacoes.
       </AdminStateMessage>
@@ -228,18 +246,17 @@ export function AdminNominationsSection({
               {(["all", "pending", "approved", "rejected"] as const).map((status) => {
                 const isActive = statusFilter === status;
                 const badgeCount =
-                  status === "all"
-                    ? nominations.length
-                    : statusCounts[status as NominationStatus];
+                  status === "all" ? nominations.length : statusCounts[status as NominationStatus];
 
                 return (
                   <Button
                     key={status}
                     size="sm"
-                    variant={isActive ? "secondary" : "outline"}
+                    variant="outline"
                     className={cn(
+                      ADMIN_OUTLINE_BUTTON_CLASS,
                       "min-h-10 rounded-full",
-                      isActive ? "border-[var(--border-neon)]" : "",
+                      isActive ? "border-[var(--border-neon)] bg-[rgba(122,173,58,0.12)]" : "",
                       status === "pending" && statusCounts.pending > 0
                         ? "text-[var(--neon-amber)]"
                         : ""
@@ -264,13 +281,19 @@ export function AdminNominationsSection({
 
             <div className="w-full">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
+                <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}>
                   <SelectValue placeholder="Filtrar categoria" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as categorias</SelectItem>
+                <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
+                  <SelectItem value="all" className={ADMIN_SELECT_ITEM_CLASS}>
+                    Todas as categorias
+                  </SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem
+                      key={category.id}
+                      value={category.id}
+                      className={ADMIN_SELECT_ITEM_CLASS}
+                    >
                       {category.name}
                     </SelectItem>
                   ))}
@@ -282,10 +305,13 @@ export function AdminNominationsSection({
           {filteredNominations.length === 0 ? (
             <AdminStateMessage variant="panel">
               Fila limpa - nenhuma nomeacao{" "}
-              {statusFilter === "all" ? "disponivel neste filtro" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
+              {statusFilter === "all"
+                ? "disponivel neste filtro"
+                : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}
+              .
             </AdminStateMessage>
           ) : (
-            <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(11,14,8,0.72)] p-2">
+            <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] p-2">
               <VirtualizedList
                 className="px-0 py-0"
                 estimateSize={() => 72}
@@ -303,13 +329,13 @@ export function AdminNominationsSection({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 space-y-1">
-                          <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                          <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
                             {nomination.title}
                           </p>
-                          <p className="truncate text-xs text-[rgba(245,237,224,0.72)]">
+                          <p className="truncate text-xs text-[var(--ink-muted)]">
                             {categoryName}
                           </p>
-                          <p className="text-[11px] text-[var(--text-muted)]">
+                          <p className="text-[11px] text-[var(--ink-muted)]">
                             {formatDateTimeUtc(nomination.createdAtUtc)}
                           </p>
                         </div>
@@ -346,10 +372,10 @@ export function AdminNominationsSection({
             <AdminDetailPanel>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1">
-                  <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
+                  <p className="font-[var(--font-mono)] text-xs text-[var(--ink-muted)]">
                     {formatDateTimeUtc(selectedNomination.createdAtUtc)}
                   </p>
-                  <p className="flex items-center gap-1.5 text-sm text-[rgba(245,237,224,0.82)]">
+                  <p className="flex items-center gap-1.5 text-sm text-[var(--ink-primary)]">
                     <User className="h-3.5 w-3.5" />
                     Submetido por {selectedNomination.submittedByName}
                   </p>
@@ -365,9 +391,7 @@ export function AdminNominationsSection({
             </AdminDetailPanel>
 
             <div className="space-y-2">
-              <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                Mover para categoria
-              </p>
+              <p className="text-xs font-medium text-[var(--ink-muted)]">Mover para categoria</p>
               <Select
                 value={selectedNomination.categoryId ?? "none"}
                 onValueChange={(value) =>
@@ -377,13 +401,19 @@ export function AdminNominationsSection({
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}>
                   <SelectValue placeholder="Mover para categoria" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem categoria</SelectItem>
+                <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
+                  <SelectItem value="none" className={ADMIN_SELECT_ITEM_CLASS}>
+                    Sem categoria
+                  </SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem
+                      key={category.id}
+                      value={category.id}
+                      className={ADMIN_SELECT_ITEM_CLASS}
+                    >
                       {category.name}
                     </SelectItem>
                   ))}

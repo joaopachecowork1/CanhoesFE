@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
+
 export function AdminSectionSummary({
   description,
   items,
@@ -17,7 +19,7 @@ export function AdminSectionSummary({
   title: string;
 }>) {
   return (
-    <Card className="border-[var(--color-moss)]/20 bg-[rgba(16,20,11,0.9)]">
+    <Card className={ADMIN_CONTENT_CARD_CLASS}>
       <CardHeader className="space-y-2">
         <p className="editorial-kicker">{kicker}</p>
         <CardTitle>{title}</CardTitle>
@@ -29,14 +31,14 @@ export function AdminSectionSummary({
             <div
               key={item.label}
               className={cn(
-                "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.12)] px-3 py-3",
+                "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] px-3 py-3",
                 item.tone === "highlight"
-                  ? "bg-gradient-to-r from-[rgba(177,140,255,0.08)] to-transparent"
+                  ? "bg-[rgba(122,173,58,0.08)]"
                   : item.tone === "success"
                     ? "bg-[rgba(97,220,168,0.08)]"
                     : item.tone === "warning"
                       ? "bg-[rgba(253,224,71,0.08)]"
-                      : "bg-[rgba(11,14,8,0.46)]"
+                      : "bg-[var(--bg-paper-soft)]"
               )}
             >
               <div className="space-y-1">
@@ -50,7 +52,7 @@ export function AdminSectionSummary({
                         ? "text-[var(--color-success)]"
                         : item.tone === "warning"
                           ? "text-[var(--color-warning)]"
-                          : "text-[var(--bg-paper)]"
+                          : "text-[var(--ink-primary)]"
                   )}
                 >
                   {item.value}

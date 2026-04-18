@@ -109,3 +109,4 @@ canhoes-vault/
 *.temp
 .cache/
 
+.aider*

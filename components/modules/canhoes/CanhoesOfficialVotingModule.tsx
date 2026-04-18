@@ -8,12 +8,11 @@ import { toast } from "sonner";
 import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useCategorySelection } from "./useCategorySelection";
-import { CategoryTabs } from "./CategoryTabs";
+import { CompactSegmentTabs } from "./CompactSegmentTabs";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CanhoesVotingModule } from "@/components/modules/canhoes/CanhoesVotingModule";
 import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -21,11 +20,10 @@ import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 export function CanhoesOfficialVotingModule() {
   const queryClient = useQueryClient();
-  const { event, overview } = useEventOverview();
+  const { event } = useEventOverview();
 
   const eventId = event?.id ?? null;
   const queryEventId = eventId ?? "";
-  const isOfficialVotingPhase = overview?.activePhase?.type === "VOTING";
 
   const boardQuery = useQuery({
     queryKey: ["official-voting", queryEventId],
@@ -107,10 +105,6 @@ export function CanhoesOfficialVotingModule() {
   const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
   const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
 
-  if (!isOfficialVotingPhase) {
-    return <CanhoesVotingModule />;
-  }
-
   return (
     <div className="space-y-4">
       <CanhoesModuleHeader
@@ -132,11 +126,14 @@ export function CanhoesOfficialVotingModule() {
         </CardContent>
       </Card>
 
-      <CategoryTabs
-        categories={boardCategories}
-        selectedId={selectedCategoryId ?? ""}
+      <CompactSegmentTabs
+        activeId={selectedCategoryId ?? ""}
+        items={boardCategories.map((category) => ({
+          id: category.id,
+          label: category.title,
+          badge: category.myNomineeId ? "Votado" : undefined,
+        }))}
         onSelect={setSelectedCategoryId}
-        getBadge={(cat) => cat.myNomineeId ? "Votado" : undefined}
       />
 
       {selectedCategory ? (

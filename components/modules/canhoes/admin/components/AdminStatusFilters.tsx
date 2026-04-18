@@ -13,13 +13,7 @@ type AdminStatusFiltersProps<TFilter extends string> = {
   options: readonly TFilter[];
 };
 
-export function AdminStatusFilters<TFilter extends string>({
-  active,
-  counts,
-  labels,
-  onChange,
-  options,
-}: Readonly<AdminStatusFiltersProps<TFilter>>) {
+export function AdminStatusFilters<TFilter extends string>({ active, counts, labels, onChange, options }: Readonly<AdminStatusFiltersProps<TFilter>>) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((filterKey) => (

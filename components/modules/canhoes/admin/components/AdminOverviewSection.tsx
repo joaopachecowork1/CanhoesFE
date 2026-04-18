@@ -1,43 +1,39 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { CalendarClock, Eye, TimerReset, Vote } from "lucide-react";
 
 import { formatEventPhaseLabel } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { countVisibleModules } from "@/lib/modules";
-import type {
-  CategoryProposalDto,
-  EventAdminStateDto,
-  MeasureProposalDto,
-  NomineeDto,
-} from "@/lib/api/types";
+import type { EventAdminStateDto } from "@/lib/api/types";
 
 import { AdminDashboard } from "./AdminDashboard";
 import { AdminStateMessage } from "./AdminStateMessage";
 
 type AdminOverviewSectionProps = {
   activeEventName: string | null;
-  allNominees: NomineeDto[];
+  eventId: string | null;
   loading: boolean;
-  pendingCategoryProposals: CategoryProposalDto[];
-  pendingMeasureProposals: MeasureProposalDto[];
-  pendingNominees: NomineeDto[];
+  pendingCategoryProposalsCount: number;
+  pendingMeasureProposalsCount: number;
+  pendingNominationCount: number;
   state: EventAdminStateDto | null;
 };
 
 export function AdminOverviewSection({
   activeEventName,
-  allNominees,
+  eventId,
   loading,
-  pendingCategoryProposals,
-  pendingMeasureProposals,
-  pendingNominees,
+  pendingCategoryProposalsCount,
+  pendingMeasureProposalsCount,
+  pendingNominationCount,
   state,
 }: Readonly<AdminOverviewSectionProps>) {
   const pendingReviewCount =
-    pendingNominees.length +
-    pendingCategoryProposals.length +
-    pendingMeasureProposals.length;
+    pendingNominationCount +
+    pendingCategoryProposalsCount +
+    pendingMeasureProposalsCount;
 
   const visibleModuleCount = countVisibleModules(state?.effectiveModules);
 
@@ -51,8 +47,7 @@ export function AdminOverviewSection({
               Painel operacional da edicao
             </h2>
             <p className="text-sm leading-6 text-[var(--ink-muted)]">
-              Leitura rapida do evento, da fila e dos sinais principais sem misturar
-              controlos com o conteudo operacional.
+              Leitura rapida do evento, da fila e dos sinais principais sem misturar controlos com o conteudo operacional.
             </p>
           </div>
 
@@ -91,11 +86,11 @@ export function AdminOverviewSection({
       )}
 
       <AdminDashboard
-        allNominees={allNominees}
+        eventId={eventId}
         loading={loading}
-        pendingCategoryProposals={pendingCategoryProposals}
-        pendingMeasureProposals={pendingMeasureProposals}
-        pendingNominees={pendingNominees}
+        pendingCategoryProposalsCount={pendingCategoryProposalsCount}
+        pendingMeasureProposalsCount={pendingMeasureProposalsCount}
+        pendingNominationCount={pendingNominationCount}
       />
     </div>
   );
@@ -107,7 +102,7 @@ function OverviewMetric({
   tone = "default",
   value,
 }: Readonly<{
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   tone?: "default" | "highlight";
   value: string;

@@ -17,7 +17,7 @@ export function Particles({
   className,
   durationMs = 780,
   onComplete,
-}: ParticlesProps) {
+}: Readonly<ParticlesProps>) {
   const particleColors = React.useMemo(
     () =>
       colors ?? [
@@ -46,8 +46,8 @@ export function Particles({
   useEffect(() => {
     if (!onComplete) return undefined;
 
-    const timeoutId = window.setTimeout(onComplete, durationMs + 40);
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = globalThis.setTimeout(onComplete, durationMs + 40);
+    return () => globalThis.clearTimeout(timeoutId);
   }, [durationMs, onComplete]);
 
   return (
@@ -76,22 +76,4 @@ export function Particles({
       ))}
     </div>
   );
-}
-
-export function useParticles() {
-  const [particles, setParticles] = React.useState<{
-    x: number;
-    y: number;
-    id: number;
-  } | null>(null);
-
-  const trigger = React.useCallback((x: number, y: number) => {
-    setParticles({ x, y, id: Date.now() });
-  }, []);
-
-  const clear = React.useCallback(() => {
-    setParticles(null);
-  }, []);
-
-  return { particles, trigger, clear };
 }

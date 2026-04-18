@@ -4,10 +4,6 @@ import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type {
-  AdminNomineeDto,
-  AdminOfficialResultsDto,
-  AdminVoteAuditRowDto,
-  AwardCategoryDto,
   CategoryProposalDto,
   MeasureProposalDto,
 } from "@/lib/api/types";
@@ -17,33 +13,35 @@ import {
   isAdminContentSectionId,
   type AdminContentSectionId,
 } from "../adminContentSections";
-import { AdminCategoriesSection } from "./AdminCategoriesSection";
 import { AdminContentTabs } from "./AdminContentTabs";
-import { AdminQueueSection } from "./AdminQueueSection";
-import { AdminResultsSection } from "./AdminResultsSection";
+import { AdminNominationsSection } from "./AdminNominationsSection";
+import { AdminOfficialResultsSection } from "./AdminOfficialResultsSection";
+import { CategoriesAdmin } from "./CategoriesAdmin";
+import { PendingProposals } from "./PendingProposals";
+import { VotesAudit } from "./VotesAudit";
 
 type AdminContentSectionProps = {
-  adminNominees: AdminNomineeDto[];
-  categories: AwardCategoryDto[];
   categoryProposals: CategoryProposalDto[];
+  categoriesCount: number;
   eventId: string | null;
-  initialResults?: AdminOfficialResultsDto;
   loading: boolean;
   measureProposals: MeasureProposalDto[];
+  memberCount: number;
+  officialResultsCount: number;
+  pendingNominationCount: number;
   onUpdate: () => Promise<void>;
-  votes: AdminVoteAuditRowDto[];
 };
 
 export function AdminContentSection({
-  adminNominees,
-  categories,
   categoryProposals,
+  categoriesCount,
   eventId,
-  initialResults,
   loading,
   measureProposals,
+  memberCount,
+  officialResultsCount,
+  pendingNominationCount,
   onUpdate,
-  votes,
 }: Readonly<AdminContentSectionProps>) {
   const pathname = usePathname();
   const router = useRouter();
@@ -55,25 +53,34 @@ export function AdminContentSection({
       ? activeViewParam
       : getDefaultAdminContentSection();
 
+  const safeCategoryProposals = useMemo(
+    () => (Array.isArray(categoryProposals) ? categoryProposals : []),
+    [categoryProposals]
+  );
+  const safeMeasureProposals = useMemo(
+    () => (Array.isArray(measureProposals) ? measureProposals : []),
+    [measureProposals]
+  );
+
   const pendingCounts = useMemo(
     () => ({
-      categoryProposals: categoryProposals.filter((proposal) => proposal.status === "pending").length,
-      measureProposals: measureProposals.filter((proposal) => proposal.status === "pending").length,
-      nominations: adminNominees.filter((nominee) => nominee.status === "pending").length,
+      categoryProposals: safeCategoryProposals.filter((proposal) => proposal.status === "pending").length,
+      measureProposals: safeMeasureProposals.filter((proposal) => proposal.status === "pending").length,
+      nominations: pendingNominationCount,
     }),
-    [adminNominees, categoryProposals, measureProposals]
+    [pendingNominationCount, safeCategoryProposals, safeMeasureProposals]
   );
 
   const contentItems = useMemo(
     () =>
       buildAdminContentSectionItems({
-        categoriesCount: categories.length,
+        categoriesCount,
         pendingCategoryProposalsCount: pendingCounts.categoryProposals,
         pendingMeasureProposalsCount: pendingCounts.measureProposals,
         pendingNominationsCount: pendingCounts.nominations,
-        resultsCount: initialResults?.categories.length ?? 0,
+        resultsCount: officialResultsCount,
       }),
-    [categories.length, initialResults?.categories.length, pendingCounts]
+    [categoriesCount, officialResultsCount, pendingCounts]
   );
 
   const handleSelectView = useCallback(
@@ -93,45 +100,28 @@ export function AdminContentSection({
     [activeView, pathname, router, searchParams]
   );
 
-  let content = null;
-  switch (activeView) {
-    case "categorias":
-      content = (
-        <AdminCategoriesSection
-          adminNominees={adminNominees}
-          categories={categories}
+  const content =
+    activeView === "categorias" ? (
+      <CategoriesAdmin eventId={eventId} loading={loading} onUpdate={onUpdate} />
+    ) : activeView === "resultados" ? (
+      <div className="space-y-6">
+        <AdminOfficialResultsSection eventId={eventId} memberCount={memberCount} />
+
+        <VotesAudit eventId={eventId} loading={loading} />
+      </div>
+    ) : (
+      <div className="space-y-6">
+        <AdminNominationsSection eventId={eventId} loading={loading} />
+
+        <PendingProposals
+          categoryProposals={safeCategoryProposals}
           eventId={eventId}
           loading={loading}
-          onUpdate={onUpdate}
-          votes={votes}
-        />
-      );
-      break;
-    case "resultados":
-      content = (
-        <AdminResultsSection
-          categories={categories}
-          eventId={eventId}
-          initialResults={initialResults}
-          loading={loading}
-          votes={votes}
-        />
-      );
-      break;
-    default:
-      content = (
-        <AdminQueueSection
-          adminNominees={adminNominees}
-          categories={categories}
-          categoryProposals={categoryProposals}
-          eventId={eventId}
-          loading={loading}
-          measureProposals={measureProposals}
+          measureProposalsAll={safeMeasureProposals}
           onUpdate={onUpdate}
         />
-      );
-      break;
-  }
+      </div>
+    );
 
   return (
     <div className="space-y-4">
