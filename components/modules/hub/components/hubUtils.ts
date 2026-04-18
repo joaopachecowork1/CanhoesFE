@@ -19,5 +19,3 @@ export function formatDateTime(value: string | Date) {
 }
 
 export { absMediaUrl };
-
-

@@ -1,18 +1,6 @@
-import {
-  FolderTree,
-  Layers3,
-  Settings2,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { BarChart2, FolderTree, Settings2, Users, type LucideIcon } from "lucide-react";
 
-import { createAdminSectionRegistry } from "./adminSectionRegistry";
-
-export type AdminSectionId =
-  | "dashboard"
-  | "conteudo"
-  | "membros"
-  | "configuracoes";
+export type AdminSectionId = "dashboard" | "conteudo" | "membros" | "configuracoes";
 
 export type AdminSectionCountContext = {
   memberCount: number;
@@ -29,49 +17,49 @@ export type AdminSectionItem = {
   label: string;
 };
 
-const ADMIN_SECTION_REGISTRY = createAdminSectionRegistry<AdminSectionId, AdminSectionCountContext>([
+export const ADMIN_SECTIONS = [
+  {
+    id: "dashboard",
+    label: "Resumo",
+    description: "Leitura rapida da edicao, da fila e dos sinais operacionais.",
+    icon: BarChart2,
+    count: () => 0,
+  },
   {
     id: "conteudo",
     label: "Conteúdo",
     description: "Fila, categorias e resultados oficiais.",
     icon: FolderTree,
-    count: (context) => context.pendingReviewCount + context.pendingNominationsCount,
-  },
-  {
-    id: "configuracoes",
-    label: "Evento",
-    description: "Evento ativo, fase e visibilidade dos modulos.",
-    icon: Settings2,
-    count: (context) => context.visibleModuleCount,
+    count: (context: AdminSectionCountContext) => context.pendingReviewCount + context.pendingNominationsCount,
   },
   {
     id: "membros",
     label: "Amigos",
     description: "Amigo secreto e roster operacional desta edicao.",
     icon: Users,
-    count: (context) => context.memberCount,
+    count: (context: AdminSectionCountContext) => context.memberCount,
   },
   {
-    id: "dashboard",
-    label: "Resumo",
-    description: "Leitura rapida da edicao, da fila e dos sinais operacionais.",
-    icon: Layers3,
-    count: () => 0,
+    id: "configuracoes",
+    label: "Evento",
+    description: "Evento ativo, fase e visibilidade dos modulos.",
+    icon: Settings2,
+    count: (context: AdminSectionCountContext) => context.visibleModuleCount,
   },
-] as const);
+] as const;
 
-export const ADMIN_SECTION_IDS = ADMIN_SECTION_REGISTRY.ids;
+export const ADMIN_SECTION_IDS = ADMIN_SECTIONS.map((section) => section.id) as readonly AdminSectionId[];
 
 export function isAdminSectionId(value: string): value is AdminSectionId {
-  return ADMIN_SECTION_REGISTRY.isId(value);
+  return ADMIN_SECTION_IDS.includes(value as AdminSectionId);
 }
 
 export function getAdminSectionMeta() {
-  return ADMIN_SECTION_REGISTRY.getMeta();
+  return ADMIN_SECTIONS.map(({ id, label, icon }) => ({ id, label, icon }));
 }
 
 export function getAdminSectionItem(id: AdminSectionId) {
-  return ADMIN_SECTION_REGISTRY.getItem(id);
+  return ADMIN_SECTIONS.find((section) => section.id === id) ?? null;
 }
 
 export function getDefaultAdminSection(): AdminSectionId {

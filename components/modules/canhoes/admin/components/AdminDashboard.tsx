@@ -1,24 +1,23 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
+import type { AdminNomineeDto } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
-import type {
-  CategoryProposalDto,
-  MeasureProposalDto,
-  NomineeDto,
-} from "@/lib/api/types";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
 
 type AdminDashboardProps = {
-  allNominees: NomineeDto[];
+  eventId: string | null;
   loading: boolean;
-  pendingCategoryProposals: CategoryProposalDto[];
-  pendingMeasureProposals: MeasureProposalDto[];
-  pendingNominees: NomineeDto[];
+  pendingCategoryProposalsCount: number;
+  pendingMeasureProposalsCount: number;
+  pendingNominationCount: number;
 };
 
 const PENDING_BADGE_LABELS = [
@@ -56,29 +55,24 @@ function PendingReviewBadges({
 }
 
 export function AdminDashboard({
-  allNominees,
+  eventId,
   loading,
-  pendingCategoryProposals,
-  pendingMeasureProposals,
-  pendingNominees,
+  pendingCategoryProposalsCount,
+  pendingMeasureProposalsCount,
+  pendingNominationCount,
 }: Readonly<AdminDashboardProps>) {
-  const safeAllNominees = allNominees ?? [];
-  const safePendingCategoryProposals = pendingCategoryProposals ?? [];
-  const safePendingMeasureProposals = pendingMeasureProposals ?? [];
-  const safePendingNominees = pendingNominees ?? [];
+  const recentNomineesQuery = useQuery({
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.getAdminNominationsPaged(eventId!, 0, 5),
+    queryKey: ["canhoes", "admin", "recent-nominees", eventId],
+    refetchOnWindowFocus: false,
+    select: (page) => page.nominations,
+    staleTime: 1000 * 60 * 2,
+  });
 
-  const pendingReviews =
-    safePendingNominees.length +
-    safePendingCategoryProposals.length +
-    safePendingMeasureProposals.length;
+  const pendingReviews = pendingNominationCount + pendingCategoryProposalsCount + pendingMeasureProposalsCount;
 
-  const recentNominees = [...safeAllNominees]
-    .sort(
-      (left, right) =>
-        new Date(right.createdAtUtc).getTime() -
-        new Date(left.createdAtUtc).getTime()
-    )
-    .slice(0, 5);
+  const recentNominees = recentNomineesQuery.data ?? [];
 
   return (
     <div className="space-y-5">
@@ -98,9 +92,9 @@ export function AdminDashboard({
               </h3>
               <div className="flex flex-wrap gap-2">
                 <PendingReviewBadges
-                  nomineesCount={safePendingNominees.length}
-                  categoryProposalsCount={safePendingCategoryProposals.length}
-                  measureProposalsCount={safePendingMeasureProposals.length}
+                  nomineesCount={pendingNominationCount}
+                  categoryProposalsCount={pendingCategoryProposalsCount}
+                  measureProposalsCount={pendingMeasureProposalsCount}
                 />
               </div>
             </div>
@@ -108,13 +102,21 @@ export function AdminDashboard({
         </section>
       ) : null}
 
-      {!loading && recentNominees.length > 0 ? (
+      {loading || recentNomineesQuery.isLoading ? <AdminStateMessage variant="panel">A carregar nomeações recentes...</AdminStateMessage> : null}
+
+      {!loading && recentNomineesQuery.error ? (
+        <AdminStateMessage tone="warning" variant="panel">
+          Não foi possível carregar as nomeações recentes.
+        </AdminStateMessage>
+      ) : null}
+
+      {!loading && !recentNomineesQuery.isLoading && recentNominees.length > 0 ? (
         <AdminCollapsibleSection
           kicker={adminCopy.dashboard.recentKicker}
           title={adminCopy.dashboard.recentTitle}
           count={recentNominees.length}
         >
-          {recentNominees.map((nominee) => (
+          {recentNominees.map((nominee: AdminNomineeDto) => (
             <article
               key={nominee.id}
               className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)]"
@@ -124,8 +126,11 @@ export function AdminDashboard({
                   <p className="truncate font-semibold text-[var(--ink-primary)]">
                     {nominee.title}
                   </p>
+                  <p className="truncate text-xs text-[var(--ink-muted)]">
+                    Submetida por {nominee.submittedByName}
+                  </p>
                   <p className="text-xs text-[var(--ink-muted)]">
-                    {new Date(nominee.createdAtUtc).toLocaleDateString("pt-PT", {
+                    {new Date(nominee.createdAtUtc).toLocaleString("pt-PT", {
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",

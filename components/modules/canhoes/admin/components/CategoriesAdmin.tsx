@@ -1,18 +1,16 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FolderTree, Pencil, Plus, Trash2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type {
-  AdminNomineeDto,
-  AdminVoteAuditRowDto,
   AwardCategoryDto,
   CreateAwardCategoryRequest,
   UpdateAwardCategoryRequest,
 } from "@/lib/api/types";
-import { getErrorMessage } from "@/lib/errors";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import {
   AlertDialog,
@@ -54,12 +52,9 @@ import {
 } from "./adminContentUi";
 
 type CategoriesAdminProps = {
-  adminNominees: AdminNomineeDto[];
-  categories: AwardCategoryDto[];
   eventId: string | null;
   loading: boolean;
   onUpdate: () => Promise<void>;
-  votes: AdminVoteAuditRowDto[];
 };
 
 type CategoryFormState = {
@@ -497,16 +492,41 @@ function CategoryEditorSheet({
 }
 
 export function CategoriesAdmin({
-  adminNominees,
-  categories,
   eventId,
   loading,
   onUpdate,
-  votes,
 }: Readonly<CategoriesAdminProps>) {
   const [sheetState, setSheetState] = useState<CategorySheetState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AwardCategoryDto | null>(null);
   const [form, setForm] = useState<CategoryFormState>(() => buildInitialForm(1));
+
+  const categoriesQuery = useQuery({
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.adminGetCategories(eventId!),
+    queryKey: ["canhoes", "admin", "categories", eventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const nominationsSummaryQuery = useQuery({
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.getAdminNominationsSummary(eventId!),
+    queryKey: ["canhoes", "admin", "nominations-summary", eventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const votesQuery = useQuery({
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.loadAllAdminVotes(eventId!),
+    queryKey: ["canhoes", "admin", "votes", eventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
+  const nominationsSummary = useMemo(() => nominationsSummaryQuery.data ?? [], [nominationsSummaryQuery.data]);
+  const votes = useMemo(() => votesQuery.data ?? [], [votesQuery.data]);
 
   const sortedCategories = useMemo(
     () =>
@@ -524,7 +544,7 @@ export function CategoriesAdmin({
   ).length;
 
   const categoryUsageById = useMemo(() => {
-    const nomineeCounts = adminNominees.reduce<Record<string, number>>((acc, nominee) => {
+    const nomineeCounts = nominationsSummary.reduce<Record<string, number>>((acc, nominee) => {
       if (!nominee.categoryId) return acc;
       acc[nominee.categoryId] = (acc[nominee.categoryId] ?? 0) + 1;
       return acc;
@@ -545,7 +565,10 @@ export function CategoriesAdmin({
         ),
       ])
     ) as Record<string, CategoryUsage>;
-  }, [adminNominees, sortedCategories, votes]);
+  }, [nominationsSummary, sortedCategories, votes]);
+
+  const isLoading = loading || categoriesQuery.isLoading || nominationsSummaryQuery.isLoading || votesQuery.isLoading;
+  const queryError = categoriesQuery.error ?? nominationsSummaryQuery.error ?? votesQuery.error;
 
   const createCategory = useMutation({
     mutationFn: (payload: CreateAwardCategoryRequest) =>
@@ -636,6 +659,30 @@ export function CategoriesAdmin({
     return <AdminStateMessage>Falta uma edicao ativa para gerir categorias.</AdminStateMessage>;
   }
 
+  if (queryError) {
+    logFrontendError("CategoriesAdmin.query", queryError, { eventId });
+    return (
+      <AdminStateMessage
+        tone="error"
+        action={
+          <Button
+            type="button"
+            onClick={() => void Promise.all([
+              categoriesQuery.refetch(),
+              nominationsSummaryQuery.refetch(),
+              votesQuery.refetch(),
+            ])}
+            className={ADMIN_OUTLINE_BUTTON_CLASS}
+          >
+            Tentar novamente
+          </Button>
+        }
+      >
+        Nao foi possivel carregar as categorias.
+      </AdminStateMessage>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <AdminSectionSummary
@@ -680,15 +727,15 @@ export function CategoriesAdmin({
         </CardHeader>
 
         <CardContent className="space-y-3">
-          {loading ? <AdminStateMessage>A carregar categorias...</AdminStateMessage> : null}
+          {isLoading ? <AdminStateMessage>A carregar categorias...</AdminStateMessage> : null}
 
-          {!loading && sortedCategories.length === 0 ? (
+          {!isLoading && sortedCategories.length === 0 ? (
             <AdminStateMessage variant="panel">
               Ainda nao existem categorias oficiais nesta edicao.
             </AdminStateMessage>
           ) : null}
 
-          {!loading && sortedCategories.length > 0 ? (
+          {!isLoading && sortedCategories.length > 0 ? (
             <CategoryList
               categories={sortedCategories}
               categoryUsageById={categoryUsageById}

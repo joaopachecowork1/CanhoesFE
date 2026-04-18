@@ -1,29 +1,12 @@
 import { cn } from "@/lib/utils";
-
-/**
- * State message component for displaying loading, empty, or disabled states.
- * Uses paper surfaces so the admin reads consistently against dark chrome.
- *
- * @param variant - Type of message: 'page' (full page), 'panel' (in panel), 'card' (in card)
- * @param tone - Visual tone: 'default', 'warning', 'error'
- * @param children - Message text to display
- * @example
- * ```tsx
- * <AdminStateMessage variant="page">Carregando propostas...</AdminStateMessage>
- * <AdminStateMessage variant="panel" tone="warning">Nenhuma proposta encontrada.</AdminStateMessage>
- * ```
- */
-export function AdminStateMessage({
-  action,
-  children,
-  variant = "panel",
-  tone = "default",
-}: Readonly<{
+type AdminStateMessageProps = {
   action?: React.ReactNode;
   children: React.ReactNode;
   variant?: "page" | "panel" | "card";
   tone?: "default" | "warning" | "error";
-}>) {
+};
+
+export function AdminStateMessage({ action, children, variant = "panel", tone = "default" }: Readonly<AdminStateMessageProps>) {
   const styles = {
     page:
       "flex min-h-[50vh] items-center justify-center rounded-[var(--radius-lg-token)] border border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper)] px-5 py-8 text-center text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",

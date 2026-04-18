@@ -1,12 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
+import { logFrontendError } from "@/lib/errors";
 import { adminCopy } from "@/lib/canhoesCopy";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+
+import { AdminStateMessage } from "./AdminStateMessage";
 
 type VoteAuditRow = {
   categoryId: string;
@@ -18,14 +24,11 @@ type VoteAuditRow = {
 };
 
 type Props = {
-  votes: VoteAuditRow[];
-  /** @deprecated Category names now resolved in vote payload from backend */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  categories?: any[];
+  eventId: string | null;
   loading: boolean;
 };
 
-function VotesAuditShell({ children }: Readonly<{ children: React.ReactNode }>) {
+function VotesAuditShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <article className="canhoes-paper-panel relative overflow-hidden rounded-[var(--radius-md-token)] px-4 py-3.5 text-[var(--ink-primary)]">
       <CardHeader className="space-y-1">
@@ -55,8 +58,18 @@ function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
   );
 }
 
-export function VotesAudit({ votes, loading }: Readonly<Props>) {
+export function VotesAudit({ eventId, loading }: Readonly<Props>) {
   const [search, setSearch] = useState("");
+
+  const votesQuery = useQuery({
+    enabled: Boolean(eventId),
+    queryFn: () => canhoesEventsRepo.loadAllAdminVotes(eventId!),
+    queryKey: ["canhoes", "admin", "votes", eventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const votes = useMemo(() => votesQuery.data ?? [], [votesQuery.data]);
 
   const filteredVotes = useMemo(() => {
     if (!search.trim()) return votes;
@@ -70,11 +83,24 @@ export function VotesAudit({ votes, loading }: Readonly<Props>) {
     );
   }, [votes, search]);
 
-  if (loading) {
+  if (!eventId) {
+    return <AdminStateMessage>Falta uma edicao ativa para consultar votos.</AdminStateMessage>;
+  }
+
+  if (loading || votesQuery.isLoading) {
     return (
       <VotesAuditShell>
         <VotesAuditState message={adminCopy.audit.loading} />
       </VotesAuditShell>
+    );
+  }
+
+  if (votesQuery.error) {
+    logFrontendError("VotesAudit.query", votesQuery.error, { eventId });
+    return (
+      <AdminStateMessage tone="error" action={<Button onClick={() => void votesQuery.refetch()}>Tentar novamente</Button>}>
+        Nao foi possivel carregar a auditoria de votos.
+      </AdminStateMessage>
     );
   }
 

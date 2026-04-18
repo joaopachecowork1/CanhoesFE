@@ -10,15 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 
-function AdminStateCard({
-  action,
-  description,
-  title,
-}: Readonly<{
-  action?: ReactNode;
-  description: string;
-  title: string;
-}>) {
+function AdminStateCard({ action, description, title }: Readonly<{ action?: ReactNode; description: string; title: string }>) {
   return (
     <section className="canhoes-paper-panel mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
@@ -34,19 +26,10 @@ function AdminStateCard({
 }
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
-  const {
-    loading,
-    profileError,
-    isLogged,
-    refreshProfile,
-    user,
-    loginGoogle,
-    logout,
-  } = useAuth();
+  const { loading, profileError, isLogged, refreshProfile, user, loginGoogle, logout } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const router = useRouter();
 
-  // Unified loading state
   if (loading || (isLogged && !user) || adminLoading) {
     return (
       <AdminStateCard

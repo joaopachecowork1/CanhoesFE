@@ -4,25 +4,15 @@ import type { ComponentProps, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ImageOff, Upload } from "lucide-react";
 
-import type { EventPhaseDto, NomineeDto } from "@/lib/api/types";
+import type { NomineeDto } from "@/lib/api/types";
+import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { absMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 
-export function formatEventPhaseLabel(phaseType?: EventPhaseDto["type"]) {
-  switch (phaseType) {
-    case "DRAW":
-      return "Sorteio";
-    case "PROPOSALS":
-      return "Propostas";
-    case "VOTING":
-      return "Votacao";
-    case "RESULTS":
-      return "Resultados";
-    default:
-      return "Desconhecida";
-  }
+export function formatEventPhaseLabel(phaseType?: string | null) {
+  return getPhaseLabel(phaseType);
 }
 
 export function getNomineeStatusBadgeVariant(status: NomineeDto["status"]) {

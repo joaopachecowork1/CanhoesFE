@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge } from "@/components/ui/badge";
 
 export function AdminReviewCard({
@@ -7,10 +9,10 @@ export function AdminReviewCard({
   status,
   title,
 }: Readonly<{
-  actions?: React.ReactNode;
-  children?: React.ReactNode;
+  actions?: ReactNode;
+  children?: ReactNode;
   meta?: string;
-  status?: React.ReactNode;
+  status?: ReactNode;
   title: string;
 }>) {
   return (

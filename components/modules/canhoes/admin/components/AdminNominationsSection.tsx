@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import type { AdminNomineeDto, AwardCategoryDto } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import { formatDateTimeUtc } from "./dateUtils";
-import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
+import { AdminStateMessage } from "./AdminStateMessage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,12 +85,12 @@ function getNominationStatusIcon(status: NominationStatus) {
 }
 
 export function AdminNominationsSection({
-  categories,
   eventId,
+  loading,
   initialRows,
 }: Readonly<{
-  categories: AwardCategoryDto[];
   eventId: string | null;
+  loading: boolean;
   initialRows?: AdminNomineeDto[];
 }>) {
   const queryClient = useQueryClient();
@@ -100,25 +100,67 @@ export function AdminNominationsSection({
   const [selectedNominationId, setSelectedNominationId] = useState<string | null>(null);
   const queryEventId = eventId ?? "";
 
-  const nominationsQuery = useQuery({
-    queryKey: ["admin-nominations", queryEventId],
+  const categoriesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetNominationsWithAuthors(queryEventId),
-    initialData: initialRows,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (!data) return false;
-      const hasPending = data.some((nomination) => nomination.status === "pending");
-      return hasPending ? 30_000 : false;
-    },
+    queryFn: () => canhoesEventsRepo.adminGetCategories(queryEventId),
+    queryKey: ["canhoes", "admin", "categories", queryEventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
   });
 
+  const nominationsQuery = useQuery({
+    enabled: Boolean(eventId),
+    initialData: initialRows?.length ? initialRows : undefined,
+    queryFn: () => canhoesEventsRepo.loadAllAdminNominations(queryEventId),
+    queryKey: ["canhoes", "admin", "nominations", queryEventId],
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!Array.isArray(data) || data.length === 0) return false;
+      return data.some((nomination) => nomination.status === "pending") ? 30_000 : false;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const categories = categoriesQuery.data ?? [];
+  const nominations = useMemo(
+    () => (Array.isArray(nominationsQuery.data) ? nominationsQuery.data : []),
+    [nominationsQuery.data]
+  );
+
+  const statusCounts = useMemo(
+    () =>
+      nominations.reduce(
+        (accumulator, nomination) => {
+          accumulator[nomination.status]++;
+          return accumulator;
+        },
+        { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
+      ),
+    [nominations]
+  );
+
+  const filteredNominations = useMemo(() => {
+    return nominations
+      .filter((nomination) => (statusFilter === "all" ? true : nomination.status === statusFilter))
+      .filter((nomination) => categoryFilter === "all" ? true : nomination.categoryId === categoryFilter)
+      .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
+  }, [categoryFilter, nominations, statusFilter]);
+
+  const selectedNomination = useMemo(
+    () => filteredNominations.find((nomination) => nomination.id === selectedNominationId) ?? null,
+    [filteredNominations, selectedNominationId]
+  );
+
+  const isLoading = loading || categoriesQuery.isLoading || nominationsQuery.isLoading;
+  const queryError = nominationsQuery.error ?? categoriesQuery.error;
+
   const invalidate = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-nominations", queryEventId] }),
-      queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId] }),
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin-bootstrap", queryEventId] }),
-    ]);
+    await queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] });
+  };
+
+  const refresh = async () => {
+    await Promise.all([categoriesQuery.refetch(), nominationsQuery.refetch()]);
   };
 
   const approveNomination = useMutation({
@@ -160,38 +202,6 @@ export function AdminNominationsSection({
     },
   });
 
-  const nominations = useMemo(() => nominationsQuery.data ?? [], [nominationsQuery.data]);
-
-  const statusCounts = useMemo(
-    () =>
-      nominations.reduce(
-        (accumulator, nomination) => {
-          accumulator[nomination.status]++;
-          return accumulator;
-        },
-        { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
-      ),
-    [nominations]
-  );
-
-  const filteredNominations = useMemo(() => {
-    return nominations
-      .filter((nomination) => {
-        if (statusFilter === "all") return true;
-        return nomination.status === statusFilter;
-      })
-      .filter((nomination) => {
-        if (categoryFilter === "all") return true;
-        return nomination.categoryId === categoryFilter;
-      })
-      .sort((left, right) => right.createdAtUtc.localeCompare(left.createdAtUtc));
-  }, [categoryFilter, nominations, statusFilter]);
-
-  const selectedNomination = useMemo(
-    () => filteredNominations.find((nomination) => nomination.id === selectedNominationId) ?? null,
-    [filteredNominations, selectedNominationId]
-  );
-
   const anyMutationPending =
     approveNomination.isPending || rejectNomination.isPending || setCategory.isPending;
 
@@ -199,20 +209,17 @@ export function AdminNominationsSection({
     return <AdminStateMessage>Falta uma edicao ativa para moderar nomeacoes.</AdminStateMessage>;
   }
 
-  if (nominationsQuery.isLoading) {
+  if (isLoading && nominations.length === 0) {
     return <AdminStateMessage>A carregar nomeacoes...</AdminStateMessage>;
   }
 
-  if (nominationsQuery.error) {
-    logFrontendError("AdminNominationsSection.query", nominationsQuery.error, { eventId });
+  if (queryError) {
+    logFrontendError("AdminNominationsSection.query", queryError, { eventId });
     return (
       <AdminStateMessage
         tone="error"
         action={
-          <Button
-            onClick={() => void nominationsQuery.refetch()}
-            className={ADMIN_OUTLINE_BUTTON_CLASS}
-          >
+          <Button onClick={() => void refresh()} className={ADMIN_OUTLINE_BUTTON_CLASS}>
             Tentar novamente
           </Button>
         }
@@ -239,9 +246,7 @@ export function AdminNominationsSection({
               {(["all", "pending", "approved", "rejected"] as const).map((status) => {
                 const isActive = statusFilter === status;
                 const badgeCount =
-                  status === "all"
-                    ? nominations.length
-                    : statusCounts[status as NominationStatus];
+                  status === "all" ? nominations.length : statusCounts[status as NominationStatus];
 
                 return (
                   <Button
@@ -300,7 +305,10 @@ export function AdminNominationsSection({
           {filteredNominations.length === 0 ? (
             <AdminStateMessage variant="panel">
               Fila limpa - nenhuma nomeacao{" "}
-              {statusFilter === "all" ? "disponivel neste filtro" : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}.
+              {statusFilter === "all"
+                ? "disponivel neste filtro"
+                : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}
+              .
             </AdminStateMessage>
           ) : (
             <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] p-2">
@@ -383,9 +391,7 @@ export function AdminNominationsSection({
             </AdminDetailPanel>
 
             <div className="space-y-2">
-              <p className="text-xs font-medium text-[var(--ink-muted)]">
-                Mover para categoria
-              </p>
+              <p className="text-xs font-medium text-[var(--ink-muted)]">Mover para categoria</p>
               <Select
                 value={selectedNomination.categoryId ?? "none"}
                 onValueChange={(value) =>

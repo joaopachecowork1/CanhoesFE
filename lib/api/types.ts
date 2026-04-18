@@ -446,14 +446,6 @@ export type EventAdminBootstrapDto = {
   events: EventSummaryDto[];
   state: EventAdminStateDto;
   counts: AdminListCountsDto;
-  categories?: AwardCategoryDto[] | null;
-  nominees?: NomineeDto[] | null;
-  adminNominees?: AdminNomineeDto[] | null;
-  proposals?: AdminProposalsHistoryDto | null;
-  votes?: AdminVotesDto | null;
-  members?: PublicUserDto[] | null;
-  secretSanta?: EventAdminSecretSantaStateDto | null;
-  officialResults?: AdminOfficialResultsDto | null;
 };
 
 export type AdminListCountsDto = {

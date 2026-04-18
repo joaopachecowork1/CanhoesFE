@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { CategoryProposalDto, MeasureProposalDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
@@ -45,33 +45,15 @@ export function usePendingProposals(eventId: string | null): UsePendingProposals
     refetchOnWindowFocus: false,
   });
 
-  // Mutation para invalidar queries após ações de moderação
-  const invalidateMutation = useMutation<void, Error, void>({
-    mutationFn: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "category-proposals", "pending", eventId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "measure-proposals", "pending", eventId],
-        }),
-        // Também invalida o bootstrap para atualizar counts
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin-bootstrap", eventId],
-        }),
-      ]);
-    },
-  });
-
   const refresh = useCallback(async () => {
-    await invalidateMutation.mutateAsync();
-  }, [invalidateMutation]);
+    await queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] });
+  }, [queryClient]);
 
   return {
     categoryProposals: categoryQuery.data ?? [],
     measureProposals: measureQuery.data ?? [],
     loading: categoryQuery.isLoading || measureQuery.isLoading,
-    error: categoryQuery.error ?? measureQuery.error ?? invalidateMutation.error ?? null,
+    error: categoryQuery.error ?? measureQuery.error ?? null,
     refresh,
   };
 }

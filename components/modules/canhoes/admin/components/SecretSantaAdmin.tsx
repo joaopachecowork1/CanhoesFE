@@ -37,12 +37,12 @@ export function SecretSantaAdmin({
 }: Readonly<SecretSantaAdminProps>) {
   const [eventCode, setEventCode] = useState(() => buildDefaultEventCode(eventId));
   const [busy, setBusy] = useState<"draw" | "refresh" | null>(null);
-  let drawButtonLabel: string = adminCopy.secretSanta.draw;
-  if (busy === "draw") {
-    drawButtonLabel = adminCopy.secretSanta.drawing;
-  } else if (state?.hasDraw) {
-    drawButtonLabel = adminCopy.secretSanta.redraw;
-  }
+  const drawButtonLabel =
+    busy === "draw"
+      ? adminCopy.secretSanta.drawing
+      : state?.hasDraw
+        ? adminCopy.secretSanta.redraw
+        : adminCopy.secretSanta.draw;
 
   useEffect(() => {
     setEventCode(state?.eventCode || buildDefaultEventCode(eventId));
@@ -73,9 +73,7 @@ export function SecretSantaAdmin({
       await onUpdate();
     } catch (error) {
       logFrontendError("Admin.SecretSanta.refresh", error, { eventId });
-      toast.error(
-        getErrorMessage(error, "Nao foi possivel atualizar o estado do sorteio.")
-      );
+      toast.error(getErrorMessage(error, "Nao foi possivel atualizar o estado do sorteio."));
     } finally {
       setBusy(null);
     }

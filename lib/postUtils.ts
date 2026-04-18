@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import type { FeedSortOrder } from "@/hooks/useHubFeed";
+
 /**
  * Parse post text into title and body (Reddit-style).
  *
@@ -54,3 +56,9 @@ export function useRelativeTime(utcString: string): string {
 
   return formatRelativeTime(utcString);
 }
+
+export const HUB_FEED_SORT_OPTIONS: ReadonlyArray<{ label: string; value: FeedSortOrder }> = [
+  { label: "🔥 Popular", value: "hot" },
+  { label: "🕐 Novo", value: "new" },
+  { label: "⭐ Topo", value: "top" },
+];

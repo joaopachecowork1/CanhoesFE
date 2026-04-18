@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import type { EventSummaryDto } from "@/lib/api/types";
-import { REFRESH_EVENT_OVERVIEW_EVENT, pickActiveEvent } from "@/lib/canhoesEvent";
+import { pickActiveEvent } from "@/lib/canhoesEvent";
 import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -19,8 +19,6 @@ function normalizeEventsResponse(payload: unknown): EventSummaryDto[] {
  * Uses TanStack Query to deduplicate requests across components.
  */
 export function useEventOverview() {
-  const queryClient = useQueryClient();
-
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["eventOverview"],
     queryFn: async () => {
@@ -51,15 +49,6 @@ export function useEventOverview() {
   const refresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
-
-  useEffect(() => {
-    const handleRefresh = () => {
-      void queryClient.invalidateQueries({ queryKey: ["eventOverview"] });
-    };
-
-    globalThis.addEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
-    return () => globalThis.removeEventListener(REFRESH_EVENT_OVERVIEW_EVENT, handleRefresh);
-  }, [queryClient]);
 
   let resolvedError: Error | null = null;
   if (error instanceof Error) {

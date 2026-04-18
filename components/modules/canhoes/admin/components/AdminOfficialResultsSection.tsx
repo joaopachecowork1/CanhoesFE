@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Award, BarChart2, ChevronDown, ChevronUp, Medal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-import type { AdminOfficialResultsDto } from "@/lib/api/types";
+import type { AdminCategoryResultDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { cn } from "@/lib/utils";
@@ -64,7 +64,7 @@ function ResultsCategoryButton({
   totalMembers,
   onSelect,
 }: Readonly<{
-  category: AdminOfficialResultsDto["categories"][number];
+  category: AdminCategoryResultDto;
   isSelected: boolean;
   totalMembers: number;
   onSelect: (categoryId: string) => void;
@@ -93,7 +93,7 @@ function ResultsNomineeBar({
   index,
   totalVotes,
 }: Readonly<{
-  nominee: AdminOfficialResultsDto["categories"][number]["nominees"][number];
+  nominee: AdminCategoryResultDto["nominees"][number];
   index: number;
   totalVotes: number;
 }>) {
@@ -121,7 +121,7 @@ function ResultsNomineeBar({
 function ResultsVotersList({
   nominees,
 }: Readonly<{
-  nominees: AdminOfficialResultsDto["categories"][number]["nominees"];
+  nominees: AdminCategoryResultDto["nominees"];
 }>) {
   return (
     <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
@@ -137,10 +137,10 @@ function ResultsVotersList({
 
 export function AdminOfficialResultsSection({
   eventId,
-  initialResults,
+  memberCount,
 }: Readonly<{
   eventId: string | null;
-  initialResults?: AdminOfficialResultsDto;
+  memberCount: number;
 }>) {
   const isAdmin = useIsAdmin();
   const [isVotersVisible, setIsVotersVisible] = useState(false);
@@ -148,16 +148,14 @@ export function AdminOfficialResultsSection({
   const queryEventId = eventId ?? "";
 
   const resultsQuery = useQuery({
-    queryKey: ["admin-official-results", queryEventId],
+    queryKey: ["canhoes", "admin", "official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
-    queryFn: () => canhoesEventsRepo.adminGetOfficialResults(queryEventId),
-    initialData: initialResults,
+    queryFn: () => canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId),
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
   });
 
-  const resultCategories = useMemo(
-    () => resultsQuery.data?.categories ?? [],
-    [resultsQuery.data]
-  );
+  const resultCategories = useMemo(() => resultsQuery.data ?? [], [resultsQuery.data]);
 
   const selectedCategory = useMemo(
     () =>
@@ -191,7 +189,7 @@ export function AdminOfficialResultsSection({
     return <AdminStateMessage>A carregar resultados oficiais...</AdminStateMessage>;
   }
 
-  if (!resultsQuery.data) {
+  if (resultsQuery.error) {
     return (
       <AdminStateMessage
         tone="warning"
@@ -201,12 +199,14 @@ export function AdminOfficialResultsSection({
           </Button>
         }
       >
-        Sem resultados para mostrar neste momento.
+        Nao foi possivel carregar os resultados oficiais.
       </AdminStateMessage>
     );
   }
 
-  const results = resultsQuery.data;
+  const refreshedAt = resultsQuery.dataUpdatedAt
+    ? new Date(resultsQuery.dataUpdatedAt).toLocaleString("pt-PT")
+    : null;
 
   return (
     <div className="space-y-4">
@@ -217,26 +217,24 @@ export function AdminOfficialResultsSection({
             <BarChart2 className="h-4 w-4" />
             Resultados oficiais
           </CardTitle>
-          <p className="text-xs text-[var(--ink-muted)]">
-            Gerado em {new Date(results.generatedAt).toLocaleString("pt-PT")}
-          </p>
+          {refreshedAt ? <p className="text-xs text-[var(--ink-muted)]">Atualizado em {refreshedAt}</p> : null}
         </CardHeader>
       </Card>
 
-      {results.categories.length === 0 ? (
+      {resultCategories.length === 0 ? (
         <AdminStateMessage variant="panel">
           Ainda nao existem resultados oficiais para esta edicao.
         </AdminStateMessage>
       ) : null}
 
-      {results.categories.length > 0 ? (
+      {resultCategories.length > 0 ? (
         <AdminListPanel>
-          {results.categories.map((category) => (
+          {resultCategories.map((category) => (
             <ResultsCategoryButton
               key={category.categoryId}
               category={category}
               isSelected={category.categoryId === selectedCategoryId}
-              totalMembers={results.totalMembers}
+              totalMembers={memberCount}
               onSelect={setSelectedCategoryId}
             />
           ))}
@@ -250,7 +248,7 @@ export function AdminOfficialResultsSection({
         title={selectedCategory?.categoryName ?? ""}
         description={
           selectedCategory
-            ? `${selectedCategory.totalVotes}/${results.totalMembers} membros votaram (${Math.round(
+            ? `${selectedCategory.totalVotes}/${memberCount} membros votaram (${Math.round(
                 selectedCategory.participationRate * 100
               )}%)`
             : undefined

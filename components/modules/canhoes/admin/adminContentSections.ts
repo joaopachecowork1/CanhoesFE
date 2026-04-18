@@ -1,6 +1,6 @@
 import { BarChart2, FolderTree, Gavel, type LucideIcon } from "lucide-react";
 
-import { createAdminSectionRegistry } from "./adminSectionRegistry";
+import type { AdminModuleKey } from "@/lib/api/types";
 
 export type AdminContentSectionId = "queue" | "categorias" | "resultados";
 
@@ -20,16 +20,13 @@ export type AdminContentSectionItem = {
   label: string;
 };
 
-const ADMIN_CONTENT_SECTION_REGISTRY = createAdminSectionRegistry<
-  AdminContentSectionId,
-  AdminContentSectionCountContext
->([
+export const ADMIN_CONTENT_SECTIONS = [
   {
     id: "queue",
     label: "Queue",
     description: "Propostas pendentes e moderacao prioritaria.",
     icon: Gavel,
-    count: (context) =>
+    count: (context: AdminContentSectionCountContext) =>
       context.pendingNominationsCount +
       context.pendingCategoryProposalsCount +
       context.pendingMeasureProposalsCount,
@@ -39,29 +36,50 @@ const ADMIN_CONTENT_SECTION_REGISTRY = createAdminSectionRegistry<
     label: "Categorias",
     description: "CRUD das categorias oficiais e campos relacionados.",
     icon: FolderTree,
-    count: (context) => context.categoriesCount,
+    count: (context: AdminContentSectionCountContext) => context.categoriesCount,
   },
   {
     id: "resultados",
     label: "Resultados",
     description: "Resultados oficiais e auditoria isolados da moderacao.",
     icon: BarChart2,
-    count: (context) => context.resultsCount,
+    count: (context: AdminContentSectionCountContext) => context.resultsCount,
   },
-] as const);
+] as const;
 
-export const ADMIN_CONTENT_SECTION_IDS = ADMIN_CONTENT_SECTION_REGISTRY.ids;
+export const ADMIN_CONTENT_SECTION_IDS = ADMIN_CONTENT_SECTIONS.map((section) => section.id) as readonly AdminContentSectionId[];
 
 export function isAdminContentSectionId(value: string): value is AdminContentSectionId {
-  return ADMIN_CONTENT_SECTION_REGISTRY.isId(value);
+  return ADMIN_CONTENT_SECTION_IDS.includes(value as AdminContentSectionId);
 }
 
 export function buildAdminContentSectionItems(
   context: Readonly<AdminContentSectionCountContext>
 ): AdminContentSectionItem[] {
-  return ADMIN_CONTENT_SECTION_REGISTRY.buildItems(context);
+  return ADMIN_CONTENT_SECTIONS.map((section) => ({
+    id: section.id,
+    label: section.label,
+    description: section.description,
+    icon: section.icon,
+    count: section.count(context),
+  }));
 }
 
 export function getDefaultAdminContentSection(): AdminContentSectionId {
   return "queue";
 }
+
+export const QUICK_ADMIN_MODULE_ORDER: readonly AdminModuleKey[] = [
+  "feed",
+  "nominees",
+  "categories",
+  "secretSanta",
+] as const;
+
+export const ADVANCED_ADMIN_MODULE_ORDER: readonly AdminModuleKey[] = [
+  "wishlist",
+  "voting",
+  "stickers",
+  "measures",
+  "gala",
+] as const;

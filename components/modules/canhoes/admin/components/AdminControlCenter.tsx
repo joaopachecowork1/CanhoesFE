@@ -34,6 +34,10 @@ import {
   AdminDetailSheet,
 } from "./adminContentUi";
 import { AdminStateMessage } from "./AdminStateMessage";
+import {
+  ADVANCED_ADMIN_MODULE_ORDER,
+  QUICK_ADMIN_MODULE_ORDER,
+} from "../adminContentSections";
 
 export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
   PROPOSALS: "Nomeações",
@@ -44,21 +48,6 @@ export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
 
 export const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
 
-export const QUICK_MODULE_ORDER: readonly AdminModuleKey[] = [
-  "feed",
-  "nominees",
-  "categories",
-  "secretSanta",
-] as const;
-
-export const ADVANCED_MODULE_ORDER: readonly AdminModuleKey[] = [
-  "wishlist",
-  "voting",
-  "stickers",
-  "measures",
-  "gala",
-] as const;
-
 export function formatPhaseLabel(phaseType: EventPhaseDto["type"] | null | undefined) {
   if (!phaseType) return "Sem fase";
   return PHASE_LABELS[phaseType];
@@ -68,9 +57,7 @@ export function selectModuleItems(
   order: readonly AdminModuleKey[],
   itemsByKey: Partial<Record<AdminModuleKey, ModuleVisibilityItem>>
 ) {
-  return order
-    .map((key) => itemsByKey[key])
-    .filter((item): item is ModuleVisibilityItem => Boolean(item));
+  return order.map((key) => itemsByKey[key]).filter((item): item is ModuleVisibilityItem => Boolean(item));
 }
 
 export type SettingsFeedbackState = {
@@ -138,16 +125,20 @@ export function AdminControlCenter({
 
   const moduleItemsByKey = useMemo(() => buildModuleItemsByKey(moduleItems), [moduleItems]);
   const quickModuleItems = useMemo(
-    () => selectModuleItems(QUICK_MODULE_ORDER, moduleItemsByKey),
+    () => selectModuleItems(QUICK_ADMIN_MODULE_ORDER, moduleItemsByKey),
     [moduleItemsByKey]
   );
   const advancedModuleItems = useMemo(
-    () => selectModuleItems(ADVANCED_MODULE_ORDER, moduleItemsByKey),
+    () => selectModuleItems(ADVANCED_ADMIN_MODULE_ORDER, moduleItemsByKey),
     [moduleItemsByKey]
   );
 
   if (!state) {
-    return <AdminStateMessage variant="panel">Falta uma edição ativa para abrir os controlos.</AdminStateMessage>;
+    return (
+      <AdminStateMessage variant="panel">
+        Falta uma edição ativa para abrir os controlos.
+      </AdminStateMessage>
+    );
   }
 
   const currentState = state;
@@ -305,11 +296,8 @@ export function AdminControlCenter({
 export type FeedbackTone = "default" | "error" | "success";
 
 export const SELECT_TRIGGER_CLASS = ADMIN_SELECT_TRIGGER_CLASS;
-
 export const SELECT_CONTENT_CLASS = ADMIN_SELECT_CONTENT_CLASS;
-
 export const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
-
 export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =

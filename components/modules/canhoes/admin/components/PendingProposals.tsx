@@ -48,18 +48,7 @@ type CategoryDraft = { description: string; name: string };
 type ProposalCounts = Record<ProposalStatus, number> & { all: number };
 type ProposalType = "category" | "measure";
 
-export type PendingProposalField = {
-  disabled?: boolean;
-  icon: "description" | "measure" | "name";
-  id: string;
-  label: string;
-  multiline?: boolean;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  value: string;
-};
-
-export type PendingProposalCard = {
+type PendingProposalCard = {
   deleteIcon?: "trash";
   deleteLabel?: string;
   id: string;
@@ -75,7 +64,7 @@ export type PendingProposalCard = {
   saveLabel: string;
   status: ProposalStatus;
   title: string;
-  fields: PendingProposalField[];
+  fields: Array<{ disabled?: boolean; icon: "description" | "measure" | "name"; id: string; label: string; multiline?: boolean; onChange: (value: string) => void; placeholder?: string; value: string }>;
 };
 
 type PendingProposalPanel = {
@@ -158,7 +147,7 @@ function renderProposalPanelState(
   return hasItems ? null : <AdminStateMessage variant="panel">{emptyMessage}</AdminStateMessage>;
 }
 
-function ProposalFieldInput({ field }: Readonly<{ field: PendingProposalField }>) {
+function ProposalFieldInput({ field }: Readonly<{ field: { disabled?: boolean; icon: "description" | "measure" | "name"; id: string; label: string; multiline?: boolean; onChange: (value: string) => void; placeholder?: string; value: string } }>) {
   const icon = field.icon === "name" ? (
     <FilePenLine className="h-3.5 w-3.5" />
   ) : (
