@@ -42,14 +42,15 @@ describe("AdminContentSection", () => {
   it("defaults to the queue view when no sub-section is selected", () => {
     render(
       <AdminContentSection
-        adminNominees={[]}
-        categories={[]}
         categoryProposals={[]}
+        categoriesCount={0}
         eventId="evt-1"
         loading={false}
         measureProposals={[]}
+        memberCount={0}
+        officialResultsCount={0}
+        pendingNominationCount={0}
         onUpdate={vi.fn()}
-        votes={[]}
       />
     );
 
@@ -62,14 +63,15 @@ describe("AdminContentSection", () => {
   it("updates the query string when selecting another sub-section", () => {
     render(
       <AdminContentSection
-        adminNominees={[]}
-        categories={[]}
         categoryProposals={[]}
+        categoriesCount={0}
         eventId="evt-1"
         loading={false}
         measureProposals={[]}
+        memberCount={0}
+        officialResultsCount={0}
+        pendingNominationCount={0}
         onUpdate={vi.fn()}
-        votes={[]}
       />
     );
 

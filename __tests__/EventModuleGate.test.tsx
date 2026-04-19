@@ -10,6 +10,8 @@ vi.mock("@/hooks/useEventModuleAccess", () => ({
 
 import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { useEventModuleAccess } from "@/hooks/useEventModuleAccess";
+import type { EventRouteModuleKey } from "@/hooks/useEventModuleAccess";
+import type { EventOverviewDto } from "@/lib/api/types";
 
 const mockUseEventModuleAccess = vi.mocked(useEventModuleAccess);
 
@@ -22,25 +24,39 @@ function createWrapper() {
   };
 }
 
-function makeAccess(overrides: Partial<{
+type AccessMock = {
   isLoading: boolean;
+  isFetching: boolean;
   error: Error | null;
-  event: { id: string; name: string } | null;
-  overview: { modules: Record<string, boolean>; permissions: { isAdmin: boolean } } | null;
+  event: { id: string; name: string; isActive: boolean } | null;
+  overview: EventOverviewDto | null;
   isAllowed: boolean;
-  module: { key: string; label: string; href: string };
+  module: { key: EventRouteModuleKey; label: string; href: string; description: string; group: "core" | "community" | "finale" };
   fallbackHref: string;
   fallbackLabel: string;
   refresh: () => Promise<void>;
-}> = {}) {
+};
+
+function makeAccess(overrides: Partial<AccessMock> = {}): AccessMock {
   return {
     isLoading: false,
     isFetching: false,
     error: null,
-    event: { id: "evt-1", name: "Test" },
-    overview: { modules: { voting: true }, permissions: { isAdmin: false } },
+    event: { id: "evt-1", name: "Test", isActive: true },
+    overview: {
+      event: { id: "evt-1", name: "Test", isActive: true },
+      modules: { feed: true, secretSanta: false, wishlist: false, categories: true, voting: true, gala: false, stickers: false, measures: false, nominees: false, admin: false },
+      permissions: { isAdmin: false, isMember: true, canPost: true, canSubmitProposal: false, canVote: false, canManage: false },
+      counts: { memberCount: 0, feedPostCount: 0, categoryCount: 0, pendingProposalCount: 0, wishlistItemCount: 0 },
+      hasSecretSantaDraw: false,
+      hasSecretSantaAssignment: false,
+      myWishlistItemCount: 0,
+      myProposalCount: 0,
+      myVoteCount: 0,
+      votingCategoryCount: 0,
+    },
     isAllowed: true,
-    module: { key: "voting", label: "Votacao", href: "/canhoes/votacao" },
+    module: { key: "voting", label: "Votacao", href: "/canhoes/votacao", description: "", group: "core" },
     fallbackHref: "/canhoes",
     fallbackLabel: "Evento",
     refresh: vi.fn(),

@@ -13,6 +13,7 @@ import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { useModuleVisibility, type ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -411,11 +412,14 @@ function VisibilityRow({
   pending,
 }: Readonly<VisibilityRowProps>) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2">
+    <div className={cn("flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2 text-[var(--ink-primary)]", checked && "border-[rgba(122,173,58,0.28)] bg-[rgba(122,173,58,0.08)]")}>
       <div className="min-w-0">
         <Label
           htmlFor={id}
-          className="cursor-pointer text-sm font-medium text-[var(--ink-primary)]"
+          className={cn(
+            "cursor-pointer text-sm font-medium",
+            checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-muted)]"
+          )}
         >
           {label}
         </Label>
@@ -427,7 +431,13 @@ function VisibilityRow({
             A guardar
           </span>
         ) : null}
-        <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} />
+        <Switch
+          id={id}
+          checked={checked}
+          disabled={pending}
+          onCheckedChange={onChange}
+          variant="admin"
+        />
       </div>
     </div>
   );
@@ -510,7 +520,12 @@ function AdminSettingsMainPanel({
       <CardHeader className="space-y-1.5 pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
+            <div className="flex items-center gap-2">
+              <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
+              <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none">
+                {visibleCount}/{moduleCount}
+              </Badge>
+            </div>
             <CardTitle className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-[var(--neon-green)]" />
               Evento
@@ -521,7 +536,7 @@ function AdminSettingsMainPanel({
             type="button"
             size="sm"
             variant="outline"
-            className={`gap-1.5 ${OUTLINE_BUTTON_CLASS}`}
+            className={`gap-1.5 px-3 ${OUTLINE_BUTTON_CLASS}`}
             onClick={onOpenAdvanced}
           >
             Avançado
@@ -586,7 +601,7 @@ function AdminSettingsMainPanel({
           title="Visibilidade de módulos"
           subtitle="Feed · Nomeações · Categorias · Amigos · Pendentes"
           action={
-            <Badge className="border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.9)] text-[var(--bg-paper)] shadow-none">
+            <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none">
               {visibleCount}/{moduleCount}
             </Badge>
           }
