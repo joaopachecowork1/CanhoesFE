@@ -26,12 +26,12 @@ export function ErrorAlert({
   return (
     <Alert
       className={cn(
-        "canhoes-bits-panel relative overflow-hidden border text-[rgba(255,236,231,0.94)]",
-        tone === "danger" && "canhoes-bits-panel--danger border-[rgba(224,90,58,0.24)]",
+        "surface-panel relative overflow-hidden border text-[rgba(255,236,231,0.94)]",
+        tone === "danger" && "border-[rgba(224,90,58,0.24)]",
         tone === "official" &&
-          "canhoes-bits-panel--official border-[rgba(0,255,136,0.18)] text-[rgba(245,237,224,0.94)]",
+          "border-[rgba(0,255,136,0.18)] text-[rgba(245,237,224,0.94)]",
         tone === "social" &&
-          "canhoes-bits-panel--social border-[rgba(177,140,255,0.22)] text-[rgba(245,237,224,0.94)]",
+          "border-[rgba(177,140,255,0.22)] text-[rgba(245,237,224,0.94)]",
         className
       )}
     >

@@ -15,7 +15,7 @@ export function InlineLoader({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-2 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-4 py-6 text-sm text-[var(--text-muted)]",
+        "surface-panel-soft flex items-center justify-center gap-2 px-4 py-6 text-sm text-[var(--text-muted)]",
         className
       )}
     >
