@@ -25,11 +25,16 @@ function createWrapper() {
 function makeOverview(overrides: Partial<{
   modules: Record<string, boolean>;
   isAdmin: boolean;
-  activePhase: { type: string } | null;
+  activePhase: { id: string; type: "PROPOSALS" | "VOTING" | "RESULTS" | "DRAW"; startDate: string; endDate: string; isActive: boolean } | null;
 }> = {}) {
   return {
-    event: { id: "evt-1", name: "Test Event" },
+    event: { id: "evt-1", name: "Test Event", isActive: true },
     overview: {
+      event: {
+        id: "evt-1",
+        name: "Test Event",
+        isActive: true,
+      },
       modules: {
         feed: true,
         secretSanta: false,
@@ -40,6 +45,8 @@ function makeOverview(overrides: Partial<{
         nominees: false,
         measures: false,
         gala: false,
+        admin: false,
+        results: false,
         ...overrides.modules,
       },
       permissions: {
@@ -50,6 +57,25 @@ function makeOverview(overrides: Partial<{
         canVote: false,
         canManage: false,
       },
+      counts: {
+        memberCount: 0,
+        feedPostCount: 0,
+        categoryCount: 0,
+        wishlistItemCount: 0,
+        pendingProposalCount: 0,
+        pendingNominationCount: 0,
+        pendingCategoryProposalCount: 0,
+        pendingMeasureProposalCount: 0,
+        visibleModuleCount: 0,
+      },
+      myWishlistItemCount: 0,
+      myProposalCount: 0,
+      myVoteCount: 0,
+      votingCategoryCount: 0,
+      hasSecretSantaDraw: false,
+      hasSecretSantaAssignment: false,
+      hasResults: false,
+      hasNominees: false,
       activePhase: overrides.activePhase ?? null,
     },
     isLoading: false,

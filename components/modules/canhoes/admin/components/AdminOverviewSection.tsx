@@ -8,6 +8,8 @@ import { adminCopy } from "@/lib/canhoesCopy";
 import { countVisibleModules } from "@/lib/modules";
 import type { EventAdminStateDto } from "@/lib/api/types";
 
+import { Badge } from "@/components/ui/badge";
+
 import { AdminDashboard } from "./AdminDashboard";
 import { AdminStateMessage } from "./AdminStateMessage";
 
@@ -41,14 +43,20 @@ export function AdminOverviewSection({
     <div className="space-y-4">
       <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
         <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="editorial-kicker text-[var(--moss-glow)]">Admin</p>
-            <h2 className="text-base font-semibold text-[var(--ink-primary)]">
-              Painel operacional da edição
-            </h2>
-            <p className="text-sm leading-6 text-[var(--ink-muted)]">
-              Leitura rápida do evento, da fila e dos sinais principais, sem misturar controlo com conteúdo.
-            </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <p className="editorial-kicker text-[var(--moss-glow)]">Admin</p>
+              <h2 className="text-base font-semibold text-[var(--ink-primary)]">
+                Painel operacional da edição
+              </h2>
+              <p className="text-sm leading-6 text-[var(--ink-muted)]">
+                Leitura rápida do evento, da fila e dos sinais principais, sem misturar controlo com conteúdo.
+              </p>
+            </div>
+
+            <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none sm:self-start">
+              {visibleModuleCount} módulos ativos
+            </Badge>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
@@ -70,6 +78,7 @@ export function AdminOverviewSection({
               icon={<Eye className="h-4 w-4" />}
               label="Módulos visíveis"
               value={`${visibleModuleCount}`}
+              tone={visibleModuleCount > 0 ? "highlight" : "default"}
             />
             <OverviewMetric
               icon={<Vote className="h-4 w-4" />}
