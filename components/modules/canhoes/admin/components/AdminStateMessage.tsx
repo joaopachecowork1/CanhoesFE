@@ -9,9 +9,9 @@ type AdminStateMessageProps = {
 export function AdminStateMessage({ action, children, variant = "panel", tone = "default" }: Readonly<AdminStateMessageProps>) {
   const styles = {
     page:
-      "flex min-h-[50vh] items-center justify-center rounded-[var(--radius-lg-token)] border border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper)] px-5 py-8 text-center text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
+      "flex min-h-[50vh] items-center justify-center rounded-[var(--radius-lg-token)] border border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper)] px-5 py-7 text-center text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
     panel:
-      "flex items-center justify-center rounded-[var(--radius-md-token)] border border-dashed border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper-soft)] px-4 py-8 text-center body-small text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
+      "flex items-center justify-center rounded-[var(--radius-md-token)] border border-dashed border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper-soft)] px-4 py-6 text-center body-small text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
     card: "flex items-center justify-center text-center text-[var(--ink-primary)]",
   }[variant];
 

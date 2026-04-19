@@ -63,6 +63,7 @@
    * - readable content: bg-paper*
    * - primary live controls: moss + neon green
    * - secondary cyber accent only: accent-purple*
+   * Paper surfaces are the default for long-form reading and admin/content cards.
    */
   --bg-void: var(--color-bg-base);
   --bg-deep: var(--color-bg-surface);
@@ -99,9 +100,9 @@
   --accent-purple-soft: #d7c4ff;
   --accent-purple-deep: #7a54d8;
 
-  --glow-green: 0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.25),
-    0 0 40px rgba(0, 255, 136, 0.12);
-  --glow-green-sm: 0 0 4px #00ff88, 0 0 10px rgba(0, 255, 136, 0.2);
+  --glow-green: 0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.18),
+    0 0 40px rgba(0, 255, 136, 0.08);
+  --glow-green-sm: 0 0 4px #00ff88, 0 0 10px rgba(0, 255, 136, 0.16);
   --glow-amber: 0 0 6px #ffb800, 0 0 20px rgba(255, 184, 0, 0.25);
   --glow-purple: 0 0 8px rgba(177, 140, 255, 0.45),
     0 0 22px rgba(177, 140, 255, 0.2);
@@ -244,8 +245,8 @@
   body {
     min-height: 100svh;
     background:
-      radial-gradient(circle at top center, rgba(0, 255, 136, 0.14), transparent 22rem),
-      radial-gradient(circle at bottom right, rgba(177, 140, 255, 0.08), transparent 18rem),
+      radial-gradient(circle at top center, rgba(0, 255, 136, 0.1), transparent 22rem),
+      radial-gradient(circle at bottom right, rgba(177, 140, 255, 0.06), transparent 18rem),
       linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-void) 100%);
     color: var(--text-primary);
     font-family: var(--font-body);

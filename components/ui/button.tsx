@@ -22,7 +22,7 @@ const buttonVariants = cva(
         link:
           "px-0 text-[var(--accent-purple-soft)] underline-offset-4 shadow-none hover:text-[var(--bg-paper)] hover:underline decoration-[var(--border-purple)] decoration-2 hover:underline-offset-4",
         glow:
-          "border border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--bg-paper)] shadow-[0_0_20px_rgba(0,255,136,0.06)] hover:shadow-[0_0_30px_rgba(0,255,136,0.14)] active:scale-[0.98]",
+          "border border-[var(--border-subtle)] bg-[var(--bg-deep)] text-[var(--bg-paper)] shadow-[0_0_20px_rgba(0,255,136,0.04)] hover:shadow-[0_0_24px_rgba(0,255,136,0.1)] active:scale-[0.98]",
       },
       size: {
         default: "px-4 py-3 text-sm",

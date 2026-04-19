@@ -230,10 +230,10 @@ export function AdminNominationsSection({
     <div className="space-y-4">
       <Card className={ADMIN_CONTENT_CARD_CLASS}>
         <CardHeader className="space-y-2">
-          <p className="editorial-kicker">Moderacao</p>
+          <p className="editorial-kicker">Moderação</p>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-4 w-4" />
-            Nomeacoes
+            Nomeações
           </CardTitle>
         </CardHeader>
 

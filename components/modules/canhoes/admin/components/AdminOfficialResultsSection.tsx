@@ -212,7 +212,7 @@ export function AdminOfficialResultsSection({
     <div className="space-y-4">
       <Card className={ADMIN_CONTENT_CARD_CLASS}>
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Analise</p>
+          <p className="editorial-kicker">Análise</p>
           <CardTitle className="flex items-center gap-2">
             <BarChart2 className="h-4 w-4" />
             Resultados oficiais

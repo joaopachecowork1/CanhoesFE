@@ -89,7 +89,7 @@ export function AdminMembersSection({
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
-            <AdminStateMessage>Nenhum membro nesta edicao.</AdminStateMessage>
+            <AdminStateMessage>Nenhum membro nesta edição.</AdminStateMessage>
           ) : (
             <div className="max-h-[60svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)]">
               <VirtualizedList
