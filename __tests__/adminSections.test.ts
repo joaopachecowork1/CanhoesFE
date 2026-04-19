@@ -19,10 +19,10 @@ describe("admin section registries", () => {
     expect(isAdminSectionId("invalid")).toBe(false);
 
     expect(getAdminSectionMeta().map((section) => section.id)).toEqual([
-      "conteudo",
-      "configuracoes",
-      "membros",
       "dashboard",
+      "conteudo",
+      "membros",
+      "configuracoes",
     ]);
 
     expect(getAdminSectionItem("dashboard")?.label).toBe("Resumo");
