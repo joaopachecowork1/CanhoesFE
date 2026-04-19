@@ -226,17 +226,15 @@ export function useHubFeed(eventId: string | null) {
   // Flatten all pages into a single array
   const safePosts = useMemo(
     () => postsQuery.data?.pages.flatMap((page) => page.posts) ?? [],
-    [postsQuery.data?.pages]
+    [postsQuery.data]
   );
 
-  // Apply sorting client-side (backend should handle this in future)
-  const sortedPosts = useMemo(
+  const displayedPosts = useMemo(
     () => sortPosts(safePosts, sort),
     [safePosts, sort]
   );
 
-  const displayedPosts = sortedPosts;
-  const allPostsCount = sortedPosts.length;
+  const allPostsCount = displayedPosts.length;
 
   const hasMore = postsQuery.hasNextPage ?? false;
   const isFetchingNextPage = postsQuery.isFetchingNextPage;

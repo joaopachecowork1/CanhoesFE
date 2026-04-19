@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { NumberTicker } from "@/components/animations/NumberTicker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +10,7 @@ import { HUB_REACTIONS, QUICK_REACTIONS } from "@/lib/reactions";
 import { ReactionPicker } from "./ReactionPicker";
 
 const reactionButtonGroupClassName =
-  "flex flex-wrap gap-1.5 [&>button]:border-[rgba(74,92,47,0.3)] [&>button]:bg-[rgba(255,255,255,0.07)] [&>button]:text-[var(--bg-paper)] [&>button]:shadow-[0_8px_18px_rgba(0,0,0,0.14)] [&>button:hover]:bg-[rgba(255,255,255,0.12)]";
+  "flex flex-wrap items-center gap-1.5 [&>button]:h-9 [&>button]:rounded-full [&>button]:border-[rgba(212,184,150,0.14)] [&>button]:bg-[rgba(255,255,255,0.06)] [&>button]:px-2.5 [&>button]:text-[var(--bg-paper)] [&>button]:shadow-[0_8px_18px_rgba(0,0,0,0.14)] [&>button:hover]:bg-[rgba(255,255,255,0.1)]";
 
 type HubPostActionsProps = {
   postId: string;
@@ -21,7 +23,7 @@ type HubPostActionsProps = {
   onToggleComments: (postId: string) => void;
 };
 
-export function HubPostActions({
+function HubPostActionsComponent({
   postId,
   commentCount,
   reactionCounts,
@@ -33,7 +35,6 @@ export function HubPostActions({
 }: Readonly<HubPostActionsProps>) {
   return (
     <div className={reactionButtonGroupClassName}>
-      {/* Quick reaction buttons (first 3) */}
       {QUICK_REACTIONS.map((reaction) => {
         const { emoji, label } = reaction;
         const isActive = myReactions.includes(emoji);
@@ -55,7 +56,6 @@ export function HubPostActions({
         );
       })}
 
-      {/* More reactions picker */}
       <ReactionPicker
         reactions={HUB_REACTIONS}
         myReactions={myReactions}
@@ -63,34 +63,34 @@ export function HubPostActions({
         trigger={(open) => (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="rounded-full px-1.5 text-[var(--text-muted)] hover:text-[var(--bg-paper)]"
+            className="h-9 rounded-full px-3 text-[var(--bg-paper)]"
             onClick={open}
             aria-label="Mais reações"
           >
-            <span className="text-base">😊</span>
+            <span className="text-sm">😊</span>
+            <span className="text-xs font-medium">Reagir</span>
           </Button>
         )}
       />
 
-      {/* Comments toggle */}
       <Button
         type="button"
         variant={commentsExpanded ? "secondary" : "outline"}
         size="sm"
-        className="rounded-full px-3 text-[var(--bg-paper)] hover:text-white"
+        className="h-9 rounded-full px-3 text-[var(--bg-paper)]"
         onClick={() => onToggleComments(postId)}
       >
         <span className="text-xs font-medium">
-          {commentsExpanded
-            ? "✕ Fechar comentarios"
-            : `💬 Ver comentarios (${commentCount})`}
+          {commentsExpanded ? "Fechar comentários" : `Comentários (${commentCount})`}
         </span>
       </Button>
 
-      {/* Pinned badge */}
       {isPinned ? <Badge variant="secondary">{feedCopy.post.pinned}</Badge> : null}
     </div>
   );
 }
+
+export const HubPostActions = memo(HubPostActionsComponent);
+HubPostActions.displayName = "HubPostActions";

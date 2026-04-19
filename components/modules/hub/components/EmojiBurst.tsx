@@ -3,11 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+type EmojiParticle = {
+  id: string;
+  x: number;
+  y: number;
+  scale: number;
+  tx: number;
+  ty: number;
+};
+
 type EmojiBurst = {
   id: number;
   x: number;
   y: number;
   emoji: string;
+  particles: EmojiParticle[];
 };
 
 type EmojiBurstContainerProps = {
@@ -30,39 +40,32 @@ export function EmojiBurstContainer({ bursts, onClear }: Readonly<EmojiBurstCont
     <div className="pointer-events-none fixed inset-0 z-[9998]">
       <AnimatePresence>
         {bursts.map((burst) =>
-          Array.from({ length: 7 }).map((_, i) => {
-            const angle = (Math.PI * 2 * i) / 7 + (Math.random() - 0.5) * 0.5;
-            const distance = 30 + Math.random() * 40;
-            const tx = Math.cos(angle) * distance;
-            const ty = Math.sin(angle) * distance - 20;
-
-            return (
-              <motion.span
-                key={`${burst.id}-${i}`}
-                initial={{
-                  x: burst.x,
-                  y: burst.y,
-                  scale: 0.3,
-                  opacity: 1,
-                }}
-                animate={{
-                  x: burst.x + tx,
-                  y: burst.y + ty,
-                  scale: 1 + Math.random() * 0.4,
-                  opacity: 0,
-                }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: 0.5 + Math.random() * 0.2,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                className="absolute text-lg"
-                aria-hidden="true"
-              >
-                {burst.emoji}
-              </motion.span>
-            );
-          })
+          burst.particles.map((particle) => (
+            <motion.span
+              key={particle.id}
+              initial={{
+                x: burst.x,
+                y: burst.y,
+                scale: 0.3,
+                opacity: 1,
+              }}
+              animate={{
+                x: burst.x + particle.tx,
+                y: burst.y + particle.ty,
+                scale: particle.scale,
+                opacity: 0,
+              }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+              className="absolute text-lg"
+              aria-hidden="true"
+            >
+              {burst.emoji}
+            </motion.span>
+          ))
         )}
       </AnimatePresence>
     </div>
@@ -73,13 +76,31 @@ export function EmojiBurstContainer({ bursts, onClear }: Readonly<EmojiBurstCont
  * Hook to manage emoji bursts.
  * Returns the current bursts array and a trigger function.
  */
+function createParticles(burstId: number, x: number, y: number): EmojiParticle[] {
+  return Array.from({ length: 7 }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / 7;
+    const distance = 30 + index * 4;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance - 20;
+
+    return {
+      id: `${burstId}-${index}`,
+      x,
+      y,
+      scale: 1 + index * 0.05,
+      tx,
+      ty,
+    };
+  });
+}
+
 export function useEmojiBurst() {
   const [bursts, setBursts] = useState<EmojiBurst[]>([]);
   const nextIdRef = useRef(0);
 
   const trigger = (emoji: string, x: number, y: number) => {
     const id = Date.now() + (nextIdRef.current++);
-    setBursts((prev) => [...prev, { id, emoji, x, y }]);
+    setBursts((prev) => [...prev, { id, emoji, x, y, particles: createParticles(id, x, y) }]);
   };
 
   const clear = () => setBursts([]);

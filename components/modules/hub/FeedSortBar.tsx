@@ -19,7 +19,7 @@ export function FeedSortBar({
   onSortChange,
 }: Readonly<FeedSortBarProps>) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-3 py-2">
+    <div className="surface-panel flex items-center gap-2 px-3 py-2">
       <span className="text-xs font-medium text-[var(--text-muted)]">Ordenar:</span>
       {HUB_FEED_SORT_OPTIONS.map((option) => (
         <motion.button
@@ -28,7 +28,7 @@ export function FeedSortBar({
           onClick={() => onSortChange(option.value)}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "sort-pill rounded-full px-3 py-1 text-xs font-medium transition-colors",
+            "sort-pill rounded-full px-3 py-1 text-xs font-medium",
             sort === option.value ? "sort-pill-active" : ""
           )}
         >

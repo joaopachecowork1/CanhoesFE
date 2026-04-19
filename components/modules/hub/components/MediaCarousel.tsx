@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
@@ -80,20 +80,20 @@ export function MediaCarousel({
     );
   }, [media.length, setCurrentIndex]);
 
+  const markAsFailed = useCallback((url: string) => {
+    setFailedMedia((previousState) =>
+      previousState[url] ? previousState : { ...previousState, [url]: true }
+    );
+  }, []);
+
+  const handleClick = useCallback((index: number) => {
+    onImageClick?.(index);
+  }, [onImageClick]);
+
   if (media.length === 0) return null;
 
   const maxH = aspect === "portrait" ? "max-h-[32rem]" : aspect === "video" ? "max-h-[28rem]" : "max-h-[24rem]";
   const currentImageUrl = media[currentIndex] ?? media[0];
-
-  const markAsFailed = (url: string) => {
-    setFailedMedia((previousState) =>
-      previousState[url] ? previousState : { ...previousState, [url]: true }
-    );
-  };
-
-  const handleClick = (index: number) => {
-    onImageClick?.(index);
-  };
 
   return (
     <div className={cn("w-full", className)}>

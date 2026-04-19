@@ -243,9 +243,24 @@ export const canhoesEventsRepo = {
       method: "PUT",
     }),
 
+  loadAdminMembersPage: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResultPublicUserDto>(
+      `/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`
+    ),
+
+  loadAdminNominationsPage: (
+    eventId: string,
+    skip = 0,
+    take = 50,
+    status?: "pending" | "approved" | "rejected"
+  ) =>
+    canhoesFetch<T.PagedResultAdminNomineeDto>(
+      `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${status}` : ""}`
+    ),
+
   loadAllAdminMembers: async (eventId: string) =>
     loadAllPagedRecords(
-      (skip, take) => canhoesEventsRepo.getAdminMembersPaged(eventId, skip, take),
+      (skip, take) => canhoesEventsRepo.loadAdminMembersPage(eventId, skip, take),
       (page) => page.items
     ),
 
@@ -254,8 +269,8 @@ export const canhoesEventsRepo = {
     status?: "pending" | "approved" | "rejected"
   ) =>
     loadAllPagedRecords(
-      (skip, take) => canhoesEventsRepo.getAdminNominationsPaged(eventId, skip, take, status),
-      (page) => page.nominations
+      (skip, take) => canhoesEventsRepo.loadAdminNominationsPage(eventId, skip, take, status),
+      (page) => page.items
     ),
 
   loadAllAdminVotes: async (eventId: string) =>

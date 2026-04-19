@@ -74,7 +74,7 @@ export function PostComposer({
     : "";
 
   return (
-    <section className="editorial-shell bg-circuit rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+    <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-4">
         <div className="flex flex-col gap-3">
           <div className="space-y-1">

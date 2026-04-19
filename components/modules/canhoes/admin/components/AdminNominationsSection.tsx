@@ -87,11 +87,9 @@ function getNominationStatusIcon(status: NominationStatus) {
 export function AdminNominationsSection({
   eventId,
   loading,
-  initialRows,
 }: Readonly<{
   eventId: string | null;
   loading: boolean;
-  initialRows?: AdminNomineeDto[];
 }>) {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<NominationListFilter>("pending");
@@ -110,9 +108,8 @@ export function AdminNominationsSection({
 
   const nominationsQuery = useQuery({
     enabled: Boolean(eventId),
-    initialData: initialRows?.length ? initialRows : undefined,
-    queryFn: () => canhoesEventsRepo.loadAllAdminNominations(queryEventId),
-    queryKey: ["canhoes", "admin", "nominations", queryEventId],
+    queryFn: () => canhoesEventsRepo.loadAdminNominationsPage(queryEventId, 0, 50, "pending"),
+    queryKey: ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"],
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!Array.isArray(data) || data.length === 0) return false;
@@ -126,7 +123,7 @@ export function AdminNominationsSection({
   const nominations = useMemo(
     () => (Array.isArray(nominationsQuery.data) ? nominationsQuery.data : []),
     [nominationsQuery.data]
-  );
+  ) as AdminNomineeDto[];
 
   const statusCounts = useMemo(
     () =>

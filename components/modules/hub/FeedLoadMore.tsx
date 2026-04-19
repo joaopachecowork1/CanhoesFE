@@ -23,12 +23,12 @@ export function FeedLoadMore({
     <>
       <div ref={sentinelRef} className="flex justify-center py-6">
         {isFetchingNextPage ? (
-          <div className="flex flex-col items-center gap-3">
+          <div className="surface-panel-soft flex flex-col items-center gap-3 px-4 py-3">
             <div className="skeleton-shimmer h-6 w-6 rounded-full" />
             <span className="text-xs text-[var(--text-muted)]">A carregar mais posts...</span>
           </div>
         ) : (
-          <div className="h-10 w-10 rounded-full border-2 border-dashed border-[var(--border-subtle)] animate-pulse" />
+          <div className="h-10 w-10 rounded-full border-2 border-dashed border-[var(--border-subtle)] motion-safe-smooth animate-pulse" />
         )}
       </div>
 
@@ -43,7 +43,7 @@ export function FeedLoadMore({
             onClick={onLoadMore}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="rounded-full border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-6 py-2 text-xs font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--border-moss)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+            className="surface-panel-soft px-6 py-2 text-xs font-medium text-[var(--text-muted)] hover:border-[var(--border-moss)] hover:text-[var(--text-primary)]"
             aria-label="Carregar mais posts manualmente"
           >
             Carregar mais ({Math.max(remainingCount, 0)} restantes)

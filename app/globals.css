@@ -244,12 +244,14 @@
   body {
     min-height: 100svh;
     background:
-      radial-gradient(circle at top center, rgba(0, 255, 136, 0.12), transparent 26rem),
+      radial-gradient(circle at top center, rgba(0, 255, 136, 0.14), transparent 22rem),
+      radial-gradient(circle at bottom right, rgba(177, 140, 255, 0.08), transparent 18rem),
       linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-void) 100%);
     color: var(--text-primary);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body::after {
@@ -1201,10 +1203,14 @@ h3,
   .reddit-post {
     border: 1px solid var(--border-subtle);
     background: var(--bg-deep);
-    transition: border-color 150ms ease;
+    transition: border-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
   }
   .reddit-post:hover {
     border-color: var(--border-moss);
+    box-shadow: var(--shadow-layered);
+    transform: translateY(-1px);
   }
 
   .reddit-vote-sidebar {
@@ -1262,10 +1268,13 @@ h3,
   .sort-pill {
     border: 1px solid var(--border-subtle);
     background: var(--bg-deep);
-    transition: all 150ms ease;
+    transition: border-color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
   }
   .sort-pill:hover {
     border-color: var(--border-moss);
+    transform: translateY(-1px);
   }
   .sort-pill-active {
     border-color: var(--border-moss);
@@ -1287,6 +1296,48 @@ h3,
 
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+
+  .surface-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg-token);
+    background: linear-gradient(180deg, rgba(18, 24, 11, 0.94), rgba(11, 14, 8, 0.96));
+    box-shadow: var(--shadow-panel);
+  }
+
+  .surface-panel-soft {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md-token);
+    background: var(--bg-deep);
+    box-shadow: var(--shadow-card);
+  }
+
+  .motion-safe-smooth {
+    transition-property: transform, opacity, box-shadow, border-color, background-color;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-out);
+  }
+}
+
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in-soft {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

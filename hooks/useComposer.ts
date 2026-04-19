@@ -28,16 +28,40 @@ export function useComposer({ onReset }: UseComposerOptions = {}) {
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlCacheRef = useRef<string[]>([]);
 
-  const previewUrls = useMemo(
-    () => files.map((file) => URL.createObjectURL(file)),
-    [files]
-  );
+  const previewUrls = useMemo(() => {
+    const nextUrls: string[] = [];
 
-  // Revoke object URLs on cleanup to avoid memory leaks
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const cachedUrl = previewUrlCacheRef.current[index];
+
+      if (cachedUrl) {
+        nextUrls.push(cachedUrl);
+        continue;
+      }
+
+      nextUrls.push(URL.createObjectURL(file));
+    }
+
+    return nextUrls;
+  }, [files]);
+
   useEffect(() => {
+    const previousUrls = previewUrlCacheRef.current;
+    const nextUrls = previewUrls;
+
+    previousUrls.forEach((url, index) => {
+      if (nextUrls[index] !== url) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    previewUrlCacheRef.current = nextUrls;
+
     return () => {
-      previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+      nextUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previewUrls]);
 
@@ -57,7 +81,6 @@ export function useComposer({ onReset }: UseComposerOptions = {}) {
       [...currentFiles, ...Array.from(fileList)].slice(0, MAX_MEDIA_FILES)
     );
 
-    // Reset input so the same file can be re-selected
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }

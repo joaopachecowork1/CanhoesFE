@@ -27,10 +27,11 @@ export function AdminMembersSection({
 }: Readonly<AdminMembersSectionProps>) {
   const membersQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.loadAllAdminMembers(eventId!),
-    queryKey: ["canhoes", "admin", "members", eventId],
+    queryFn: () => canhoesEventsRepo.loadAdminMembersPage(eventId!, 0, 50),
+    queryKey: ["canhoes", "admin", "members", eventId, 0, 50],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
+    select: (page) => page.items,
   });
 
   const secretSantaQuery = useQuery({
@@ -40,6 +41,8 @@ export function AdminMembersSection({
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
+
+  const members = membersQuery.data ?? [];
 
   if (!eventId) {
     return <AdminStateMessage>Falta uma edicao ativa para gerir amigos.</AdminStateMessage>;
@@ -66,8 +69,6 @@ export function AdminMembersSection({
       </AdminStateMessage>
     );
   }
-
-  const members = membersQuery.data ?? [];
 
   return (
     <div className="space-y-4">

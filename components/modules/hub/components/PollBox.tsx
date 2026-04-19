@@ -15,7 +15,7 @@ export function PollBox({
   const totalVotes = Math.max(0, poll.totalVotes || 0);
 
   return (
-    <section className="rounded-[var(--radius-lg-token)] border border-[var(--color-moss)]/15 bg-[var(--color-bg-surface)] p-4 sm:p-5">
+    <section className="surface-panel p-4 sm:p-5">
       <div className="space-y-4">
         <div className="space-y-1">
           <p className="editorial-kicker">Sondagem</p>
@@ -38,18 +38,18 @@ export function PollBox({
                 aria-pressed={isActive}
                 aria-label={`${option.text} — ${option.voteCount} votos, ${percentage}%`}
                 className={cn(
-                  "relative w-full overflow-hidden rounded-[var(--radius-md-token)] border px-4 py-3 text-left transition-colors",
+                  "relative w-full overflow-hidden rounded-[var(--radius-md-token)] border px-4 py-3 text-left motion-safe-smooth",
                   isActive
-                    ? "border-[var(--color-moss)]/35 bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
-                    : "border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-card)] hover:border-[var(--color-brown)]/30"
+                    ? "border-[var(--border-moss)]/35 bg-[var(--bg-surface)] shadow-[var(--shadow-card)]"
+                    : "border-[var(--border-subtle)] bg-[var(--bg-deep)] hover:border-[var(--border-moss)]/30"
                 )}
               >
                 <span
                   className={cn(
                     "absolute inset-y-0 left-0 rounded-[var(--radius-md-token)]",
                     isActive
-                      ? "bg-[var(--color-moss)]/18"
-                      : "bg-[var(--color-brown)]/10"
+                      ? "bg-[var(--moss)]/18"
+                      : "bg-[var(--bark)]/10"
                   )}
                   style={{ width: `${percentage}%` }}
                   role="progressbar"

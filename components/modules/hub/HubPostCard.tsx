@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
@@ -99,7 +99,7 @@ function HubPostCardComponent({
     }
   }, [openComments]);
 
-  const mediaUrls = useCallback(
+  const resolvedMediaUrls = useMemo(
     () =>
       Array.from(
         new Set(
@@ -110,12 +110,10 @@ function HubPostCardComponent({
       ),
     [post.mediaUrls, post.mediaUrl]
   );
-
-  const resolvedMediaUrls = mediaUrls();
   const reactionCounts = post.reactionCounts || {};
 
   const hasMedia = resolvedMediaUrls.length > 0;
-  const hasText = !!post.text?.trim();
+  const parsedText = useMemo(() => (post.text?.trim() ? parsePostText(post.text) : null), [post.text]);
   const displayScore = (post.likeCount ?? 0) - (post.downvoteCount ?? 0);
   const commentCount = post.commentCount ?? 0;
 
@@ -215,16 +213,13 @@ function HubPostCardComponent({
                 onAdminDelete={() => onAdminDelete(post.id)}
               />
 
-              {hasText && (() => {
-                const { title, body } = parsePostText(post.text);
-                return title ? (
+              {parsedText ? (
+                parsedText.title ? (
                   <div className="space-y-1.5">
-                    <p className="post-title text-[var(--text-primary)]">
-                      {title}
-                    </p>
-                    {body ? (
+                    <p className="post-title text-[var(--text-primary)]">{parsedText.title}</p>
+                    {parsedText.body ? (
                       <p className="post-body whitespace-pre-wrap break-words">
-                        {body}
+                        {parsedText.body}
                       </p>
                     ) : null}
                   </div>
@@ -232,8 +227,8 @@ function HubPostCardComponent({
                   <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
                     {post.text}
                   </p>
-                );
-              })()}
+                )
+              ) : null}
 
               {hasMedia ? (
                 <LazyMediaCarousel
