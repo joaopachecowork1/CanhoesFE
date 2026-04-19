@@ -74,16 +74,16 @@ export function PostComposer({
     : "";
 
   return (
-    <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
+    <section className="surface-panel px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-4">
         <div className="flex flex-col gap-3">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-[var(--neon-green)]">
+            <div className="flex items-center gap-2 text-[var(--moss-glow)]">
               <ScrollText className="h-4 w-4" />
               <span className="editorial-kicker">{feedCopy.composer.kicker}</span>
             </div>
             <div className="space-y-1">
-              <h3 className="heading-3 text-[var(--text-dark)]">
+              <h3 className="heading-3 text-[var(--text-primary)]">
                 {feedCopy.composer.title}
               </h3>
               <p className="body-small max-w-[60ch] text-[var(--text-muted)]">
@@ -137,7 +137,7 @@ export function PostComposer({
         </div>
 
         {files.length > 0 ? (
-          <div className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] p-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel)] sm:p-5">
+          <div className="surface-panel-soft p-4 text-[var(--text-primary)] sm:p-5">
             <div className="space-y-3">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">
@@ -152,7 +152,7 @@ export function PostComposer({
                 {files.map((file, fileIndex) => (
                   <div
                     key={`${file.name}-${file.size}-${fileIndex}`}
-                    className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.9),rgba(11,14,8,0.94))] shadow-[var(--shadow-panel)]"
+                    className="relative overflow-hidden rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-deep)] shadow-sm"
                   >
                     <div className="aspect-square">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -167,7 +167,7 @@ export function PostComposer({
                     <button
                       type="button"
                       onClick={() => removeFile(fileIndex)}
-                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(212,184,150,0.16)] bg-[rgba(12,16,8,0.9)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)] transition-transform active:scale-95"
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm transition-transform active:scale-95"
                       aria-label="Remover imagem"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -180,11 +180,11 @@ export function PostComposer({
         ) : null}
 
         {isPollEnabled ? (
-          <section className="canhoes-paper-panel rounded-[var(--radius-lg-token)] p-4 sm:p-5">
+          <section className="surface-panel-soft p-4 sm:p-5">
             <div className="space-y-4">
               <div className="space-y-1">
                 <p className="editorial-kicker">{feedCopy.composer.pollLabel}</p>
-                <h4 className="heading-3 text-[var(--text-dark)]">
+                <h4 className="heading-3 text-[var(--text-primary)]">
                   {feedCopy.composer.pollTitle}
                 </h4>
                 <p className="body-small text-[var(--text-muted)]">

@@ -48,19 +48,18 @@ export function ReactionPicker({
         align="start"
         sideOffset={10}
         className={cn(
-          "w-[min(92vw,22rem)] rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)]",
-          "bg-[linear-gradient(180deg,rgba(18,24,11,0.98),rgba(11,14,8,0.98))] p-3 text-[var(--bg-paper)] shadow-[var(--shadow-panel)]"
+          "w-[min(92vw,22rem)] surface-panel-soft p-3 text-[var(--text-primary)]"
         )}
       >
         <div className="space-y-3">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">Reações</p>
-            <p className="text-sm text-[rgba(245,237,224,0.82)]">Escolhe uma reação rápida</p>
+            <p className="editorial-kicker text-[var(--ink-muted)]">Reações</p>
+            <p className="text-sm text-[var(--text-muted)]">Escolhe uma reação rápida</p>
           </div>
 
           {REACTION_COLLECTIONS.map((group) => (
             <div key={group.label} className="space-y-2">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[rgba(245,237,224,0.52)]">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
                 {group.label}
               </p>
               <div className="grid grid-cols-4 gap-2">
@@ -86,8 +85,8 @@ export function ReactionPicker({
                       className={cn(
                         "relative flex h-16 items-center justify-center rounded-2xl border text-2xl transition-colors",
                         isActive
-                          ? "border-[var(--moss-glow)] bg-[rgba(122,173,58,0.14)] shadow-[var(--glow-green-sm)]"
-                          : "border-[rgba(212,184,150,0.10)] bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)]"
+                          ? "border-[var(--border-neon)] bg-[rgba(122,173,58,0.14)] shadow-[var(--glow-green-sm)]"
+                          : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-deep)]"
                       )}
                       aria-label={reaction.label}
                     >

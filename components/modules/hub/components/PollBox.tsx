@@ -15,11 +15,11 @@ export function PollBox({
   const totalVotes = Math.max(0, poll.totalVotes || 0);
 
   return (
-    <section className="surface-panel p-4 sm:p-5">
+    <section className="surface-panel-soft p-4 sm:p-5">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="editorial-kicker">Sondagem</p>
-          <h3 className="heading-3 text-[var(--color-text-primary)]">
+          <p className="editorial-kicker text-[var(--text-muted)]">Sondagem</p>
+          <h3 className="heading-3 text-[var(--text-primary)]">
             {poll.question}
           </h3>
         </div>
@@ -60,10 +60,10 @@ export function PollBox({
                 />
 
                 <span className="relative flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
                     {option.text}
                   </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
+                  <span className="text-xs text-[var(--text-muted)]">
                     {option.voteCount} · {percentage}%
                   </span>
                 </span>
@@ -72,7 +72,7 @@ export function PollBox({
           })}
         </div>
 
-        <p className="body-small text-[var(--color-text-muted)]">
+        <p className="body-small text-[var(--text-muted)]">
           {totalVotes} voto(s) registados. Podes trocar o teu voto enquanto a
           sondagem estiver ativa.
         </p>

@@ -46,12 +46,8 @@ export function PostHeader({
       <div className="flex min-w-0 items-center gap-2">
         <div
           aria-hidden="true"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-bold"
-          style={{
-            background: `linear-gradient(180deg, ${accent}28, rgba(255,255,255,0.08))`,
-            borderColor: `${accent}44`,
-            color: accent,
-          }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs font-bold"
+          style={{ color: accent }}
         >
           {initials(authorName)}
         </div>
@@ -74,7 +70,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
             onClick={onAdminPin}
             aria-label={isPinned ? "Desafixar post" : "Fixar post"}
           >
@@ -83,7 +79,7 @@ export function PostHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--danger)]"
+            className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--danger)]"
             onClick={onAdminDelete}
             aria-label="Eliminar post"
           >

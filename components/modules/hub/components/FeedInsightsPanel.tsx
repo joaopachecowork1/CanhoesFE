@@ -79,12 +79,12 @@ function FeedInsightCard({
       : "border-[rgba(0,255,136,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]";
 
   return (
-    <Card className="surface-panel text-[var(--bg-paper)]">
+    <Card className="surface-panel-soft text-[var(--text-primary)]">
       <CardContent className="space-y-3 px-4 py-4 sm:px-5">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{label}</p>
-            <p className="heading-2 text-[var(--bg-paper)]">{value}</p>
+            <p className="editorial-kicker text-[var(--text-muted)]">{label}</p>
+            <p className="heading-2 text-[var(--text-primary)]">{value}</p>
           </div>
           <span
             className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-[var(--shadow-card)] ${iconClassName}`}
@@ -92,7 +92,7 @@ function FeedInsightCard({
             {icon}
           </span>
         </div>
-        <p className="body-small text-[rgba(245,237,224,0.72)]">{description}</p>
+        <p className="body-small text-[var(--text-muted)]">{description}</p>
       </CardContent>
     </Card>
   );

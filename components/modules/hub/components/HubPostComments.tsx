@@ -75,7 +75,7 @@ export function HubPostComments({
 
   return (
     <>
-      <section className="surface-panel space-y-3 p-4 sm:p-5">
+      <section className="surface-panel-soft space-y-3 p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-[var(--text-primary)]">
             <MessageSquare className="h-4 w-4 text-[var(--moss-glow)]" />
@@ -110,7 +110,7 @@ export function HubPostComments({
               return (
                 <article
                   key={comment.id}
-                  className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--moss-glow)]/50"
+                  className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--border-neon)]/50"
                   style={{ marginLeft: commentIndex > 0 ? "0.5rem" : 0 }}
                 >
                   <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
