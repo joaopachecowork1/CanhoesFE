@@ -34,7 +34,7 @@ export const ADMIN_SECTIONS = [
   },
   {
     id: "membros",
-    label: "Amigos",
+    label: "Membros",
     description: "Amigo secreto e roster operacional desta edicao.",
     icon: Users,
     count: (context: AdminSectionCountContext) => context.memberCount,
