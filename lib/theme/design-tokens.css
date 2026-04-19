@@ -2,13 +2,14 @@
     --color-bg-base: #0f1209;
     --color-bg-surface: #161c0e;
     --color-bg-elevated: #1e2614;
-    --color-border: rgba(74, 92, 47, 0.2);
-    --color-border-strong: rgba(0, 255, 136, 0.4);
-    --color-text-primary: #f2ead8;
-    --color-text-secondary: #dccfb8;
-    --color-text-muted: #bcc7a8;
-    --color-accent: #4a5c2f;
-    --color-accent-hover: #5f7440;
+    --color-bg-overlay: rgba(8, 10, 6, 0.72);
+    --color-border: rgba(74, 92, 47, 0.24);
+    --color-border-strong: rgba(0, 255, 136, 0.42);
+    --color-text-primary: #f5ecd9;
+    --color-text-secondary: #e1d4be;
+    --color-text-muted: #c4cfb0;
+    --color-accent: #526635;
+    --color-accent-hover: #677f46;
     --color-danger: #e05a3a;
     --color-success: #4caf50;
     --color-warning: #ffb800;
@@ -60,8 +61,10 @@
     --duration-fast: 120ms;
     --duration-base: 220ms;
     --duration-slow: 380ms;
+    --duration-slower: 520ms;
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+    --ease-springy: cubic-bezier(0.2, 0.9, 0.2, 1);
   }
 
   @keyframes fadeSlideUp {

@@ -9,6 +9,7 @@ import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/Canho
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { cn } from "@/lib/utils";
 
 import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
 
@@ -75,10 +76,10 @@ export function AdminDashboard({
   const recentNominees = recentNomineesQuery.data ?? [];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {!loading && pendingReviews > 0 ? (
-        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.2)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
-          <div className="space-y-3">
+        <section className={cn("surface-panel-soft border border-[rgba(224,90,58,0.2)]") }>
+          <div className="space-y-2.5">
             <div className="flex items-center gap-2 text-[var(--danger)]">
               <AlertTriangle className="h-4 w-4" />
               <span className="editorial-kicker text-[var(--danger)]">
@@ -119,7 +120,7 @@ export function AdminDashboard({
           {recentNominees.map((nominee: AdminNomineeDto) => (
             <article
               key={nominee.id}
-              className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)]"
+              className="surface-panel-soft border border-[var(--border-subtle)] px-4 py-4 text-[var(--ink-primary)]"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">

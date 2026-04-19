@@ -19,9 +19,15 @@ export function FeedInsightsPanel({
 }: Readonly<{
   posts: readonly EventFeedPostFullDto[];
 }>) {
-  const pinnedPostCount = posts.filter((post) => post.isPinned).length;
-  const postsWithMediaCount = posts.filter((post) => getPostMediaCount(post) > 0).length;
-  const postsWithPollCount = posts.filter((post) => Boolean(post.poll)).length;
+  let pinnedPostCount = 0;
+  let postsWithMediaCount = 0;
+  let postsWithPollCount = 0;
+
+  for (const post of posts) {
+    if (post.isPinned) pinnedPostCount += 1;
+    if (getPostMediaCount(post) > 0) postsWithMediaCount += 1;
+    if (post.poll) postsWithPollCount += 1;
+  }
 
   return (
     <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
@@ -73,12 +79,12 @@ function FeedInsightCard({
       : "border-[rgba(0,255,136,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]";
 
   return (
-    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+    <Card className="surface-panel-soft text-[var(--text-primary)]">
       <CardContent className="space-y-3 px-4 py-4 sm:px-5">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">{label}</p>
-            <p className="heading-2 text-[var(--bg-paper)]">{value}</p>
+            <p className="editorial-kicker text-[var(--text-muted)]">{label}</p>
+            <p className="heading-2 text-[var(--text-primary)]">{value}</p>
           </div>
           <span
             className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-[var(--shadow-card)] ${iconClassName}`}
@@ -86,7 +92,7 @@ function FeedInsightCard({
             {icon}
           </span>
         </div>
-        <p className="body-small text-[rgba(245,237,224,0.72)]">{description}</p>
+        <p className="body-small text-[var(--text-muted)]">{description}</p>
       </CardContent>
     </Card>
   );

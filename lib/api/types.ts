@@ -154,6 +154,24 @@ export type UpdateMeasureProposalRequest = {
   status?: "pending" | "approved" | "rejected" | null;
 };
 
+export type PagedResultPublicUserDto = {
+  items: PublicUserDto[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type PagedResultAdminNomineeDto = {
+  items: AdminNomineeDto[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type PagedResultAdminCategoryResultDto = PagedResult<AdminCategoryResultDto>;
+
 export type PendingAdminDto = {
   nominees: NomineeDto[];
   categoryProposals: CategoryProposalDto[];
@@ -491,8 +509,6 @@ export type AdminProposalsPagedDto = {
   measureProposals: ProposalsByStatusDto<MeasureProposalDto>;
 };
 
-export type PagedResultPublicUserDto = PagedResult<PublicUserDto>;
-export type PagedResultAdminCategoryResultDto = PagedResult<AdminCategoryResultDto>;
 
 // Summary DTOs (lightweight for list views)
 export type NomineeSummaryDto = {

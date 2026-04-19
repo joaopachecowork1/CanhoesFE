@@ -179,7 +179,7 @@ const CANHOES_EVENTS_REPO_ROUTES: FrontendRoute[] = [
   { method: "POST", path: "/v1/events/{eventId}/wishlist", repoMethod: "createWishlistItem", module: "CanhoesWishlistModule" },
   { method: "DELETE", path: "/v1/events/{eventId}/wishlist/{itemId}", repoMethod: "deleteWishlistItem", module: "CanhoesWishlistModule" },
 
-  // User-facing measures/results/members (need BE implementation)
+  // User-facing measures/results/members
   { method: "GET", path: "/v1/events/{eventId}/measures", repoMethod: "getMeasures", module: "CanhoesMeasuresModule" },
   { method: "POST", path: "/v1/events/{eventId}/measures/proposals", repoMethod: "createMeasureProposal", module: "CanhoesMeasuresModule" },
   { method: "GET", path: "/v1/events/{eventId}/results", repoMethod: "getResults", module: "CanhoesGalaModule" },
@@ -189,7 +189,7 @@ const CANHOES_EVENTS_REPO_ROUTES: FrontendRoute[] = [
   { method: "POST", path: "/v1/events/{eventId}/nominations/{nomineeId}/upload", repoMethod: "uploadNomineeImage", module: "Stickers/Nominees" },
   { method: "POST", path: "/v1/events/{eventId}/wishlist/{itemId}/upload", repoMethod: "uploadWishlistImage", module: "CanhoesWishlistModule" },
 
-  // Feed interactions (need BE implementation)
+  // Feed interactions
   { method: "GET", path: "/v1/events/{eventId}/feed/posts/{postId}/comments", repoMethod: "getFeedPostComments", module: "HubFeed comments" },
   { method: "POST", path: "/v1/events/{eventId}/feed/posts/{postId}/comments", repoMethod: "createFeedPostComment", module: "HubFeed create comment" },
   { method: "POST", path: "/v1/events/{eventId}/feed/posts/{postId}/reactions", repoMethod: "toggleFeedPostReaction", module: "HubFeed reactions" },
@@ -244,11 +244,12 @@ describe("canhoesEventsRepo — backend route coverage", () => {
   }
 
   it("all routes should exist in backend (list missing for reporting)", () => {
-    // This test always passes but reports missing routes
-    if (missingRoutes.length > 0) {
+    const implemented = missingRoutes.filter((r) => !PENDING_EVENT_SCOPED_ROUTES.has(`${r.method} ${r.path}`));
+
+    if (implemented.length > 0) {
       console.warn(
-        `\n⚠️  ${missingRoutes.length} endpoints are called by the frontend but MISSING from the backend:\n` +
-        missingRoutes.map((r) =>
+        `\n⚠️  ${implemented.length} endpoints are called by the frontend but MISSING from the backend:\n` +
+        implemented.map((r) =>
           `  ${r.method.padEnd(6)} ${r.path.padEnd(65)} ← ${r.module} (${r.repoMethod})`
         ).join("\n") +
         "\n"

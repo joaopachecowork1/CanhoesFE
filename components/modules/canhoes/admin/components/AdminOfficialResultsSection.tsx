@@ -147,15 +147,15 @@ export function AdminOfficialResultsSection({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const queryEventId = eventId ?? "";
 
-  const resultsQuery = useQuery({
+  const resultsQuery = useQuery<AdminCategoryResultDto[]>({
     queryKey: ["canhoes", "admin", "official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
-    queryFn: () => canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId),
+    queryFn: async () => canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId) as Promise<AdminCategoryResultDto[]>,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
 
-  const resultCategories = useMemo(() => resultsQuery.data ?? [], [resultsQuery.data]);
+  const resultCategories = useMemo<AdminCategoryResultDto[]>(() => resultsQuery.data ?? [], [resultsQuery.data]);
 
   const selectedCategory = useMemo(
     () =>
@@ -212,7 +212,7 @@ export function AdminOfficialResultsSection({
     <div className="space-y-4">
       <Card className={ADMIN_CONTENT_CARD_CLASS}>
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Analise</p>
+          <p className="editorial-kicker">Análise</p>
           <CardTitle className="flex items-center gap-2">
             <BarChart2 className="h-4 w-4" />
             Resultados oficiais

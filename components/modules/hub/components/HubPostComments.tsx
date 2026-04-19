@@ -63,44 +63,43 @@ export function HubPostComments({
 }: Readonly<HubPostCommentsProps>) {
   const [commentPendingDelete, setCommentPendingDelete] = useState<HubCommentDto | null>(null);
 
-  const sortedComments = useMemo(
-    () =>
-      [...comments].sort((left, right) =>
-        String(left.createdAtUtc).localeCompare(String(right.createdAtUtc))
-      ),
-    [comments]
-  );
+  const sortedComments = useMemo(() => {
+    if (comments.length < 2) return comments;
+
+    return [...comments].sort((left, right) =>
+      String(left.createdAtUtc).localeCompare(String(right.createdAtUtc))
+    );
+  }, [comments]);
 
   if (!openComments) return null;
 
   return (
     <>
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
+      <section className="surface-panel-soft space-y-3 p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-[var(--text-primary)]">
             <MessageSquare className="h-4 w-4 text-[var(--moss-glow)]" />
             <span className="font-medium">
               {commentCount > 0
                 ? `${commentCount} comentario${commentCount === 1 ? "" : "s"}`
-                : "Sem comentarios ainda"}
+                : "Sem comentários ainda"}
             </span>
           </div>
 
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-8 rounded-full px-3 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+            className="h-8 rounded-full px-3 text-[var(--bg-paper)]"
             onClick={() => onToggleComments(postId)}
           >
-            ✕ Fechar
+            Fechar
           </Button>
         </div>
 
-        {/* Comment list — Reddit-style threaded */}
         <div className="space-y-0">
           {sortedComments.length === 0 ? (
-            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)] px-4 py-3 text-sm text-[var(--text-muted)]">
+            <div className="surface-panel-soft px-4 py-3 text-sm text-[var(--text-muted)]">
               {feedCopy.comments.empty}
             </div>
           ) : (
@@ -111,7 +110,7 @@ export function HubPostComments({
               return (
                 <article
                   key={comment.id}
-                  className="comment-thread group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 transition-colors hover:border-[var(--moss-glow)]/50"
+                  className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--border-neon)]/50"
                   style={{ marginLeft: commentIndex > 0 ? "0.5rem" : 0 }}
                 >
                   <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
@@ -161,7 +160,7 @@ export function HubPostComments({
                           type="button"
                           className="canhoes-tap flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition-colors hover:text-[var(--danger)]"
                           onClick={() => setCommentPendingDelete(comment)}
-                          aria-label="Apagar comentario"
+                          aria-label="Apagar comentário"
                         >
                           <Trash2 className="h-3 w-3" />
                           Apagar
@@ -176,7 +175,7 @@ export function HubPostComments({
         </div>
 
         {/* Comment form */}
-        <div className="flex gap-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-deep)] p-3">
+        <div className="surface-panel-soft flex gap-2.5 p-3">
           <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
             {currentUserImage ? (
               <AvatarImage src={currentUserImage} alt={currentUserName} />
@@ -191,7 +190,7 @@ export function HubPostComments({
               value={commentDraft}
               onChange={(event) => onCommentDraftChange(postId, event.target.value)}
               placeholder={feedCopy.comments.placeholder}
-              className="min-h-[64px] resize-none border-[var(--border-subtle)] bg-[var(--bg-surface)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              className="min-h-[64px] resize-none text-sm"
             />
 
             <div className="flex justify-end gap-2">
@@ -199,7 +198,6 @@ export function HubPostComments({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:bg-[var(--bg-deep)]"
                 onClick={() => onCommentDraftChange(postId, "")}
                 disabled={!commentDraft}
               >
@@ -208,7 +206,6 @@ export function HubPostComments({
               <Button
                 type="button"
                 size="sm"
-                className="bg-[var(--moss)] text-white hover:bg-[var(--moss-light)]"
                 onClick={() => onAddComment(postId)}
                 disabled={!commentDraft.trim()}
               >

@@ -27,10 +27,11 @@ export function AdminMembersSection({
 }: Readonly<AdminMembersSectionProps>) {
   const membersQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.loadAllAdminMembers(eventId!),
-    queryKey: ["canhoes", "admin", "members", eventId],
+    queryFn: () => canhoesEventsRepo.loadAdminMembersPage(eventId!, 0, 50),
+    queryKey: ["canhoes", "admin", "members", eventId, 0, 50],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
+    select: (page) => page.items,
   });
 
   const secretSantaQuery = useQuery({
@@ -40,6 +41,8 @@ export function AdminMembersSection({
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
+
+  const members = membersQuery.data ?? [];
 
   if (!eventId) {
     return <AdminStateMessage>Falta uma edicao ativa para gerir amigos.</AdminStateMessage>;
@@ -67,8 +70,6 @@ export function AdminMembersSection({
     );
   }
 
-  const members = membersQuery.data ?? [];
-
   return (
     <div className="space-y-4">
       <SecretSantaAdmin
@@ -88,7 +89,7 @@ export function AdminMembersSection({
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
-            <AdminStateMessage>Nenhum membro nesta edicao.</AdminStateMessage>
+            <AdminStateMessage>Nenhum membro nesta edição.</AdminStateMessage>
           ) : (
             <div className="max-h-[60svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)]">
               <VirtualizedList

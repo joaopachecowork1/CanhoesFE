@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { LogOut, Menu } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -75,21 +75,21 @@ export function CanhoesChrome({
   const [hasOpenedMenu, setHasOpenedMenu] = useState(false);
   const [showAmbientBackground, setShowAmbientBackground] = useState(false);
 
-  const handleComposeSheetChange = (open: boolean) => {
+  const handleComposeSheetChange = useCallback((open: boolean) => {
     if (open) {
       setHasOpenedComposeSheet(true);
     }
 
     setIsComposeSheetOpen(open);
-  };
+  }, []);
 
-  const handleMenuOpenChange = (open: boolean) => {
+  const handleMenuOpenChange = useCallback((open: boolean) => {
     if (open) {
       setHasOpenedMenu(true);
     }
 
     setIsMenuOpen(open);
-  };
+  }, []);
 
   // Close overlays on navigation
   useEffect(() => {
@@ -188,7 +188,7 @@ export function CanhoesChrome({
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
             animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="page-hero canhoes-bits-panel canhoes-bits-panel--shell editorial-shell border-[var(--border-subtle)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-4 sm:py-4"
+            className="page-hero canhoes-bits-panel canhoes-bits-panel--shell surface-panel px-3 py-3 text-[var(--text-primary)] sm:px-4 sm:py-4"
           >
             <CanhoesGlowBackdrop tone={headerTone} />
 
@@ -197,7 +197,7 @@ export function CanhoesChrome({
                 <CanhoesBrandMark compact subtitle="Premios da edicao" />
 
                 {!isEventHomePath ? (
-                  <div className="min-w-0 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-2">
+                  <div className="surface-panel-soft min-w-0 px-3 py-2">
                     <div className="flex min-w-0 items-center gap-2">
                       <Badge
                         variant="outline"

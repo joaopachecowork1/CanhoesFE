@@ -221,30 +221,27 @@ function AdminMobileSummary({
         return null;
     }
 
+    const pendingTotal =
+        pendingNominationCount +
+        summary.pendingCategoryProposalCount +
+        summary.pendingMeasureProposalCount;
+
     return (
-        <div className="sm:hidden">
-            <div className="mb-2 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[linear-gradient(180deg,var(--bg-paper),var(--bg-paper-soft))] px-3 py-3">
-                <div className="flex items-center justify-between">
+        <div className="sm:hidden space-y-2">
+            <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-3 py-3">
+                <div className="flex items-start justify-between gap-3">
                     <div>
                         <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">
                             Pendentes
                         </p>
                         <p className="mt-0.5 text-2xl font-extrabold text-[var(--ink-primary)] tabular-nums">
-                            {pendingNominationCount +
-                                summary.pendingCategoryProposalCount +
-                                summary.pendingMeasureProposalCount}
+                            {pendingTotal}
                         </p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-[0.6rem] text-[var(--ink-muted)]">
-                            {pendingNominationCount} nomeações
-                        </p>
-                        <p className="text-[0.6rem] text-[var(--ink-muted)]">
-                            {summary.pendingCategoryProposalCount} categorias
-                        </p>
-                        <p className="text-[0.6rem] text-[var(--ink-muted)]">
-                            {summary.pendingMeasureProposalCount} medidas
-                        </p>
+                    <div className="text-right text-[0.6rem] leading-4 text-[var(--ink-muted)]">
+                        <p>{pendingNominationCount} nomeações</p>
+                        <p>{summary.pendingCategoryProposalCount} categorias</p>
+                        <p>{summary.pendingMeasureProposalCount} medidas</p>
                     </div>
                 </div>
             </div>

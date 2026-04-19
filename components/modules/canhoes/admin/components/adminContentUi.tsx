@@ -33,7 +33,7 @@ const ADMIN_CONTENT_ROW_IDLE_CLASS =
 const ADMIN_CONTENT_SHEET_CLASS = "canhoes-paper-panel w-full sm:max-w-xl";
 const ADMIN_CONTENT_SHEET_HEADER_CLASS =
   "border-b border-[var(--border-subtle)] pb-4";
-const ADMIN_CONTENT_SHEET_BODY_CLASS = "flex-1 space-y-5 overflow-y-auto px-4 pb-6";
+const ADMIN_CONTENT_SHEET_BODY_CLASS = "flex-1 space-y-4 overflow-y-auto px-4 pb-6";
 
 export const ADMIN_OUTLINE_BUTTON_CLASS = "canhoes-admin-outline-button";
 

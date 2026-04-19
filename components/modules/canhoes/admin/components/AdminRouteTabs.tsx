@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,10 +24,7 @@ export function AdminRouteTabs({
   onSelect,
 }: Readonly<AdminRouteTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const sections = useMemo<ReadonlyArray<AdminRouteTabItem>>(
-    () => items ?? getAdminSectionMeta().map((section) => ({ ...section, count: 0 })),
-    [items]
-  );
+  const sections = items ?? getAdminSectionMeta().map((section) => ({ ...section, count: 0 }));
 
   useEffect(() => {
     const scroller = scrollRef.current;

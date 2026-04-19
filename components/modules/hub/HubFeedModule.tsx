@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
@@ -97,18 +97,80 @@ function HubFeedModuleView({
     handleCreatePost,
   } = state;
 
+  const handleRetry = useCallback(() => void refresh(), [refresh]);
+  const handleClearParticles = useCallback(() => setShowParticles(null), [setShowParticles]);
+
+  const feedList = useMemo(
+    () => (
+      <HubFeedList
+        posts={posts}
+        sort={sort}
+        allPostsCount={allPostsCount}
+        isAdmin={isAdmin}
+        hasMore={hasMore}
+        isFetchingNextPage={isFetchingNextPage}
+        currentUserId={currentUserId}
+        currentUserImage={currentUserImage}
+        currentUserName={currentUserName}
+        comments={comments}
+        openComments={openComments}
+        commentDrafts={commentDrafts}
+        onSortChange={setSort}
+        onLoadMore={state.loadMore}
+        onToggleReaction={toggleReaction}
+        onToggleDownvote={toggleDownvote}
+        onToggleComments={toggleComments}
+        onVotePoll={votePoll}
+        onAddComment={addComment}
+        onDeleteComment={deleteComment}
+        onCommentDraftChange={setCommentDraft}
+        onToggleCommentReaction={toggleCommentReaction}
+        onAdminPin={adminPin}
+        onAdminDelete={adminDelete}
+        sentinelRef={sentinelRef}
+      />
+    ),
+    [
+      addComment,
+      allPostsCount,
+      adminDelete,
+      adminPin,
+      commentDrafts,
+      comments,
+      currentUserId,
+      currentUserImage,
+      currentUserName,
+      deleteComment,
+      hasMore,
+      isAdmin,
+      isFetchingNextPage,
+      openComments,
+      posts,
+      sentinelRef,
+      setCommentDraft,
+      setSort,
+      sort,
+      state.loadMore,
+      toggleCommentReaction,
+      toggleComments,
+      toggleDownvote,
+      toggleReaction,
+      votePoll,
+    ]
+  );
+
   return (
     <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
-      <SectionBoundary title="Erro no mural social" description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis." onRetry={() => void refresh()}>
+      <SectionBoundary title="Erro no mural social" description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis." onRetry={handleRetry}>
         <div className="space-y-3">
           {!showComposer ? <CanhoesModuleHeader icon={ScrollText} title={feedCopy.hero.title} description={feedCopy.hero.description} /> : null}
           {showComposer ? <LazyPostComposer onSubmit={handleCreatePost} /> : null}
-          {errorMessage ? <ErrorAlert title="Erro ao carregar o mural" description={errorMessage} actionLabel="Tentar novamente" tone="social" onAction={() => void refresh()} /> : null}
-          <HubFeedList posts={posts} sort={sort} allPostsCount={allPostsCount} isAdmin={isAdmin} hasMore={hasMore} isFetchingNextPage={isFetchingNextPage} currentUserId={currentUserId} currentUserImage={currentUserImage} currentUserName={currentUserName} comments={comments} openComments={openComments} commentDrafts={commentDrafts} onSortChange={setSort} onLoadMore={state.loadMore} onToggleReaction={toggleReaction} onToggleDownvote={toggleDownvote} onToggleComments={toggleComments} onVotePoll={votePoll} onAddComment={addComment} onDeleteComment={deleteComment} onCommentDraftChange={setCommentDraft} onToggleCommentReaction={toggleCommentReaction} onAdminPin={adminPin} onAdminDelete={adminDelete} sentinelRef={sentinelRef} />
+          {errorMessage ? <ErrorAlert title="Erro ao carregar o mural" description={errorMessage} actionLabel="Tentar novamente" tone="social" onAction={handleRetry} /> : null}
+          {feedList}
         </div>
       </SectionBoundary>
       <SectionBoundary title="Erro nos indicadores do mural" description="Os indicadores laterais falharam ao renderizar, mas o mural social continua disponivel."><LazyFeedInsightsPanel posts={posts} /></SectionBoundary>
-      {showParticles ? <LazyParticles count={24} onComplete={() => setShowParticles(null)} className="pointer-events-none fixed inset-0 z-50" /> : null}
+      {showParticles ? <LazyParticles count={24} onComplete={handleClearParticles} className="pointer-events-none fixed inset-0 z-50" /> : null}
     </div>
   );
 }

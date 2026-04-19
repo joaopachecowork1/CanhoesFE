@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { FeedReaction } from "@/lib/reactions";
 
@@ -13,12 +14,11 @@ type ReactionPickerProps = {
   trigger: (open: () => void) => React.ReactNode;
 };
 
-/**
- * ReactionPicker — Facebook/LinkedIn-style animated emoji picker.
- *
- * Opens on hover (desktop) or long-press (mobile), shows all available
- * reactions with spring stagger animation, and displays labels on hover.
- */
+const REACTION_COLLECTIONS: Array<{ label: string; emojis: readonly string[] }> = [
+  { label: "Favoritos", emojis: ["❤️", "🔥", "😂", "👏"] },
+  { label: "Reações", emojis: ["😮", "😢", "👍"] },
+];
+
 export function ReactionPicker({
   reactions,
   myReactions,
@@ -27,137 +27,92 @@ export function ReactionPicker({
 }: Readonly<ReactionPickerProps>) {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const open = () => setIsOpen(true);
-  const close = () => {
+  const reactionsByEmoji = useMemo(() => {
+    return new Map(reactions.map((reaction) => [reaction.emoji, reaction]));
+  }, [reactions]);
+
+  const handleToggle = (emoji: string) => {
+    onToggle(emoji);
     setIsOpen(false);
     setHoveredEmoji(null);
   };
 
-  const handleMouseEnter = () => {
-    hoverTimerRef.current = setTimeout(() => setIsOpen(true), 300);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    // Delay close slightly to allow moving cursor to picker
-    hoverTimerRef.current = setTimeout(() => {
-      if (!hoverTimerRef.current) return; // Already cleared
-      close();
-    }, 500);
-  };
-
-  const handlePointerDown = () => {
-    longPressRef.current = setTimeout(() => {
-      setIsOpen(true);
-    }, 400);
-  };
-
-  const handlePointerUp = () => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
-  };
-
-  const handleReactionClick = (emoji: string) => {
-    onToggle(emoji);
-    close();
-  };
-
   return (
-    <div
-      className="relative inline-flex"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-    >
-      {/* Trigger button */}
-      {trigger(open)}
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        {trigger(() => setIsOpen(true))}
+      </PopoverTrigger>
 
-      {/* Picker popover */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.9 }}
-            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className={cn(
-              "absolute bottom-full left-0 z-50 mb-2",
-              "rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-deep)] p-2 shadow-xl backdrop-blur-sm"
-            )}
-            onMouseEnter={() => {
-              if (hoverTimerRef.current) {
-                clearTimeout(hoverTimerRef.current);
-                hoverTimerRef.current = null;
-              }
-            }}
-            onMouseLeave={() => {
-              close();
-            }}
-          >
-            <div className="flex gap-1">
-              {reactions.map((reaction, index) => {
-                const { emoji, label } = reaction;
-                const isActive = myReactions.includes(emoji);
-                const isHovered = hoveredEmoji === emoji;
-
-                return (
-                  <motion.button
-                    key={emoji}
-                    type="button"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 18,
-                      delay: index * 0.04,
-                    }}
-                    whileHover={{ scale: 1.35, y: -6 }}
-                    whileTap={{ scale: 0.8 }}
-                    onClick={() => handleReactionClick(emoji)}
-                    onMouseEnter={() => setHoveredEmoji(emoji)}
-                    onMouseLeave={() => setHoveredEmoji(null)}
-                    className={cn(
-                      "relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-xl transition-shadow",
-                      isActive
-                        ? "ring-2 ring-[var(--moss-glow)] ring-offset-1 ring-offset-[var(--bg-deep)]"
-                        : "hover:bg-[rgba(255,255,255,0.06)]"
-                    )}
-                    aria-label={label}
-                  >
-                    {emoji}
-
-                    {/* Label tooltip on hover */}
-                    <AnimatePresence>
-                      {isHovered && (
-                        <motion.span
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 4 }}
-                          transition={{ duration: 0.12 }}
-                          className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-primary)] shadow-sm"
-                        >
-                          {label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
+      <PopoverContent
+        align="start"
+        sideOffset={10}
+        className={cn(
+          "w-[min(92vw,22rem)] surface-panel-soft p-3 text-[var(--text-primary)]"
         )}
-      </AnimatePresence>
-    </div>
+      >
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="editorial-kicker text-[var(--ink-muted)]">Reações</p>
+            <p className="text-sm text-[var(--text-muted)]">Escolhe uma reação rápida</p>
+          </div>
+
+          {REACTION_COLLECTIONS.map((group) => (
+            <div key={group.label} className="space-y-2">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+                {group.label}
+              </p>
+              <div className="grid grid-cols-4 gap-2">
+                {group.emojis.map((emoji) => {
+                  const reaction = reactionsByEmoji.get(emoji);
+                  if (!reaction) return null;
+
+                  const isActive = myReactions.includes(emoji);
+                  const isHovered = hoveredEmoji === emoji;
+
+                  return (
+                    <motion.button
+                      key={emoji}
+                      type="button"
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      whileHover={{ scale: 1.06, y: -2 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ duration: 0.12 }}
+                      onClick={() => handleToggle(emoji)}
+                      onMouseEnter={() => setHoveredEmoji(emoji)}
+                      onMouseLeave={() => setHoveredEmoji(null)}
+                      className={cn(
+                        "relative flex h-16 items-center justify-center rounded-2xl border text-2xl transition-colors",
+                        isActive
+                          ? "border-[var(--border-neon)] bg-[rgba(122,173,58,0.14)] shadow-[var(--glow-green-sm)]"
+                          : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-deep)]"
+                      )}
+                      aria-label={reaction.label}
+                    >
+                      {emoji}
+
+                      <AnimatePresence>
+                        {isHovered ? (
+                          <motion.span
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 4 }}
+                            transition={{ duration: 0.12 }}
+                            className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-primary)] shadow-sm"
+                          >
+                            {reaction.label}
+                          </motion.span>
+                        ) : null}
+                      </AnimatePresence>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
