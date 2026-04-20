@@ -21,6 +21,11 @@ type UseModuleVisibilityOptions = {
   state: EventAdminStateDto | null;
 };
 
+export type ModuleVisibilityActionState = {
+  key: string | null;
+  label: string | null;
+};
+
 export type ModuleVisibilityItem = (typeof CANHOES_MEMBER_MODULES)[number] & {
   checked: boolean;
   effective: boolean;
@@ -32,6 +37,7 @@ export function useModuleVisibility({
   state,
 }: Readonly<UseModuleVisibilityOptions>) {
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [actionLabel, setActionLabel] = useState<string | null>(null);
   const [optimisticOverrides, setOptimisticOverrides] = useState<
     Partial<EventAdminModuleVisibilityDto>
   >({});
@@ -81,27 +87,30 @@ export function useModuleVisibility({
     ) => {
       if (!eventId || !state) return false;
 
+      const optimisticModuleVisibility = patch.moduleVisibility ?? null;
       setSavingKey(busyStateKey);
+      setActionLabel(successMessage);
       try {
         await canhoesEventsRepo.updateAdminState(eventId, patch);
+        if (optimisticModuleVisibility) clearModuleOverrides(optimisticModuleVisibility);
         await onUpdate();
-        if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
         toast.success(successMessage);
         return true;
       } catch (err) {
         logFrontendError("Admin.useModuleVisibility", err, {
           endpoint: `admin/state (${busyStateKey})`,
         });
-        if (patch.moduleVisibility) clearModuleOverrides(patch.moduleVisibility);
+        if (optimisticModuleVisibility) clearModuleOverrides(optimisticModuleVisibility);
         toast.error(
           getErrorMessage(err, "Nao foi possivel guardar a configuracao dos modulos.")
         );
         return false;
       } finally {
         setSavingKey(null);
+        setActionLabel(null);
       }
     },
-    [eventId, onUpdate, state, clearModuleOverrides]
+    [eventId, state, clearModuleOverrides]
   );
 
   const toggleModule = useCallback(
@@ -144,6 +153,7 @@ export function useModuleVisibility({
     allDisabled: moduleItems.every((item) => !item.checked),
     allEnabled: moduleItems.every((item) => item.checked),
     moduleItems,
+    actionLabel,
     savingKey,
     setAllModules,
     setNominationsVisible: (checked: boolean) =>
