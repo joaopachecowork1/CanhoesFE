@@ -35,7 +35,7 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
         : [];
 
       const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
-        text: trimmedText,
+        content: trimmedText,
         mediaUrls,
         pollQuestion: data.pollOn && pollQuestion ? pollQuestion : null,
         pollOptions: data.pollOn ? pollOptions : null,

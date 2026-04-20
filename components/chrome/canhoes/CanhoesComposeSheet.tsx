@@ -170,10 +170,10 @@ export function CanhoesComposeSheet({
         : [];
 
       const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
+        content: trimmedText,
         mediaUrls,
         pollOptions: isPollEnabled ? trimmedPollOptions : null,
         pollQuestion: isPollEnabled && trimmedPollQuestion ? trimmedPollQuestion : null,
-        text: trimmedText,
       });
 
       if (createdPost?.id && typeof window !== "undefined") {

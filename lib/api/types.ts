@@ -653,7 +653,7 @@ export type CreateEventPostRequest = {
 };
 
 export type CreateEventFeedPostRequest = {
-  text: string;
+  content: string;
   mediaUrl?: string | null;
   mediaUrls?: string[] | null;
   pollQuestion?: string | null;

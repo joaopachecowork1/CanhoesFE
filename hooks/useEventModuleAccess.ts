@@ -10,7 +10,7 @@ import {
 
 export type EventRouteModuleKey = CanhoesMemberModuleKey | "admin";
 
-type EventRouteModuleDefinition = Omit<CanhoesMemberModuleDefinition, "key"> & {
+export type EventRouteModuleDefinition = Omit<CanhoesMemberModuleDefinition, "key"> & {
   key: EventRouteModuleKey;
 };
 
