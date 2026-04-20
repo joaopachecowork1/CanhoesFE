@@ -118,7 +118,7 @@ export function HubPostComments({
                       <AvatarImage src={currentUserImage} alt={comment.userName} />
                     ) : null}
                     <AvatarFallback className="bg-[var(--bg-surface)] text-[10px] font-semibold text-[var(--text-muted)]">
-                      {initials(comment.userName)}
+                      {initials(comment.userName ?? comment.authorName)}
                     </AvatarFallback>
                   </Avatar>
 

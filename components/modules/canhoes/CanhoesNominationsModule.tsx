@@ -5,7 +5,7 @@ import { CheckCircle2, Clock, Lock, Trophy } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { AwardCategoryDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
+import type { EventCategoryDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -53,7 +53,7 @@ export function CanhoesNominationsModule() {
   const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
   const error = categoriesQuery.error ?? myStatusQuery.error ?? approvedQuery.error;
   const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
-  const myStatus = myStatusQuery.data ?? [];
+  const myStatus = myStatusQuery.data ?? null;
   const approvedNominees = approvedQuery.data ?? [];
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -142,11 +142,9 @@ export function CanhoesNominationsModule() {
         items={categories.map((category) => ({
           id: category.id,
           label: category.name,
-          badge: myStatus.some(
-            (status) => status.categoryId === category.id && status.hasNominated
-          )
-            ? "Enviado"
-            : undefined,
+          badge: myStatus?.hasNomination && myStatus.nomineeId && myStatus.nomineeId === category.id
+          ? "Enviado"
+          : undefined,
         }))}
         onSelect={setSelectedCategoryId}
       />
@@ -156,7 +154,7 @@ export function CanhoesNominationsModule() {
           category={selectedCategory}
           eventId={queryEventId}
           isPhaseOpen={isPhaseOpen}
-          myStatus={myStatus.find((status) => status.categoryId === selectedCategory.id)}
+          myStatus={myStatus?.nomineeId === selectedCategory.id ? myStatus : undefined}
           approvedNominees={approvedNominees.filter((nominee) => nominee.categoryId === selectedCategory.id)}
           onRefresh={async () => {
             await Promise.all([
@@ -178,7 +176,7 @@ function CategoryNominationCard({
   isPhaseOpen,
   onRefresh,
 }: Readonly<{
-  category: AwardCategoryDto;
+  category: EventCategoryDto;
   eventId: string;
   myStatus: MyNominationStatusDto | undefined;
   approvedNominees: NomineeDto[];
@@ -191,8 +189,8 @@ function CategoryNominationCard({
 
   const titleTrimmed = title.trim();
   const isValid = titleTrimmed.length >= 2 && titleTrimmed.length <= 120;
-  const alreadyNominated = Boolean(myStatus?.hasNominated || pendingLabel);
-  const nominatedTitle = pendingLabel ?? myStatus?.nomineeTitle;
+  const alreadyNominated = Boolean(myStatus?.status || pendingLabel);
+  const nominatedTitle = pendingLabel ?? null;
 
   const createNomination = useMutation({
     mutationFn: () =>

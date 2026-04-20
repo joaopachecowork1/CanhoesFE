@@ -178,7 +178,7 @@ function HomeHeroSection({
   phaseLabel,
   phaseSummary,
 }: Readonly<{
-  event: CanhoesEventHomeViewModel["event"];
+  event: NonNullable<CanhoesEventHomeViewModel["event"]>;
   homeCopy: CanhoesEventHomeViewModel["homeCopy"];
   metrics: MetricItem[];
   overview: CanhoesEventHomeViewModel["overview"];

@@ -129,7 +129,10 @@ export function AdminNominationsSection({
     () =>
       nominations.reduce(
         (accumulator, nomination) => {
-          accumulator[nomination.status]++;
+          const status = nomination.status as NominationStatus;
+          if (status in accumulator) {
+            accumulator[status]++;
+          }
           return accumulator;
         },
         { pending: 0, approved: 0, rejected: 0 } as Record<NominationStatus, number>
@@ -340,7 +343,7 @@ export function AdminNominationsSection({
                           variant={NOMINATION_BADGE_VARIANT_BY_STATUS[nomination.status]}
                           className="inline-flex items-center gap-1"
                         >
-                          {getNominationStatusIcon(nomination.status)}
+                          {getNominationStatusIcon(nomination.status as NominationStatus)}
                           {nomination.status}
                         </Badge>
                       </div>
@@ -381,7 +384,7 @@ export function AdminNominationsSection({
                   variant={NOMINATION_BADGE_VARIANT_BY_STATUS[selectedNomination.status]}
                   className="inline-flex items-center gap-1 self-start"
                 >
-                  {getNominationStatusIcon(selectedNomination.status)}
+                  {getNominationStatusIcon(selectedNomination.status as NominationStatus)}
                   {selectedNomination.status}
                 </Badge>
               </div>

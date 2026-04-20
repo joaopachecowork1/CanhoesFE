@@ -3,7 +3,6 @@
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 export function useEventOverview() {

@@ -179,7 +179,7 @@ export function CanhoesWishlistModule() {
             activeId={selectedMember?.id ?? ""}
             items={memberList.map((member) => ({
               id: member.id,
-              label: member.displayName || member.email,
+              label: member.displayName || member.email || member.name,
               badge: String((wishlistByUser.get(member.id) ?? []).length),
             }))}
             onSelect={setSelectedMemberId}
@@ -328,7 +328,7 @@ function WishlistMemberPanel({
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-2">
                   <p className="text-[11px] text-[var(--color-text-muted)]">
-                    {new Date(wishlistItem.updatedAt).toLocaleDateString()}
+                    {new Date(wishlistItem.updatedAt ?? wishlistItem.updatedAtUtc).toLocaleDateString()}
                   </p>
 
                   {isCurrentUser ? (

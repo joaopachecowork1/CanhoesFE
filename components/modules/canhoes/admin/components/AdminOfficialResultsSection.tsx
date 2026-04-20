@@ -88,12 +88,20 @@ function ResultsCategoryButton({
   );
 }
 
+type AdminCategoryNomineeResult = {
+  nomineeId: string;
+  title: string;
+  imageUrl: string | null;
+  voteCount: number;
+  voterUserIds: string[];
+};
+
 function ResultsNomineeBar({
   nominee,
   index,
   totalVotes,
 }: Readonly<{
-  nominee: AdminCategoryResultDto["nominees"][number];
+  nominee: AdminCategoryNomineeResult;
   index: number;
   totalVotes: number;
 }>) {
@@ -105,7 +113,7 @@ function ResultsNomineeBar({
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           {Icon ? <Icon className={cn("h-4 w-4 shrink-0", iconClassName)} /> : null}
-          <p className="truncate text-sm text-[var(--ink-primary)]">{nominee.nomineeTitle}</p>
+          <p className="truncate text-sm text-[var(--ink-primary)]">{nominee.title}</p>
         </div>
         <span className="text-xs text-[var(--ink-muted)]">
           {nominee.voteCount} votos ({percentage}%)
@@ -121,13 +129,13 @@ function ResultsNomineeBar({
 function ResultsVotersList({
   nominees,
 }: Readonly<{
-  nominees: AdminCategoryResultDto["nominees"];
+  nominees: AdminCategoryNomineeResult[];
 }>) {
   return (
     <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
       {nominees.map((nominee) => (
         <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]">
-          <span className="text-[var(--ink-primary)]">{nominee.nomineeTitle}</span>:{" "}
+          <span className="text-[var(--ink-primary)]">{nominee.title}</span>: {" "}
           {nominee.voterUserIds.join(", ") || "Sem votos"}
         </p>
       ))}
@@ -163,7 +171,7 @@ export function AdminOfficialResultsSection({
     [resultCategories, selectedCategoryId]
   );
 
-  const sortedNominees = useMemo(
+  const sortedNominees = useMemo<AdminCategoryNomineeResult[]>(
     () =>
       selectedCategory
         ? [...selectedCategory.nominees].sort((left, right) => right.voteCount - left.voteCount)

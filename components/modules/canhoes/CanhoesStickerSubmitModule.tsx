@@ -18,7 +18,7 @@ import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type {
-  AwardCategoryDto,
+  EventCategoryDto,
   NomineeDto,
 } from "@/lib/api/types";
 
@@ -38,7 +38,7 @@ export function CanhoesStickerSubmitModule() {
   const { overview, event } = useEventOverview();
   const eventId = event?.id ?? null;
 
-  const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
+  const [categoryList, setCategoryList] = useState<EventCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

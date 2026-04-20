@@ -501,7 +501,7 @@ export function PendingProposals({
         );
       },
       saveLabel: "Guardar",
-      status: proposal.status,
+      status: proposal.status as ProposalStatus,
       title: draft.name || proposal.name,
     };
   };
@@ -588,7 +588,7 @@ export function PendingProposals({
       },
       saveDisabled: !draftText.trim(),
       saveLabel: "Guardar texto",
-      status: proposal.status,
+      status: proposal.status as ProposalStatus,
       title: "Medida proposta",
     };
   };
