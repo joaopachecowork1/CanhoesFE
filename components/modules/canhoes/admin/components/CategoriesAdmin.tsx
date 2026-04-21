@@ -571,15 +571,6 @@ export function CategoriesAdmin({
   const isLoading = loading || categoriesQuery.isLoading || nominationsSummaryQuery.isLoading || votesQuery.isLoading;
   const queryError = categoriesQuery.error ?? nominationsSummaryQuery.error ?? votesQuery.error;
 
-  const refreshCategoryData = useCallback(async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", eventId] }),
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
-      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
-    ]);
-    await onUpdate();
-  }, [eventId, onUpdate, queryClient]);
-
   const createCategory = useMutation({
     mutationFn: (payload: CreateAwardCategoryRequest) =>
       canhoesEventsRepo.adminCreateCategory(eventId!, payload),
