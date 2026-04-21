@@ -583,10 +583,17 @@ export function CategoriesAdmin({
   const createCategory = useMutation({
     mutationFn: (payload: CreateAwardCategoryRequest) =>
       canhoesEventsRepo.adminCreateCategory(eventId!, payload),
-    onSuccess: async () => {
+    onSuccess: async (createdCategory) => {
+      queryClient.setQueryData<AwardCategoryDto[]>(["canhoes", "admin", "categories", eventId], (current) =>
+        current ? [...current, createdCategory] : [createdCategory]
+      );
       toast.success("Categoria criada.");
       setSheetState(null);
-      await refreshCategoryData();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+      ]);
+      await onUpdate();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel criar a categoria."));
@@ -601,10 +608,17 @@ export function CategoriesAdmin({
       categoryId: string;
       payload: UpdateAwardCategoryRequest;
     }) => canhoesEventsRepo.adminUpdateCategory(eventId!, categoryId, payload),
-    onSuccess: async () => {
+    onSuccess: async (updatedCategory) => {
+      queryClient.setQueryData<AwardCategoryDto[]>(["canhoes", "admin", "categories", eventId], (current) =>
+        current?.map((category) => (category.id === updatedCategory.id ? updatedCategory : category)) ?? [updatedCategory]
+      );
       toast.success("Categoria atualizada.");
       setSheetState(null);
-      await refreshCategoryData();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+      ]);
+      await onUpdate();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel atualizar a categoria."));
@@ -613,11 +627,18 @@ export function CategoriesAdmin({
 
   const deleteCategory = useMutation({
     mutationFn: (categoryId: string) => canhoesEventsRepo.adminDeleteCategory(eventId!, categoryId),
-    onSuccess: async () => {
+    onSuccess: async (_data, categoryId) => {
+      queryClient.setQueryData<AwardCategoryDto[]>(["canhoes", "admin", "categories", eventId], (current) =>
+        current?.filter((category) => category.id !== categoryId) ?? []
+      );
       toast.success("Categoria apagada.");
       setDeleteTarget(null);
       setSheetState(null);
-      await refreshCategoryData();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+      ]);
+      await onUpdate();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel apagar a categoria."));
