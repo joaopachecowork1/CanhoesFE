@@ -20,7 +20,7 @@ export function AdminContentTabs({
   onSelect,
 }: Readonly<AdminContentTabsProps>) {
   return (
-    <div className="surface-panel-soft overflow-hidden px-2 py-2">
+    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(16,23,11,0.96)] px-2 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
       <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory">
         <div className="flex min-w-max gap-1.5">
           {items.map((item) => {
@@ -38,7 +38,7 @@ export function AdminContentTabs({
                   "snap-start",
                   isActive
                     ? "border-[rgba(122,173,58,0.44)] bg-[rgba(122,173,58,0.16)] text-[var(--ink-primary)] shadow-none"
-                    : "border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper-soft)] text-[var(--ink-primary)] hover:bg-[var(--bg-paper-olive)]"
+                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.9)] text-[var(--ink-primary)] hover:bg-[rgba(30,39,20,0.96)]"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -51,7 +51,7 @@ export function AdminContentTabs({
                       "rounded-full px-1.5 text-[0.65rem] shadow-none",
                       isActive
                         ? "border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.18)] text-[var(--ink-primary)]"
-                        : "border-[rgba(84,64,40,0.16)] bg-[var(--bg-paper)] text-[var(--ink-muted)]"
+                        : "border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.96)] text-[var(--ink-muted)]"
                     )}
                   >
                     {item.count}
