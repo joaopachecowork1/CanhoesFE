@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Inbox, Link as LinkIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -111,15 +111,14 @@ export function CanhoesWishlistModule() {
   const selectedMember = memberList.find((member) => member.id === selectedMemberId) ?? null;
   const selectedMemberItems = selectedMember ? wishlistByUser.get(selectedMember.id) ?? [] : [];
 
-  const loadWishlist = async () => {
-    if (!eventId) return;
+  const loadWishlist = useCallback(async (currentEventId: string) => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
       const [nextMembers, nextWishlistItems] = await Promise.all([
-        canhoesEventsRepo.getMembers(eventId),
-        canhoesEventsRepo.getWishlist(eventId),
+        canhoesEventsRepo.getMembers(currentEventId),
+        canhoesEventsRepo.getWishlist(currentEventId),
       ]);
 
       setMemberList(Array.isArray(nextMembers) ? nextMembers : []);
@@ -129,17 +128,27 @@ export function CanhoesWishlistModule() {
         error,
         "Nao foi possivel carregar a wishlist desta edicao."
       );
-      logFrontendError("CanhoesWishlist.loadWishlist", error);
+      logFrontendError("CanhoesWishlist.loadWishlist", error, { eventId: currentEventId });
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void loadWishlist();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]);
+    setMemberList([]);
+    setWishlistItems([]);
+    setErrorMessage(null);
+    setSelectedMemberId(null);
+    setFormState({ title: "", link: "", notes: "", selectedFile: null });
+
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadWishlist(eventId);
+  }, [eventId, loadWishlist]);
 
   const handleCreate = async () => {
     if (!canSubmit || !eventId) return;
@@ -157,7 +166,7 @@ export function CanhoesWishlistModule() {
       }
 
       setFormState({ title: "", link: "", notes: "", selectedFile: null });
-      await loadWishlist();
+      await loadWishlist(eventId);
       toast.success("Item adicionado");
     } catch (error) {
       const message = getErrorMessage(
@@ -296,7 +305,7 @@ export function CanhoesWishlistModule() {
           title="Erro ao carregar wishlist"
           description={errorMessage}
           actionLabel="Tentar novamente"
-          onAction={() => void loadWishlist()}
+          onAction={() => void (eventId ? loadWishlist(eventId) : Promise.resolve())}
         />
       ) : null}
 

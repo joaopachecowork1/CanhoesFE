@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
@@ -77,29 +77,30 @@ export function CanhoesStickerSubmitModule() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [stickerTitle, setStickerTitle] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const selectedFilePreviewUrl = useMemo(
-    () => (selectedFile ? URL.createObjectURL(selectedFile) : ""),
-    [selectedFile]
-  );
+  const [selectedFilePreviewUrl, setSelectedFilePreviewUrl] = useState("");
 
   useEffect(() => {
-    return () => {
-      if (selectedFilePreviewUrl) {
-        URL.revokeObjectURL(selectedFilePreviewUrl);
-      }
-    };
-  }, [selectedFilePreviewUrl]);
+    if (!selectedFile) {
+      setSelectedFilePreviewUrl("");
+      return;
+    }
 
-  const loadStickerData = useCallback(async () => {
-    if (!eventId) return;
+    const previewUrl = URL.createObjectURL(selectedFile);
+    setSelectedFilePreviewUrl(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [selectedFile]);
+
+  const loadStickerData = useCallback(async (currentEventId: string) => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
       const [nextCategories, nextNominees] = await Promise.all([
-        canhoesEventsRepo.getUserCategories(eventId),
-        canhoesEventsRepo.getApprovedNominees(eventId),
+        canhoesEventsRepo.getUserCategories(currentEventId),
+        canhoesEventsRepo.getApprovedNominees(currentEventId),
       ]);
 
       setCategoryList(Array.isArray(nextCategories) ? nextCategories : []);
@@ -117,16 +118,29 @@ export function CanhoesStickerSubmitModule() {
         error,
         "Nao foi possivel carregar os stickers desta edicao."
       );
-      logFrontendError("CanhoesStickerSubmit.loadStickerData", error);
+      logFrontendError("CanhoesStickerSubmit.loadStickerData", error, { eventId: currentEventId });
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
-  }, [eventId]);
+  }, []);
 
   useEffect(() => {
-    void loadStickerData();
-  }, [loadStickerData]);
+    setCategoryList([]);
+    setNomineeList([]);
+    setErrorMessage(null);
+    setIsLoading(Boolean(eventId));
+    setSelectedCategoryId("");
+    setStickerTitle("");
+    setSelectedFile(null);
+
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadStickerData(eventId);
+  }, [eventId, loadStickerData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -181,7 +195,7 @@ export function CanhoesStickerSubmitModule() {
 
       setStickerTitle("");
       setSelectedFile(null);
-      await loadStickerData();
+      await loadStickerData(eventId);
       toast.success("Sticker submetido");
     } catch (error) {
       const message = getErrorMessage(
@@ -226,7 +240,7 @@ export function CanhoesStickerSubmitModule() {
               title="Erro ao carregar stickers"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void loadStickerData()}
+              onAction={() => void (eventId ? loadStickerData(eventId) : Promise.resolve())}
             />
           ) : null}
 

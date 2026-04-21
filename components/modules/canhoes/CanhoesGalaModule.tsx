@@ -94,30 +94,36 @@ export function CanhoesGalaModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadResults = useCallback(() => {
-    if (!eventId) return;
-    if (resultsByCategory.length === 0) {
-      setIsLoading(true);
-    }
+  const loadResults = useCallback(async (currentEventId: string) => {
+    setIsLoading(true);
     setErrorMessage(null);
 
-    return canhoesEventsRepo
-      .getResults(eventId)
-      .then(setResultsByCategory)
-      .catch((error: unknown) => {
-        const message = getErrorMessage(
-          error,
-          "Nao foi possivel carregar os resultados da gala."
-        );
-        logFrontendError("CanhoesGala.loadResults", error);
-        setErrorMessage(message);
-      })
-      .finally(() => setIsLoading(false));
-  }, [eventId, resultsByCategory.length]);
+    try {
+      const nextResults = await canhoesEventsRepo.getResults(currentEventId);
+      setResultsByCategory(nextResults);
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar os resultados da gala."
+      );
+      logFrontendError("CanhoesGala.loadResults", error, { eventId: currentEventId });
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    void loadResults();
-  }, [loadResults]);
+    setResultsByCategory([]);
+    setErrorMessage(null);
+
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadResults(eventId);
+  }, [eventId, loadResults]);
 
   const totalVotes = useMemo(
     () => resultsByCategory.reduce((voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0), 0),
@@ -140,7 +146,7 @@ export function CanhoesGalaModule() {
           title="Erro ao carregar resultados"
           description={errorMessage}
           actionLabel="Tentar novamente"
-          onAction={() => void loadResults()}
+          onAction={() => void (eventId ? loadResults(eventId) : Promise.resolve())}
         />
       ) : null}
 

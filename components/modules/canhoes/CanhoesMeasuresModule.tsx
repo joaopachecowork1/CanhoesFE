@@ -46,29 +46,38 @@ export function CanhoesMeasuresModule() {
   const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadData = useCallback(async () => {
-    if (!eventId) return;
+  const loadData = useCallback(async (currentEventId: string) => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const nextMeasures = await canhoesEventsRepo.getMeasures(eventId);
+      const nextMeasures = await canhoesEventsRepo.getMeasures(currentEventId);
       setMeasures(nextMeasures);
     } catch (error) {
       const message = getErrorMessage(
         error,
         "Nao foi possivel carregar as medidas desta edicao."
       );
-      logFrontendError("CanhoesMeasures.loadMeasures", error);
+      logFrontendError("CanhoesMeasures.loadMeasures", error, { eventId: currentEventId });
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
-  }, [eventId]);
+  }, []);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    setMeasures([]);
+    setErrorMessage(null);
+    setSearch("");
+    setProposalText("");
+
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadData(eventId);
+  }, [eventId, loadData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -162,7 +171,7 @@ export function CanhoesMeasuresModule() {
               title="Erro ao carregar medidas"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void loadData()}
+              onAction={() => void (eventId ? loadData(eventId) : Promise.resolve())}
             />
           ) : null}
 

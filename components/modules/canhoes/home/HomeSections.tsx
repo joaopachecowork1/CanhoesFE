@@ -228,7 +228,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {[homeCopy.primaryAction, homeCopy.secondaryAction].map((action) => (
-            <ActionButton key={action.label} action={action} />
+            <ActionButton key={`${action.label}-${action.tone}`} action={action} />
           ))}
         </div>
 

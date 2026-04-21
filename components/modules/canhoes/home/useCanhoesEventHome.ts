@@ -14,10 +14,9 @@ export type HomeAction = {
   onClick?: () => void;
 };
 
-type CanhoesEventHomeSnapshot = {
+type CanhoesEventHomeContext = {
   event: EventSummaryDto;
   overview: EventOverviewDto;
-  snapshot: EventHomeSnapshotDto;
 };
 
 export type CanhoesEventHomeViewModel = {
@@ -39,25 +38,36 @@ export type CanhoesEventHomeViewModel = {
 };
 
 export function useCanhoesEventHome() {
-  const { data: homeSnapshot, isLoading, error: snapshotError } = useQuery<CanhoesEventHomeSnapshot>({
-    queryKey: ["canhoes", "home-snapshot", "active"],
+  const activeContextQuery = useQuery<CanhoesEventHomeContext>({
+    queryKey: ["canhoes", "home", "active-context"],
     queryFn: async () => {
       const context = await canhoesEventsRepo.getActiveContext();
-      const snapshot = await canhoesEventsRepo.getEventHomeSnapshot(context.event.id);
       return {
         event: context.event,
         overview: context.overview,
-        snapshot,
       };
     },
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
+    retry: 1,
+  });
+
+  const eventId = activeContextQuery.data?.event.id ?? null;
+
+  const snapshotQuery = useQuery<EventHomeSnapshotDto>({
+    enabled: Boolean(eventId),
+    queryKey: ["canhoes", "home-snapshot", eventId],
+    queryFn: () => canhoesEventsRepo.getEventHomeSnapshot(eventId!),
+    staleTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const viewModel = useMemo(() => {
-    if (!homeSnapshot) return null;
+    if (!activeContextQuery.data || !snapshotQuery.data) return null;
 
-    const { event, overview, snapshot } = homeSnapshot;
+    const { event, overview } = activeContextQuery.data;
+    const snapshot = snapshotQuery.data;
 
     return {
       event,
@@ -76,13 +86,14 @@ export function useCanhoesEventHome() {
       voting: snapshot.voting,
       wishlistAction: { label: "Abrir", href: "/canhoes", tone: "secondary" as const },
     } satisfies CanhoesEventHomeViewModel;
-  }, [homeSnapshot]);
+  }, [activeContextQuery.data, snapshotQuery.data]);
 
-  const errorMessage = snapshotError instanceof Error ? snapshotError.message : null;
+  const error = activeContextQuery.error ?? snapshotQuery.error;
+  const errorMessage = error instanceof Error ? error.message : error ? String(error) : null;
 
   return {
     errorMessage,
-    isLoading,
+    isLoading: activeContextQuery.isLoading || snapshotQuery.isLoading,
     viewModel,
   };
 }

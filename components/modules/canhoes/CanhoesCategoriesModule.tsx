@@ -50,34 +50,38 @@ export function CanhoesCategoriesModule() {
     const [categoryDescription, setCategoryDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const loadCategories = useCallback(async () => {
-        if (!event) {
-            setCategoryList([]);
-            setErrorMessage(null);
-            setIsLoading(false);
-            return;
-        }
-
+    const loadCategories = useCallback(async (currentEventId: string) => {
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            setCategoryList(await canhoesEventsRepo.getCategories(event.id));
+            setCategoryList(await canhoesEventsRepo.getCategories(currentEventId));
         } catch (error) {
             const message = getErrorMessage(
                 error,
                 "Nao foi possivel carregar as categorias desta edicao."
             );
-            logFrontendError("CanhoesCategories.loadCategories", error, { eventId: event.id });
+            logFrontendError("CanhoesCategories.loadCategories", error, { eventId: currentEventId });
             setErrorMessage(message);
         } finally {
             setIsLoading(false);
         }
-    }, [event]);
+    }, []);
 
     useEffect(() => {
-        void loadCategories();
-    }, [loadCategories]);
+        setCategoryList([]);
+        setErrorMessage(null);
+        setSearch("");
+        setCategoryName("");
+        setCategoryDescription("");
+
+        if (!event) {
+            setIsLoading(false);
+            return;
+        }
+
+        void loadCategories(event.id);
+    }, [event, loadCategories]);
 
     const canSubmitProposal =
         categoryName.trim().length >= 3 && Boolean(overview?.permissions.canSubmitProposal);
@@ -109,7 +113,7 @@ export function CanhoesCategoriesModule() {
 
             setCategoryName("");
             setCategoryDescription("");
-            await loadCategories();
+            await loadCategories(event.id);
             toast.success("Proposta enviada");
         } catch (error) {
             const message = getErrorMessage(
@@ -197,7 +201,7 @@ export function CanhoesCategoriesModule() {
                             description={errorMessage}
                             actionLabel="Tentar novamente"
                             tone="official"
-                            onAction={() => void loadCategories()}
+                            onAction={() => void (event ? loadCategories(event.id) : Promise.resolve())}
                         />
                     ) : null}
 

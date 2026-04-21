@@ -93,6 +93,7 @@ export function AdminMembersSection({
               <VirtualizedList
                 className="px-1 py-1"
                 estimateSize={() => 56}
+                getKey={(member) => member.id}
                 items={members}
                 renderItem={(member) => (
                   <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] min-h-11 px-3 py-2 shadow-[0_6px_14px_rgba(0,0,0,0.06)]">
