@@ -155,20 +155,35 @@ export function AdminNominationsSection({
   const isLoading = loading || categoriesQuery.isLoading || nominationsQuery.isLoading;
   const queryError = nominationsQuery.error ?? categoriesQuery.error;
 
-  const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] });
+  const refresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId], exact: true }),
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"], exact: true }),
+    ]);
   };
 
-  const refresh = async () => {
-    await Promise.all([categoriesQuery.refetch(), nominationsQuery.refetch()]);
+  const updateCachedNomination = (nomineeId: string, updater: (nomination: AdminNomineeDto) => AdminNomineeDto) => {
+    queryClient.setQueryData<AdminNomineeDto[]>(["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"], (current) =>
+      current?.map((nomination) => (nomination.id === nomineeId ? updater(nomination) : nomination)) ?? current
+    );
+  };
+
+  const removeNominationFromCache = (nomineeId: string) => {
+    queryClient.setQueryData<AdminNomineeDto[]>(["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"], (current) =>
+      current?.filter((nomination) => nomination.id !== nomineeId) ?? current
+    );
   };
 
   const approveNomination = useMutation({
     mutationFn: (nomineeId: string) =>
       canhoesEventsRepo.adminApproveNomination(queryEventId, nomineeId),
-    onSuccess: async () => {
+    onSuccess: async (_data, nomineeId) => {
+      updateCachedNomination(nomineeId, (nomination) => ({ ...nomination, status: "approved" }));
       toast.success("Nomeacao aprovada.");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
+      ]);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel aprovar a nomeacao."));
@@ -178,10 +193,15 @@ export function AdminNominationsSection({
   const rejectNomination = useMutation({
     mutationFn: (nomineeId: string) =>
       canhoesEventsRepo.adminRejectNomination(queryEventId, nomineeId),
-    onSuccess: async () => {
+    onSuccess: async (_data, nomineeId) => {
       setRejectingNominationId(null);
+      removeNominationFromCache(nomineeId);
+      setSelectedNominationId((current) => (current === nomineeId ? null : current));
       toast.success("Nomeacao rejeitada.");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
+      ]);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel rejeitar a nomeacao."));
@@ -193,9 +213,16 @@ export function AdminNominationsSection({
       canhoesEventsRepo.adminSetNominationCategory(queryEventId, nomineeId, {
         categoryId: categoryId === "none" ? null : categoryId,
       }),
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
+      updateCachedNomination(variables.nomineeId, (nomination) => ({
+        ...nomination,
+        categoryId: variables.categoryId === "none" ? null : variables.categoryId,
+      }));
       toast.success("Categoria atualizada.");
-      await invalidate();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
+      ]);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel mover a nomeacao."));

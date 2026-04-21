@@ -153,14 +153,18 @@ export function CanhoesNominationsModule() {
         <CategoryNominationCard
           category={selectedCategory}
           eventId={queryEventId}
+          queryClient={queryClient}
           isPhaseOpen={isPhaseOpen}
           myStatus={myStatus?.nomineeId === selectedCategory.id ? myStatus : undefined}
           approvedNominees={approvedNominees.filter((nominee) => nominee.categoryId === selectedCategory.id)}
-          onRefresh={async () => {
-            await Promise.all([
-              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "my-status"] }),
-              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "approved"] }),
-            ]);
+          onRefresh={() => {
+            queryClient.setQueryData<MyNominationStatusDto | null>(["nominations", queryEventId, "my-status"], (current) =>
+              current ? { ...current, hasNomination: true, nomineeId: selectedCategory.id } : current
+            );
+            queryClient.setQueryData<NomineeDto[]>(["nominations", queryEventId, "approved"], (current) =>
+              current ?? []
+            );
+            return Promise.resolve();
           }}
         />
       ) : null}
@@ -175,6 +179,7 @@ function CategoryNominationCard({
   approvedNominees,
   isPhaseOpen,
   onRefresh,
+  queryClient,
 }: Readonly<{
   category: EventCategoryDto;
   eventId: string;
@@ -182,6 +187,7 @@ function CategoryNominationCard({
   approvedNominees: NomineeDto[];
   isPhaseOpen: boolean;
   onRefresh: () => Promise<void>;
+  queryClient: ReturnType<typeof useQueryClient>;
 }>) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -198,16 +204,34 @@ function CategoryNominationCard({
         categoryId: category.id,
         title: titleTrimmed,
       }),
-    onSuccess: async () => {
+    onMutate: async () => {
+      const previousMyStatus = queryClient.getQueryData<MyNominationStatusDto | null>(["nominations", eventId, "my-status"]);
+      const previousApproved = queryClient.getQueryData<NomineeDto[]>(["nominations", eventId, "approved"]);
+      queryClient.setQueryData<MyNominationStatusDto | null>(["nominations", eventId, "my-status"], {
+        hasNomination: true,
+        nomineeId: category.id,
+        status: "pending",
+      });
       setPendingLabel(titleTrimmed);
       setTitle("");
       setFile(null);
-      toast.success("Nomeacao submetida. Aguarda aprovacao.");
-      await onRefresh();
+      return { previousApproved, previousMyStatus };
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousMyStatus !== undefined) {
+        queryClient.setQueryData(["nominations", eventId, "my-status"], context.previousMyStatus);
+      }
+      if (context?.previousApproved !== undefined) {
+        queryClient.setQueryData(["nominations", eventId, "approved"], context.previousApproved);
+      }
+      setPendingLabel(null);
       logFrontendError("CanhoesNominations.createNomination", error, { categoryId: category.id, eventId });
       toast.error(getErrorMessage(error, "Nao foi possivel submeter a nomeacao."));
+    },
+    onSuccess: async () => {
+      setPendingLabel(titleTrimmed);
+      toast.success("Nomeacao submetida. Aguarda aprovacao.");
+      await onRefresh();
     },
   });
 

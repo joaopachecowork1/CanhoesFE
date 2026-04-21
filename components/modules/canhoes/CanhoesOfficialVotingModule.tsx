@@ -69,9 +69,9 @@ export function CanhoesOfficialVotingModule() {
       logFrontendError("CanhoesOfficialVoting.castVote", error, { eventId });
       toast.error(getErrorMessage(error, "Nao foi possivel registar o voto. Tenta novamente."));
     },
-    onSettled: async () => {
+    onSuccess: async () => {
       if (!eventId) return;
-      await queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId] });
+      await queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId], exact: true });
     },
   });
 

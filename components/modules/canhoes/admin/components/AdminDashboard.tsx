@@ -9,7 +9,6 @@ import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/Canho
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-import { cn } from "@/lib/utils";
 
 import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
 
@@ -78,19 +77,15 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       {!loading && pendingReviews > 0 ? (
-        <section className={cn("surface-panel-soft border border-[rgba(224,90,58,0.24)] bg-[rgba(31,17,12,0.92)]") }>
-          <div className="space-y-2.5">
+        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.24)] bg-[rgba(34,18,14,0.95)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-[var(--danger)]">
               <AlertTriangle className="h-4 w-4" />
-              <span className="editorial-kicker text-[var(--danger)]">
-                {adminCopy.dashboard.queueKicker}
-              </span>
+              <span className="editorial-kicker text-[var(--danger)]">{adminCopy.dashboard.queueKicker}</span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="heading-3 text-[var(--ink-primary)]">
-                {adminCopy.dashboard.queueTitle}
-              </h3>
+              <h3 className="heading-3 text-[var(--ink-primary)]">{adminCopy.dashboard.queueTitle}</h3>
               <div className="flex flex-wrap gap-2">
                 <PendingReviewBadges
                   nomineesCount={pendingNominationCount}
@@ -120,7 +115,7 @@ export function AdminDashboard({
           {recentNominees.map((nominee: AdminNomineeDto) => (
             <article
               key={nominee.id}
-              className="surface-panel-soft border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]"
+              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">

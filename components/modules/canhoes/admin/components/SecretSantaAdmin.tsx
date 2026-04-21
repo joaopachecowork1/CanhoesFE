@@ -81,16 +81,14 @@ export function SecretSantaAdmin({
 
   return (
     <div className="space-y-4">
-      <Card className="canhoes-paper-panel">
+      <Card className="canhoes-paper-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <Gift className="h-4 w-4" />
             <span className="label">{adminCopy.secretSanta.kicker}</span>
           </div>
           <CardTitle>{adminCopy.secretSanta.title}</CardTitle>
-          <p className="body-small text-[var(--ink-muted)]">
-            {adminCopy.secretSanta.description}
-          </p>
+          <p className="body-small text-[var(--ink-muted)]">{adminCopy.secretSanta.description}</p>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -188,9 +186,7 @@ function StatusMetric({
 }>) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-3 text-[var(--ink-primary)]">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
-        {label}
-      </p>
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
       <p className="mt-2 text-lg font-semibold text-[var(--ink-primary)]">{value}</p>
       <p className="mt-1 text-xs text-[var(--ink-muted)]">{hint}</p>
     </div>
