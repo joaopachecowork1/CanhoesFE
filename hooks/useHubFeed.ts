@@ -321,30 +321,28 @@ export function useHubFeed(eventId: string | null) {
       if (!eventId) return;
 
       let previousPost: EventFeedPostFullDto | undefined;
+      let appliedOptimisticUpdate = false;
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) => {
         previousPost = findPostInFeed(old, postId);
+        appliedOptimisticUpdate = Boolean(previousPost);
         return updateInfiniteFeedPosts(old, (post) =>
           post.id === postId ? applyPostReaction(post, emoji) : post
         );
       });
 
       try {
-        if (emoji === HEART_REACTION) {
-          const result = await toggleReactionMutation.mutateAsync({ postId, emoji }) as { liked: boolean };
-          queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
-            updateInfiniteFeedPosts(old, (post) => {
-              if (post.id !== postId) return post;
-              const myReactions = new Set(post.myReactions ?? []);
-              if (result.liked) myReactions.add(HEART_REACTION);
-              else myReactions.delete(HEART_REACTION);
-              return { ...post, likedByMe: result.liked, myReactions: Array.from(myReactions) };
-            })
-          );
-          return;
-        }
-        await toggleReactionMutation.mutateAsync({ postId, emoji });
+        const result = await toggleReactionMutation.mutateAsync({ postId, emoji }) as { liked: boolean };
+        queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
+          updateInfiniteFeedPosts(old, (post) => {
+            if (post.id !== postId) return post;
+            const myReactions = new Set(post.myReactions ?? []);
+            if (result.liked) myReactions.add(HEART_REACTION);
+            else myReactions.delete(HEART_REACTION);
+            return { ...post, likedByMe: result.liked, myReactions: Array.from(myReactions) };
+          })
+        );
       } catch (error) {
-        if (previousPost) {
+        if (appliedOptimisticUpdate && previousPost) {
           queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
             updateInfiniteFeedPosts(old, (post) =>
               post.id === previousPost!.id ? previousPost! : post
@@ -413,6 +411,7 @@ export function useHubFeed(eventId: string | null) {
 
       setShowParticles({ postId, x: 50, y: 50 });
 
+      const previousPost = findPostInFeed(postsQuery.data, postId);
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
         updateInfiniteFeedPosts(old, (post) =>
           post.id === postId ? applyPollVote(post, optionId) : post
@@ -422,13 +421,19 @@ export function useHubFeed(eventId: string | null) {
       try {
         await canhoesEventsRepo.voteFeedPoll(eventId, postId, optionId);
       } catch (error) {
+        if (previousPost) {
+          queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
+            updateInfiniteFeedPosts(old, (post) =>
+              post.id === previousPost.id ? previousPost : post
+            )
+          );
+        }
         const message = getErrorMessage(error, "Nao foi possivel registar o teu voto.");
         logFrontendError("HubFeed.votePoll", error, { optionId, postId });
         toast.error(message);
-        await refreshPosts();
       }
     },
-    [queryClient, refreshPosts, eventId]
+    [queryClient, eventId, postsQuery.data]
   );
 
   const toggleComments = useCallback(
