@@ -65,8 +65,8 @@ export function CanhoesBottomTabs({
           containerClassName="h-auto w-full max-w-none justify-center"
           dockClassName={cn(
             "min-h-[4rem] w-max min-w-fit max-w-full items-center gap-1 rounded-[1.4rem] border px-1 py-1.5",
-            "border-[rgba(212,184,150,0.12)] bg-[var(--bg-deep)]/95",
-            "shadow-[0_16px_32px_rgba(0,0,0,0.28)] backdrop-blur-[16px]"
+            "border-[rgba(122,173,58,0.22)] bg-[rgba(14,24,10,0.98)]",
+            "shadow-[0_16px_32px_rgba(0,0,0,0.34)]"
           )}
         />
       </div>
