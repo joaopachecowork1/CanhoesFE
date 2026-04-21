@@ -3,10 +3,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { useEventOverview } from "@/hooks/useEventOverview";
 import { getPhaseLabel, getPhaseSummary, formatPhaseWindow } from "@/lib/canhoesEvent";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-import type { EventHomeSnapshotDto as CanhoesEventHomeSnapshot } from "@/lib/api/types";
+import type { EventHomeSnapshotDto, EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
 
 export type HomeAction = {
   label: string;
@@ -15,38 +14,42 @@ export type HomeAction = {
   onClick?: () => void;
 };
 
+type CanhoesEventHomeSnapshot = EventHomeSnapshotDto & { snapshot: EventHomeSnapshotDto };
+
 export type CanhoesEventHomeViewModel = {
-  event: NonNullable<Awaited<ReturnType<typeof useEventOverview>>["event"]>;
+  event: EventSummaryDto;
   homeCopy: {
     alerts: string[];
     primaryAction: HomeAction;
     secondaryAction: HomeAction;
   };
-  overview: NonNullable<Awaited<ReturnType<typeof useEventOverview>>["overview"]>;
+  overview: EventOverviewDto;
   phaseDeadline: string | null;
   phaseLabel: string;
   phaseSummary: string;
-  recentPosts: CanhoesEventHomeSnapshot["recentPosts"];
-  secretSanta: CanhoesEventHomeSnapshot["secretSanta"];
+  recentPosts: EventHomeSnapshotDto["recentPosts"];
+  secretSanta: EventHomeSnapshotDto["secretSanta"];
   secretSantaAction: HomeAction;
-  voting: CanhoesEventHomeSnapshot["voting"];
+  voting: EventHomeSnapshotDto["voting"];
   wishlistAction: HomeAction;
 };
 
 export function useCanhoesEventHome() {
-  const { event, error: overviewError, isLoading: isOverviewLoading, overview } = useEventOverview();
-  const eventId = event?.id ?? null;
-
-  const { data: homeSnapshot, isLoading: isSnapshotLoading, error: snapshotError } = useQuery({
-    queryKey: ["canhoes", "home-snapshot", eventId],
-    enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getEventHomeSnapshot(eventId!),
+  const { data: homeSnapshot, isLoading, error: snapshotError } = useQuery<CanhoesEventHomeSnapshot>({
+    queryKey: ["canhoes", "home-snapshot", "active"],
+    queryFn: async () => {
+      const context = await canhoesEventsRepo.getActiveContext();
+      const snapshot = await canhoesEventsRepo.getEventHomeSnapshot(context.event.id);
+      return { ...context, snapshot };
+    },
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
   });
 
   const viewModel = useMemo(() => {
-    if (!event || !overview || !homeSnapshot) return null;
+    if (!homeSnapshot) return null;
+
+    const { event, overview, snapshot } = homeSnapshot;
 
     return {
       event,
@@ -59,19 +62,19 @@ export function useCanhoesEventHome() {
       phaseDeadline: formatPhaseWindow(overview.activePhase) ?? "S/A definir",
       phaseLabel: getPhaseLabel(overview.activePhase?.type),
       phaseSummary: getPhaseSummary(overview.activePhase?.type),
-      recentPosts: homeSnapshot.recentPosts,
-      secretSanta: homeSnapshot.secretSanta,
+      recentPosts: snapshot.recentPosts,
+      secretSanta: snapshot.secretSanta,
       secretSantaAction: { label: "Abrir", href: "/canhoes", tone: "outline" as const },
-      voting: homeSnapshot.voting,
+      voting: snapshot.voting,
       wishlistAction: { label: "Abrir", href: "/canhoes", tone: "secondary" as const },
     } satisfies CanhoesEventHomeViewModel;
-  }, [event, homeSnapshot, overview]);
+  }, [homeSnapshot]);
 
-  const errorMessage = overviewError?.message ?? (snapshotError instanceof Error ? snapshotError.message : null);
+  const errorMessage = snapshotError instanceof Error ? snapshotError.message : null;
 
   return {
     errorMessage,
-    isLoading: isOverviewLoading || isSnapshotLoading,
+    isLoading,
     viewModel,
   };
 }

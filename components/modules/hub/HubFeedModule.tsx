@@ -99,6 +99,8 @@ function HubFeedModuleView({
 
   const handleRetry = useCallback(() => void refresh(), [refresh]);
   const handleClearParticles = useCallback(() => setShowParticles(null), [setShowParticles]);
+  const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
+  const handleLoadMore = useCallback(() => state.loadMore(), [state]);
 
   const feedList = useMemo(
     () => (
@@ -115,8 +117,8 @@ function HubFeedModuleView({
         comments={comments}
         openComments={openComments}
         commentDrafts={commentDrafts}
-        onSortChange={setSort}
-        onLoadMore={state.loadMore}
+        onSortChange={handleSortChange}
+        onLoadMore={handleLoadMore}
         onToggleReaction={toggleReaction}
         onToggleDownvote={toggleDownvote}
         onToggleComments={toggleComments}
@@ -132,15 +134,17 @@ function HubFeedModuleView({
     ),
     [
       addComment,
-      allPostsCount,
       adminDelete,
       adminPin,
+      allPostsCount,
       commentDrafts,
       comments,
       currentUserId,
       currentUserImage,
       currentUserName,
       deleteComment,
+      handleLoadMore,
+      handleSortChange,
       hasMore,
       isAdmin,
       isFetchingNextPage,
@@ -148,9 +152,7 @@ function HubFeedModuleView({
       posts,
       sentinelRef,
       setCommentDraft,
-      setSort,
       sort,
-      state.loadMore,
       toggleCommentReaction,
       toggleComments,
       toggleDownvote,
