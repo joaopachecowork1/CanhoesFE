@@ -14,7 +14,11 @@ export type HomeAction = {
   onClick?: () => void;
 };
 
-type CanhoesEventHomeSnapshot = EventHomeSnapshotDto & { snapshot: EventHomeSnapshotDto };
+type CanhoesEventHomeSnapshot = {
+  event: EventSummaryDto;
+  overview: EventOverviewDto;
+  snapshot: EventHomeSnapshotDto;
+};
 
 export type CanhoesEventHomeViewModel = {
   event: EventSummaryDto;
@@ -40,7 +44,11 @@ export function useCanhoesEventHome() {
     queryFn: async () => {
       const context = await canhoesEventsRepo.getActiveContext();
       const snapshot = await canhoesEventsRepo.getEventHomeSnapshot(context.event.id);
-      return { ...context, snapshot };
+      return {
+        event: context.event,
+        overview: context.overview,
+        snapshot,
+      };
     },
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
