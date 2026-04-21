@@ -156,11 +156,14 @@ export function CanhoesNominationsModule() {
           isPhaseOpen={isPhaseOpen}
           myStatus={myStatus?.nomineeId === selectedCategory.id ? myStatus : undefined}
           approvedNominees={approvedNominees.filter((nominee) => nominee.categoryId === selectedCategory.id)}
-          onRefresh={async () => {
-            await Promise.all([
-              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "my-status"] }),
-              queryClient.invalidateQueries({ queryKey: ["nominations", queryEventId, "approved"] }),
-            ]);
+          onRefresh={() => {
+            queryClient.setQueryData<MyNominationStatusDto | null>(["nominations", queryEventId, "my-status"], (current) =>
+              current ? { ...current, hasNomination: true, nomineeId: selectedCategory.id } : current
+            );
+            queryClient.setQueryData<NomineeDto[]>(["nominations", queryEventId, "approved"], (current) =>
+              current ?? []
+            );
+            return Promise.resolve();
           }}
         />
       ) : null}

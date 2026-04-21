@@ -581,8 +581,8 @@ export function CategoriesAdmin({
       toast.success("Categoria criada.");
       setSheetState(null);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId], exact: true }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId], exact: true }),
       ]);
       await onUpdate();
     },
@@ -606,8 +606,8 @@ export function CategoriesAdmin({
       toast.success("Categoria atualizada.");
       setSheetState(null);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId], exact: true }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId], exact: true }),
       ]);
       await onUpdate();
     },
@@ -626,8 +626,8 @@ export function CategoriesAdmin({
       setDeleteTarget(null);
       setSheetState(null);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId], exact: true }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId], exact: true }),
       ]);
       await onUpdate();
     },

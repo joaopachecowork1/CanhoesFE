@@ -291,12 +291,16 @@ export default function CanhoesAdminModule({
 
     const handleRefresh = useCallback(async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "category-proposals", "pending", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "measure-proposals", "pending", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "members", activeEvent?.id, 0, 50], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", activeEvent?.id], exact: true }),
             refreshOverview(),
         ]);
-        // Query invalidation above is the canonical refresh path; the shared
-        // event is no longer needed here and would double-trigger refetches.
-    }, [queryClient, refreshOverview]);
+    }, [activeEvent?.id, queryClient, refreshOverview]);
 
     const dashboardError = getAdminErrorMessage(error);
     const sectionContent = buildSectionContent({
