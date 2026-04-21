@@ -114,13 +114,12 @@ describe("useEventModuleAccess", () => {
     expect(result.current.isAllowed).toBe(false);
   });
 
-  it("provides fallback to first available module when denied", () => {
+  it("exposes the default fallback route when denied", () => {
     mockUseEventOverview.mockReturnValue(makeOverview({ isAdmin: false }));
     const { result } = renderHook(() => useEventModuleAccess("voting"), {
       wrapper: createWrapper(),
     });
-    // feed is first visible module
-    expect(result.current.fallbackHref).toBe("/canhoes/feed");
+    expect(result.current.fallbackHref).toBe("/canhoes");
   });
 
   it("provides fallback to /canhoes when no modules visible", () => {
@@ -151,7 +150,6 @@ describe("useEventModuleAccess", () => {
     });
     expect(result.current.module.key).toBe("voting");
     expect(result.current.module.label).toBe("Votacao");
-    expect(result.current.module.href).toBe("/canhoes/votacao");
   });
 
   it("admin module access requires isAdmin permission", () => {

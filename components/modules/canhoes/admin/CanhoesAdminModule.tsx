@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 
@@ -299,22 +299,19 @@ export default function CanhoesAdminModule({
     }, [activeEvent?.id, queryClient, refreshOverview]);
 
     const dashboardError = getAdminErrorMessage(error);
-    const sectionContent = useMemo(
-      () => buildSectionContent({
-        activeEventName: activeEvent?.name ?? null,
-        categoriesCount: totalCategories,
-        categoryProposals,
-        events,
-        eventId: activeEvent?.id ?? null,
-        eventState,
-        handleRefresh,
-        loading,
-        measureProposals,
-        pendingNominationCount,
-        summary,
-      }),
-      [activeEvent?.id, activeEvent?.name, categoryProposals, events, eventState, handleRefresh, loading, measureProposals, pendingNominationCount, summary, totalCategories]
-    );
+    const sectionContent = buildSectionContent({
+      activeEventName: activeEvent?.name ?? null,
+      categoriesCount: totalCategories,
+      categoryProposals,
+      events,
+      eventId: activeEvent?.id ?? null,
+      eventState,
+      handleRefresh,
+      loading,
+      measureProposals,
+      pendingNominationCount,
+      summary,
+    });
 
     useEffect(() => {
         if (!error) return;

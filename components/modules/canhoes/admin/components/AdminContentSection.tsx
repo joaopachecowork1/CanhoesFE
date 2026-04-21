@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type {
@@ -53,35 +53,22 @@ export function AdminContentSection({
       ? activeViewParam
       : getDefaultAdminContentSection();
 
-  const safeCategoryProposals = useMemo(
-    () => (Array.isArray(categoryProposals) ? categoryProposals : []),
-    [categoryProposals]
-  );
-  const safeMeasureProposals = useMemo(
-    () => (Array.isArray(measureProposals) ? measureProposals : []),
-    [measureProposals]
-  );
+  const safeCategoryProposals = Array.isArray(categoryProposals) ? categoryProposals : [];
+  const safeMeasureProposals = Array.isArray(measureProposals) ? measureProposals : [];
 
-  const pendingCounts = useMemo(
-    () => ({
-      categoryProposals: safeCategoryProposals.filter((proposal) => proposal.status === "pending").length,
-      measureProposals: safeMeasureProposals.filter((proposal) => proposal.status === "pending").length,
-      nominations: pendingNominationCount,
-    }),
-    [pendingNominationCount, safeCategoryProposals, safeMeasureProposals]
-  );
+  const pendingCounts = {
+    categoryProposals: safeCategoryProposals.filter((proposal) => proposal.status === "pending").length,
+    measureProposals: safeMeasureProposals.filter((proposal) => proposal.status === "pending").length,
+    nominations: pendingNominationCount,
+  };
 
-  const contentItems = useMemo(
-    () =>
-      buildAdminContentSectionItems({
-        categoriesCount,
-        pendingCategoryProposalsCount: pendingCounts.categoryProposals,
-        pendingMeasureProposalsCount: pendingCounts.measureProposals,
-        pendingNominationsCount: pendingCounts.nominations,
-        resultsCount: officialResultsCount,
-      }),
-    [categoriesCount, officialResultsCount, pendingCounts]
-  );
+  const contentItems = buildAdminContentSectionItems({
+    categoriesCount,
+    pendingCategoryProposalsCount: pendingCounts.categoryProposals,
+    pendingMeasureProposalsCount: pendingCounts.measureProposals,
+    pendingNominationsCount: pendingCounts.nominations,
+    resultsCount: officialResultsCount,
+  });
 
   const handleSelectView = useCallback(
     (nextView: AdminContentSectionId) => {

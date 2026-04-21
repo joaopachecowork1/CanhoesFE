@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Medal, Trophy } from "lucide-react";
 
 import {
@@ -9,8 +9,8 @@ import {
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { Skeleton } from "@/components/ui/skeleton";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { cn } from "@/lib/utils";
 import type { CanhoesCategoryResultDto } from "@/lib/api/types";
@@ -18,6 +18,25 @@ import type { CanhoesCategoryResultDto } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
+function GalaLoadingState() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <Card key={index}>
+          <CardHeader className="pb-2">
+            <Skeleton className="h-5 w-48 rounded" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-16 w-full rounded-[var(--radius-md-token)]" />
+            <Skeleton className="h-16 w-full rounded-[var(--radius-md-token)]" />
+            <Skeleton className="h-4 w-40 rounded" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 function renderPlacementIcon(position: number) {
   return position === 0 ? (
@@ -75,33 +94,40 @@ export function CanhoesGalaModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadResults = useCallback(() => {
-    if (!eventId) return;
+  const loadResults = useCallback(async (currentEventId: string) => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    return canhoesEventsRepo
-      .getResults(eventId)
-      .then(setResultsByCategory)
-      .catch((error: unknown) => {
-        const message = getErrorMessage(
-          error,
-          "Nao foi possivel carregar os resultados da gala."
-        );
-        logFrontendError("CanhoesGala.loadResults", error);
-        setResultsByCategory([]);
-        setErrorMessage(message);
-      })
-      .finally(() => setIsLoading(false));
-  }, [eventId]);
+    try {
+      const nextResults = await canhoesEventsRepo.getResults(currentEventId);
+      setResultsByCategory(nextResults);
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Nao foi possivel carregar os resultados da gala."
+      );
+      logFrontendError("CanhoesGala.loadResults", error, { eventId: currentEventId });
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    void loadResults();
-  }, [loadResults]);
+    setResultsByCategory([]);
+    setErrorMessage(null);
 
-  const totalVotes = useMemo(
-    () => resultsByCategory.reduce((voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0), 0),
-    [resultsByCategory]
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadResults(eventId);
+  }, [eventId, loadResults]);
+
+  const totalVotes = resultsByCategory.reduce(
+    (voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0),
+    0
   );
 
   return (
@@ -113,14 +139,14 @@ export function CanhoesGalaModule() {
         badgeLabel={`Total votos: ${totalVotes}`}
       />
 
-      {isLoading ? <InlineLoader label="A carregar resultados" /> : null}
+      {isLoading ? <GalaLoadingState /> : null}
 
       {!isLoading && errorMessage ? (
         <ErrorAlert
           title="Erro ao carregar resultados"
           description={errorMessage}
           actionLabel="Tentar novamente"
-          onAction={() => void loadResults()}
+          onAction={() => void (eventId ? loadResults(eventId) : Promise.resolve())}
         />
       ) : null}
 
@@ -128,7 +154,7 @@ export function CanhoesGalaModule() {
         <p className="body-small text-[var(--color-text-muted)]">Sem resultados ainda.</p>
       ) : null}
 
-      {!isLoading ? (
+      {resultsByCategory.length > 0 ? (
         <div className="space-y-4">
           {resultsByCategory.map((categoryResult) => (
             <Card key={categoryResult.categoryId}>

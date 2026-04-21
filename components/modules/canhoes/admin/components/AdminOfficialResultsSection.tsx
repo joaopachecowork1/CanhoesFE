@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Award, BarChart2, ChevronDown, ChevronUp, Medal } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { AdminCategoryResultDto } from "@/lib/api/types";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+const EMPTY_ADMIN_CATEGORY_RESULTS: AdminCategoryResultDto[] = [];
 import {
   ADMIN_CONTENT_CARD_CLASS,
   ADMIN_OUTLINE_BUTTON_CLASS,
@@ -120,11 +123,28 @@ function ResultsVotersList({
 }: Readonly<{
   nominees: AdminCategoryNomineeResult[];
 }>) {
+  const content =
+    nominees.length > 20 ? (
+      <VirtualizedList
+        items={nominees}
+        estimateSize={() => 40}
+        className="max-h-[34svh]"
+        getKey={(nominee) => nominee.nomineeId}
+        renderItem={(nominee) => (
+          <p className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
+        )}
+      />
+    ) : (
+      <div className="space-y-1">
+        {nominees.map((nominee) => (
+          <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
+        ))}
+      </div>
+    );
+
   return (
     <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
-      {nominees.map((nominee) => (
-        <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
-      ))}
+      {content}
     </AdminDetailPanel>
   );
 }
@@ -145,11 +165,12 @@ export function AdminOfficialResultsSection({
     queryKey: ["canhoes", "admin", "official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
     queryFn: async () => canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId) as Promise<AdminCategoryResultDto[]>,
+    placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
 
-  const resultCategories = useMemo<AdminCategoryResultDto[]>(() => resultsQuery.data ?? [], [resultsQuery.data]);
+  const resultCategories = resultsQuery.data ?? EMPTY_ADMIN_CATEGORY_RESULTS;
 
   const selectedCategory = useMemo(
     () =>
@@ -223,15 +244,20 @@ export function AdminOfficialResultsSection({
 
       {resultCategories.length > 0 ? (
         <AdminListPanel className="border-[rgba(122,173,58,0.12)] bg-[rgba(16,23,11,0.94)]">
-          {resultCategories.map((category) => (
-            <ResultsCategoryButton
-              key={category.categoryId}
-              category={category}
-              isSelected={category.categoryId === selectedCategoryId}
-              totalMembers={memberCount}
-              onSelect={setSelectedCategoryId}
-            />
-          ))}
+          <VirtualizedList
+            items={resultCategories}
+            getKey={(category) => category.categoryId}
+            estimateSize={() => 58}
+            className="max-h-[58svh]"
+            renderItem={(category) => (
+              <ResultsCategoryButton
+                category={category}
+                isSelected={category.categoryId === selectedCategoryId}
+                totalMembers={memberCount}
+                onSelect={setSelectedCategoryId}
+              />
+            )}
+          />
         </AdminListPanel>
       ) : null}
 
@@ -254,16 +280,19 @@ export function AdminOfficialResultsSection({
               Participacao {Math.round(selectedCategory.participationRate * 100)}%
             </AdminDetailPanel>
 
-            <div className="space-y-3">
-              {sortedNominees.map((nominee, index) => (
+            <VirtualizedList
+              items={sortedNominees}
+              getKey={(nominee) => nominee.nomineeId}
+              estimateSize={() => 72}
+              className="max-h-[42svh]"
+              renderItem={(nominee, index) => (
                 <ResultsNomineeBar
-                  key={nominee.nomineeId}
                   nominee={nominee}
                   index={index}
                   totalVotes={selectedCategory.totalVotes}
                 />
-              ))}
-            </div>
+              )}
+            />
 
             <Button
               type="button"

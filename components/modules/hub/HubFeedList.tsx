@@ -5,6 +5,7 @@ import { ScrollText } from "lucide-react";
 
 import { PostErrorBoundary } from "@/components/ui/post-error-boundary";
 import { EmptyState } from "@/components/ui/empty-state";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { feedCopy } from "@/lib/canhoesCopy";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import type { FeedSortOrder } from "@/hooks/useHubFeed";
@@ -85,31 +86,48 @@ export function HubFeedList({
           />
         ) : null}
 
-        {posts.map((post, index) => (
-          <PostErrorBoundary key={post.id}>
-            <HubPostCard
-              post={post}
-              index={index}
-              isAdmin={isAdmin}
-              openComments={openComments[post.id] ?? false}
-              commentDraft={commentDrafts[post.id] ?? ""}
-              comments={comments[post.id] ?? []}
-              currentUserId={currentUserId}
-              currentUserName={currentUserName}
-              currentUserImage={currentUserImage}
-              onToggleReaction={onToggleReaction}
-              onToggleDownvote={onToggleDownvote}
-              onToggleComments={onToggleComments}
-              onVotePoll={onVotePoll}
-              onAddComment={onAddComment}
-              onDeleteComment={onDeleteComment}
-              onCommentDraftChange={onCommentDraftChange}
-              onToggleCommentReaction={onToggleCommentReaction}
-              onAdminPin={onAdminPin}
-              onAdminDelete={onAdminDelete}
-            />
-          </PostErrorBoundary>
-        ))}
+        {posts.length > 0 ? (
+          <VirtualizedList
+            items={posts}
+            useWindowScroll
+            overscan={4}
+            getKey={(post) => post.id}
+            estimateSize={() => 420}
+            renderItem={(post, index) => (
+              <PostErrorBoundary key={post.id}>
+                <HubPostCard
+                  post={post}
+                  index={index}
+                  isAdmin={isAdmin}
+                  openComments={openComments[post.id] ?? false}
+                  commentDraft={commentDrafts[post.id] ?? ""}
+                  comments={comments[post.id] ?? []}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  currentUserImage={currentUserImage}
+                  onToggleReaction={onToggleReaction}
+                  onToggleDownvote={onToggleDownvote}
+                  onToggleComments={onToggleComments}
+                  onVotePoll={onVotePoll}
+                  onAddComment={onAddComment}
+                  onDeleteComment={onDeleteComment}
+                  onCommentDraftChange={onCommentDraftChange}
+                  onToggleCommentReaction={onToggleCommentReaction}
+                  onAdminPin={onAdminPin}
+                  onAdminDelete={onAdminDelete}
+                />
+              </PostErrorBoundary>
+            )}
+          />
+        ) : (
+          <EmptyState
+            className="py-10"
+            icon={ScrollText}
+            title={feedCopy.empty.title}
+            description={feedCopy.empty.description}
+            tone="social"
+          />
+        )}
 
         <FeedLoadMore
           hasMore={hasMore}
@@ -118,16 +136,6 @@ export function HubFeedList({
           onLoadMore={onLoadMore}
           sentinelRef={sentinelRef}
         />
-
-        {posts.length === 0 ? (
-          <EmptyState
-            className="py-10"
-            icon={ScrollText}
-            title={feedCopy.empty.title}
-            description={feedCopy.empty.description}
-            tone="social"
-          />
-        ) : null}
       </motion.div>
     </AnimatePresence>
   );

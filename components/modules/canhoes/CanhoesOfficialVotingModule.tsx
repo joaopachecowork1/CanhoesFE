@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { CheckCircle2, Flame, Loader2, Vote } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
@@ -16,7 +16,25 @@ import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleP
 import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function OfficialVotingLoadingState() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-24 rounded-[var(--radius-lg-token)]" />
+      <Skeleton className="h-10 rounded-full" />
+      <div className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.88)] p-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] p-3">
+            <Skeleton className="h-4 w-3/5 rounded" />
+            <Skeleton className="h-3 w-2/5 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function CanhoesOfficialVotingModule() {
   const queryClient = useQueryClient();
@@ -29,6 +47,9 @@ export function CanhoesOfficialVotingModule() {
     queryKey: ["official-voting", queryEventId],
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(queryEventId),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 3,
+    refetchOnWindowFocus: false,
   });
 
   const boardCategories = useMemo(
@@ -83,7 +104,7 @@ export function CanhoesOfficialVotingModule() {
           title="Boletim oficial"
           description="Participacao oficial com uma escolha validada por categoria."
         />
-        <FeedSkeleton />
+        <OfficialVotingLoadingState />
       </div>
     );
   }
@@ -200,40 +221,47 @@ function OfficialVotingCategoryCard({
       <CardContent className="space-y-2">
         <CanhoesDecorativeDivider tone="moss" />
 
-        {category.nominees.map((nominee) => {
-          const selected = category.myNomineeId === nominee.id;
-          const pending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
-          const stats = voteMap.find((entry) => entry.id === nominee.id);
-          let statusIcon = null;
+        {category.nominees.length > 0 ? (
+          <VirtualizedList
+            items={category.nominees}
+            getKey={(nominee) => nominee.id}
+            estimateSize={() => 72}
+            className="max-h-[52svh]"
+            renderItem={(nominee) => {
+              const selected = category.myNomineeId === nominee.id;
+              const pending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
+              const stats = voteMap.find((entry) => entry.id === nominee.id);
+              let statusIcon = null;
 
-          if (pending) {
-            statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-          } else if (selected) {
-            statusIcon = <CheckCircle2 className="h-4 w-4" />;
-          }
+              if (pending) {
+                statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+              } else if (selected) {
+                statusIcon = <CheckCircle2 className="h-4 w-4" />;
+              }
 
-          return (
-            <button
-              key={nominee.id}
-              type="button"
-              disabled={!canVote || isBusy}
-              onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
-              className={cn(
-                "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3",
-                selected && "border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)]"
-              )}
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.label}</p>
-                {category.totalVotes && category.totalVotes > 0 ? (
-                  <p className="text-xs text-[var(--text-muted)]">{stats?.count ?? 0} votos ({stats?.pct ?? 0}%)</p>
-                ) : null}
-              </div>
+              return (
+                <button
+                  type="button"
+                  disabled={!canVote || isBusy}
+                  onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
+                  className={cn(
+                    "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3",
+                    selected && "border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)]"
+                  )}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.label}</p>
+                    {category.totalVotes && category.totalVotes > 0 ? (
+                      <p className="text-xs text-[var(--text-muted)]">{stats?.count ?? 0} votos ({stats?.pct ?? 0}%)</p>
+                    ) : null}
+                  </div>
 
-              <div className="shrink-0 text-[var(--neon-green)]">{statusIcon}</div>
-            </button>
-          );
-        })}
+                  <div className="shrink-0 text-[var(--neon-green)]">{statusIcon}</div>
+                </button>
+              );
+            }}
+          />
+        ) : null}
       </CardContent>
     </Card>
   );

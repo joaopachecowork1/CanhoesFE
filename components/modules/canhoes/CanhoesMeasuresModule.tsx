@@ -17,9 +17,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function MeasuresLoadingState() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="canhoes-list-item space-y-2 p-2.5">
+          <Skeleton className="h-4 w-4/5 rounded" />
+          <Skeleton className="h-3 w-28 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function CanhoesMeasuresModule() {
   const { overview, event } = useEventOverview();
@@ -32,30 +46,38 @@ export function CanhoesMeasuresModule() {
   const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadData = useCallback(async () => {
-    if (!eventId) return;
+  const loadData = useCallback(async (currentEventId: string) => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const nextMeasures = await canhoesEventsRepo.getMeasures(eventId);
+      const nextMeasures = await canhoesEventsRepo.getMeasures(currentEventId);
       setMeasures(nextMeasures);
     } catch (error) {
       const message = getErrorMessage(
         error,
         "Nao foi possivel carregar as medidas desta edicao."
       );
-      logFrontendError("CanhoesMeasures.loadMeasures", error);
-      setMeasures([]);
+      logFrontendError("CanhoesMeasures.loadMeasures", error, { eventId: currentEventId });
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
-  }, [eventId]);
+  }, []);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    setMeasures([]);
+    setErrorMessage(null);
+    setSearch("");
+    setProposalText("");
+
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    void loadData(eventId);
+  }, [eventId, loadData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -149,28 +171,32 @@ export function CanhoesMeasuresModule() {
               title="Erro ao carregar medidas"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void loadData()}
+              onAction={() => void (eventId ? loadData(eventId) : Promise.resolve())}
             />
           ) : null}
 
-          {isLoading ? <InlineLoader label="A carregar medidas" /> : null}
+          {isLoading && filteredMeasures.length === 0 ? <MeasuresLoadingState /> : null}
 
           {!isLoading && !errorMessage && filteredMeasures.length === 0 ? (
             <EmptyState icon={Inbox} title="Sem medidas" description="Ainda nao ha medidas nesta edicao." />
           ) : null}
 
-          {isLoading ? null : (
-            <div className="max-h-[44svh] space-y-2 overflow-y-auto pr-1">
-              {filteredMeasures.map((measure) => (
-                <div key={measure.id} className="canhoes-list-item space-y-1 p-2.5">
+          {filteredMeasures.length > 0 ? (
+            <VirtualizedList
+              items={filteredMeasures}
+              getKey={(measure) => measure.id}
+              estimateSize={() => 72}
+              className="max-h-[44svh]"
+              renderItem={(measure) => (
+                <div className="canhoes-list-item space-y-1 p-2.5">
                   <p className="text-sm font-semibold text-[var(--color-text-primary)]">{measure.text}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">
                     {new Date(measure.createdAtUtc).toLocaleString()}
                   </p>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+            />
+          ) : null}
         </CardContent>
       </Card>
     </div>

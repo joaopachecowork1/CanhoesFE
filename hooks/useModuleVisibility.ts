@@ -110,7 +110,7 @@ export function useModuleVisibility({
         setActionLabel(null);
       }
     },
-    [eventId, state, clearModuleOverrides]
+    [clearModuleOverrides, eventId, onUpdate, state]
   );
 
   const toggleModule = useCallback(

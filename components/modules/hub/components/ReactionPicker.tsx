@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,9 +28,7 @@ export function ReactionPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);
 
-  const reactionsByEmoji = useMemo(() => {
-    return new Map(reactions.map((reaction) => [reaction.emoji, reaction]));
-  }, [reactions]);
+  const reactionsByEmoji = new Map(reactions.map((reaction) => [reaction.emoji, reaction]));
 
   const handleToggle = (emoji: string) => {
     onToggle(emoji);

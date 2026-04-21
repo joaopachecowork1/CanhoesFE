@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronRight, Layers, Settings2, Timer, ToggleRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -124,15 +124,9 @@ export function AdminControlCenter({
     state,
   });
 
-  const moduleItemsByKey = useMemo(() => buildModuleItemsByKey(moduleItems), [moduleItems]);
-  const quickModuleItems = useMemo(
-    () => selectModuleItems(QUICK_ADMIN_MODULE_ORDER, moduleItemsByKey),
-    [moduleItemsByKey]
-  );
-  const advancedModuleItems = useMemo(
-    () => selectModuleItems(ADVANCED_ADMIN_MODULE_ORDER, moduleItemsByKey),
-    [moduleItemsByKey]
-  );
+  const moduleItemsByKey = buildModuleItemsByKey(moduleItems);
+  const quickModuleItems = selectModuleItems(QUICK_ADMIN_MODULE_ORDER, moduleItemsByKey);
+  const advancedModuleItems = selectModuleItems(ADVANCED_ADMIN_MODULE_ORDER, moduleItemsByKey);
 
   if (!state) {
     return (

@@ -342,6 +342,7 @@ export function AdminNominationsSection({
               <VirtualizedList
                 className="px-0 py-0"
                 estimateSize={() => 72}
+                getKey={(nomination) => nomination.id}
                 items={filteredNominations}
                 renderItem={(nomination) => {
                   const isSelected = nomination.id === selectedNominationId;

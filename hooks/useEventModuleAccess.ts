@@ -32,7 +32,7 @@ export function useEventModuleAccess(moduleKey: EventRouteModuleKey) {
   const modules = eventOverview.overview?.modules as Record<string, boolean> | null | undefined;
   const isAdmin = Boolean(eventOverview.overview?.permissions.isAdmin);
 
-  const isAllowed = moduleKey === "admin" ? Boolean(modules?.admin ?? isAdmin) : isAdmin || Boolean(modules?.[moduleKey]);
+  const isAllowed = isAdmin || (moduleKey === "admin" ? Boolean(modules?.admin) : Boolean(modules?.[moduleKey]));
 
   return {
     ...eventOverview,

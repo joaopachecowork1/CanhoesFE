@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import type {
   CategoryProposalDto,
   MeasureProposalDto,
@@ -370,8 +371,8 @@ export function PendingProposals({
 
   const getMeasureText = (proposal: MeasureProposalDto) => getMeasureDraft(proposal).trim();
 
-  const categoryCounts = useMemo(() => buildCounts(categoryProposals), [categoryProposals]);
-  const measureCounts = useMemo(() => buildCounts(measureProposalsAll), [measureProposalsAll]);
+  const categoryCounts = buildCounts(categoryProposals);
+  const measureCounts = buildCounts(measureProposalsAll);
 
   const runCategoryStatusChange = (
     proposal: CategoryProposalDto,
@@ -651,17 +652,21 @@ export function PendingProposals({
             />
 
             {renderProposalPanelState(
-              loading,
+              loading && panel.items.length === 0,
               controlsDisabled,
               panel.items.length > 0,
               panel.emptyMessage
             )}
 
-            {!loading &&
-              !controlsDisabled &&
-              panel.items.map((proposal) => (
-                <ProposalReviewCard key={proposal.id} proposal={proposal} />
-              ))}
+            {!controlsDisabled && panel.items.length > 0 ? (
+              <VirtualizedList
+                items={panel.items}
+                getKey={(proposal) => proposal.id}
+                estimateSize={() => 320}
+                className="max-h-[72svh]"
+                renderItem={(proposal) => <ProposalReviewCard proposal={proposal} />}
+              />
+            ) : null}
           </ProposalShell>
         ))}
       </div>

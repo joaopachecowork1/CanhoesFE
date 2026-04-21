@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Gift, Link as LinkIcon, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,13 +20,13 @@ import { CANHOES_MEMBER_MODULE_MAP } from "@/lib/modules";
 import { normalizeWishlistItems } from "@/lib/api/responseNormalization";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
-import { InlineLoader } from "@/components/ui/inline-loader";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 
 type SecretSantaState =
   | { status: "idle" }
@@ -41,6 +41,20 @@ type SecretSantaState =
 function buildDefaultEventCode(eventId?: string | null) {
   if (eventId) return eventId;
   return `canhoes${new Date().getFullYear()}`;
+}
+
+function SecretSantaLoadingState() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <Skeleton className="h-5 w-44 rounded" />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Skeleton className="h-20 w-full rounded-[var(--radius-md-token)]" />
+        <Skeleton className="h-10 w-32 rounded-full" />
+      </CardContent>
+    </Card>
+  );
 }
 
 function SecretSantaAssignmentCard({
@@ -141,23 +155,29 @@ function AssignedWishlistPanel({
             Ainda nao ha itens na wishlist. Diz ao teu amigo secreto para adicionar.
           </p>
         ) : (
-          assignedWishlistItems.map((wishlistItem) => (
-            <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-3">
-              <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="truncate font-semibold text-[var(--color-text-primary)]">{wishlistItem.title}</p>
-                {wishlistItem.notes ? (
-                  <p className="body-small line-clamp-2 text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
-                ) : null}
-                {wishlistItem.link ? (
-                  <a href={wishlistItem.link} target="_blank" rel="noreferrer" className="canhoes-link inline-flex items-center gap-1 text-sm">
-                    <LinkIcon className="h-3.5 w-3.5" />
-                    Ver produto
-                  </a>
-                ) : null}
+          <VirtualizedList
+            items={assignedWishlistItems}
+            getKey={(wishlistItem) => wishlistItem.id}
+            estimateSize={() => 92}
+            className="max-h-[50svh]"
+            renderItem={(wishlistItem) => (
+              <div className="canhoes-list-item flex gap-3 p-3">
+                <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="truncate font-semibold text-[var(--color-text-primary)]">{wishlistItem.title}</p>
+                  {wishlistItem.notes ? (
+                    <p className="body-small line-clamp-2 text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
+                  ) : null}
+                  {wishlistItem.link ? (
+                    <a href={wishlistItem.link} target="_blank" rel="noreferrer" className="canhoes-link inline-flex items-center gap-1 text-sm">
+                      <LinkIcon className="h-3.5 w-3.5" />
+                      Ver produto
+                    </a>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ))
+            )}
+          />
         )}
       </CardContent>
     </Card>
@@ -180,9 +200,11 @@ export function CanhoesSecretSantaModule() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawEventCode, setDrawEventCode] = useState(buildDefaultEventCode(null));
+  const loadedEventIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!event) {
+      loadedEventIdRef.current = null;
       if (!isOverviewLoading) {
         setScreenState({ status: "idle" });
         setErrorMessage(null);
@@ -192,10 +214,14 @@ export function CanhoesSecretSantaModule() {
     }
 
     const activeEvent = event;
+    const isFirstLoadForEvent = loadedEventIdRef.current !== activeEvent.id;
+    loadedEventIdRef.current = activeEvent.id;
     let isCancelled = false;
 
     async function loadSecretSantaState() {
-      setScreenState({ status: "loading" });
+      if (isFirstLoadForEvent) {
+        setScreenState({ status: "loading" });
+      }
       setErrorMessage(null);
 
       try {
@@ -228,12 +254,12 @@ export function CanhoesSecretSantaModule() {
     };
   }, [event, isOverviewLoading]);
 
-  const assignedWishlistItems = useMemo(() => {
-    if (screenState.status !== "ready" || !screenState.overview.assignedUser) return [];
-    return normalizeWishlistItems(screenState.wishlistItems).filter(
-      (item) => item.userId === screenState.overview.assignedUser?.id
-    );
-  }, [screenState]);
+  const assignedWishlistItems =
+    screenState.status !== "ready" || !screenState.overview.assignedUser
+      ? []
+      : normalizeWishlistItems(screenState.wishlistItems).filter(
+          (item) => item.userId === screenState.overview.assignedUser?.id
+        );
 
   const retryLoad = useCallback(() => {
     setErrorMessage(null);
@@ -270,7 +296,6 @@ export function CanhoesSecretSantaModule() {
     if (!event || screenState.status !== "ready") return;
 
     setIsDrawing(true);
-    setScreenState({ status: "loading" });
     try {
       await canhoesEventsRepo.adminDrawSecretSanta(event.id, { eventCode: drawEventCode.trim() || null });
       await refreshOverview();
@@ -376,19 +401,7 @@ function SecretSantaContent({
   wishlistLabel: string;
 }>) {
   if (isBusy) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-4 w-4 text-[var(--color-fire)]" />
-            O teu amigo secreto
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InlineLoader label="A carregar amigo secreto" />
-        </CardContent>
-      </Card>
-    );
+    return <SecretSantaLoadingState />;
   }
 
   if (errorMessage) {

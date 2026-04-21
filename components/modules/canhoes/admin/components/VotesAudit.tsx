@@ -127,6 +127,7 @@ export function VotesAudit({ eventId, loading }: Readonly<Props>) {
           <VirtualizedList
             className="px-0 py-0"
             estimateSize={() => 52}
+            getKey={(vote) => `${vote.categoryId}-${vote.userId}-${vote.nomineeId}-${vote.updatedAtUtc}`}
             items={filteredVotes}
             renderItem={(vote) => <VotesAuditRowItem vote={vote} />}
           />

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { SectionBoundary } from "@/components/ui/section-boundary";
 import { homeCopy as homeCopyText } from "@/lib/canhoesCopy";
 import { getPhaseLabel, openComposeSheet } from "@/lib/canhoesEvent";
@@ -227,7 +228,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {[homeCopy.primaryAction, homeCopy.secondaryAction].map((action) => (
-            <ActionButton key={action.label} action={action} />
+            <ActionButton key={`${action.label}-${action.tone}`} action={action} />
           ))}
         </div>
 
@@ -259,6 +260,23 @@ const HomeAlertsSection = memo(function HomeAlertsSection({ alerts }: Readonly<{
 });
 
 const HomeFeedPanel = memo(function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
+  const feedContent =
+    posts.length === 0 ? (
+      <HomePanelState>{homeCopyText.emptyFeed}</HomePanelState>
+    ) : posts.length > 20 ? (
+      <VirtualizedList
+        useWindowScroll
+        items={posts}
+        getKey={(post) => post.id}
+        estimateSize={() => 308}
+        overscan={4}
+        className="relative"
+        renderItem={(post) => <FeedPostCard post={post} />}
+      />
+    ) : (
+      posts.map((post) => <FeedPostCard key={post.id} post={post} />)
+    );
+
   return (
     <HomePanel
       title="Mural social da edicao"
@@ -271,11 +289,7 @@ const HomeFeedPanel = memo(function HomeFeedPanel({ posts }: Readonly<{ posts: R
         </div>
       }
     >
-      {posts.length === 0 ? (
-        <HomePanelState>{homeCopyText.emptyFeed}</HomePanelState>
-      ) : (
-        posts.map((post) => <FeedPostCard key={post.id} post={post} />)
-      )}
+      {feedContent}
     </HomePanel>
   );
 });

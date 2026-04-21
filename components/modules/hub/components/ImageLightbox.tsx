@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type TouchEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,7 +28,7 @@ export function ImageLightbox({
   const touchStartX = useRef(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const safeImages = useMemo(() => (images ?? []).filter(Boolean), [images]);
+  const safeImages = (images ?? []).filter(Boolean);
   const totalSlides = safeImages.length;
 
   // Reset index when lightbox opens with a new image

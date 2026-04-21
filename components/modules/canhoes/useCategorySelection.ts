@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Manages category selection state for voting, results, and nomination views.
@@ -34,10 +34,7 @@ export function useCategorySelection<T>(
     });
   }, [items, getId]);
 
-  const selectedItem = useMemo(
-    () => items.find((item) => getId(item) === selectedId) ?? null,
-    [items, selectedId, getId]
-  );
+  const selectedItem = items.find((item) => getId(item) === selectedId) ?? null;
 
   return {
     selectedId,
