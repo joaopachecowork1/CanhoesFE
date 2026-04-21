@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Clock, Lock, Trophy } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type { EventCategoryDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
@@ -18,8 +18,29 @@ import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function NominationsLoadingState() {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <Skeleton className="h-10 w-full rounded-[var(--radius-md-token)]" />
+        <Skeleton className="h-10 w-36 rounded-full" />
+      </div>
+      <div className="space-y-2 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.72)] p-4">
+        <Skeleton className="h-4 w-40 rounded" />
+        <Skeleton className="h-3 w-56 rounded" />
+        <div className="space-y-2 pt-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-12 w-full rounded-[var(--radius-md-token)]" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function CanhoesNominationsModule() {
   const queryClient = useQueryClient();
@@ -36,18 +57,27 @@ export function CanhoesNominationsModule() {
       const categories = await canhoesEventsRepo.getUserCategories(queryEventId);
       return categories.filter((category) => category.isActive);
     },
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const myStatusQuery = useQuery({
     queryKey: ["nominations", queryEventId, "my-status"],
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getMyNominationStatus(queryEventId),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const approvedQuery = useQuery({
     queryKey: ["nominations", queryEventId, "approved"],
     enabled: Boolean(eventId),
     queryFn: () => canhoesEventsRepo.getApprovedNominees(queryEventId),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
@@ -75,7 +105,9 @@ export function CanhoesNominationsModule() {
     [categories, selectedCategoryId]
   );
 
-  if (isLoading) {
+  const isInitialLoading = isLoading && categories.length === 0;
+
+  if (isInitialLoading) {
     return (
       <div className="space-y-3">
         <CanhoesModuleHeader
@@ -83,7 +115,7 @@ export function CanhoesNominationsModule() {
           title="Nomeacoes oficiais"
           description="Area oficial para propor um nome por categoria durante a fase de propostas."
         />
-        <FeedSkeleton />
+        <NominationsLoadingState />
       </div>
     );
   }
@@ -311,18 +343,18 @@ function CategoryNominationCard({
           {approvedNominees.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria oficial.</p>
           ) : (
-            <ul className="space-y-1.5">
-              {approvedNominees.map((nominee, index) => (
-                <li
-                  key={nominee.id}
-                  className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 animate-[stagger-fade-in_0.3s_ease-out_both] transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]"
-                  style={{ animationDelay: `${index * 0.04}s` }}
-                >
+            <VirtualizedList
+              items={approvedNominees}
+              getKey={(nominee) => nominee.id}
+              estimateSize={() => 52}
+              className="max-h-[34svh]"
+              renderItem={(nominee) => (
+                <div className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--neon-green)]" />
                   <span className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.title}</span>
-                </li>
-              ))}
-            </ul>
+                </div>
+              )}
+            />
           )}
         </div>
       </CardContent>

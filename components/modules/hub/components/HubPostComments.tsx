@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ReactionBar } from "@/components/ui/reaction-bar";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { Textarea } from "@/components/ui/textarea";
 import type { HubCommentDto } from "@/lib/api/types";
 import { feedCopy } from "@/lib/canhoesCopy";
@@ -103,74 +104,78 @@ export function HubPostComments({
               {feedCopy.comments.empty}
             </div>
           ) : (
-            sortedComments.map((comment, commentIndex) => {
-              const isOwnComment =
-                Boolean(currentUserId) && comment.userId === currentUserId;
+            <VirtualizedList
+              items={sortedComments}
+              getKey={(comment) => comment.id}
+              estimateSize={() => 170}
+              className="max-h-[38svh]"
+              renderItem={(comment, commentIndex) => {
+                const isOwnComment = Boolean(currentUserId) && comment.userId === currentUserId;
 
-              return (
-                <article
-                  key={comment.id}
-                  className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--border-neon)]/50"
-                  style={{ marginLeft: commentIndex > 0 ? "0.5rem" : 0 }}
-                >
-                  <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
-                    {comment.userName === currentUserName && currentUserImage ? (
-                      <AvatarImage src={currentUserImage} alt={comment.userName} />
-                    ) : null}
-                    <AvatarFallback className="bg-[var(--bg-surface)] text-[10px] font-semibold text-[var(--text-muted)]">
-                      {initials(comment.userName ?? comment.authorName)}
-                    </AvatarFallback>
-                  </Avatar>
+                return (
+                  <article
+                    className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--border-neon)]/50"
+                    style={{ marginLeft: commentIndex > 0 ? "0.5rem" : 0 }}
+                  >
+                    <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
+                      {comment.userName === currentUserName && currentUserImage ? (
+                        <AvatarImage src={currentUserImage} alt={comment.userName} />
+                      ) : null}
+                      <AvatarFallback className="bg-[var(--bg-surface)] text-[10px] font-semibold text-[var(--text-muted)]">
+                        {initials(comment.userName ?? comment.authorName)}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-semibold text-[var(--text-primary)]">
-                        {comment.userName}
-                      </span>
-                      {comment.userName === postAuthorName && (
-                        <Badge
-                          variant="outline"
-                          className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
-                        >
-                          OP
-                        </Badge>
-                      )}
-                      <span className="text-[10px] text-[var(--text-muted)]">
-                        {formatDateTime(comment.createdAtUtc)}
-                      </span>
-                    </div>
-
-                    <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[var(--text-primary)]">
-                      {comment.text}
-                    </p>
-
-                    <ReactionBar
-                      emojis={HUB_EMOJI_STRINGS}
-                      reactionCounts={comment.reactionCounts ?? {}}
-                      myReactions={comment.myReactions ?? []}
-                      onToggle={(emoji) =>
-                        onToggleCommentReaction(postId, comment.id, emoji)
-                      }
-                      className="mt-2"
-                    />
-
-                    {isOwnComment && (
-                      <div className="mt-1 flex justify-end">
-                        <button
-                          type="button"
-                          className="canhoes-tap flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition-colors hover:text-[var(--danger)]"
-                          onClick={() => setCommentPendingDelete(comment)}
-                          aria-label="Apagar comentário"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          Apagar
-                        </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-[var(--text-primary)]">
+                          {comment.userName}
+                        </span>
+                        {comment.userName === postAuthorName && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
+                          >
+                            OP
+                          </Badge>
+                        )}
+                        <span className="text-[10px] text-[var(--text-muted)]">
+                          {formatDateTime(comment.createdAtUtc)}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </article>
-              );
-            })
+
+                      <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[var(--text-primary)]">
+                        {comment.text}
+                      </p>
+
+                      <ReactionBar
+                        emojis={HUB_EMOJI_STRINGS}
+                        reactionCounts={comment.reactionCounts ?? {}}
+                        myReactions={comment.myReactions ?? []}
+                        onToggle={(emoji) =>
+                          onToggleCommentReaction(postId, comment.id, emoji)
+                        }
+                        className="mt-2"
+                      />
+
+                      {isOwnComment && (
+                        <div className="mt-1 flex justify-end">
+                          <button
+                            type="button"
+                            className="canhoes-tap flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition-colors hover:text-[var(--danger)]"
+                            onClick={() => setCommentPendingDelete(comment)}
+                            aria-label="Apagar comentário"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Apagar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              }}
+            />
           )}
         </div>
 

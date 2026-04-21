@@ -19,9 +19,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function CategoriesLoadingState() {
+    return (
+        <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
+                    <div className="min-w-0 flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/5 rounded" />
+                        <Skeleton className="h-3 w-4/5 rounded" />
+                    </div>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export function CanhoesCategoriesModule() {
     const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
@@ -52,7 +69,6 @@ export function CanhoesCategoriesModule() {
                 "Nao foi possivel carregar as categorias desta edicao."
             );
             logFrontendError("CanhoesCategories.loadCategories", error, { eventId: event.id });
-            setCategoryList([]);
             setErrorMessage(message);
         } finally {
             setIsLoading(false);
@@ -185,8 +201,8 @@ export function CanhoesCategoriesModule() {
                         />
                     ) : null}
 
-                    {(isLoading || isOverviewLoading) ? (
-                        <InlineLoader label="A carregar categorias" />
+                    {isLoading && filteredCategoryList.length === 0 ? (
+                        <CategoriesLoadingState />
                     ) : null}
 
                     {!isLoading && !isOverviewLoading && !errorMessage && filteredCategoryList.length === 0 ? (
@@ -198,10 +214,14 @@ export function CanhoesCategoriesModule() {
                         />
                     ) : null}
 
-                    {isLoading || isOverviewLoading ? null : (
-                        <div className="max-h-[46svh] space-y-2 overflow-y-auto pr-1">
-                            {filteredCategoryList.map((category) => (
-                                <div key={category.id} className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
+                    {filteredCategoryList.length > 0 ? (
+                        <VirtualizedList
+                            items={filteredCategoryList}
+                            getKey={(category) => category.id}
+                            estimateSize={() => 88}
+                            className="max-h-[46svh]"
+                            renderItem={(category) => (
+                                <div className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
                                             {category.name}
@@ -212,11 +232,11 @@ export function CanhoesCategoriesModule() {
                                     </div>
                                     <Badge variant="secondary">{category.isActive ? "Ativa" : "Inativa"}</Badge>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            )}
+                        />
+                    ) : null}
 
-                    {!isLoading && !isOverviewLoading && filteredCategoryList.length > 0 ? (
+                    {filteredCategoryList.length > 0 ? (
                         <CanhoesDecorativeDivider tone="moss" />
                     ) : null}
                 </CardContent>

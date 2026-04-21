@@ -14,7 +14,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { PublicUserDto, EventWishlistItemDto } from "@/lib/api/types";
@@ -23,7 +22,37 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function WishlistLoadingState() {
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2 overflow-hidden">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-9 w-28 rounded-full" />
+        ))}
+      </div>
+      <div className="space-y-2 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.72)] p-4">
+        <Skeleton className="h-5 w-48 rounded" />
+        <Skeleton className="h-4 w-28 rounded" />
+        <div className="space-y-3 pt-2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="flex gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] p-3">
+              <Skeleton className="h-14 w-14 rounded-[var(--radius-md-token)]" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-4 w-2/3 rounded" />
+                <Skeleton className="h-3 w-full rounded" />
+                <Skeleton className="h-3 w-4/5 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function groupWishlistItemsByUser(items: EventWishlistItemDto[]) {
   const wishlistByUser = new Map<string, EventWishlistItemDto[]>();
@@ -101,8 +130,6 @@ export function CanhoesWishlistModule() {
         "Nao foi possivel carregar a wishlist desta edicao."
       );
       logFrontendError("CanhoesWishlist.loadWishlist", error);
-      setMemberList([]);
-      setWishlistItems([]);
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -166,13 +193,15 @@ export function CanhoesWishlistModule() {
     }
   };
 
+  const isInitialLoading = isLoading && memberList.length === 0;
+
   let wishlistContent: JSX.Element | null = null;
-  if (!isLoading && !errorMessage) {
-    if (memberList.length === 0) {
+  if (!errorMessage) {
+    if (memberList.length === 0 && !isInitialLoading) {
       wishlistContent = (
         <EmptyState icon={Inbox} title="Sem membros" description="Ainda nao ha membros na wishlist." />
       );
-    } else {
+    } else if (memberList.length > 0) {
       wishlistContent = (
         <div className="space-y-3">
           <CompactSegmentTabs
@@ -271,7 +300,7 @@ export function CanhoesWishlistModule() {
         />
       ) : null}
 
-      {isLoading ? <InlineLoader label="A carregar wishlist" /> : null}
+      {isInitialLoading ? <WishlistLoadingState /> : null}
 
       {wishlistContent}
     </div>
@@ -308,9 +337,13 @@ function WishlistMemberPanel({
         {items.length === 0 ? (
           <p className="text-center text-sm text-[var(--text-muted)] py-4">Sem itens nesta wishlist.</p>
         ) : (
-          <div className="max-h-[50svh] space-y-3 overflow-y-auto pr-1">
-            {items.map((wishlistItem) => (
-              <div key={wishlistItem.id} className="canhoes-list-item flex gap-3 p-2.5">
+          <VirtualizedList
+            items={items}
+            getKey={(wishlistItem) => wishlistItem.id}
+            estimateSize={() => 108}
+            className="max-h-[50svh]"
+            renderItem={(wishlistItem) => (
+              <div className="canhoes-list-item flex gap-3 p-2.5">
                 <CanhoesMediaThumb alt={wishlistItem.title} src={wishlistItem.imageUrl} />
 
                 <div className="min-w-0 flex-1">
@@ -344,8 +377,8 @@ function WishlistMemberPanel({
                   ) : null}
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+          />
         )}
       </CardContent>
     </Card>

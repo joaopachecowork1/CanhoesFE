@@ -17,9 +17,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+function MeasuresLoadingState() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="canhoes-list-item space-y-2 p-2.5">
+          <Skeleton className="h-4 w-4/5 rounded" />
+          <Skeleton className="h-3 w-28 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function CanhoesMeasuresModule() {
   const { overview, event } = useEventOverview();
@@ -46,7 +60,6 @@ export function CanhoesMeasuresModule() {
         "Nao foi possivel carregar as medidas desta edicao."
       );
       logFrontendError("CanhoesMeasures.loadMeasures", error);
-      setMeasures([]);
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -153,24 +166,28 @@ export function CanhoesMeasuresModule() {
             />
           ) : null}
 
-          {isLoading ? <InlineLoader label="A carregar medidas" /> : null}
+          {isLoading && filteredMeasures.length === 0 ? <MeasuresLoadingState /> : null}
 
           {!isLoading && !errorMessage && filteredMeasures.length === 0 ? (
             <EmptyState icon={Inbox} title="Sem medidas" description="Ainda nao ha medidas nesta edicao." />
           ) : null}
 
-          {isLoading ? null : (
-            <div className="max-h-[44svh] space-y-2 overflow-y-auto pr-1">
-              {filteredMeasures.map((measure) => (
-                <div key={measure.id} className="canhoes-list-item space-y-1 p-2.5">
+          {filteredMeasures.length > 0 ? (
+            <VirtualizedList
+              items={filteredMeasures}
+              getKey={(measure) => measure.id}
+              estimateSize={() => 72}
+              className="max-h-[44svh]"
+              renderItem={(measure) => (
+                <div className="canhoes-list-item space-y-1 p-2.5">
                   <p className="text-sm font-semibold text-[var(--color-text-primary)]">{measure.text}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">
                     {new Date(measure.createdAtUtc).toLocaleString()}
                   </p>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+            />
+          ) : null}
         </CardContent>
       </Card>
     </div>

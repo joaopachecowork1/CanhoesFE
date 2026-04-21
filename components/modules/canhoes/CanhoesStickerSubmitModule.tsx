@@ -14,7 +14,6 @@ import {
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { InlineLoader } from "@/components/ui/inline-loader";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type {
@@ -26,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -33,6 +34,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+function StickerSubmitLoadingState() {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-11 rounded-[var(--radius-md-token)]" />
+        <Skeleton className="h-11 rounded-[var(--radius-md-token)]" />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <Skeleton className="h-44 rounded-[var(--radius-md-token)]" />
+        <Skeleton className="h-44 rounded-[var(--radius-md-token)]" />
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-4 w-64 rounded" />
+        <Skeleton className="h-10 w-40 rounded-full" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.9)] p-3">
+            <Skeleton className="aspect-square w-full rounded-[var(--radius-md-token)]" />
+            <Skeleton className="h-4 w-4/5 rounded" />
+            <Skeleton className="h-3 w-2/3 rounded" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function CanhoesStickerSubmitModule() {
   const { overview, event } = useEventOverview();
@@ -88,8 +118,6 @@ export function CanhoesStickerSubmitModule() {
         "Nao foi possivel carregar os stickers desta edicao."
       );
       logFrontendError("CanhoesStickerSubmit.loadStickerData", error);
-      setCategoryList([]);
-      setNomineeList([]);
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -113,6 +141,8 @@ export function CanhoesStickerSubmitModule() {
     () => nomineeList.filter((nominee) => nominee.imageUrl),
     [nomineeList]
   );
+
+  const isInitialLoading = isLoading && categoryList.length === 0 && nomineeList.length === 0;
 
   const handleFileChange = (file: File | null) => {
     if (!file) {
@@ -200,9 +230,7 @@ export function CanhoesStickerSubmitModule() {
             />
           ) : null}
 
-          {isLoading ? (
-            <InlineLoader label="A carregar stickers" />
-          ) : null}
+          {isInitialLoading ? <StickerSubmitLoadingState /> : null}
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="space-y-2">
@@ -292,33 +320,67 @@ export function CanhoesStickerSubmitModule() {
           <EmptyState icon={Inbox} title="Sem stickers" description="Ainda nao ha stickers com imagem para mostrar." />
         ) : null}
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {stickersWithImage.map((nominee) => (
-            <Card key={nominee.id} className="overflow-hidden">
-              <CanhoesMediaThumb
-                alt={nominee.title}
-                src={nominee.imageUrl}
-                frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
-                iconClassName="h-6 w-6"
-              />
+        {stickersWithImage.length > 20 ? (
+          <VirtualizedList
+            items={stickersWithImage}
+            getKey={(nominee) => nominee.id}
+            estimateSize={() => 380}
+            className="max-h-[64svh]"
+            renderItem={(nominee) => (
+              <Card className="overflow-hidden">
+                <CanhoesMediaThumb
+                  alt={nominee.title}
+                  src={nominee.imageUrl}
+                  frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
+                  iconClassName="h-6 w-6"
+                />
 
-              <CardContent className="space-y-3 pt-4">
-                <div className="space-y-1">
-                  <p className="truncate font-semibold text-[var(--color-text-primary)]">
-                    {nominee.title}
-                  </p>
-                  <p className="text-xs text-[var(--color-text-muted)]">
-                    {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
-                  </p>
-                </div>
+                <CardContent className="space-y-3 pt-4">
+                  <div className="space-y-1">
+                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
+                      {nominee.title}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
+                    </p>
+                  </div>
 
-                <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
-                  {nominee.status}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
+                    {nominee.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            )}
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {stickersWithImage.map((nominee) => (
+              <Card key={nominee.id} className="overflow-hidden">
+                <CanhoesMediaThumb
+                  alt={nominee.title}
+                  src={nominee.imageUrl}
+                  frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
+                  iconClassName="h-6 w-6"
+                />
+
+                <CardContent className="space-y-3 pt-4">
+                  <div className="space-y-1">
+                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
+                      {nominee.title}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
+                    </p>
+                  </div>
+
+                  <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
+                    {nominee.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
