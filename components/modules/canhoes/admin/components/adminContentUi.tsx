@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-export const ADMIN_CONTENT_CARD_CLASS = "canhoes-paper-panel";
+export const ADMIN_CONTENT_CARD_CLASS =
+  "canhoes-paper-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]";
 
 export const ADMIN_CONTENT_DETAIL_PANEL_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-4 py-3";
+  "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-4 py-3 shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 
 const ADMIN_CONTENT_LIST_PANEL_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] p-2";
+  "rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(16,23,11,0.94)] p-2 shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 
 const ADMIN_CONTENT_LIST_BODY_CLASS = "max-h-[58svh] space-y-1 overflow-y-auto pr-1";
 
@@ -28,11 +29,12 @@ const ADMIN_CONTENT_ROW_ACTIVE_CLASS =
   "border-[rgba(122,173,58,0.32)] bg-[rgba(122,173,58,0.12)]";
 
 const ADMIN_CONTENT_ROW_IDLE_CLASS =
-  "border-[var(--border-subtle)] bg-[var(--bg-paper)] hover:bg-[var(--bg-paper-soft)]";
+  "border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] hover:bg-[rgba(30,39,20,0.96)]";
 
-const ADMIN_CONTENT_SHEET_CLASS = "canhoes-paper-panel w-full sm:max-w-xl";
+const ADMIN_CONTENT_SHEET_CLASS =
+  "canhoes-paper-panel w-full border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.98)] sm:max-w-xl";
 const ADMIN_CONTENT_SHEET_HEADER_CLASS =
-  "border-b border-[var(--border-subtle)] pb-4";
+  "border-b border-[rgba(212,184,150,0.14)] pb-4";
 const ADMIN_CONTENT_SHEET_BODY_CLASS = "flex-1 space-y-4 overflow-y-auto px-4 pb-6";
 
 export const ADMIN_OUTLINE_BUTTON_CLASS = "canhoes-admin-outline-button";

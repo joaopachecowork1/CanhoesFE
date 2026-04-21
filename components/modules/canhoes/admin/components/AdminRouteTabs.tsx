@@ -39,7 +39,7 @@ export function AdminRouteTabs({
   }, [activeId]);
 
   return (
-    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border px-2 py-1.5 shadow-[var(--shadow-paper)]">
+    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(16,23,11,0.96)] px-2 py-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
       <CanhoesGlowBackdrop tone="admin" />
 
       <div
@@ -62,7 +62,7 @@ export function AdminRouteTabs({
                   "snap-start",
                   isActive
                     ? "border-[var(--border-moss)] bg-[var(--moss)] text-white"
-                    : "border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] text-[var(--ink-secondary)] hover:bg-[var(--bg-paper-olive)]"
+                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.9)] text-[var(--ink-secondary)] hover:bg-[rgba(30,39,20,0.96)]"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -70,7 +70,7 @@ export function AdminRouteTabs({
                   {section.label}
                 </span>
                 {section.count > 0 ? (
-                  <Badge className="h-4 min-w-4 rounded-full border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.16)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
+                  <Badge className="h-4 min-w-4 rounded-full border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.2)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
                     {section.count}
                   </Badge>
                 ) : null}

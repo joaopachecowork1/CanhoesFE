@@ -41,7 +41,7 @@ export function AdminOverviewSection({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(16,23,11,0.96)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)] sm:px-5">
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
@@ -117,7 +117,7 @@ function OverviewMetric({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-3">
+    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-3 py-3 shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
       <div className="flex items-center justify-between gap-3">
         <span
           className={

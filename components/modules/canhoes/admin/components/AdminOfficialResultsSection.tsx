@@ -236,7 +236,7 @@ export function AdminOfficialResultsSection({
       ) : null}
 
       {resultCategories.length > 0 ? (
-        <AdminListPanel>
+        <AdminListPanel className="border-[rgba(122,173,58,0.12)] bg-[rgba(16,23,11,0.94)]">
           {resultCategories.map((category) => (
             <ResultsCategoryButton
               key={category.categoryId}
@@ -264,7 +264,7 @@ export function AdminOfficialResultsSection({
       >
         {selectedCategory ? (
           <>
-            <AdminDetailPanel className={getParticipationClass(selectedCategory.participationRate)}>
+            <AdminDetailPanel className={cn(getParticipationClass(selectedCategory.participationRate), "bg-[rgba(22,28,15,0.92)]") }>
               Participacao {Math.round(selectedCategory.participationRate * 100)}%
             </AdminDetailPanel>
 

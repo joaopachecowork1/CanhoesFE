@@ -302,7 +302,7 @@ export const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
 export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-2.5";
+  "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(15,24,10,0.9)] px-3 py-3 shadow-[0_10px_24px_rgba(0,0,0,0.12)]";
 
 type ControlBlockProps = {
   action?: ReactNode;
@@ -386,7 +386,7 @@ function VisibilityTile({
   pending,
 }: Readonly<VisibilityTileProps>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-2">
+    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-3 py-2.5 shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
       <div className="flex items-start justify-between gap-2">
         <Label
           htmlFor={id}
@@ -412,7 +412,7 @@ function VisibilityRow({
   pending,
 }: Readonly<VisibilityRowProps>) {
   return (
-    <div className={cn("flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2 text-[var(--ink-primary)]", checked && "border-[rgba(122,173,58,0.28)] bg-[rgba(122,173,58,0.08)]")}>
+    <div className={cn("flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,25,12,0.92)] min-h-11 px-3 py-2 text-[var(--ink-primary)]", checked && "border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)]")}>
       <div className="min-w-0">
         <Label
           htmlFor={id}

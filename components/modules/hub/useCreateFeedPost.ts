@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
 
 import type { PostComposerSubmitData } from "./components/PostComposer";
 
@@ -11,7 +13,30 @@ type UseCreateFeedPostParams = {
   eventId: string | null;
 };
 
+type FeedInfiniteData = {
+  pages: Array<{ posts: EventFeedPostFullDto[]; nextCursor: number | null }>;
+  pageParams: number[];
+};
+
+function prependCreatedPost(old: FeedInfiniteData | undefined, createdPost: EventFeedPostFullDto) {
+  if (!old?.pages?.length) return old;
+
+  const [firstPage, ...restPages] = old.pages;
+  return {
+    ...old,
+    pages: [
+      {
+        ...firstPage,
+        posts: [createdPost, ...firstPage.posts.filter((post) => post.id !== createdPost.id)],
+      },
+      ...restPages,
+    ],
+  };
+}
+
 export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>) {
+  const queryClient = useQueryClient();
+
   return useCallback(async (data: PostComposerSubmitData) => {
     if (!eventId) {
       toast.error("Nao ha evento ativo para publicar no mural.");
@@ -41,8 +66,10 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
         pollOptions: data.pollOn ? pollOptions : null,
       });
 
-      if (createdPost?.id && typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("hub:postCreated", { detail: createdPost }));
+      if (createdPost?.id) {
+        queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
+          prependCreatedPost(old, createdPost)
+        );
       }
 
       toast.success("Post publicado");
@@ -52,5 +79,5 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
       toast.error(message);
       throw error;
     }
-  }, [eventId]);
+  }, [eventId, queryClient]);
 }
