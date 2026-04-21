@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Clock3, Gift, Loader2, MessageSquare, Vote } from "lucide-react";
 
@@ -30,7 +30,7 @@ type MetricItem = { hint: string; label: string; tone?: "green" | "purple"; valu
 type ChecklistItemData = { done: boolean; hint?: string; label: string };
 type AlertItem = string;
 
-export function CanhoesEventHomeLoadingState() {
+export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadingState() {
   return (
     <Card className={HERO_CARD_CLASS}>
       <CardContent className="flex min-h-[16rem] items-center justify-center">
@@ -43,9 +43,9 @@ export function CanhoesEventHomeLoadingState() {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function CanhoesEventHomeErrorState({
+export const CanhoesEventHomeErrorState = memo(function CanhoesEventHomeErrorState({
   errorMessage,
 }: Readonly<{ errorMessage: string | null }>) {
   return (
@@ -60,9 +60,9 @@ export function CanhoesEventHomeErrorState({
       </CardContent>
     </Card>
   );
-}
+});
 
-export function CanhoesEventHomeContent({
+export const CanhoesEventHomeContent = memo(function CanhoesEventHomeContent({
   viewModel,
 }: Readonly<{ viewModel: CanhoesEventHomeViewModel }>) {
   const { event, homeCopy, overview, phaseDeadline, phaseLabel, phaseSummary, recentPosts, secretSanta, secretSantaAction, voting, wishlistAction } = viewModel;
@@ -167,9 +167,9 @@ export function CanhoesEventHomeContent({
       </div>
     </div>
   );
-}
+});
 
-function HomeHeroSection({
+const HomeHeroSection = memo(function HomeHeroSection({
   event,
   homeCopy,
   metrics,
@@ -244,9 +244,9 @@ function HomeHeroSection({
       </div>
     </section>
   );
-}
+});
 
-function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
+const HomeAlertsSection = memo(function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
   return (
     <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[rgba(212,184,150,0.22)] bg-[rgba(57,45,28,0.28)]">
       {alerts.map((alert) => (
@@ -256,9 +256,9 @@ function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
       ))}
     </HomePanel>
   );
-}
+});
 
-function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
+const HomeFeedPanel = memo(function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
   return (
     <HomePanel
       title="Mural social da edicao"
@@ -278,9 +278,9 @@ function HomeFeedPanel({ posts }: Readonly<{ posts: RecentPost[] }>) {
       )}
     </HomePanel>
   );
-}
+});
 
-function HomeSecretSantaPanel({
+const HomeSecretSantaPanel = memo(function HomeSecretSantaPanel({
   assignedWishlistItemCount,
   assignedUserName,
   hasAssignment,
@@ -309,9 +309,9 @@ function HomeSecretSantaPanel({
       </div>
     </HomePanel>
   );
-}
+});
 
-function HomeChecklistPanel({ items }: Readonly<{ items: ChecklistItemData[] }>) {
+const HomeChecklistPanel = memo(function HomeChecklistPanel({ items }: Readonly<{ items: ChecklistItemData[] }>) {
   return (
     <HomePanel title={homeCopyText.checklistTitle} icon={Vote}>
       {items.map((item) => (
@@ -319,9 +319,9 @@ function HomeChecklistPanel({ items }: Readonly<{ items: ChecklistItemData[] }>)
       ))}
     </HomePanel>
   );
-}
+});
 
-function HomePanel({
+const HomePanel = memo(function HomePanel({
   cardClassName,
   children,
   footer,
@@ -348,12 +348,12 @@ function HomePanel({
       </CardContent>
     </Card>
   );
-}
+});
 
-function HomePanelState({ children }: Readonly<{ children: ReactNode }>) {
+const HomePanelState = memo(function HomePanelState({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-4 text-sm text-[rgba(245,237,224,0.88)]">
       {children}
     </div>
   );
-}
+});

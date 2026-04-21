@@ -269,6 +269,14 @@ export function useHubFeed(eventId: string | null) {
   const fetchedCommentPostsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    fetchedCommentPostsRef.current = new Set();
+    setOpenComments({});
+    setComments({});
+    setCommentDrafts({});
+    setShowParticles(null);
+  }, [eventId]);
+
+  useEffect(() => {
     if (!eventId) return;
 
     const postIdsNeedingPreview = safePosts

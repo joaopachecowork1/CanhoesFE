@@ -100,7 +100,7 @@ function HubFeedModuleView({
   const handleRetry = useCallback(() => void refresh(), [refresh]);
   const handleClearParticles = useCallback(() => setShowParticles(null), [setShowParticles]);
   const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
-  const handleLoadMore = useCallback(() => state.loadMore(), [state]);
+  const handleLoadMore = state.loadMore;
 
   const feedList = useMemo(
     () => (

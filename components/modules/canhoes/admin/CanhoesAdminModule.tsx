@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 
@@ -101,12 +101,12 @@ function CollapsibleMobileMetrics({
 }
 
 function MetricTile({ label, value }: Readonly<{ label: string; value: string }>) {
-    return (
-        <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-2 py-1.5">
-            <p className="text-[0.55rem] leading-none text-[var(--ink-muted)]">{label}</p>
-            <p className="mt-1 text-xs font-semibold text-[var(--ink-primary)]">{value}</p>
-        </div>
-    );
+  return (
+    <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-2 py-1.5">
+      <p className="text-[0.55rem] leading-none text-[var(--ink-muted)]">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--ink-primary)]">{value}</p>
+    </div>
+  );
 }
 
 type BuildSectionContentArgs = {
@@ -193,7 +193,7 @@ function buildSectionContent({
     };
 }
 
-function AdminMobileSummary({
+const AdminMobileSummary = memo(function AdminMobileSummary({
     eventState,
     loading,
     pendingNominationCount,
@@ -231,12 +231,8 @@ function AdminMobileSummary({
             <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-3 py-3">
                 <div className="flex items-start justify-between gap-3">
                     <div>
-                        <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">
-                            Pendentes
-                        </p>
-                        <p className="mt-0.5 text-2xl font-extrabold text-[var(--ink-primary)] tabular-nums">
-                            {pendingTotal}
-                        </p>
+                        <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">Pendentes</p>
+                        <p className="mt-0.5 text-2xl font-extrabold text-[var(--ink-primary)] tabular-nums">{pendingTotal}</p>
                     </div>
                     <div className="text-right text-[0.6rem] leading-4 text-[var(--ink-muted)]">
                         <p>{pendingNominationCount} nomeações</p>
@@ -255,7 +251,7 @@ function AdminMobileSummary({
             />
         </div>
     );
-}
+});
 
 export default function CanhoesAdminModule({
     section,
@@ -303,7 +299,8 @@ export default function CanhoesAdminModule({
     }, [activeEvent?.id, queryClient, refreshOverview]);
 
     const dashboardError = getAdminErrorMessage(error);
-    const sectionContent = buildSectionContent({
+    const sectionContent = useMemo(
+      () => buildSectionContent({
         activeEventName: activeEvent?.name ?? null,
         categoriesCount: totalCategories,
         categoryProposals,
@@ -315,7 +312,9 @@ export default function CanhoesAdminModule({
         measureProposals,
         pendingNominationCount,
         summary,
-    });
+      }),
+      [activeEvent?.id, activeEvent?.name, categoryProposals, events, eventState, handleRefresh, loading, measureProposals, pendingNominationCount, summary, totalCategories]
+    );
 
     useEffect(() => {
         if (!error) return;
