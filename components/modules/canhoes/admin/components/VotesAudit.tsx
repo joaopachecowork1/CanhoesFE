@@ -30,7 +30,7 @@ type Props = {
 
 function VotesAuditShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <article className="canhoes-paper-panel relative overflow-hidden rounded-[var(--radius-md-token)] px-4 py-3.5 text-[var(--ink-primary)]">
+    <article className="canhoes-paper-panel relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
       <CardHeader className="space-y-1">
         <p className="editorial-kicker">{adminCopy.audit.kicker}</p>
         <CardTitle>{adminCopy.audit.title}</CardTitle>
@@ -46,7 +46,7 @@ function VotesAuditState({ message }: Readonly<{ message: string }>) {
 
 function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
   return (
-    <article className="grid gap-1 border-b border-[rgba(84,64,40,0.12)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
+    <article className="grid gap-1 border-b border-[rgba(212,184,150,0.14)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{vote.categoryName}</p>
       <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm">
         <p className="truncate">Votou: {vote.userName}</p>
@@ -127,7 +127,7 @@ export function VotesAudit({ eventId, loading }: Readonly<Props>) {
 
         <Separator className="bg-[rgba(84,64,40,0.12)]" />
 
-        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)]">
+        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(16,23,11,0.94)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
           <VirtualizedList
             className="px-0 py-0"
             estimateSize={() => 52}
