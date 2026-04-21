@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Medal, Trophy } from "lucide-react";
 
 import {
@@ -125,9 +125,9 @@ export function CanhoesGalaModule() {
     void loadResults(eventId);
   }, [eventId, loadResults]);
 
-  const totalVotes = useMemo(
-    () => resultsByCategory.reduce((voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0), 0),
-    [resultsByCategory]
+  const totalVotes = resultsByCategory.reduce(
+    (voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0),
+    0
   );
 
   return (

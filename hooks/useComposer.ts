@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const MAX_MEDIA_FILES = 10;
 export const MAX_POLL_OPTIONS = 6;
@@ -28,42 +28,21 @@ export function useComposer({ onReset }: UseComposerOptions = {}) {
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewUrlCacheRef = useRef<string[]>([]);
-
-  const previewUrls = useMemo(() => {
-    const nextUrls: string[] = [];
-
-    for (let index = 0; index < files.length; index += 1) {
-      const file = files[index];
-      const cachedUrl = previewUrlCacheRef.current[index];
-
-      if (cachedUrl) {
-        nextUrls.push(cachedUrl);
-        continue;
-      }
-
-      nextUrls.push(URL.createObjectURL(file));
-    }
-
-    return nextUrls;
-  }, [files]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    const previousUrls = previewUrlCacheRef.current;
-    const nextUrls = previewUrls;
+    if (files.length === 0) {
+      setPreviewUrls([]);
+      return;
+    }
 
-    previousUrls.forEach((url, index) => {
-      if (nextUrls[index] !== url) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
-    previewUrlCacheRef.current = nextUrls;
+    const nextUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(nextUrls);
 
     return () => {
       nextUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [previewUrls]);
+  }, [files]);
 
   const reset = useCallback(() => {
     setText("");

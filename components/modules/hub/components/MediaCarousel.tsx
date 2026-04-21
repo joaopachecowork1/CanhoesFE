@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
@@ -69,7 +69,7 @@ export function MediaCarousel({
   onImageClick,
   authorName,
 }: Readonly<MediaCarouselProps>) {
-  const media = useMemo(() => (urls ?? []).filter(Boolean), [urls]);
+  const media = (urls ?? []).filter(Boolean);
   const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
   const { currentIndex, setCurrentIndex, handleTouchEnd, handleTouchMove, handleTouchStart } =
     useCarouselGesture(media.length);

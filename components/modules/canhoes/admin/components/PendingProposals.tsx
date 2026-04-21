@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -371,8 +371,8 @@ export function PendingProposals({
 
   const getMeasureText = (proposal: MeasureProposalDto) => getMeasureDraft(proposal).trim();
 
-  const categoryCounts = useMemo(() => buildCounts(categoryProposals), [categoryProposals]);
-  const measureCounts = useMemo(() => buildCounts(measureProposalsAll), [measureProposalsAll]);
+  const categoryCounts = buildCounts(categoryProposals);
+  const measureCounts = buildCounts(measureProposalsAll);
 
   const runCategoryStatusChange = (
     proposal: CategoryProposalDto,

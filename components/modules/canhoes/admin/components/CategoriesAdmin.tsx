@@ -38,6 +38,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 
+const EMPTY_AWARD_CATEGORIES: AwardCategoryDto[] = [];
+const EMPTY_ADMIN_NOMINATIONS_SUMMARY = [] as Awaited<ReturnType<typeof canhoesEventsRepo.getAdminNominationsSummary>>;
+const EMPTY_ADMIN_VOTES = [] as Awaited<ReturnType<typeof canhoesEventsRepo.loadAllAdminVotes>>;
+
 import { AdminSectionSummary } from "./AdminSectionSummary";
 import { AdminStateMessage } from "./AdminStateMessage";
 import {
@@ -514,9 +518,9 @@ export function CategoriesAdmin({
     staleTime: 1000 * 60 * 2,
   });
 
-  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
-  const nominationsSummary = useMemo(() => nominationsSummaryQuery.data ?? [], [nominationsSummaryQuery.data]);
-  const votes = useMemo(() => votesQuery.data ?? [], [votesQuery.data]);
+  const categories = categoriesQuery.data ?? EMPTY_AWARD_CATEGORIES;
+  const nominationsSummary = nominationsSummaryQuery.data ?? EMPTY_ADMIN_NOMINATIONS_SUMMARY;
+  const votes = votesQuery.data ?? EMPTY_ADMIN_VOTES;
 
   const sortedCategories = useMemo(
     () =>

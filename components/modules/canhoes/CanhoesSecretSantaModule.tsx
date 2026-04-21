@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Gift, Link as LinkIcon, Shuffle, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -254,12 +254,12 @@ export function CanhoesSecretSantaModule() {
     };
   }, [event, isOverviewLoading]);
 
-  const assignedWishlistItems = useMemo(() => {
-    if (screenState.status !== "ready" || !screenState.overview.assignedUser) return [];
-    return normalizeWishlistItems(screenState.wishlistItems).filter(
-      (item) => item.userId === screenState.overview.assignedUser?.id
-    );
-  }, [screenState]);
+  const assignedWishlistItems =
+    screenState.status !== "ready" || !screenState.overview.assignedUser
+      ? []
+      : normalizeWishlistItems(screenState.wishlistItems).filter(
+          (item) => item.userId === screenState.overview.assignedUser?.id
+        );
 
   const retryLoad = useCallback(() => {
     setErrorMessage(null);

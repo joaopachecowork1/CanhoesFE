@@ -12,6 +12,8 @@ import { AdminStateMessage } from "@/components/modules/canhoes/admin/components
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+const EMPTY_ADMIN_CATEGORY_RESULTS: AdminCategoryResultDto[] = [];
 import {
   ADMIN_CONTENT_CARD_CLASS,
   ADMIN_OUTLINE_BUTTON_CLASS,
@@ -168,7 +170,7 @@ export function AdminOfficialResultsSection({
     staleTime: 1000 * 60 * 2,
   });
 
-  const resultCategories = useMemo<AdminCategoryResultDto[]>(() => resultsQuery.data ?? [], [resultsQuery.data]);
+  const resultCategories = resultsQuery.data ?? EMPTY_ADMIN_CATEGORY_RESULTS;
 
   const selectedCategory = useMemo(
     () =>

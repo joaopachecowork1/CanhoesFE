@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Clock, Lock, Trophy } from "lucide-react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -21,6 +21,9 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
+
+const EMPTY_EVENT_CATEGORIES: EventCategoryDto[] = [];
+const EMPTY_NOMINEES: NomineeDto[] = [];
 
 function NominationsLoadingState() {
   return (
@@ -82,9 +85,9 @@ export function CanhoesNominationsModule() {
 
   const isLoading = isOverviewLoading || categoriesQuery.isLoading || myStatusQuery.isLoading || approvedQuery.isLoading;
   const error = categoriesQuery.error ?? myStatusQuery.error ?? approvedQuery.error;
-  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
+  const categories = categoriesQuery.data ?? EMPTY_EVENT_CATEGORIES;
   const myStatus = myStatusQuery.data ?? null;
-  const approvedNominees = approvedQuery.data ?? [];
+  const approvedNominees = approvedQuery.data ?? EMPTY_NOMINEES;
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
@@ -100,10 +103,7 @@ export function CanhoesNominationsModule() {
     });
   }, [categories]);
 
-  const selectedCategory = useMemo(
-    () => categories.find((category) => category.id === selectedCategoryId) ?? null,
-    [categories, selectedCategoryId]
-  );
+  const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
 
   const isInitialLoading = isLoading && categories.length === 0;
 

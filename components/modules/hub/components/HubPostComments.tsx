@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { MessageSquare, Trash2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,13 +64,12 @@ export function HubPostComments({
 }: Readonly<HubPostCommentsProps>) {
   const [commentPendingDelete, setCommentPendingDelete] = useState<HubCommentDto | null>(null);
 
-  const sortedComments = useMemo(() => {
-    if (comments.length < 2) return comments;
-
-    return [...comments].sort((left, right) =>
-      String(left.createdAtUtc).localeCompare(String(right.createdAtUtc))
-    );
-  }, [comments]);
+  const sortedComments =
+    comments.length < 2
+      ? comments
+      : [...comments].sort((left, right) =>
+          String(left.createdAtUtc).localeCompare(String(right.createdAtUtc))
+        );
 
   if (!openComments) return null;
 

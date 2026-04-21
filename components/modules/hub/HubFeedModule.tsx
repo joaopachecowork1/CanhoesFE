@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
@@ -102,63 +102,34 @@ function HubFeedModuleView({
   const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
   const handleLoadMore = state.loadMore;
 
-  const feedList = useMemo(
-    () => (
-      <HubFeedList
-        posts={posts}
-        sort={sort}
-        allPostsCount={allPostsCount}
-        isAdmin={isAdmin}
-        hasMore={hasMore}
-        isFetchingNextPage={isFetchingNextPage}
-        currentUserId={currentUserId}
-        currentUserImage={currentUserImage}
-        currentUserName={currentUserName}
-        comments={comments}
-        openComments={openComments}
-        commentDrafts={commentDrafts}
-        onSortChange={handleSortChange}
-        onLoadMore={handleLoadMore}
-        onToggleReaction={toggleReaction}
-        onToggleDownvote={toggleDownvote}
-        onToggleComments={toggleComments}
-        onVotePoll={votePoll}
-        onAddComment={addComment}
-        onDeleteComment={deleteComment}
-        onCommentDraftChange={setCommentDraft}
-        onToggleCommentReaction={toggleCommentReaction}
-        onAdminPin={adminPin}
-        onAdminDelete={adminDelete}
-        sentinelRef={sentinelRef}
-      />
-    ),
-    [
-      addComment,
-      adminDelete,
-      adminPin,
-      allPostsCount,
-      commentDrafts,
-      comments,
-      currentUserId,
-      currentUserImage,
-      currentUserName,
-      deleteComment,
-      handleLoadMore,
-      handleSortChange,
-      hasMore,
-      isAdmin,
-      isFetchingNextPage,
-      openComments,
-      posts,
-      sentinelRef,
-      setCommentDraft,
-      sort,
-      toggleCommentReaction,
-      toggleComments,
-      toggleDownvote,
-      toggleReaction,
-      votePoll,
-    ]
+  const feedList = (
+    <HubFeedList
+      posts={posts}
+      sort={sort}
+      allPostsCount={allPostsCount}
+      isAdmin={isAdmin}
+      hasMore={hasMore}
+      isFetchingNextPage={isFetchingNextPage}
+      currentUserId={currentUserId}
+      currentUserImage={currentUserImage}
+      currentUserName={currentUserName}
+      comments={comments}
+      openComments={openComments}
+      commentDrafts={commentDrafts}
+      onSortChange={handleSortChange}
+      onLoadMore={handleLoadMore}
+      onToggleReaction={toggleReaction}
+      onToggleDownvote={toggleDownvote}
+      onToggleComments={toggleComments}
+      onVotePoll={votePoll}
+      onAddComment={addComment}
+      onDeleteComment={deleteComment}
+      onCommentDraftChange={setCommentDraft}
+      onToggleCommentReaction={toggleCommentReaction}
+      onAdminPin={adminPin}
+      onAdminDelete={adminDelete}
+      sentinelRef={sentinelRef}
+    />
   );
 
   return (

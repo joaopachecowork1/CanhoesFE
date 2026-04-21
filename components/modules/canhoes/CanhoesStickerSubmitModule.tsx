@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Cigarette, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
@@ -151,10 +151,7 @@ export function CanhoesStickerSubmitModule() {
       : "Submeter sticker"
     : "Nomeacoes fechadas";
 
-  const stickersWithImage = useMemo(
-    () => nomineeList.filter((nominee) => nominee.imageUrl),
-    [nomineeList]
-  );
+  const stickersWithImage = nomineeList.filter((nominee) => nominee.imageUrl);
 
   const isInitialLoading = isLoading && categoryList.length === 0 && nomineeList.length === 0;
 
