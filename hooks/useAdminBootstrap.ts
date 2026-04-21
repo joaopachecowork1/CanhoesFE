@@ -29,18 +29,17 @@ export function useAdminBootstrap(eventId: string | null) {
   });
 
   const bootstrap = bootstrapQuery.data ?? null;
-  const counts = bootstrap?.counts ?? null;
-  const state: EventAdminStateDto | null = bootstrap?.state ?? null;
-  const events: EventSummaryDto[] = bootstrap?.events ?? [];
+  const state: EventAdminStateDto | null = bootstrap?.adminState ?? null;
+  const events: EventSummaryDto[] = bootstrap ? [bootstrap.event] : [];
 
   const summary = {
-    memberCount: counts?.membersTotal ?? 0,
-    pendingCategoryProposalCount: counts?.categoryProposalsPendingTotal ?? 0,
-    pendingMeasureProposalCount: counts?.measureProposalsPendingTotal ?? 0,
+    memberCount: state?.counts.memberCount ?? 0,
+    pendingCategoryProposalCount: 0,
+    pendingMeasureProposalCount: 0,
     pendingNominationCount: 0,
-    officialResultsCategoryCount: counts?.officialResultsCategoriesCount ?? 0,
+    officialResultsCategoryCount: 0,
     totalCategories: state?.counts.categoryCount ?? 0,
-    totalNominees: counts?.nomineesTotal ?? 0,
+    totalNominees: 0,
     visibleModuleCount: countVisibleModules(state?.effectiveModules),
   };
 

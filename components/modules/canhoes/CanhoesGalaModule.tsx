@@ -57,7 +57,7 @@ function NomineeRankCard({
             {nominee.title}
           </span>
         </div>
-        <p className="body-small text-[var(--color-text-muted)]">{nominee.votes} votos</p>
+        <p className="body-small text-[var(--color-text-muted)]">{nominee.voteCount} votos</p>
       </div>
 
       <Badge variant={isWinner ? "default" : "outline"}>

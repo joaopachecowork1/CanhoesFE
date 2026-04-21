@@ -46,8 +46,11 @@ export function usePendingProposals(eventId: string | null): UsePendingProposals
   });
 
   const refresh = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["canhoes", "admin"] });
-  }, [queryClient]);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "category-proposals", "pending", eventId] }),
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "measure-proposals", "pending", eventId] }),
+    ]);
+  }, [eventId, queryClient]);
 
   return {
     categoryProposals: categoryQuery.data ?? [],

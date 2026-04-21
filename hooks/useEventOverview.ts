@@ -3,45 +3,13 @@
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import type { EventSummaryDto } from "@/lib/api/types";
-import { pickActiveEvent } from "@/lib/canhoesEvent";
-import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
-function normalizeEventsResponse(payload: unknown): EventSummaryDto[] {
-  if (!Array.isArray(payload)) return [];
-  return payload as EventSummaryDto[];
-}
-
-/**
- * Loads the active event plus its overview in one place so chrome, admin and
- * other phase-aware screens do not duplicate the same bootstrap logic.
- * Uses TanStack Query to deduplicate requests across components.
- */
 export function useEventOverview() {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["eventOverview"],
-    queryFn: async () => {
-      try {
-        const eventsPayload = await canhoesEventsRepo.listEvents();
-        const events = normalizeEventsResponse(eventsPayload);
-        const activeEvent = pickActiveEvent(events);
-
-        if (!activeEvent) {
-          return { event: null, overview: null };
-        }
-
-        const overview = await canhoesEventsRepo.getEventOverview(activeEvent.id);
-        return { event: activeEvent, overview };
-      } catch (err) {
-        throw new Error(
-          getErrorMessage(err, "Nao foi possivel carregar o contexto do evento.", {
-            404: "Nao existe um evento ativo para abrir agora.",
-          })
-        );
-      }
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    queryFn: () => canhoesEventsRepo.getActiveContext(),
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     retry: 1,
   });

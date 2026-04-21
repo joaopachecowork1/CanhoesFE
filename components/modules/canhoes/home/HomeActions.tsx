@@ -5,11 +5,16 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import type { CanhoesEventHomeViewModel } from "./useCanhoesEventHome";
+type HomeAction = {
+  label: string;
+  href?: string;
+  tone?: "default" | "outline" | "secondary";
+  onClick?: () => void;
+};
 
-type HomeAction = CanhoesEventHomeViewModel["homeCopy"]["primaryAction"];
+type ClickableHomeAction = HomeAction;
 
-export function ActionButton({ action }: Readonly<{ action: HomeAction }>) {
+export function ActionButton({ action }: Readonly<{ action: ClickableHomeAction }>) {
   return <ActionLinkButton action={action} variant={action.tone ?? "default"} />;
 }
 
@@ -17,7 +22,7 @@ export function ActionLinkButton({
   action,
   variant,
 }: Readonly<{
-  action: HomeAction;
+  action: ClickableHomeAction;
   variant: "default" | "outline" | "secondary";
 }>) {
   const className =

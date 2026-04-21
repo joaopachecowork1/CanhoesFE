@@ -49,6 +49,8 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     isActive: true,
     kind: "Sticker",
     description: "O álbum que mais marcou o ano",
+    voteQuestion: null,
+    voteRules: null,
   },
   {
     id: "cat-002",
@@ -57,6 +59,8 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     isActive: true,
     kind: "Sticker",
     description: "A música que esteve em loop durante o ano",
+    voteQuestion: null,
+    voteRules: null,
   },
   {
     id: "cat-003",
@@ -65,6 +69,8 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     isActive: true,
     kind: "Sticker",
     description: "O concerto que ficou na memória",
+    voteQuestion: null,
+    voteRules: null,
   },
   {
     id: "cat-004",
@@ -73,6 +79,8 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     isActive: true,
     kind: "Sticker",
     description: "O artista que surpreendeu toda a gente",
+    voteQuestion: null,
+    voteRules: null,
   },
   {
     id: "cat-005",
@@ -80,6 +88,7 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     sortOrder: 5,
     isActive: true,
     kind: "UserVote",
+    description: "Categoria de votação por membros",
     voteQuestion: "Quem é o próximo admin?",
     voteRules: "Votação por membro do grupo",
   },
@@ -90,6 +99,8 @@ export const MOCK_CATEGORIES: AwardCategoryDto[] = [
     isActive: false,
     kind: "Sticker",
     description: "Categoria arquivada",
+    voteQuestion: null,
+    voteRules: null,
   },
 ];
 
@@ -101,6 +112,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: "cat-001",
     title: "SOS — ABBA",
     status: "approved",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
   {
@@ -108,6 +120,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: "cat-001",
     title: "Midnights — Taylor Swift",
     status: "approved",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
   {
@@ -115,6 +128,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: "cat-002",
     title: "Flowers — Miley Cyrus",
     status: "pending",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 3600000 * 6).toISOString(),
   },
   {
@@ -122,6 +136,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: "cat-002",
     title: "As It Was — Harry Styles",
     status: "pending",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 3600000 * 3).toISOString(),
   },
   {
@@ -129,6 +144,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: null,
     title: "Nomeação sem categoria",
     status: "pending",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 1800000).toISOString(),
   },
   {
@@ -136,6 +152,7 @@ export const MOCK_NOMINEES: NomineeDto[] = [
     categoryId: "cat-003",
     title: "Coldplay — Music of the Spheres Tour",
     status: "rejected",
+    imageUrl: null,
     createdAtUtc: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
 ];
@@ -201,26 +218,34 @@ export const MOCK_MEASURE_PROPOSALS: MeasureProposalDto[] = [
 export const MOCK_MEMBERS: PublicUserDto[] = [
   {
     id: "mock-admin-001",
+    name: "Dev Admin",
     email: "admin@dev.local",
     displayName: "Dev Admin",
+    avatarUrl: null,
     isAdmin: true,
   },
   {
     id: "user-002",
+    name: "João P.",
     email: "joao@dev.local",
     displayName: "João P.",
+    avatarUrl: null,
     isAdmin: false,
   },
   {
     id: "user-003",
+    name: "Maria S.",
     email: "maria@dev.local",
     displayName: "Maria S.",
+    avatarUrl: null,
     isAdmin: false,
   },
   {
     id: "user-004",
+    name: "Pedro M.",
     email: "pedro@dev.local",
     displayName: "Pedro M.",
+    avatarUrl: null,
     isAdmin: false,
   },
 ];
@@ -235,6 +260,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-002",
     submittedByName: "Maria S.",
     submittedByMe: false,
+    imageUrl: null,
   },
   {
     id: "nom-002",
@@ -245,6 +271,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-003",
     submittedByName: "Pedro L.",
     submittedByMe: false,
+    imageUrl: null,
   },
   {
     id: "nom-003",
@@ -255,6 +282,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-004",
     submittedByName: "Ana C.",
     submittedByMe: false,
+    imageUrl: null,
   },
   {
     id: "nom-004",
@@ -265,6 +293,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-005",
     submittedByName: "Rui F.",
     submittedByMe: false,
+    imageUrl: null,
   },
   {
     id: "nom-005",
@@ -275,6 +304,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-002",
     submittedByName: "Maria S.",
     submittedByMe: false,
+    imageUrl: null,
   },
   {
     id: "nom-006",
@@ -285,6 +315,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-001",
     submittedByName: "Joao P.",
     submittedByMe: true,
+    imageUrl: null,
   },
   {
     id: "nom-007",
@@ -295,6 +326,7 @@ export const MOCK_ADMIN_NOMINEES: AdminNomineeDto[] = [
     submittedByUserId: "user-003",
     submittedByName: "Pedro L.",
     submittedByMe: false,
+    imageUrl: null,
   },
 ];
 
@@ -335,6 +367,7 @@ export const MOCK_OFFICIAL_VOTING_BOARD: OfficialVotingBoardDto = {
       description: "O album que mais marcou o ano",
       kind: "Sticker",
       myNomineeId: null,
+      totalVotes: 0,
       nominees: [
         { id: "nom-001", label: "SOS - ABBA" },
         { id: "nom-002", label: "Midnights - Taylor Swift" },
@@ -346,6 +379,7 @@ export const MOCK_OFFICIAL_VOTING_BOARD: OfficialVotingBoardDto = {
       description: "A musica que esteve em loop durante o ano",
       kind: "Sticker",
       myNomineeId: "nom-004",
+      totalVotes: 0,
       nominees: [{ id: "nom-004", label: "Flowers - Miley Cyrus" }],
     },
     {
@@ -354,6 +388,7 @@ export const MOCK_OFFICIAL_VOTING_BOARD: OfficialVotingBoardDto = {
       description: "O concerto que ficou na memoria",
       kind: "Sticker",
       myNomineeId: null,
+      totalVotes: 0,
       nominees: [{ id: "nom-006", label: "NOS Alive 2025" }],
     },
   ],
@@ -647,9 +682,12 @@ export const MOCK_EVENT_CATEGORIES: EventCategoryDto[] = MOCK_CATEGORIES.map((ca
   id: category.id,
   eventId: MOCK_EVENT_SUMMARY.id,
   title: category.name,
+  name: category.name,
   kind: category.kind,
   isActive: category.isActive,
   description: category.description ?? null,
+  voteQuestion: category.voteQuestion ?? null,
+  voteRules: category.voteRules ?? null,
 }));
 
 export const MOCK_EVENT_PROPOSALS: EventProposalDto[] = MOCK_CATEGORY_PROPOSALS.map((proposal) => ({
@@ -666,17 +704,25 @@ export const MOCK_EVENT_WISHLIST: EventWishlistItemDto[] = [
   {
     id: "wishlist-001",
     userId: "user-002",
-    eventId: MOCK_EVENT_SUMMARY.id,
     title: "Vinil do album favorito",
+    url: "https://example.com/vinil",
     link: "https://example.com/vinil",
+    notes: null,
+    imageUrl: null,
+    createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
+    updatedAtUtc: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
     id: "wishlist-002",
     userId: "user-003",
-    eventId: MOCK_EVENT_SUMMARY.id,
     title: "Bilhete para concerto",
+    url: "https://example.com/bilhete",
     link: "https://example.com/bilhete",
+    notes: null,
+    imageUrl: null,
+    createdAtUtc: new Date(Date.now() - 86400000).toISOString(),
+    updatedAtUtc: new Date(Date.now() - 7200000).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
 ];

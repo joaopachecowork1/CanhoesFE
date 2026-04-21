@@ -75,7 +75,7 @@ export function CanhoesCategoriesModule() {
 
     const filteredCategoryList = categoryList.filter((category) =>
         search.trim()
-            ? `${category.title} ${category.description ?? ""}`
+            ? `${category.name} ${category.description ?? ""}`
                 .toLowerCase()
                 .includes(search.trim().toLowerCase())
             : true
@@ -204,7 +204,7 @@ export function CanhoesCategoriesModule() {
                                 <div key={category.id} className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
-                                            {category.title}
+                                            {category.name}
                                         </p>
                                         <p className="text-xs text-[var(--color-text-muted)]">
                                             {category.description || "Sem descricao adicional."}
