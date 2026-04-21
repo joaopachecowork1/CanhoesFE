@@ -37,7 +37,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
-import { cn } from "@/lib/utils";
 
 import { AdminSectionSummary } from "./AdminSectionSummary";
 import { AdminStateMessage } from "./AdminStateMessage";
@@ -142,6 +141,9 @@ function buildUpdatePayload(form: Readonly<CategoryFormState>): UpdateAwardCateg
   };
 }
 
+const CATEGORY_ITEM_CLASS =
+  "w-full min-h-11 rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-3 text-left transition-colors hover:bg-[var(--bg-paper-soft)]";
+
 function CategoryListItem({
   category,
   onEdit,
@@ -152,24 +154,13 @@ function CategoryListItem({
   usage: CategoryUsage;
 }>) {
   return (
-    <button
-      type="button"
-      onClick={() => onEdit(category)}
-      className={cn(
-        "w-full rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-3 text-left transition-colors hover:bg-[var(--bg-paper-soft)]",
-        "min-h-11"
-      )}
-    >
+    <button type="button" onClick={() => onEdit(category)} className={CATEGORY_ITEM_CLASS}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
-              {category.name}
-            </p>
+            <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{category.name}</p>
             <Badge variant="secondary">{CATEGORY_KIND_LABELS[category.kind]}</Badge>
-            <Badge variant={category.isActive ? "default" : "outline"}>
-              {category.isActive ? "Ativa" : "Inativa"}
-            </Badge>
+            <Badge variant={category.isActive ? "default" : "outline"}>{category.isActive ? "Ativa" : "Inativa"}</Badge>
           </div>
 
           {category.description ? (
@@ -182,9 +173,7 @@ function CategoryListItem({
             <span>Ordem {category.sortOrder}</span>
             <span>{usage.nomineeCount} nomeações</span>
             <span>{usage.voteCount} votos</span>
-            {category.kind === "UserVote" && category.voteQuestion ? (
-              <span className="normal-case tracking-normal">{category.voteQuestion}</span>
-            ) : null}
+            {category.kind === "UserVote" && category.voteQuestion ? <span className="normal-case tracking-normal">{category.voteQuestion}</span> : null}
           </div>
         </div>
 
@@ -741,10 +730,7 @@ export function CategoriesAdmin({
               </p>
             </div>
 
-            <Button type="button" onClick={openCreateSheet} className="min-h-11 gap-2 sm:self-start" disabled={isBusy}>
-              <Plus className="h-4 w-4" />
-              Nova categoria
-            </Button>
+            <Button type="button" onClick={openCreateSheet} className="min-h-11 gap-2 sm:self-start" disabled={isBusy}><Plus className="h-4 w-4" /> Nova categoria</Button>
           </div>
         </CardHeader>
 
@@ -781,10 +767,7 @@ export function CategoriesAdmin({
         sheetState={sheetState}
       />
 
-      <AlertDialog
-        open={Boolean(deleteTarget)}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-      >
+      <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Apagar categoria?</AlertDialogTitle>
@@ -796,13 +779,10 @@ export function CategoriesAdmin({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteCategory.isPending}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={deleteCategory.isPending}
-              onClick={() => {
-                if (!deleteTarget) return;
-                deleteCategory.mutate(deleteTarget.id);
-              }}
-            >
+            <AlertDialogAction disabled={deleteCategory.isPending} onClick={() => {
+              if (!deleteTarget) return;
+              deleteCategory.mutate(deleteTarget.id);
+            }}>
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>

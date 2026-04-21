@@ -48,12 +48,8 @@ function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
   return (
     <article className="grid gap-1 border-b border-[rgba(212,184,150,0.14)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{vote.categoryName}</p>
-      <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm">
-        <p className="truncate">Votou: {vote.userName}</p>
-      </div>
-      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">
-        {new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}
-      </p>
+      <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm"><p className="truncate">Votou: {vote.userName}</p></div>
+      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">{new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}</p>
     </article>
   );
 }

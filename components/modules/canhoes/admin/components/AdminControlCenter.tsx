@@ -304,6 +304,9 @@ export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 const CONTROL_BLOCK_CLASS =
   "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(15,24,10,0.9)] px-3 py-3 shadow-[0_10px_24px_rgba(0,0,0,0.12)]";
 
+const CONTROL_ROW_CLASS =
+  "flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,25,12,0.92)] min-h-11 px-3 py-2 text-[var(--ink-primary)]";
+
 type ControlBlockProps = {
   action?: ReactNode;
   children: ReactNode;
@@ -378,66 +381,29 @@ function ControlBlock({
   );
 }
 
-function VisibilityTile({
-  checked,
-  id,
-  label,
-  onChange,
-  pending,
-}: Readonly<VisibilityTileProps>) {
+function VisibilityTile({ checked, id, label, onChange, pending }: Readonly<VisibilityTileProps>) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-3 py-2.5 shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
       <div className="flex items-start justify-between gap-2">
-        <Label
-          htmlFor={id}
-          className="min-w-0 cursor-pointer text-[13px] font-medium text-[var(--ink-primary)]"
-        >
-          {label}
-        </Label>
+        <Label htmlFor={id} className="min-w-0 cursor-pointer text-[13px] font-medium text-[var(--ink-primary)]">{label}</Label>
         <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>
 
-      <p className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-        {pending ? "A guardar" : checked ? "Ativo" : "Oculto"}
-      </p>
+      <p className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{pending ? "A guardar" : checked ? "Ativo" : "Oculto"}</p>
     </div>
   );
 }
 
-function VisibilityRow({
-  checked,
-  id,
-  label,
-  onChange,
-  pending,
-}: Readonly<VisibilityRowProps>) {
+function VisibilityRow({ checked, id, label, onChange, pending }: Readonly<VisibilityRowProps>) {
   return (
-    <div className={cn("flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,25,12,0.92)] min-h-11 px-3 py-2 text-[var(--ink-primary)]", checked && "border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)]")}>
+    <div className={cn(CONTROL_ROW_CLASS, checked && "border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)]")}>
       <div className="min-w-0">
-        <Label
-          htmlFor={id}
-          className={cn(
-            "cursor-pointer text-sm font-medium",
-            checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-muted)]"
-          )}
-        >
-          {label}
-        </Label>
+        <Label htmlFor={id} className={cn("cursor-pointer text-sm font-medium", checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-muted)]")}>{label}</Label>
       </div>
 
       <div className="flex items-center gap-2">
-        {pending ? (
-          <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-            A guardar
-          </span>
-        ) : null}
-        <Switch
-          id={id}
-          checked={checked}
-          disabled={pending}
-          onCheckedChange={onChange}
-          variant="admin"
-        />
+        {pending ? <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">A guardar</span> : null}
+        <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} variant="admin" />
       </div>
     </div>
   );
@@ -446,12 +412,8 @@ function VisibilityRow({
 function QuickMetric({ label, value }: Readonly<QuickMetricProps>) {
   return (
     <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-2">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-        {label}
-      </p>
-      <p className="mt-1 truncate text-sm font-semibold text-[var(--ink-primary)]" title={value}>
-        {value}
-      </p>
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold text-[var(--ink-primary)]" title={value}>{value}</p>
     </div>
   );
 }
@@ -532,13 +494,7 @@ function AdminSettingsMainPanel({
             </CardTitle>
           </div>
 
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className={`gap-1.5 px-3 ${OUTLINE_BUTTON_CLASS}`}
-            onClick={onOpenAdvanced}
-          >
+          <Button type="button" size="sm" variant="outline" className={`gap-1.5 px-3 ${OUTLINE_BUTTON_CLASS}`} onClick={onOpenAdvanced}>
             Avançado
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -554,11 +510,7 @@ function AdminSettingsMainPanel({
             title="Evento ativo"
             subtitle={activeEventLabel}
           >
-            <Select
-              value={eventId ?? ""}
-              onValueChange={onActivateEvent}
-              disabled={savingKey === "event" || events.length === 0}
-            >
+            <Select value={eventId ?? ""} onValueChange={onActivateEvent} disabled={savingKey === "event" || events.length === 0}>
               <SelectTrigger className={`${SELECT_TRIGGER_CLASS} h-10`}>
                 <SelectValue placeholder="Selecionar evento" />
               </SelectTrigger>
@@ -577,11 +529,7 @@ function AdminSettingsMainPanel({
             title="Fase atual"
             subtitle={currentPhaseLabel}
           >
-            <Select
-              value={state.activePhase?.type ?? ""}
-              onValueChange={(value) => onUpdatePhase(value as EventPhaseDto["type"])}
-              disabled={savingKey === "phase" || loading}
-            >
+            <Select value={state.activePhase?.type ?? ""} onValueChange={(value) => onUpdatePhase(value as EventPhaseDto["type"])} disabled={savingKey === "phase" || loading}>
               <SelectTrigger className={`${SELECT_TRIGGER_CLASS} h-10`}>
                 <SelectValue placeholder="Selecionar fase" />
               </SelectTrigger>
@@ -697,24 +645,10 @@ function AdminSettingsAdvancedSheet({
             subtitle="Wishlist · Votação · Stickers · Medidas · Gala"
             action={
               <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className={OUTLINE_BUTTON_CLASS}
-                  disabled={allEnabled || allModulesSaving}
-                  onClick={() => onSetAllModules(true)}
-                >
+                <Button type="button" size="sm" variant="outline" className={OUTLINE_BUTTON_CLASS} disabled={allEnabled || allModulesSaving} onClick={() => onSetAllModules(true)}>
                   Todos on
                 </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className={OUTLINE_BUTTON_CLASS}
-                  disabled={allDisabled || allModulesSaving}
-                  onClick={() => onSetAllModules(false)}
-                >
+                <Button type="button" size="sm" variant="outline" className={OUTLINE_BUTTON_CLASS} disabled={allDisabled || allModulesSaving} onClick={() => onSetAllModules(false)}>
                   Todos off
                 </Button>
               </div>

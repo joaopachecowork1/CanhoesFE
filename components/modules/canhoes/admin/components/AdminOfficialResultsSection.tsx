@@ -72,18 +72,9 @@ function ResultsCategoryButton({
   const participationRate = Math.round(category.participationRate * 100);
 
   return (
-    <AdminSelectableButton
-      type="button"
-      onClick={() => onSelect(category.categoryId)}
-      selected={isSelected}
-      aria-pressed={isSelected}
-    >
-      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
-        {category.categoryName}
-      </p>
-      <p className="mt-1 text-xs text-[var(--ink-muted)]">
-        {category.totalVotes}/{totalMembers} votaram ({participationRate}%)
-      </p>
+    <AdminSelectableButton type="button" onClick={() => onSelect(category.categoryId)} selected={isSelected} aria-pressed={isSelected}>
+      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{category.categoryName}</p>
+      <p className="mt-1 text-xs text-[var(--ink-muted)]">{category.totalVotes}/{totalMembers} votaram ({participationRate}%)</p>
     </AdminSelectableButton>
   );
 }
@@ -115,9 +106,7 @@ function ResultsNomineeBar({
           {Icon ? <Icon className={cn("h-4 w-4 shrink-0", iconClassName)} /> : null}
           <p className="truncate text-sm text-[var(--ink-primary)]">{nominee.title}</p>
         </div>
-        <span className="text-xs text-[var(--ink-muted)]">
-          {nominee.voteCount} votos ({percentage}%)
-        </span>
+        <span className="text-xs text-[var(--ink-muted)]">{nominee.voteCount} votos ({percentage}%)</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-paper-soft)]">
         <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
@@ -134,10 +123,7 @@ function ResultsVotersList({
   return (
     <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
       {nominees.map((nominee) => (
-        <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]">
-          <span className="text-[var(--ink-primary)]">{nominee.title}</span>: {" "}
-          {nominee.voterUserIds.join(", ") || "Sem votos"}
-        </p>
+        <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
       ))}
     </AdminDetailPanel>
   );

@@ -20,7 +20,7 @@ export function AdminContentTabs({
   onSelect,
 }: Readonly<AdminContentTabsProps>) {
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(16,23,11,0.96)] px-2 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
+    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(18,26,13,0.98)] px-2 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
       <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory">
         <div className="flex min-w-max gap-1.5">
           {items.map((item) => {
@@ -37,8 +37,8 @@ export function AdminContentTabs({
                   "canhoes-tap inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-[background-color,border-color,color,box-shadow]",
                   "snap-start",
                   isActive
-                    ? "border-[rgba(122,173,58,0.44)] bg-[rgba(122,173,58,0.16)] text-[var(--ink-primary)] shadow-none"
-                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.9)] text-[var(--ink-primary)] hover:bg-[rgba(30,39,20,0.96)]"
+                    ? "border-[rgba(122,173,58,0.44)] bg-[rgba(122,173,58,0.18)] text-[var(--ink-primary)] shadow-none"
+                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,26,13,0.9)] text-[var(--ink-primary)] hover:bg-[rgba(30,39,20,0.96)]"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />

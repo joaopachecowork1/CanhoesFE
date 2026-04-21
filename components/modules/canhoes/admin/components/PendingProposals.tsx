@@ -156,27 +156,11 @@ function ProposalFieldInput({ field }: Readonly<{ field: { disabled?: boolean; i
 
   return (
     <div className="space-y-2">
-      <label htmlFor={field.id} className="editorial-kicker flex items-center gap-2">
-        {icon}
-        {field.label}
-      </label>
+      <label htmlFor={field.id} className="editorial-kicker flex items-center gap-2">{icon}{field.label}</label>
       {field.multiline ? (
-        <Textarea
-          id={field.id}
-          value={field.value}
-          onChange={(event) => field.onChange(event.target.value)}
-          disabled={field.disabled}
-          placeholder={field.placeholder}
-          rows={3}
-        />
+        <Textarea id={field.id} value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={field.disabled} placeholder={field.placeholder} rows={3} />
       ) : (
-        <Input
-          id={field.id}
-          value={field.value}
-          onChange={(event) => field.onChange(event.target.value)}
-          disabled={field.disabled}
-          placeholder={field.placeholder}
-        />
+        <Input id={field.id} value={field.value} onChange={(event) => field.onChange(event.target.value)} disabled={field.disabled} placeholder={field.placeholder} />
       )}
     </div>
   );
@@ -234,32 +218,15 @@ function ProposalCardActions({
 
   return (
     <>
-      <Button
-        variant="outline"
-        disabled={isBusy || saveDisabled}
-        onClick={onSave}
-        className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
-      >
+      <Button variant="outline" disabled={isBusy || saveDisabled} onClick={onSave} className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}>
         {saveLabel}
       </Button>
       {actions.map((action) => (
-        <Button
-          key={action.key}
-          variant={action.variant}
-          disabled={isBusy}
-          onClick={action.onClick}
-          aria-label={`${action.label} proposta`}
-          className={`${action.variant === "outline" ? ADMIN_OUTLINE_BUTTON_CLASS : ""} w-full sm:w-auto`}
-        >
+        <Button key={action.key} variant={action.variant} disabled={isBusy} onClick={action.onClick} aria-label={`${action.label} proposta`} className={`${action.variant === "outline" ? ADMIN_OUTLINE_BUTTON_CLASS : ""} w-full sm:w-auto`}>
           {action.label}
         </Button>
       ))}
-      <Button
-        variant="outline"
-        disabled={isBusy}
-        className={`${ADMIN_OUTLINE_BUTTON_CLASS} ${deleteIcon ? "w-full gap-2 sm:w-auto" : "w-full sm:w-auto"}`}
-        onClick={onDelete}
-      >
+      <Button variant="outline" disabled={isBusy} className={`${ADMIN_OUTLINE_BUTTON_CLASS} ${deleteIcon ? "w-full gap-2 sm:w-auto" : "w-full sm:w-auto"}`} onClick={onDelete}>
         {deleteIcon}
         {deleteLabel}
       </Button>
