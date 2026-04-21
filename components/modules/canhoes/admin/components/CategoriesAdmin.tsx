@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { FolderTree, Pencil, Plus, Trash2 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type {
@@ -496,6 +496,7 @@ export function CategoriesAdmin({
   loading,
   onUpdate,
 }: Readonly<CategoriesAdminProps>) {
+  const queryClient = useQueryClient();
   const [sheetState, setSheetState] = useState<CategorySheetState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AwardCategoryDto | null>(null);
   const [form, setForm] = useState<CategoryFormState>(() => buildInitialForm(1));
@@ -570,13 +571,22 @@ export function CategoriesAdmin({
   const isLoading = loading || categoriesQuery.isLoading || nominationsSummaryQuery.isLoading || votesQuery.isLoading;
   const queryError = categoriesQuery.error ?? nominationsSummaryQuery.error ?? votesQuery.error;
 
+  const refreshCategoryData = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", eventId] }),
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", eventId] }),
+      queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", eventId] }),
+    ]);
+    await onUpdate();
+  }, [eventId, onUpdate, queryClient]);
+
   const createCategory = useMutation({
     mutationFn: (payload: CreateAwardCategoryRequest) =>
       canhoesEventsRepo.adminCreateCategory(eventId!, payload),
     onSuccess: async () => {
       toast.success("Categoria criada.");
       setSheetState(null);
-      await onUpdate();
+      await refreshCategoryData();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel criar a categoria."));
@@ -594,7 +604,7 @@ export function CategoriesAdmin({
     onSuccess: async () => {
       toast.success("Categoria atualizada.");
       setSheetState(null);
-      await onUpdate();
+      await refreshCategoryData();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel atualizar a categoria."));
@@ -607,7 +617,7 @@ export function CategoriesAdmin({
       toast.success("Categoria apagada.");
       setDeleteTarget(null);
       setSheetState(null);
-      await onUpdate();
+      await refreshCategoryData();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Nao foi possivel apagar a categoria."));
