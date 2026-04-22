@@ -15,6 +15,7 @@ import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
@@ -78,20 +79,17 @@ export function CanhoesChrome({
     setIsMenuOpen(open);
   }, []);
 
-  // Close overlays on navigation
   useEffect(() => {
     setIsComposeSheetOpen(false);
     setIsMenuOpen(false);
   }, [pathname]);
 
-  // Close compose sheet if module is disabled
   useEffect(() => {
     if (!canCompose) {
       setIsComposeSheetOpen(false);
     }
   }, [canCompose]);
 
-  // Listen for global compose sheet open event
   useEffect(() => {
     const handleOpenCompose = () => {
       if (!canCompose) return;
@@ -133,6 +131,7 @@ export function CanhoesChrome({
     router,
     user,
   });
+
   useEffect(() => {
     const eventName = eventOverview.event?.name?.trim();
     document.title = eventName

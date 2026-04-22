@@ -1,122 +1,70 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export type DockItem = {
   ariaLabel?: string;
+  ariaPressed?: boolean;
   buttonClassName?: string;
   icon: LucideIcon;
   iconClassName?: string;
   isActive?: boolean;
   label: string;
   onClick?: () => void;
-  tooltipClassName?: string;
 };
 
 type DockProps = {
   className?: string;
-  containerClassName?: string;
   dockClassName?: string;
   items: readonly DockItem[];
 };
 
-type DockIconButtonProps = DockItem;
-
-const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
-  (
-    {
-      ariaLabel,
-      buttonClassName,
-      icon: Icon,
-      iconClassName,
-      isActive,
-      label,
-      onClick,
-      tooltipClassName,
-    },
-    ref
-  ) => {
-    const prefersReducedMotion = useReducedMotion();
-
+const DockButton = React.forwardRef<HTMLButtonElement, DockItem>(
+  ({ ariaLabel, ariaPressed, buttonClassName, icon: Icon, iconClassName, isActive, label, onClick }, ref) => {
     return (
-      <motion.button
+      <button
         ref={ref}
-        whileHover={prefersReducedMotion ? undefined : { y: -1 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.14, ease: "easeOut" }}
+        type="button"
         onClick={onClick}
-        aria-current={isActive ? "page" : undefined}
+        aria-current={isActive && !ariaPressed ? "page" : undefined}
+        aria-pressed={ariaPressed}
         aria-label={ariaLabel ?? label}
-        title={label}
         className={cn(
-          "group relative inline-flex min-w-[4.25rem] snap-center flex-col items-center justify-center gap-1 rounded-[1rem] px-2 py-2 transition-colors hover:bg-secondary",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "flex min-h-14 w-full flex-col items-center justify-center gap-1 rounded-[0.95rem] border px-2 py-2 text-[11px] font-semibold leading-none transition-colors active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-void)]",
+          isActive
+            ? "border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--bg-paper)]"
+            : "border-transparent bg-transparent text-[rgba(245,237,224,0.82)] hover:bg-[rgba(245,237,224,0.06)]",
           buttonClassName
         )}
       >
-        <Icon className={cn("h-5 w-5 text-foreground", iconClassName)} />
-        <span className="pointer-events-none max-w-full truncate px-1 text-center font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-[0.08em] text-current">
+        <Icon className={cn("h-5 w-5 shrink-0", iconClassName)} />
+        <span className="truncate font-[var(--font-mono)] text-[10px] uppercase tracking-[0.06em]">
           {label}
         </span>
-        <span
-          className={cn(
-            "pointer-events-none absolute bottom-1 h-1 rounded-full bg-[var(--neon-green)] transition-[width,opacity,box-shadow] duration-200",
-            isActive ? "w-6 opacity-100 [box-shadow:var(--glow-green-sm)]" : "w-2 opacity-0"
-          )}
-        />
-        <span
-          className={cn(
-            "pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 max-sm:hidden",
-            tooltipClassName
-          )}
-        >
-          {label}
-        </span>
-      </motion.button>
+      </button>
     );
   }
 );
 
-DockIconButton.displayName = "DockIconButton";
+DockButton.displayName = "DockButton";
 
-const Dock = React.forwardRef<HTMLDivElement, DockProps>(
-  ({ className, containerClassName, dockClassName, items }, ref) => {
-    const prefersReducedMotion = useReducedMotion();
-
-    return (
+const Dock = React.forwardRef<HTMLDivElement, DockProps>(({ className, dockClassName, items }, ref) => {
+  return (
+    <div ref={ref} className={cn("w-full", className)}>
       <div
-        ref={ref}
-        className={cn("flex w-full items-center justify-center", className)}
+        className={cn("grid w-full gap-1.5", dockClassName)}
+        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
       >
-        <div
-          className={cn(
-            "relative flex w-full snap-x snap-mandatory items-center justify-center overflow-x-auto scrollbar-none overscroll-x-contain touch-pan-x",
-            containerClassName
-          )}
-        >
-          <motion.div
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 10, scale: 0.98 }}
-            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
-            className={cn(
-              "flex w-max items-center gap-1 rounded-2xl border bg-background/94 p-2 shadow-md backdrop-blur-md transition-shadow duration-200 hover:shadow-lg",
-              "border-border",
-              dockClassName
-            )}
-          >
-            {items.map((item) => (
-              <DockIconButton key={item.label} {...item} />
-            ))}
-          </motion.div>
-        </div>
+        {items.map((item) => (
+          <DockButton key={item.label} {...item} />
+        ))}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 Dock.displayName = "Dock";
 
