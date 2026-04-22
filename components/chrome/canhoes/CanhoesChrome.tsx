@@ -187,7 +187,7 @@ export function CanhoesChrome({
           <motion.div
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
             animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             className="page-hero canhoes-bits-panel canhoes-bits-panel--shell surface-panel px-3 py-3 text-[var(--text-primary)] sm:px-4 sm:py-4"
           >
             <CanhoesGlowBackdrop tone={headerTone} />
@@ -289,7 +289,7 @@ export function CanhoesChrome({
               initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16, scale: 0.992 }}
               animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10, scale: 0.995 }}
-              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "mx-auto w-full",
                 isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"

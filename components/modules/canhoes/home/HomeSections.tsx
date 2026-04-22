@@ -214,9 +214,9 @@ const HomeHeroSection = memo(function HomeHeroSection({
         </div>
 
         <div className="space-y-2">
-          <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+          <h2 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
             Resumo da Fase
-          </h1>
+          </h2>
           <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">{phaseSummary}</p>
         </div>
 
