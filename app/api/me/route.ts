@@ -55,10 +55,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     const res = await fetch(new URL("/api/me", backend).toString(), {
       headers: { Authorization: `Bearer ${idToken}` },
       cache: "no-store",
+      signal: controller.signal,
     });
++
++    clearTimeout(timeoutId);
     const responseBody = await res.text();
 
     if (!res.ok) {
@@ -78,11 +84,14 @@ export async function GET(request: NextRequest) {
       headers: { "content-type": res.headers.get("content-type") || "application/json" },
     });
   } catch (error) {
+    const isAbort = error instanceof Error && error.name === "AbortError";
     return createAuthMeErrorResponse(
-      502,
+      isAbort ? 504 : 502,
       {
-        code: "AUTH_BACKEND_UNREACHABLE",
-        message: "The auth profile endpoint could not reach the backend service.",
+        code: isAbort ? "AUTH_BACKEND_TIMEOUT" : "AUTH_BACKEND_UNREACHABLE",
+        message: isAbort
+          ? "The auth profile endpoint timed out while contacting the backend service."
+          : "The auth profile endpoint could not reach the backend service.",
         detail: error instanceof Error ? error.message : String(error),
       },
       traceId

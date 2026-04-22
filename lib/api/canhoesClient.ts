@@ -15,14 +15,14 @@ export const CANHOES_API_URL =
 
 // Retry configuration
 const RETRY_CONFIG = {
-  maxRetries: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 10000,
+  maxRetries: 1,
+  initialDelayMs: 350,
+  maxDelayMs: 1200,
   retryableStatusCodes: [429, 500, 502, 503, 504],
 };
 
-// Request timeout (10 seconds)
-const REQUEST_TIMEOUT_MS = 10_000;
+// Request timeout (snappy by default)
+const REQUEST_TIMEOUT_MS = 6000;
 
 // Track requests per endpoint for rate limiting
 // Use bounded maps with periodic cleanup to prevent memory leaks in long sessions
@@ -98,7 +98,6 @@ function calculateRetryDelay(
   const baseDelay = RETRY_CONFIG.initialDelayMs;
   const maxDelay = RETRY_CONFIG.maxDelayMs;
 
-  // Exponential backoff: base * 2^attempt
   let delay = baseDelay * Math.pow(2, attempt - 1);
 
   // Respect Retry-After header if present
