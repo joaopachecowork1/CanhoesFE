@@ -125,7 +125,10 @@
   --border-subtle: var(--color-border);
   --border-moss: rgba(74, 92, 47, 0.5);
   --border-neon: var(--color-border-strong);
-  --border-paper: rgba(212, 184, 150, 0.5);
+  --border-paper: var(--color-border-paper);
+  --border-paper-soft: var(--color-border-paper-soft);
+  --border-muted: var(--color-border-muted);
+  --border-danger: var(--color-border-danger);
   --border-purple: rgba(177, 140, 255, 0.36);
   --border-default: var(--border-moss);
   --border-beige: var(--border-paper);
@@ -538,15 +541,15 @@ h3,
 .canhoes-paper-panel input,
 .canhoes-paper-panel textarea,
 .canhoes-paper-panel select {
-  border-color: rgba(84, 64, 40, 0.16);
-  background: rgba(255, 255, 255, 0.58);
-  color: #261d14;
+  border-color: var(--border-paper);
+  background: var(--bg-paper-soft);
+  color: var(--ink-primary);
   box-shadow: none;
 }
 
 .canhoes-paper-panel input::placeholder,
 .canhoes-paper-panel textarea::placeholder {
-  color: #7d6752;
+  color: var(--ink-muted);
 }
 
 .canhoes-admin-shell-panel {
@@ -584,7 +587,7 @@ h3,
 .canhoes-admin-shell-panel .body-small,
 .canhoes-admin-shell-panel .canhoes-helper-text,
 .canhoes-admin-shell-panel [data-slot="card-description"] {
-  color: var(--ink-secondary);
+  color: var(--text-secondary);
 }
 
 .canhoes-admin-shell-panel input,
@@ -663,9 +666,9 @@ h3,
   background:
     radial-gradient(circle at top right, rgba(122, 173, 58, 0.07), transparent 32%),
     radial-gradient(circle at bottom left, rgba(107, 76, 42, 0.06), transparent 28%),
-    linear-gradient(180deg, rgba(28, 36, 18, 0.97), rgba(19, 25, 13, 0.99));
+    var(--color-surface-panel-elevated);
   color: var(--text-primary);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-elevation-md), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition:
     transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms ease,
@@ -687,10 +690,10 @@ h3,
 }
 
 .canhoes-paper-card {
-  border: 1px solid rgba(212, 184, 150, 0.14);
+  border: 1px solid var(--border-muted);
   background:
     radial-gradient(circle at top right, rgba(177, 140, 255, 0.1), transparent 36%),
-    linear-gradient(180deg, rgba(18, 24, 11, 0.94), rgba(11, 14, 8, 0.96));
+    var(--color-surface-panel);
   color: var(--bg-paper);
   box-shadow: var(--shadow-panel);
 }
@@ -1107,7 +1110,7 @@ h3,
     overflow: hidden;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg-token);
-    background: linear-gradient(180deg, rgba(22, 28, 16, 0.96), rgba(12, 15, 9, 0.98));
+    background: var(--color-surface-panel);
     box-shadow: var(--shadow-paper);
   }
 
@@ -1139,8 +1142,7 @@ h3,
     overflow: hidden;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md-token);
-    background:
-      linear-gradient(180deg, rgba(30, 38, 20, 0.96), rgba(22, 28, 14, 0.96));
+    background: var(--color-surface-panel-soft);
     box-shadow: var(--shadow-panel);
   }
 
@@ -1229,7 +1231,7 @@ h3,
 
   .reddit-post {
     border: 1px solid var(--border-subtle);
-    background: var(--bg-deep);
+    background: var(--color-surface-panel-soft);
     transition: border-color var(--duration-base) var(--ease-out),
       transform var(--duration-base) var(--ease-out),
       box-shadow var(--duration-base) var(--ease-out);
@@ -1294,7 +1296,7 @@ h3,
   /* Sort dropdown styling */
   .sort-pill {
     border: 1px solid var(--border-subtle);
-    background: var(--bg-deep);
+    background: var(--color-surface-glass);
     transition: border-color var(--duration-base) var(--ease-out),
       background-color var(--duration-base) var(--ease-out),
       transform var(--duration-base) var(--ease-out);
@@ -1328,14 +1330,14 @@ h3,
   .surface-panel {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg-token);
-    background: linear-gradient(180deg, rgba(18, 24, 11, 0.96), rgba(11, 14, 8, 0.98));
+    background: var(--color-surface-panel);
     box-shadow: var(--shadow-paper);
   }
 
   .surface-panel-soft {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md-token);
-    background: var(--bg-deep);
+    background: var(--color-surface-panel-soft);
     box-shadow: none;
   }
 

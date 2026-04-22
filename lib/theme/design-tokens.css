@@ -3,8 +3,19 @@
     --color-bg-surface: #161c0e;
     --color-bg-elevated: #1e2614;
     --color-bg-overlay: rgba(8, 10, 6, 0.72);
+
+    --color-surface-panel: linear-gradient(180deg, rgba(18, 24, 11, 0.96), rgba(11, 14, 8, 0.98));
+    --color-surface-panel-soft: linear-gradient(180deg, rgba(30, 38, 20, 0.96), rgba(22, 28, 14, 0.96));
+    --color-surface-panel-elevated: linear-gradient(180deg, rgba(28, 36, 18, 0.97), rgba(19, 25, 13, 0.99));
+    --color-surface-glass: linear-gradient(180deg, rgba(15, 18, 9, 0.9), rgba(10, 13, 8, 0.96));
+
     --color-border: rgba(74, 92, 47, 0.24);
     --color-border-strong: rgba(0, 255, 136, 0.42);
+    --color-border-muted: rgba(212, 184, 150, 0.12);
+    --color-border-paper: rgba(84, 64, 40, 0.22);
+    --color-border-paper-soft: rgba(84, 64, 40, 0.16);
+    --color-border-danger: rgba(224, 90, 58, 0.18);
+
     --color-text-primary: #f5ecd9;
     --color-text-secondary: #e1d4be;
     --color-text-muted: #c4cfb0;
@@ -13,6 +24,10 @@
     --color-danger: #e05a3a;
     --color-success: #4caf50;
     --color-warning: #ffb800;
+
+    --shadow-elevation-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+    --shadow-elevation-md: 0 8px 20px rgba(0, 0, 0, 0.25);
+    --shadow-elevation-lg: 0 18px 42px rgba(0, 0, 0, 0.26);
 
     --font-display: var(--font-orbitron);
     --font-body: var(--font-dm-sans);
