@@ -64,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="pt" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${orbitron.variable} ${dmSans.variable} ${jetBrainsMono.variable} min-h-screen bg-background text-foreground antialiased`}
+        className={`${orbitron.variable} ${dmSans.variable} ${jetBrainsMono.variable} min-h-screen bg-background text-foreground antialiased [scrollbar-gutter:stable]`}
       >
         <AppProviders>{children}</AppProviders>
       </body>

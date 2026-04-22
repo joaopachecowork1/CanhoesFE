@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { LogOut, Menu } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,17 +15,10 @@ import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
-
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
 import { CanhoesPhaseHud } from "./CanhoesPhaseHud";
 import { useCanhoesShellNavigation } from "./useCanhoesShellNavigation";
-
-const loadCanhoesAmbientBackground = () =>
-  import("./CanhoesAmbientBackground").then((module) => ({
-    default: module.CanhoesAmbientBackground,
-  }));
 
 const loadCanhoesComposeSheet = () =>
   import("./CanhoesComposeSheet").then((module) => ({
@@ -36,11 +29,6 @@ const loadCanhoesFloatingActionMenu = () =>
   import("./CanhoesFloatingActionMenu").then((module) => ({
     default: module.CanhoesFloatingActionMenu,
   }));
-
-const LazyCanhoesAmbientBackground = dynamic(loadCanhoesAmbientBackground, {
-  loading: () => null,
-  ssr: false,
-});
 
 const LazyCanhoesComposeSheet = dynamic(loadCanhoesComposeSheet, {
   loading: () => null,
@@ -73,7 +61,6 @@ export function CanhoesChrome({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasOpenedComposeSheet, setHasOpenedComposeSheet] = useState(false);
   const [hasOpenedMenu, setHasOpenedMenu] = useState(false);
-  const [showAmbientBackground, setShowAmbientBackground] = useState(false);
 
   const handleComposeSheetChange = useCallback((open: boolean) => {
     if (open) {
@@ -128,14 +115,6 @@ export function CanhoesChrome({
     return () => window.clearTimeout(timeoutId);
   }, [canCompose]);
 
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setShowAmbientBackground(true);
-    }, 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
   const {
     bottomLeftEntries,
     bottomRightEntries,
@@ -154,15 +133,6 @@ export function CanhoesChrome({
     router,
     user,
   });
-  const headerTone =
-    pageContext.tone === "social"
-      ? "social"
-      : pageContext.tone === "official"
-        ? "official"
-        : pageContext.tone === "admin"
-          ? "admin"
-          : "shell";
-
   useEffect(() => {
     const eventName = eventOverview.event?.name?.trim();
     document.title = eventName
@@ -175,29 +145,20 @@ export function CanhoesChrome({
       data-theme="canhoes"
       className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
-      {showAmbientBackground ? <LazyCanhoesAmbientBackground /> : null}
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.18),transparent_65%)]"
-      />
-
-      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.12)] bg-[rgba(12,15,9,0.8)] backdrop-blur-[24px]">
-        <div className="page-shell-wide pb-2 pt-2">
+      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.1)] bg-[rgba(12,15,9,0.9)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(12,15,9,0.84)]">
+        <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">
           <motion.div
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
-            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="page-hero canhoes-bits-panel canhoes-bits-panel--shell surface-panel px-3 py-3 text-[var(--text-primary)] sm:px-4 sm:py-4"
+            initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+            animate={prefersReducedMotion ? undefined : { opacity: 1 }}
+            transition={{ duration: 0.14, ease: "easeOut" }}
+            className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[rgba(18,23,12,0.96)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-paper)] sm:px-4 sm:py-4"
           >
-            <CanhoesGlowBackdrop tone={headerTone} />
-
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
                 <CanhoesBrandMark compact subtitle="Premios da edicao" />
 
                 {!isEventHomePath ? (
-                  <div className="surface-panel-soft min-w-0 px-3 py-2">
+                  <div className="min-w-0 space-y-1">
                     <div className="flex min-w-0 items-center gap-2">
                       <Badge
                         variant="outline"
@@ -221,7 +182,7 @@ export function CanhoesChrome({
                     </div>
 
                     {pageContext.description ? (
-                      <p className="mt-1 line-clamp-1 text-xs text-[rgba(245,237,224,0.72)]">
+                      <p className="line-clamp-1 text-xs text-[rgba(245,237,224,0.72)]">
                         {pageContext.description}
                       </p>
                     ) : null}
@@ -259,11 +220,6 @@ export function CanhoesChrome({
               </div>
             </div>
 
-            <CanhoesDecorativeDivider
-              tone={pageContext.tone === "social" ? "purple" : "moss"}
-              className="mt-3"
-            />
-
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5">
                 <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
@@ -283,21 +239,18 @@ export function CanhoesChrome({
 
       <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={pathname}
-              initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16, scale: 0.992 }}
-              animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10, scale: 0.995 }}
-              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              className={cn(
-                "mx-auto w-full",
-                isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"
-              )}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={pathname}
+            initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+            animate={prefersReducedMotion ? undefined : { opacity: 1 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className={cn(
+              "mx-auto w-full",
+              isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"
+            )}
+          >
+            {children}
+          </motion.div>
         </div>
       </main>
 
