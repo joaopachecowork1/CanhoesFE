@@ -249,7 +249,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
 
 const HomeAlertsSection = memo(function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
   return (
-    <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[var(--border-paper)] bg-none bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
+    <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
       {alerts.map((alert) => (
         <div key={alert} className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-3 text-sm text-[var(--ink-primary)]">
           {alert}

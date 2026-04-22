@@ -296,10 +296,10 @@ export const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
 export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(15,24,10,0.9)] px-3 py-3 shadow-[0_10px_24px_rgba(0,0,0,0.12)]";
+  "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]";
 
 const CONTROL_ROW_CLASS =
-  "flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,25,12,0.92)] min-h-11 px-3 py-2 text-[var(--ink-primary)]";
+  "flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2 text-[var(--ink-primary)]";
 
 type ControlBlockProps = {
   action?: ReactNode;
@@ -336,10 +336,10 @@ function FeedbackNotice({ feedback }: Readonly<FeedbackNoticeProps>) {
 
   const toneClass =
     feedback.tone === "error"
-      ? "border-[rgba(224,90,58,0.24)] bg-[rgba(224,90,58,0.06)] text-[var(--danger)]"
+      ? "border-[rgba(224,90,58,0.22)] bg-[rgba(255,243,239,0.96)] text-[var(--ink-primary)]"
       : feedback.tone === "success"
-      ? "border-[rgba(76,175,80,0.28)] bg-[rgba(76,175,80,0.06)] text-[var(--success)]"
-      : "border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] text-[var(--ink-muted)]";
+      ? "border-[rgba(76,175,80,0.2)] bg-[rgba(244,252,245,0.96)] text-[var(--ink-primary)]"
+      : "border-[var(--border-paper)] bg-[var(--bg-paper-soft)] text-[var(--ink-secondary)]";
 
   return (
     <div className={`rounded-[var(--radius-md-token)] border px-3 py-1.5 text-[13px] ${toneClass}`}>
@@ -360,11 +360,11 @@ function ControlBlock({
       <div className="mb-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[var(--ink-primary)]">
-            <span className="text-[var(--moss-glow)]">{icon}</span>
+            <span className="text-[var(--moss)]">{icon}</span>
             <p className="text-[13px] font-semibold">{title}</p>
           </div>
           {subtitle ? (
-            <p className="mt-0.5 text-[11px] text-[var(--ink-muted)]">{subtitle}</p>
+            <p className="mt-0.5 text-[11px] text-[var(--ink-secondary)]">{subtitle}</p>
           ) : null}
         </div>
         {action}
@@ -377,26 +377,26 @@ function ControlBlock({
 
 function VisibilityTile({ checked, id, label, onChange, pending }: Readonly<VisibilityTileProps>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-3 py-2.5 shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-2.5 shadow-none">
       <div className="flex items-start justify-between gap-2">
         <Label htmlFor={id} className="min-w-0 cursor-pointer text-[13px] font-medium text-[var(--ink-primary)]">{label}</Label>
         <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>
 
-      <p className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{pending ? "A guardar" : checked ? "Ativo" : "Oculto"}</p>
+      <p className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-secondary)]">{pending ? "A guardar" : checked ? "Ativo" : "Oculto"}</p>
     </div>
   );
 }
 
 function VisibilityRow({ checked, id, label, onChange, pending }: Readonly<VisibilityRowProps>) {
   return (
-    <div className={cn(CONTROL_ROW_CLASS, checked && "border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)]")}>
+    <div className={cn(CONTROL_ROW_CLASS, checked && "border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.08)]")}>
       <div className="min-w-0">
-        <Label htmlFor={id} className={cn("cursor-pointer text-sm font-medium", checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-muted)]")}>{label}</Label>
+        <Label htmlFor={id} className={cn("cursor-pointer text-sm font-medium", checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-secondary)]")}>{label}</Label>
       </div>
 
       <div className="flex items-center gap-2">
-        {pending ? <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">A guardar</span> : null}
+        {pending ? <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-secondary)]">A guardar</span> : null}
         <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} variant="admin" />
       </div>
     </div>
@@ -405,8 +405,8 @@ function VisibilityRow({ checked, id, label, onChange, pending }: Readonly<Visib
 
 function QuickMetric({ label, value }: Readonly<QuickMetricProps>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-2">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)]">{label}</p>
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-2 shadow-none">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-secondary)]">{label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-[var(--ink-primary)]" title={value}>{value}</p>
     </div>
   );
@@ -478,7 +478,7 @@ function AdminSettingsMainPanel({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
-              <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none">
+              <Badge className="border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] text-[var(--ink-primary)] shadow-none">
                 {visibleCount}/{moduleCount}
               </Badge>
             </div>
