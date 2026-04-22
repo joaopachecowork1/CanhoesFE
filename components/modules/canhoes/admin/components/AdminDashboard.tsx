@@ -77,7 +77,7 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       {!loading && pendingReviews > 0 ? (
-        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.18)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
+        <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.18)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-[var(--danger)]">
               <AlertTriangle className="h-4 w-4" />

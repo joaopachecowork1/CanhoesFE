@@ -12,7 +12,7 @@ import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 
 function AdminStateCard({ action, description, title }: Readonly<{ action?: ReactNode; description: string; title: string }>) {
   return (
-    <section className="canhoes-paper-panel mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
+    <section className="canhoes-paper-panel canhoes-admin-shell-panel mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
         <Shield className="h-7 w-7" />
       </div>

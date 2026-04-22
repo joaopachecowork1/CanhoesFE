@@ -549,6 +549,58 @@ h3,
   color: #7d6752;
 }
 
+.canhoes-admin-shell-panel {
+  border: 1px solid rgba(122, 173, 58, 0.16);
+  background:
+    radial-gradient(circle at top center, rgba(0, 255, 136, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(177, 140, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(22, 28, 17, 0.98) 0%, rgba(13, 17, 10, 0.98) 100%);
+  color: #f4eadb;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+  --bg-paper: rgba(18, 23, 14, 0.96);
+  --bg-paper-alt: rgba(25, 31, 18, 0.96);
+  --bg-paper-soft: rgba(24, 30, 17, 0.98);
+  --bg-paper-olive: rgba(30, 37, 22, 0.96);
+  --text-primary: #f4eadb;
+  --text-dark: #f4eadb;
+  --text-muted: #bcae9b;
+  --text-ghost: #8d9a73;
+  --text-ink: #f4eadb;
+  --ink-primary: #f4eadb;
+  --ink-secondary: #dbc9b2;
+  --ink-muted: #b5a38e;
+  --border-subtle: rgba(122, 173, 58, 0.1);
+  --border-paper: rgba(122, 173, 58, 0.16);
+  --shadow-paper: 0 16px 36px rgba(0, 0, 0, 0.24);
+  --shadow-paper-soft: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+.canhoes-admin-shell-panel .editorial-kicker,
+.canhoes-admin-shell-panel .canhoes-field-label,
+.canhoes-admin-shell-panel .label {
+  color: var(--neon-green);
+}
+
+.canhoes-admin-shell-panel .body-small,
+.canhoes-admin-shell-panel .canhoes-helper-text,
+.canhoes-admin-shell-panel [data-slot="card-description"] {
+  color: var(--ink-secondary);
+}
+
+.canhoes-admin-shell-panel input,
+.canhoes-admin-shell-panel textarea,
+.canhoes-admin-shell-panel select {
+  border-color: rgba(122, 173, 58, 0.14);
+  background: rgba(16, 20, 12, 0.96);
+  color: var(--ink-primary);
+  box-shadow: none;
+}
+
+.canhoes-admin-shell-panel input::placeholder,
+.canhoes-admin-shell-panel textarea::placeholder {
+  color: rgba(220, 209, 190, 0.56);
+}
+
 .canhoes-admin-outline-button {
   border-color: rgba(84, 64, 40, 0.18);
   background: var(--bg-paper);

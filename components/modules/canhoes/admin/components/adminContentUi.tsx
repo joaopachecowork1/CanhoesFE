@@ -12,13 +12,13 @@ import {
 import { cn } from "@/lib/utils";
 
 export const ADMIN_CONTENT_CARD_CLASS =
-  "canhoes-paper-panel border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)]";
+  "canhoes-paper-panel canhoes-admin-shell-panel border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)]";
 
 export const ADMIN_CONTENT_DETAIL_PANEL_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-3 shadow-none";
+  "canhoes-admin-shell-panel rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-3 shadow-none";
 
 const ADMIN_CONTENT_LIST_PANEL_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] p-2 shadow-none";
+  "canhoes-admin-shell-panel rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] p-2 shadow-none";
 
 const ADMIN_CONTENT_LIST_BODY_CLASS = "max-h-[58svh] space-y-1 overflow-y-auto pr-1";
 
@@ -32,7 +32,7 @@ const ADMIN_CONTENT_ROW_IDLE_CLASS =
   "border-[var(--border-paper)] bg-[var(--bg-paper)] hover:bg-[var(--bg-paper-soft)]";
 
 const ADMIN_CONTENT_SHEET_CLASS =
-  "canhoes-paper-panel w-full border border-[var(--border-paper)] bg-[var(--bg-paper)] sm:max-w-xl";
+  "canhoes-paper-panel canhoes-admin-shell-panel w-full border border-[var(--border-paper)] bg-[var(--bg-paper)] sm:max-w-xl";
 const ADMIN_CONTENT_SHEET_HEADER_CLASS =
   "border-b border-[var(--border-paper)] pb-4";
 const ADMIN_CONTENT_SHEET_BODY_CLASS = "flex-1 space-y-4 overflow-y-auto px-4 pb-6";

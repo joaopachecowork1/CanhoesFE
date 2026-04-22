@@ -80,7 +80,7 @@ export function AdminMembersSection({
         state={secretSantaQuery.data ?? null}
       />
 
-      <Card className="canhoes-paper-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
+      <Card className="canhoes-paper-panel canhoes-admin-shell-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
         <CardHeader className="space-y-1">
           <p className="editorial-kicker">Roster</p>
           <CardTitle>{members.length} {members.length === 1 ? "membro" : "membros"}</CardTitle>

@@ -81,7 +81,7 @@ export function SecretSantaAdmin({
 
   return (
     <div className="space-y-4">
-      <Card className="canhoes-paper-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
+      <Card className="canhoes-paper-panel canhoes-admin-shell-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-2 text-[var(--neon-green)]">
             <Gift className="h-4 w-4" />

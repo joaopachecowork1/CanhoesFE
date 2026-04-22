@@ -20,7 +20,7 @@ export function AdminContentTabs({
   onSelect,
 }: Readonly<AdminContentTabsProps>) {
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-2 py-2 shadow-[var(--shadow-paper)]">
+    <div className="canhoes-admin-shell-panel overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-2 py-2 shadow-[var(--shadow-paper)]">
       <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory">
         <div className="flex min-w-max gap-1.5">
           {items.map((item) => {

@@ -11,9 +11,9 @@ type AdminStateMessageProps = {
 
 const VARIANT_CLASSES: Record<NonNullable<AdminStateMessageProps["variant"]>, string> = {
   page:
-    "flex min-h-[50vh] items-center justify-center rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-5 py-7 text-center text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
+    "canhoes-admin-shell-panel flex min-h-[50vh] items-center justify-center rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-5 py-7 text-center text-[var(--ink-primary)] shadow-[var(--shadow-paper)]",
   panel:
-    "flex items-center justify-center rounded-[var(--radius-md-token)] border border-dashed border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-6 text-center body-small text-[var(--ink-primary)] shadow-none",
+    "canhoes-admin-shell-panel flex items-center justify-center rounded-[var(--radius-md-token)] border border-dashed border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-6 text-center body-small text-[var(--ink-primary)] shadow-none",
   card: "flex items-center justify-center text-center text-[var(--ink-primary)]",
 };
 
