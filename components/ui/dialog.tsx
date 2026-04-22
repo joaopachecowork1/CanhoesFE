@@ -38,7 +38,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[radial-gradient(ellipse_at_center,rgba(36,25,20,0.68),rgba(10,14,8,0.96))] backdrop-blur-sm transition-all duration-500 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:opacity-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto data-[state=closed]:pointer-events-none data-[state=open]:before:absolute data-[state=open]:before:inset-0 data-[state=open]:before:bg-[radial-gradient(ellipse_at_center,rgba(177,140,255,0.06)_30%,transparent_60%)] data-[state=open]:before:transition-opacity data-[state=open]:before:duration-700 data-[state=open]:before:animate-in data-[state=closed]:before:animate-out data-[state=closed]:before:fade-out-0 data-[state=closed]:before:opacity-0 before:content-[''] data-[state=open]:before:opacity-100",
+        "fixed inset-0 z-50 bg-[rgba(10,14,8,0.76)] backdrop-blur-sm transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:opacity-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto data-[state=closed]:pointer-events-none",
         className
       )}
       style={{ willChange: "opacity" }}
@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.16)] bg-[linear-gradient(180deg,rgba(18,24,11,0.96),rgba(11,14,8,0.98))] p-6 text-[var(--bg-paper)] shadow-[0_20px_60px_rgba(0,0,0,0.48),var(--shadow-panel)] outline-none transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-4 sm:max-w-lg",
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--radius-xl-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] p-6 text-[var(--ink-primary)] shadow-[var(--shadow-modal)] outline-none transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-4 sm:max-w-lg",
           className
         )}
         {...props}
@@ -70,7 +70,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[rgba(212,184,150,0.16)] bg-[rgba(12,16,8,0.9)] p-2 text-[var(--bg-paper)] opacity-70 transition-all duration-200 hover:bg-[rgba(30,22,12,0.96)] hover:scale-105 hover:border-[rgba(177,140,255,0.24)] hover:shadow-[0_0_20px_rgba(177,140,255,0.18)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-purple)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] p-2 text-[var(--ink-primary)] opacity-80 transition-all duration-200 hover:bg-[var(--bg-paper)] hover:border-[var(--border-moss)] focus:outline-none focus:ring-2 focus:ring-[var(--moss)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
             style={{ willChange: "transform,opacity" }}
           >
             <XIcon />
@@ -112,7 +112,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("heading-3 text-[var(--bg-paper)]", className)}
+      className={cn("heading-3 text-[var(--ink-primary)]", className)}
       {...props}
     />
   )
@@ -125,7 +125,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("body-small text-[rgba(245,237,224,0.72)]", className)}
+      className={cn("body-small text-[var(--ink-secondary)]", className)}
       {...props}
     />
   )

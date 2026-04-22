@@ -1328,16 +1328,16 @@ h3,
   }
 
   .surface-panel {
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-paper);
     border-radius: var(--radius-lg-token);
-    background: var(--color-surface-panel);
+    background: var(--color-surface-paper);
     box-shadow: var(--shadow-paper);
   }
 
   .surface-panel-soft {
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-paper-soft);
     border-radius: var(--radius-md-token);
-    background: var(--color-surface-panel-soft);
+    background: var(--bg-paper-soft);
     box-shadow: none;
   }
 

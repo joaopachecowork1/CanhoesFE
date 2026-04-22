@@ -8,9 +8,9 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "surface-panel-soft bg-[var(--bg-deep)]",
+        default: "surface-panel-soft bg-[var(--bg-paper-soft)] text-[var(--ink-primary)]",
         destructive:
-          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+          "border-[rgba(224,90,58,0.22)] bg-[rgba(224,90,58,0.08)] text-[var(--color-danger)] [&>svg]:text-current *:data-[slot=alert-description]:text-[rgba(163,66,43,0.9)]",
       },
     },
     defaultVariants: {
@@ -55,7 +55,7 @@ function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+        "col-start-2 grid justify-items-start gap-1 text-sm text-[var(--ink-secondary)] [&_p]:leading-relaxed",
         className
       )}
       {...props}

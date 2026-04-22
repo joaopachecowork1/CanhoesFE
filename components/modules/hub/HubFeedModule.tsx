@@ -13,7 +13,7 @@ import { feedCopy } from "@/lib/canhoesCopy";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { SectionBoundary } from "@/components/ui/section-boundary";
-import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
+import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { HubFeedList } from "./HubFeedList";
 import { useCreateFeedPost } from "./useCreateFeedPost";
@@ -179,8 +179,7 @@ function useHubFeedModuleState() {
 
 function ComposerFallback() {
   return (
-    <div className="canhoes-bits-panel canhoes-bits-panel--social editorial-shell space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
-      <CanhoesGlowBackdrop tone="social" />
+    <div className="canhoes-paper-panel space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
       <div className="space-y-2">
         <div className="skeleton-shimmer h-3 w-24 rounded" />
         <div className="skeleton-shimmer h-8 w-48 rounded" />
@@ -201,9 +200,8 @@ function FeedInsightsFallback() {
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="canhoes-bits-panel canhoes-bits-panel--social rounded-[var(--radius-lg-token)] border px-4 py-4 shadow-[var(--shadow-panel)] sm:px-5"
+          className="canhoes-paper-panel rounded-[var(--radius-lg-token)] border px-4 py-4 shadow-[var(--shadow-paper)] sm:px-5"
         >
-          <CanhoesGlowBackdrop tone="social" />
           <div className="flex items-center justify-between gap-3">
             <div className="space-y-2">
               <div className="skeleton-shimmer h-3 w-20 rounded" />

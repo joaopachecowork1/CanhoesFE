@@ -4,30 +4,41 @@
     --color-bg-elevated: #1e2614;
     --color-bg-overlay: rgba(8, 10, 6, 0.72);
 
-    --color-surface-panel: linear-gradient(180deg, rgba(18, 24, 11, 0.96), rgba(11, 14, 8, 0.98));
-    --color-surface-panel-soft: linear-gradient(180deg, rgba(30, 38, 20, 0.96), rgba(22, 28, 14, 0.96));
-    --color-surface-panel-elevated: linear-gradient(180deg, rgba(28, 36, 18, 0.97), rgba(19, 25, 13, 0.99));
-    --color-surface-glass: linear-gradient(180deg, rgba(15, 18, 9, 0.9), rgba(10, 13, 8, 0.96));
+    --color-shell-base: #0c1108;
+    --color-shell-elevated: #12180c;
+    --color-shell-strong: #192112;
+    --color-paper: #efe1c7;
+    --color-paper-soft: #f5ead8;
+    --color-paper-muted: #e3d2b4;
+    --color-ink-primary: #2a1e15;
+    --color-ink-secondary: #584431;
+    --color-ink-muted: #7a644f;
 
-    --color-border: rgba(74, 92, 47, 0.24);
-    --color-border-strong: rgba(0, 255, 136, 0.42);
-    --color-border-muted: rgba(212, 184, 150, 0.12);
-    --color-border-paper: rgba(84, 64, 40, 0.22);
-    --color-border-paper-soft: rgba(84, 64, 40, 0.16);
+    --color-surface-panel: linear-gradient(180deg, rgba(21, 28, 14, 0.98), rgba(12, 16, 9, 0.99));
+    --color-surface-panel-soft: linear-gradient(180deg, rgba(29, 37, 20, 0.96), rgba(20, 26, 13, 0.97));
+    --color-surface-panel-elevated: linear-gradient(180deg, rgba(34, 44, 23, 0.97), rgba(22, 29, 14, 0.99));
+    --color-surface-glass: linear-gradient(180deg, rgba(20, 27, 13, 0.92), rgba(12, 17, 9, 0.96));
+    --color-surface-paper: linear-gradient(180deg, rgba(244, 234, 216, 0.98), rgba(233, 219, 196, 0.98));
+
+    --color-border: rgba(109, 127, 70, 0.24);
+    --color-border-strong: rgba(111, 148, 74, 0.42);
+    --color-border-muted: rgba(212, 184, 150, 0.14);
+    --color-border-paper: rgba(107, 81, 53, 0.24);
+    --color-border-paper-soft: rgba(107, 81, 53, 0.14);
     --color-border-danger: rgba(224, 90, 58, 0.18);
 
-    --color-text-primary: #f5ecd9;
-    --color-text-secondary: #e1d4be;
-    --color-text-muted: #c4cfb0;
-    --color-accent: #526635;
-    --color-accent-hover: #677f46;
+    --color-text-primary: #f3ead8;
+    --color-text-secondary: #e2d4ba;
+    --color-text-muted: #bcc5a8;
+    --color-accent: #5f7b38;
+    --color-accent-hover: #739247;
     --color-danger: #e05a3a;
     --color-success: #4caf50;
     --color-warning: #ffb800;
 
-    --shadow-elevation-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
-    --shadow-elevation-md: 0 8px 20px rgba(0, 0, 0, 0.25);
-    --shadow-elevation-lg: 0 18px 42px rgba(0, 0, 0, 0.26);
+    --shadow-elevation-sm: 0 6px 14px rgba(0, 0, 0, 0.16);
+    --shadow-elevation-md: 0 10px 24px rgba(0, 0, 0, 0.18);
+    --shadow-elevation-lg: 0 18px 40px rgba(0, 0, 0, 0.22);
 
     --font-display: var(--font-orbitron);
     --font-body: var(--font-dm-sans);

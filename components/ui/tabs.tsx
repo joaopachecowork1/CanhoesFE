@@ -26,7 +26,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "flex w-full items-center justify-start gap-2 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[linear-gradient(180deg,rgba(15,18,9,0.9),rgba(10,13,8,0.96))] p-2 text-[var(--text-muted)] overflow-x-auto scrollbar-hide whitespace-nowrap shadow-[var(--shadow-panel)]",
+  "flex w-full items-center justify-start gap-1.5 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(16,21,11,0.92)] p-1.5 text-[var(--text-muted)] overflow-x-auto scrollbar-hide whitespace-nowrap shadow-[var(--shadow-elevation-sm)]",
   {
     variants: {
       variant: {
@@ -64,9 +64,9 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md-token)] border border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-purple)] disabled:pointer-events-none disabled:opacity-50 flex-shrink-0 font-[var(--font-mono)] uppercase tracking-[0.12em]",
-        "data-[state=active]:border-[var(--border-purple)] data-[state=active]:bg-[linear-gradient(180deg,rgba(245,237,224,0.16),rgba(177,140,255,0.1))] data-[state=active]:text-[var(--bg-paper)] data-[state=active]:shadow-[var(--glow-purple-sm)]",
-        "hover:border-[rgba(212,184,150,0.18)] hover:bg-[rgba(245,237,224,0.08)] hover:text-[var(--bg-paper)]",
+        "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md-token)] border border-transparent px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--moss)] disabled:pointer-events-none disabled:opacity-50 flex-shrink-0 font-[var(--font-mono)] uppercase tracking-[0.1em]",
+        "data-[state=active]:border-[rgba(95,123,56,0.26)] data-[state=active]:bg-[rgba(95,123,56,0.14)] data-[state=active]:text-[var(--bg-paper)] data-[state=active]:shadow-none",
+        "hover:border-[rgba(212,184,150,0.16)] hover:bg-[rgba(244,234,216,0.08)] hover:text-[var(--bg-paper)]",
         className
       )}
       {...props}

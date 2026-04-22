@@ -34,7 +34,7 @@ export function CompactSegmentTabs({
                 "canhoes-tap inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors duration-150",
                 isActive
                   ? "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]"
-                  : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.88)] text-[rgba(245,237,224,0.88)] hover:bg-[rgba(24,31,17,0.96)] active:bg-[rgba(24,31,17,0.96)]"
+                  : "border-[rgba(212,184,150,0.12)] bg-[rgba(14,19,10,0.92)] text-[rgba(243,234,216,0.82)] hover:bg-[rgba(20,26,13,0.96)] active:bg-[rgba(20,26,13,0.96)]"
               )}
               aria-pressed={isActive}
             >
@@ -43,8 +43,8 @@ export function CompactSegmentTabs({
                 <span className={cn(
                   "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-150",
                   isActive
-                    ? "bg-[rgba(74,92,47,0.12)] text-[var(--ink-secondary)]"
-                    : "border border-[rgba(122,173,58,0.3)] bg-[rgba(122,173,58,0.12)] text-[var(--color-moss-light)]"
+                    ? "bg-[rgba(95,123,56,0.12)] text-[var(--ink-secondary)]"
+                    : "border border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.12)] text-[var(--bg-paper)]"
                 )}>
                   {item.badge}
                 </span>

@@ -21,9 +21,9 @@ import { ChecklistItem, MetricCard } from "./HomeCards";
 import { FeedPostCard, SecretSantaStateCard } from "./HomeFeedCard";
 
 const HERO_CARD_CLASS =
-  "rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.16),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.14),transparent_34%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-md)]";
 const PANEL_CARD_CLASS =
-  "rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]";
+  "rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]";
 
 type HomeAction = CanhoesEventHomeViewModel["homeCopy"]["primaryAction"];
 type RecentPost = CanhoesEventHomeViewModel["recentPosts"][number];
@@ -188,14 +188,14 @@ const HomeHeroSection = memo(function HomeHeroSection({
   phaseSummary: string;
 }>) {
   return (
-    <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top_right,rgba(122,173,58,0.16),transparent_36%),linear-gradient(180deg,rgba(25,33,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+    <section className="editorial-shell overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.14),transparent_34%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,0.99))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-md)]">
       <div className="space-y-4 px-4 py-5 sm:px-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.88)]">
               {event.name}
             </p>
-            <h1 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+            <h1 className="heading-1 text-[var(--bg-paper)]">
               {homeCopyText.heroTitle}
             </h1>
           </div>
@@ -203,18 +203,18 @@ const HomeHeroSection = memo(function HomeHeroSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="border-[var(--border-neon)]/60 bg-[var(--accent)] text-[var(--neon-green)]">
+          <Badge className="border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.16)] text-[var(--bg-paper)]">
             {phaseLabel}
           </Badge>
           {overview.nextPhase ? (
-            <Badge variant="outline" className="border-[rgba(212,184,150,0.28)] bg-[rgba(212,184,150,0.1)] text-[var(--bg-paper)]">
+            <Badge variant="outline" className="border-[rgba(118,98,166,0.24)] bg-[rgba(118,98,166,0.08)] text-[var(--bg-paper)]">
               Proxima: {getPhaseLabel(overview.nextPhase.type)}
             </Badge>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <h2 className="heading-1 text-[var(--bg-paper)] [text-shadow:var(--glow-green-sm)]">
+          <h2 className="heading-1 text-[var(--bg-paper)]">
             Resumo da Fase
           </h2>
           <p className="body-base max-w-3xl text-[rgba(245,237,224,0.92)]">{phaseSummary}</p>
@@ -234,11 +234,11 @@ const HomeHeroSection = memo(function HomeHeroSection({
 
         <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(212,184,150,0.12)] pt-4 text-sm text-[rgba(245,237,224,0.9)]">
           <span className="inline-flex items-center gap-2">
-            <Clock3 className="h-4 w-4 text-[var(--accent-purple-soft)]" />
+            <Clock3 className="h-4 w-4 text-[var(--sand)]" />
             {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho definida"}
           </span>
           <span className="inline-flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-[var(--neon-green)]" />
+            <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
             {overview.permissions.canManage ? homeCopyText.manageLabel : homeCopyText.memberLabel}
           </span>
         </div>
@@ -351,7 +351,7 @@ const HomePanel = memo(function HomePanel({
   return (
     <Card className={cn(PANEL_CARD_CLASS, cardClassName)}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-[var(--bg-paper)]">
+        <CardTitle className="flex items-center gap-2 text-[var(--ink-primary)]">
           <Icon className="h-4 w-4 text-[var(--moss)]" />
           {title}
         </CardTitle>
