@@ -148,9 +148,8 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
   const headers = buildBackendHeaders(request, idToken);
   const body = hasRequestBody(method) ? await request.arrayBuffer() : undefined;
 
-  // 15s timeout for backend requests
   const controller = new AbortController();
-  const timerId = setTimeout(() => controller.abort(), 15_000);
+  const timerId = setTimeout(() => controller.abort(), 6_000);
 
   try {
     const response = await fetch(backendUrl, {

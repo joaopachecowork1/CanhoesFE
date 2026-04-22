@@ -85,10 +85,11 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const backendUserQuery = useQuery<AuthUser | null>({
     queryKey: ["auth", "me", session?.idToken],
     enabled: isLoggedIn && !isDevAuthBypass,
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
     retry: false,
+    refetchOnReconnect: false,
     queryFn: async ({ signal }) => {
       const response = await fetch("/api/me", { signal });
       if (!response.ok) {
