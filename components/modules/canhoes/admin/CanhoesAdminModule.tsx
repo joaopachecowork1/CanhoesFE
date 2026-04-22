@@ -228,16 +228,14 @@ const AdminMobileSummary = memo(function AdminMobileSummary({
 
     return (
         <div className="sm:hidden space-y-2">
-            <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-paper)] px-3 py-3">
+            <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]">
                 <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                         <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">Pendentes</p>
                         <p className="mt-0.5 text-2xl font-extrabold text-[var(--ink-primary)] tabular-nums">{pendingTotal}</p>
-                    </div>
-                    <div className="text-right text-[0.6rem] leading-4 text-[var(--ink-muted)]">
-                        <p>{pendingNominationCount} nomeações</p>
-                        <p>{summary.pendingCategoryProposalCount} categorias</p>
-                        <p>{summary.pendingMeasureProposalCount} medidas</p>
+                        <p className="mt-1 text-[0.68rem] leading-4 text-[var(--ink-secondary)]">
+                            {pendingNominationCount} nomeações, {summary.pendingCategoryProposalCount} categorias, {summary.pendingMeasureProposalCount} medidas.
+                        </p>
                     </div>
                 </div>
             </div>

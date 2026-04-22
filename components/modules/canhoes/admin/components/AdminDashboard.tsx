@@ -77,7 +77,7 @@ export function AdminDashboard({
   return (
     <div className="space-y-4">
       {!loading && pendingReviews > 0 ? (
-        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.24)] bg-[rgba(34,18,14,0.95)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
+        <section className="rounded-[var(--radius-lg-token)] border border-[rgba(224,90,58,0.18)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-[var(--danger)]">
               <AlertTriangle className="h-4 w-4" />
@@ -115,17 +115,17 @@ export function AdminDashboard({
           {recentNominees.map((nominee: AdminNomineeDto) => (
             <article
               key={nominee.id}
-              className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(22,28,15,0.92)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]"
+              className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-4 text-[var(--ink-primary)] shadow-none"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
                   <p className="truncate font-semibold text-[var(--ink-primary)]">
                     {nominee.title}
                   </p>
-                  <p className="truncate text-xs text-[var(--ink-muted)]">
+                  <p className="truncate text-xs text-[var(--ink-secondary)]">
                     Submetida por {nominee.submittedByName}
                   </p>
-                  <p className="text-xs text-[var(--ink-muted)]">
+                  <p className="text-xs text-[var(--ink-secondary)]">
                     {new Date(nominee.createdAtUtc).toLocaleString("pt-PT", {
                       day: "numeric",
                       hour: "2-digit",

@@ -245,8 +245,7 @@
   body {
     min-height: 100svh;
     background:
-      radial-gradient(circle at top center, rgba(0, 255, 136, 0.1), transparent 22rem),
-      radial-gradient(circle at bottom right, rgba(177, 140, 255, 0.06), transparent 18rem),
+      radial-gradient(circle at top center, rgba(0, 255, 136, 0.06), transparent 18rem),
       linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-void) 100%);
     color: var(--text-primary);
     font-family: var(--font-body);
@@ -263,12 +262,12 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.15) 2px,
-      rgba(0, 0, 0, 0.15) 4px
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
     );
     pointer-events: none;
     z-index: 9999;
-    opacity: 0.012;
+    opacity: 0.006;
   }
 
   /* Tipografia */
@@ -743,20 +742,16 @@ h3,
 }
 
 .canhoes-bits-panel--shell {
-  border-color: rgba(212, 184, 150, 0.14);
-  background:
-    radial-gradient(circle at top right, rgba(0, 255, 136, 0.16), transparent 30%),
-    radial-gradient(circle at left bottom, rgba(177, 140, 255, 0.14), transparent 28%),
-    linear-gradient(180deg, rgba(28, 35, 18, 0.98), rgba(14, 18, 9, 0.98));
-  box-shadow: var(--shadow-panel);
+  border-color: rgba(212, 184, 150, 0.1);
+  background: linear-gradient(180deg, rgba(22, 28, 16, 0.98), rgba(13, 16, 10, 0.98));
+  box-shadow: var(--shadow-paper);
 }
 
 .canhoes-bits-panel--shell::before {
   background: linear-gradient(
     90deg,
-    rgba(0, 255, 136, 0.7),
-    rgba(177, 140, 255, 0.55),
-    rgba(255, 184, 0, 0.5),
+    rgba(0, 255, 136, 0.42),
+    rgba(177, 140, 255, 0.22),
     transparent
   );
 }
@@ -1044,7 +1039,7 @@ h3,
     width: 100%;
     max-width: var(--page-max-width);
     padding-inline: 1rem;
-    padding-block: 1rem 1.25rem;
+    padding-block: 0.875rem 1rem;
   }
 
   .page-shell-wide {
@@ -1052,38 +1047,17 @@ h3,
     width: 100%;
     max-width: calc(var(--page-max-width) + 10rem);
     padding-inline: 1rem;
-    padding-block: 1rem 1.25rem;
+    padding-block: 0.875rem 1rem;
   }
 
-.page-hero {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg-token);
-  background:
-    radial-gradient(circle at top right, rgba(0, 255, 136, 0.16), transparent 28%),
-    radial-gradient(circle at left bottom, rgba(255, 184, 0, 0.08), transparent 24%),
-    linear-gradient(180deg, rgba(30, 38, 20, 0.98), rgba(13, 16, 9, 0.98));
-  box-shadow: var(--shadow-panel);
-}
-
-.page-hero::after {
-  content: "";
-  position: absolute;
-  inset: auto 1.25rem 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.18), rgba(255, 184, 0, 0.16), transparent);
-}
-
-.page-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 26%),
-    radial-gradient(circle at 18% 120%, rgba(177, 140, 255, 0.08), transparent 28%);
-}
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg-token);
+    background: linear-gradient(180deg, rgba(22, 28, 16, 0.96), rgba(12, 15, 9, 0.98));
+    box-shadow: var(--shadow-paper);
+  }
 
   .canhoes-section-title {
     font-family: var(--font-display);
@@ -1302,20 +1276,20 @@ h3,
   .surface-panel {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg-token);
-    background: linear-gradient(180deg, rgba(18, 24, 11, 0.94), rgba(11, 14, 8, 0.96));
-    box-shadow: var(--shadow-panel);
+    background: linear-gradient(180deg, rgba(18, 24, 11, 0.96), rgba(11, 14, 8, 0.98));
+    box-shadow: var(--shadow-paper);
   }
 
   .surface-panel-soft {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md-token);
     background: var(--bg-deep);
-    box-shadow: var(--shadow-card);
+    box-shadow: none;
   }
 
   .motion-safe-smooth {
     transition-property: transform, opacity, box-shadow, border-color, background-color;
-    transition-duration: var(--duration-base);
+    transition-duration: 160ms;
     transition-timing-function: var(--ease-out);
   }
 }

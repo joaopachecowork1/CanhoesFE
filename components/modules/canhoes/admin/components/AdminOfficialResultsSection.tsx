@@ -77,7 +77,7 @@ function ResultsCategoryButton({
   return (
     <AdminSelectableButton type="button" onClick={() => onSelect(category.categoryId)} selected={isSelected} aria-pressed={isSelected}>
       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{category.categoryName}</p>
-      <p className="mt-1 text-xs text-[var(--ink-muted)]">{category.totalVotes}/{totalMembers} votaram ({participationRate}%)</p>
+      <p className="mt-1 text-xs text-[var(--ink-secondary)]">{category.totalVotes}/{totalMembers} votaram ({participationRate}%)</p>
     </AdminSelectableButton>
   );
 }
@@ -109,7 +109,7 @@ function ResultsNomineeBar({
           {Icon ? <Icon className={cn("h-4 w-4 shrink-0", iconClassName)} /> : null}
           <p className="truncate text-sm text-[var(--ink-primary)]">{nominee.title}</p>
         </div>
-        <span className="text-xs text-[var(--ink-muted)]">{nominee.voteCount} votos ({percentage}%)</span>
+        <span className="text-xs text-[var(--ink-secondary)]">{nominee.voteCount} votos ({percentage}%)</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-paper-soft)]">
         <div className={cn("h-full", fillClass)} style={{ width: `${percentage}%` }} />
@@ -131,19 +131,19 @@ function ResultsVotersList({
         className="max-h-[34svh]"
         getKey={(nominee) => nominee.nomineeId}
         renderItem={(nominee) => (
-          <p className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
+          <p className="text-xs text-[var(--ink-secondary)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
         )}
       />
     ) : (
       <div className="space-y-1">
         {nominees.map((nominee) => (
-          <p key={nominee.nomineeId} className="text-xs text-[var(--ink-muted)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
+          <p key={nominee.nomineeId} className="text-xs text-[var(--ink-secondary)]"><span className="text-[var(--ink-primary)]">{nominee.title}</span>: {nominee.voterUserIds.join(", ") || "Sem votos"}</p>
         ))}
       </div>
     );
 
   return (
-    <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto animate-in fade-in duration-200">
+    <AdminDetailPanel className="max-h-[34svh] space-y-1 overflow-y-auto">
       {content}
     </AdminDetailPanel>
   );
@@ -232,7 +232,7 @@ export function AdminOfficialResultsSection({
             <BarChart2 className="h-4 w-4" />
             Resultados oficiais
           </CardTitle>
-          {refreshedAt ? <p className="text-xs text-[var(--ink-muted)]">Atualizado em {refreshedAt}</p> : null}
+          {refreshedAt ? <p className="text-xs text-[var(--ink-secondary)]">Atualizado em {refreshedAt}</p> : null}
         </CardHeader>
       </Card>
 
@@ -243,7 +243,7 @@ export function AdminOfficialResultsSection({
       ) : null}
 
       {resultCategories.length > 0 ? (
-        <AdminListPanel className="border-[rgba(122,173,58,0.12)] bg-[rgba(16,23,11,0.94)]">
+        <AdminListPanel>
           <VirtualizedList
             items={resultCategories}
             getKey={(category) => category.categoryId}
@@ -276,8 +276,8 @@ export function AdminOfficialResultsSection({
       >
         {selectedCategory ? (
           <>
-            <AdminDetailPanel className={cn(getParticipationClass(selectedCategory.participationRate), "bg-[rgba(22,28,15,0.92)]") }>
-              Participacao {Math.round(selectedCategory.participationRate * 100)}%
+            <AdminDetailPanel className={cn(getParticipationClass(selectedCategory.participationRate), "bg-[var(--bg-paper-soft)]") }>
+              Participação {Math.round(selectedCategory.participationRate * 100)}%
             </AdminDetailPanel>
 
             <VirtualizedList

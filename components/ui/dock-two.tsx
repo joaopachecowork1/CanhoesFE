@@ -45,9 +45,9 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileHover={prefersReducedMotion ? undefined : { scale: 1.03, y: -2 }}
-        whileTap={{ scale: 0.97, y: 1 }}
-        transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.65 }}
+        whileHover={prefersReducedMotion ? undefined : { y: -1 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.14, ease: "easeOut" }}
         onClick={onClick}
         aria-current={isActive ? "page" : undefined}
         aria-label={ariaLabel ?? label}
@@ -103,7 +103,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
             animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.24, ease: "easeOut" }}
             className={cn(
-              "flex w-max items-center gap-1 rounded-2xl border bg-background/90 p-2 shadow-lg backdrop-blur-lg transition-shadow duration-300 hover:shadow-xl",
+              "flex w-max items-center gap-1 rounded-2xl border bg-background/94 p-2 shadow-md backdrop-blur-md transition-shadow duration-200 hover:shadow-lg",
               "border-border",
               dockClassName
             )}

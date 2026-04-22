@@ -41,20 +41,20 @@ export function AdminOverviewSection({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(18,26,13,0.98)] px-4 py-4 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)] sm:px-5">
+      <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
-              <p className="editorial-kicker text-[var(--moss-glow)]">Admin</p>
+              <p className="editorial-kicker text-[var(--moss)]">Admin</p>
               <h2 className="text-base font-semibold text-[var(--ink-primary)]">
                 Painel operacional da edição
               </h2>
-              <p className="text-sm leading-6 text-[var(--ink-muted)]">
+              <p className="text-sm leading-6 text-[var(--ink-secondary)]">
                 Leitura rápida do evento, da fila e dos sinais principais, sem misturar controlo com conteúdo.
               </p>
             </div>
 
-            <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none sm:self-start">
+            <Badge className="border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] text-[var(--ink-primary)] shadow-none sm:self-start">
               {visibleModuleCount} módulos ativos
             </Badge>
           </div>
@@ -117,13 +117,13 @@ function OverviewMetric({
   value: string;
 }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,26,13,0.96)] px-3 py-3 shadow-[0_8px_18px_rgba(0,0,0,0.1)]">
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-3 shadow-none">
       <div className="flex items-center justify-between gap-3">
         <span
           className={
             tone === "highlight"
-              ? "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-moss)] bg-[rgba(122,173,58,0.16)] text-[var(--ink-primary)]"
-              : "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[rgba(74,92,47,0.12)] text-[var(--ink-primary)]"
+              ? "flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)]"
+              : "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(212,184,150,0.18)] text-[var(--ink-primary)]"
           }
         >
           {icon}
@@ -132,7 +132,7 @@ function OverviewMetric({
           {value}
         </p>
       </div>
-      <p className="mt-2 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">
+      <p className="mt-2 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-secondary)]">
         {label}
       </p>
     </div>

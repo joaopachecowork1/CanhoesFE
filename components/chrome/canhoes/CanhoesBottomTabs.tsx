@@ -33,10 +33,10 @@ export function CanhoesBottomTabs({
   const composeItem = {
     ariaLabel: "Criar post",
     buttonClassName: cn(
-      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-[rgba(212,184,150,0.15)] bg-[var(--bg-deep)] px-2 py-2 text-[var(--bg-paper)] shadow-sm",
-      "hover:border-[rgba(122,173,58,0.3)]",
+      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.94)] px-2 py-2 text-[var(--bg-paper)]",
+      "hover:border-[rgba(122,173,58,0.24)]",
       isComposeOpen &&
-        "border-[rgba(0,255,136,0.25)] bg-[rgba(45,68,29,0.96)] text-[var(--neon-green)]"
+        "border-[rgba(0,255,136,0.22)] bg-[rgba(36,54,24,0.98)] text-[var(--neon-green)]"
     ),
     icon: Plus,
     iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--neon-green)]"),
@@ -65,8 +65,8 @@ export function CanhoesBottomTabs({
           containerClassName="h-auto w-full max-w-none justify-center"
           dockClassName={cn(
             "min-h-[4rem] w-max min-w-fit max-w-full items-center gap-1 rounded-[1.4rem] border px-1 py-1.5",
-            "border-[rgba(122,173,58,0.22)] bg-[rgba(14,24,10,0.98)]",
-            "shadow-[0_16px_32px_rgba(0,0,0,0.34)]"
+            "border-[rgba(122,173,58,0.18)] bg-[rgba(14,24,10,0.96)]",
+            "shadow-[0_12px_24px_rgba(0,0,0,0.26)]"
           )}
         />
       </div>
