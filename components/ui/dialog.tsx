@@ -37,10 +37,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "fixed inset-0 z-50 bg-[rgba(10,14,8,0.76)] backdrop-blur-sm transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:opacity-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto data-[state=closed]:pointer-events-none",
-        className
-      )}
+      className={cn("fixed inset-0 z-50 bg-[rgba(10,14,8,0.76)] backdrop-blur-sm transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:opacity-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:opacity-100 data-[state=open]:pointer-events-auto data-[state=closed]:pointer-events-none", className)}
       style={{ willChange: "opacity" }}
       {...props}
     />
@@ -60,17 +57,14 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--radius-xl-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] p-6 text-[var(--ink-primary)] shadow-[var(--shadow-modal)] outline-none transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-4 sm:max-w-lg",
-          className
-        )}
+        className={cn("surface-dialog fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 p-6 outline-none transition-all duration-300 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-4 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-4 sm:max-w-lg", className)}
         {...props}
       >
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] p-2 text-[var(--ink-primary)] opacity-80 transition-all duration-200 hover:bg-[var(--bg-paper)] hover:border-[var(--border-moss)] focus:outline-none focus:ring-2 focus:ring-[var(--moss)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute right-4 top-4 rounded-[var(--radius-sm-token)] border border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] p-2 text-[var(--ink-primary)] opacity-80 transition-all duration-200 hover:border-[var(--border-moss)] hover:bg-[var(--bg-paper)] focus:outline-none focus:ring-2 focus:ring-[var(--moss)] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
             style={{ willChange: "transform,opacity" }}
           >
             <XIcon />
@@ -83,52 +77,25 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
-      {...props}
-    />
-  )
+  return <div data-slot="dialog-header" className={cn("flex flex-col gap-2 text-center sm:text-left", className)} {...props} />
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <div data-slot="dialog-footer" className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />
 }
 
 function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <DialogPrimitive.Title
-      data-slot="dialog-title"
-      className={cn("heading-3 text-[var(--ink-primary)]", className)}
-      {...props}
-    />
-  )
+  return <DialogPrimitive.Title data-slot="dialog-title" className={cn("heading-3 text-[var(--ink-primary)]", className)} {...props} />
 }
 
 function DialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
-  return (
-    <DialogPrimitive.Description
-      data-slot="dialog-description"
-      className={cn("body-small text-[var(--ink-secondary)]", className)}
-      {...props}
-    />
-  )
+  return <DialogPrimitive.Description data-slot="dialog-description" className={cn("body-small text-[var(--ink-secondary)]", className)} {...props} />
 }
 
 export {
