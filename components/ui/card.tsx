@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "surface-panel text-[var(--color-text-primary)] motion-safe-smooth",
+        "surface-panel text-[var(--ink-primary)] motion-safe-smooth",
         className
       )}
       {...props}
@@ -32,7 +32,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("heading-3 text-[var(--color-text-primary)]", className)}
+      className={cn("heading-3 text-[var(--ink-primary)]", className)}
       {...props}
     />
   );
@@ -42,7 +42,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("body-small text-[var(--color-text-muted)]", className)}
+      className={cn("body-small text-[var(--ink-secondary)]", className)}
       {...props}
     />
   );

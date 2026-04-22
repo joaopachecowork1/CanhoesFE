@@ -10,7 +10,7 @@ import { HUB_REACTIONS, QUICK_REACTIONS } from "@/lib/reactions";
 import { ReactionPicker } from "./ReactionPicker";
 
 const reactionButtonGroupClassName =
-  "flex flex-wrap items-center gap-1.5 [&>button]:h-9 [&>button]:rounded-full [&>button]:border-[var(--border-subtle)] [&>button]:bg-[var(--bg-surface)] [&>button]:px-2.5 [&>button]:text-[var(--text-primary)] [&>button]:shadow-sm [&>button:hover]:bg-[var(--bg-deep)]";
+  "flex flex-wrap items-center gap-1.5 [&>button]:h-8 [&>button]:rounded-full [&>button]:px-2.5 [&>button]:shadow-none";
 
 type HubPostActionsProps = {
   postId: string;
@@ -65,7 +65,7 @@ function HubPostActionsComponent({
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 rounded-full px-3 text-[var(--text-primary)]"
+            className="h-8 rounded-full px-3 text-current"
             onClick={open}
             aria-label="Mais reações"
           >
@@ -79,7 +79,7 @@ function HubPostActionsComponent({
         type="button"
         variant={commentsExpanded ? "secondary" : "outline"}
         size="sm"
-        className="h-9 rounded-full px-3 text-[var(--text-primary)]"
+        className="h-8 rounded-full px-3 text-current"
         onClick={() => onToggleComments(postId)}
       >
         <span className="text-xs font-medium">

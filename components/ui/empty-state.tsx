@@ -32,10 +32,10 @@ export function EmptyState({
         className
       )}
     >
-      <CanhoesGlowBackdrop tone={tone} />
+      {tone === "shell" || tone === "social" ? <CanhoesGlowBackdrop tone={tone} /> : null}
 
       {Icon ? (
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(245,237,224,0.08)] bg-[rgba(245,237,224,0.06)] text-[var(--neon-green)] shadow-[0_0_24px_rgba(0,255,136,0.08)]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] text-[var(--moss)] shadow-none">
           <Icon className="h-6 w-6" />
         </div>
       ) : null}
@@ -44,7 +44,7 @@ export function EmptyState({
         <p
           className={cn(
             "text-sm font-semibold",
-            tone === "admin" ? "text-[var(--ink-primary)]" : "text-[var(--bg-paper)]"
+            tone === "admin" || tone === "official" ? "text-[var(--ink-primary)]" : "text-[var(--bg-paper)]"
           )}
         >
           {title}
@@ -53,7 +53,7 @@ export function EmptyState({
           <p
             className={cn(
               "text-sm",
-              tone === "admin" ? "text-[var(--ink-muted)]" : "text-[var(--text-muted)]"
+              tone === "admin" || tone === "official" ? "text-[var(--ink-muted)]" : "text-[var(--text-muted)]"
             )}
           >
             {description}

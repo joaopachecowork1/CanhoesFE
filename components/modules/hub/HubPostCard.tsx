@@ -143,11 +143,11 @@ function HubPostCardComponent({
 
   return (
     <BlurFade delay={index * 50}>
-      <article className="reddit-post canhoes-bits-panel canhoes-bits-panel--social overflow-hidden rounded-[var(--radius-md-token)]">
-        <CanhoesGlowBackdrop tone="social" />
+      <article className="reddit-post canhoes-paper-panel overflow-hidden rounded-[var(--radius-md-token)] border-[var(--border-paper)] text-[var(--ink-primary)]">
+        <CanhoesGlowBackdrop tone="admin" />
 
         <div className="flex flex-col sm:flex-row">
-          <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-void)] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
+          <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-paper-soft)] bg-[rgba(84,64,40,0.04)] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
             <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5">
               <button
                 type="button"
@@ -155,8 +155,8 @@ function HubPostCardComponent({
                 className={cn(
                   "canhoes-tap rounded p-1 transition-colors",
                   post.likedByMe
-                    ? "text-[var(--neon-green)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--neon-green)]"
+                    ? "text-[var(--moss)]"
+                    : "text-[var(--ink-muted)] hover:text-[var(--moss)]"
                 )}
                 aria-label={post.likedByMe ? "Remover upvote" : "Upvote"}
               >
@@ -167,10 +167,10 @@ function HubPostCardComponent({
                 className={cn(
                   "reddit-score min-w-[2.25rem] text-center font-mono text-xs font-bold tabular-nums sm:min-w-0",
                   post.likedByMe
-                    ? "text-[var(--neon-green)]"
+                    ? "text-[var(--moss)]"
                     : post.downvotedByMe
                       ? "text-[var(--neon-red)]"
-                      : "text-[var(--text-primary)]"
+                      : "text-[var(--ink-primary)]"
                 )}
               >
                 {displayScore}
@@ -183,7 +183,7 @@ function HubPostCardComponent({
                   "canhoes-tap rounded p-1 transition-colors",
                   post.downvotedByMe
                     ? "text-[var(--neon-red)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--neon-red)]"
+                    : "text-[var(--ink-muted)] hover:text-[var(--neon-red)]"
                 )}
                 aria-label={post.downvotedByMe ? "Remover downvote" : "Downvote"}
               >
@@ -193,7 +193,7 @@ function HubPostCardComponent({
 
             <button
               type="button"
-              className="canhoes-tap flex items-center gap-1.5 rounded px-1 py-1 text-[var(--text-muted)] transition-colors hover:text-[var(--moss-glow)] sm:mt-2 sm:flex-col sm:gap-0.5 sm:px-0.5"
+              className="canhoes-tap flex items-center gap-1.5 rounded px-1 py-1 text-[var(--ink-muted)] transition-colors hover:text-[var(--moss)] sm:mt-2 sm:flex-col sm:gap-0.5 sm:px-0.5"
               onClick={() => onToggleComments(post.id)}
               aria-label={`${commentCount} comentários`}
             >
@@ -216,7 +216,7 @@ function HubPostCardComponent({
               {parsedText ? (
                 parsedText.title ? (
                   <div className="space-y-1.5">
-                    <p className="post-title text-[var(--text-primary)]">{parsedText.title}</p>
+                    <p className="post-title text-[var(--ink-primary)]">{parsedText.title}</p>
                     {parsedText.body ? (
                       <p className="post-body whitespace-pre-wrap break-words">
                         {parsedText.body}
@@ -224,7 +224,7 @@ function HubPostCardComponent({
                     ) : null}
                   </div>
                 ) : (
-                  <p className="body-base whitespace-pre-wrap break-words text-[var(--text-primary)] leading-[1.6]">
+                  <p className="body-base whitespace-pre-wrap break-words text-[var(--ink-primary)] leading-[1.6]">
                     {post.text}
                   </p>
                 )

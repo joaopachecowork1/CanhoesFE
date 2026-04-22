@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
       cache: "no-store",
       signal: controller.signal,
     });
-+
-+    clearTimeout(timeoutId);
+
+    clearTimeout(timeoutId);
     const responseBody = await res.text();
 
     if (!res.ok) {

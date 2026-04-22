@@ -135,14 +135,14 @@ export function CanhoesOfficialVotingModule() {
         badgeLabel={`${votedCategories}/${totalCategories}`}
       />
 
-      <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl">
+      <Card className="rounded-2xl border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)]">
         <CardContent className="space-y-3 py-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[var(--text-muted)]">Votaste em {votedCategories} de {totalCategories} categorias oficiais</span>
-            <span className="font-[var(--font-mono)] text-[var(--text-primary)]">{completion}%</span>
+            <span className="text-[var(--ink-secondary)]">Votaste em {votedCategories} de {totalCategories} categorias oficiais</span>
+            <span className="font-[var(--font-mono)] text-[var(--ink-primary)]">{completion}%</span>
           </div>
-          <div className="h-2 rounded-full bg-[var(--moss)]/30 overflow-hidden">
-            <div className="h-full rounded-full bg-[var(--neon-green)] transition-all" style={{ width: `${completion}%` }} />
+          <div className="h-2 overflow-hidden rounded-full bg-[rgba(95,123,56,0.16)]">
+            <div className="h-full rounded-full bg-[var(--moss)] transition-all" style={{ width: `${completion}%` }} />
           </div>
         </CardContent>
       </Card>
@@ -168,8 +168,8 @@ export function CanhoesOfficialVotingModule() {
       ) : null}
 
       {votedCategories === totalCategories && totalCategories > 0 ? (
-        <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)]">
-          <CardContent className="py-6 text-center text-[var(--neon-green)] font-semibold">
+        <Card className="rounded-2xl border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.1)] text-[var(--ink-primary)]">
+          <CardContent className="py-6 text-center font-semibold text-[var(--moss)]">
             Boletim oficial completo
           </CardContent>
         </Card>
@@ -201,20 +201,20 @@ function OfficialVotingCategoryCard({
   }, [category.nominees, category.totalVotes]);
 
   return (
-    <Card className="canhoes-bits-panel canhoes-bits-panel--official relative rounded-2xl">
+    <Card className="relative rounded-2xl border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)]">
       {canVote ? null : (
-        <div className="absolute inset-0 z-10 rounded-2xl bg-black/35 backdrop-blur-[1px] flex items-center justify-center text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-[rgba(42,30,21,0.12)] backdrop-blur-[1px] text-xs uppercase tracking-[0.12em] text-[var(--ink-muted)]">
           Boletim encerrado
         </div>
       )}
 
       <CardHeader className="pb-2">
-        <CardTitle className="text-[var(--text-primary)] flex items-center gap-2">
-          <Flame className="h-4 w-4 text-[var(--neon-amber)]" />
+        <CardTitle className="flex items-center gap-2 text-[var(--ink-primary)]">
+          <Flame className="h-4 w-4 text-[var(--bark)]" />
           {category.title}
         </CardTitle>
         {category.description ? (
-          <p className="text-sm text-[var(--text-muted)]">{category.description}</p>
+          <p className="text-sm text-[var(--ink-secondary)]">{category.description}</p>
         ) : null}
       </CardHeader>
 
@@ -245,18 +245,18 @@ function OfficialVotingCategoryCard({
                   disabled={!canVote || isBusy}
                   onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
                   className={cn(
-                    "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3",
-                    selected && "border-[var(--border-neon)] bg-[rgba(0,255,136,0.06)]"
+                    "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3 border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] shadow-none",
+                    selected && "border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.08)]"
                   )}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.label}</p>
+                    <p className="truncate text-sm font-medium text-[var(--ink-primary)]">{nominee.label}</p>
                     {category.totalVotes && category.totalVotes > 0 ? (
-                      <p className="text-xs text-[var(--text-muted)]">{stats?.count ?? 0} votos ({stats?.pct ?? 0}%)</p>
+                      <p className="text-xs text-[var(--ink-secondary)]">{stats?.count ?? 0} votos ({stats?.pct ?? 0}%)</p>
                     ) : null}
                   </div>
 
-                  <div className="shrink-0 text-[var(--neon-green)]">{statusIcon}</div>
+                  <div className="shrink-0 text-[var(--moss)]">{statusIcon}</div>
                 </button>
               );
             }}

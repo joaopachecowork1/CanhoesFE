@@ -144,13 +144,13 @@ export function CanhoesChrome({
       data-theme="canhoes"
       className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
-      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.1)] bg-[rgba(12,15,9,0.9)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(12,15,9,0.84)]">
+      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
         <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">
           <motion.div
             initial={prefersReducedMotion ? undefined : { opacity: 0 }}
             animate={prefersReducedMotion ? undefined : { opacity: 1 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
-            className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[rgba(18,23,12,0.96)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-paper)] sm:px-4 sm:py-4"
+            className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
@@ -164,13 +164,13 @@ export function CanhoesChrome({
                         className={cn(
                           "shrink-0 border-transparent px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]",
                           pageContext.tone === "social" &&
-                            "bg-[rgba(177,140,255,0.16)] text-[var(--accent-purple-soft)]",
+                            "bg-[rgba(118,98,166,0.14)] text-[var(--accent-purple-soft)]",
                           pageContext.tone === "official" &&
-                            "bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)]",
+                            "bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]",
                           pageContext.tone === "admin" &&
-                            "bg-[rgba(255,184,0,0.12)] text-[var(--neon-amber)]",
+                            "bg-[rgba(201,164,106,0.14)] text-[var(--bg-paper)]",
                           pageContext.tone === "event" &&
-                            "bg-[rgba(245,237,224,0.08)] text-[rgba(245,237,224,0.86)]"
+                            "bg-[rgba(244,234,216,0.08)] text-[rgba(243,234,216,0.82)]"
                         )}
                       >
                         {pageContext.toneLabel}
@@ -181,7 +181,7 @@ export function CanhoesChrome({
                     </div>
 
                     {pageContext.description ? (
-                      <p className="line-clamp-1 text-xs text-[rgba(245,237,224,0.72)]">
+                      <p className="line-clamp-1 text-xs text-[rgba(243,234,216,0.66)]">
                         {pageContext.description}
                       </p>
                     ) : null}
@@ -194,7 +194,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-[var(--bg-paper)] hover:bg-[rgba(244,234,216,0.1)]"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -209,7 +209,7 @@ export function CanhoesChrome({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.76)] text-[var(--bg-paper)] hover:bg-[rgba(38,48,24,0.92)]"
+                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-[var(--bg-paper)] hover:bg-[rgba(244,234,216,0.1)]"
                   onClick={() => handleMenuOpenChange(!isMenuOpen)}
                   aria-expanded={isMenuOpen}
                   aria-label="Abrir menu"
@@ -220,7 +220,7 @@ export function CanhoesChrome({
             </div>
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <div className="inline-flex min-h-9 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(18,23,12,0.72)] px-3 py-1.5">
+              <div className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.06)] px-3 py-1">
                 <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
                   {userLabel}
                 </p>
