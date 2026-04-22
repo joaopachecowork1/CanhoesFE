@@ -138,9 +138,9 @@ function buildSectionContent({
     measureProposals,
     pendingNominationCount,
     summary,
-}: Readonly<BuildSectionContentArgs>): Record<AdminSectionId, ReactNode> {
+}: Readonly<BuildSectionContentArgs>): Record<AdminSectionId, () => ReactNode> {
     return {
-        dashboard: (
+        dashboard: () => (
             <Suspense fallback={LOADING_FALLBACK}>
                 <AdminOverviewSection
                     activeEventName={activeEventName}
@@ -153,7 +153,7 @@ function buildSectionContent({
                 />
             </Suspense>
         ),
-        conteudo: (
+        conteudo: () => (
             <Suspense fallback={LOADING_FALLBACK}>
                 <AdminContentSection
                     categoryProposals={categoryProposals}
@@ -168,7 +168,7 @@ function buildSectionContent({
                 />
             </Suspense>
         ),
-        membros: (
+        membros: () => (
             <Suspense fallback={LOADING_FALLBACK}>
                 <AdminMembersSection
                     activeEventName={activeEventName}
@@ -178,7 +178,7 @@ function buildSectionContent({
                 />
             </Suspense>
         ),
-        configuracoes: (
+        configuracoes: () => (
             <Suspense fallback={LOADING_FALLBACK}>
                 <AdminControlCenter
                     activeEventName={activeEventName}
@@ -370,7 +370,7 @@ export default function CanhoesAdminModule({
                 onRetry={() => void handleRefresh()}
                 resetKey={section}
             >
-                {sectionContent[section]}
+                {sectionContent[section]()}
             </SectionBoundary>
         </div>
     );
