@@ -41,7 +41,7 @@ export function AdminOverviewSection({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
+      <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">

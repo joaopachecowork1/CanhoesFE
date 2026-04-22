@@ -41,7 +41,7 @@ export function AdminRouteTabs({
   }, [activeId, prefersReducedMotion]);
 
   return (
-    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-2 py-1.5 shadow-[var(--shadow-paper)]">
+    <div className="canhoes-bits-panel canhoes-bits-panel--admin canhoes-admin-shell-panel overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-2 py-1.5 shadow-[var(--shadow-paper)]">
 
       <div
         ref={scrollRef}

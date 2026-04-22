@@ -30,7 +30,7 @@ type Props = {
 
 function VotesAuditShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <article className="canhoes-paper-panel relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
+    <article className="canhoes-paper-panel canhoes-admin-shell-panel relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
       <CardHeader className="space-y-1">
         <p className="editorial-kicker">{adminCopy.audit.kicker}</p>
         <CardTitle>{adminCopy.audit.title}</CardTitle>

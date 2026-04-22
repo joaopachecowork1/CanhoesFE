@@ -228,7 +228,7 @@ const AdminMobileSummary = memo(function AdminMobileSummary({
 
     return (
         <div className="sm:hidden space-y-2">
-            <div className="overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]">
+            <div className="canhoes-admin-shell-panel overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]">
                 <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                         <p className="editorial-kicker text-[var(--neon-amber)] text-[0.6rem]">Pendentes</p>

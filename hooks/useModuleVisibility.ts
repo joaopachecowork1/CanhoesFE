@@ -11,7 +11,6 @@ import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import {
   CANHOES_MEMBER_MODULES,
   buildModuleVisibilityState,
-  countVisibleModules,
 } from "@/lib/modules";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
@@ -42,11 +41,6 @@ export function useModuleVisibility({
     Partial<EventAdminModuleVisibilityDto>
   >({});
 
-  const visibleCount = useMemo(
-    () => countVisibleModules(state?.effectiveModules),
-    [state?.effectiveModules]
-  );
-
   const moduleItems = useMemo(
     () =>
       CANHOES_MEMBER_MODULES.map((moduleDefinition) => {
@@ -60,6 +54,11 @@ export function useModuleVisibility({
         };
       }),
     [state, optimisticOverrides]
+  );
+
+  const visibleCount = useMemo(
+    () => moduleItems.filter((item) => item.checked).length,
+    [moduleItems]
   );
 
   const clearModuleOverrides = useCallback(
