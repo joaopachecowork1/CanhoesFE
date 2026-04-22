@@ -1,6 +1,5 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -30,44 +29,37 @@ export function CanhoesBottomTabs({
   rightItems,
   showCompose = true,
 }: Readonly<CanhoesBottomTabsProps>) {
-  const composeItem = {
+  const composeItem: DockItem = {
     ariaLabel: "Criar post",
+    ariaPressed: isComposeOpen,
     buttonClassName: cn(
-      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.94)] px-2 py-2 text-[var(--bg-paper)]",
-      "hover:border-[rgba(122,173,58,0.24)]",
+      "border-[rgba(212,184,150,0.12)] bg-[rgba(245,237,224,0.04)] text-[var(--bg-paper)]",
       isComposeOpen &&
-        "border-[rgba(0,255,136,0.22)] bg-[rgba(36,54,24,0.98)] text-[var(--neon-green)]"
+        "border-[rgba(0,255,136,0.22)] bg-[rgba(28,39,18,0.98)] text-[var(--neon-green)]"
     ),
     icon: Plus,
     iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--neon-green)]"),
     isActive: isComposeOpen,
     label: "Post",
     onClick: onCompose,
-    tooltipClassName:
-      "bg-[rgba(15,18,9,0.96)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
-  } as const satisfies DockItem;
+  };
 
   const items = [
-    ...leftItems.map((entry) => toDockItem(entry)),
+    ...leftItems.map(toDockItem),
     ...(showCompose ? [composeItem] : []),
-    ...rightItems.map((entry) => toDockItem(entry)),
+    ...rightItems.map(toDockItem),
   ] as const satisfies readonly DockItem[];
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50"
       aria-label="Navegacao principal do evento"
+      className="fixed inset-x-0 bottom-0 z-50"
     >
-      <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-2 pb-safe sm:px-3">
+      <div className="mx-auto max-w-[calc(var(--page-max-width)+10rem)] px-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:px-3">
         <Dock
           items={items}
-          className="h-auto p-0"
-          containerClassName="h-auto w-full max-w-none justify-center"
-          dockClassName={cn(
-            "min-h-[4rem] w-max min-w-fit max-w-full items-center gap-1 rounded-[1.4rem] border px-1 py-1.5",
-            "border-[rgba(122,173,58,0.18)] bg-[rgba(14,24,10,0.96)]",
-            "shadow-[0_12px_24px_rgba(0,0,0,0.26)]"
-          )}
+          className="w-full"
+          dockClassName="rounded-[1.25rem] border border-[rgba(212,184,150,0.12)] bg-[rgba(14,18,10,0.96)] p-1.5 shadow-[var(--shadow-paper)]"
         />
       </div>
     </nav>
@@ -75,36 +67,23 @@ export function CanhoesBottomTabs({
 }
 
 function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
-  const Icon: LucideIcon = entry.item.icon;
   const isActive = Boolean(entry.isActive);
   const isMoreItem = entry.item.id === "more";
-  let iconToneClass = "text-[rgba(245,237,224,0.85)]";
-  if (isMoreItem) {
-    iconToneClass = "text-[var(--bg-paper)]";
-  }
-  if (isActive) {
-    iconToneClass = "text-[var(--neon-green)]";
-  }
 
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      "min-h-[3.5rem] min-w-[4.25rem] rounded-xl border border-transparent bg-transparent px-2 py-1.5 text-[rgba(245,237,224,0.88)] transition-all duration-200",
-      "hover:bg-[rgba(245,237,224,0.08)] active:scale-95",
-      isMoreItem &&
-        "border-[rgba(212,184,150,0.15)] bg-[var(--bg-surface)] text-[var(--bg-paper)]",
-      isActive &&
-        "border-[rgba(122,173,58,0.35)] bg-[rgba(42,55,28,0.96)] text-[var(--bg-paper)]"
+      isMoreItem && "text-[var(--bg-paper)]",
+      isActive && "bg-[rgba(122,173,58,0.12)] text-[var(--bg-paper)]"
     ),
-    icon: Icon,
+    icon: entry.item.icon,
     iconClassName: cn(
       "h-[18px] w-[18px]",
-      iconToneClass
+      isMoreItem && !isActive && "text-[var(--bg-paper)]",
+      isActive && "text-[var(--neon-green)]"
     ),
     isActive,
     label: entry.item.label,
     onClick: entry.onClick,
-    tooltipClassName:
-      "bg-[rgba(15,18,9,0.96)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]",
   };
 }
