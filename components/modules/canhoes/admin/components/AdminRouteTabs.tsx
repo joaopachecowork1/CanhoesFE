@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import { CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
+
 import { cn } from "@/lib/utils";
 
 import type { AdminSectionId, AdminSectionItem } from "../adminSections";
@@ -24,6 +25,7 @@ export function AdminRouteTabs({
   onSelect,
 }: Readonly<AdminRouteTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
   const sections = items ?? getAdminSectionMeta().map((section) => ({ ...section, count: 0 }));
 
   useEffect(() => {
@@ -32,15 +34,14 @@ export function AdminRouteTabs({
 
     const activeElement = scroller.querySelector<HTMLElement>('[aria-current="page"]');
     activeElement?.scrollIntoView({
-      behavior: "smooth",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
       inline: "center",
       block: "nearest",
     });
-  }, [activeId]);
+  }, [activeId, prefersReducedMotion]);
 
   return (
-    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border border-[rgba(122,173,58,0.14)] bg-[rgba(18,26,13,0.98)] px-2 py-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
-      <CanhoesGlowBackdrop tone="admin" />
+    <div className="canhoes-bits-panel canhoes-bits-panel--admin overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-2 py-1.5 shadow-[var(--shadow-paper)]">
 
       <div
         ref={scrollRef}
@@ -61,8 +62,8 @@ export function AdminRouteTabs({
                   "canhoes-tap inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-semibold transition-[background-color,border-color,color,box-shadow]",
                   "snap-start",
                   isActive
-                    ? "border-[var(--border-moss)] bg-[var(--moss)] text-white"
-                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(18,26,13,0.9)] text-[var(--ink-secondary)] hover:bg-[rgba(30,39,20,0.96)]"
+                    ? "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]"
+                    : "border-[var(--border-paper)] bg-[var(--bg-paper-soft)] text-[var(--ink-secondary)] hover:bg-[var(--bg-paper)]"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -70,7 +71,7 @@ export function AdminRouteTabs({
                   {section.label}
                 </span>
                 {section.count > 0 ? (
-                  <Badge className="h-4 min-w-4 rounded-full border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.2)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
+                  <Badge className="h-4 min-w-4 rounded-full border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
                     {section.count}
                   </Badge>
                 ) : null}

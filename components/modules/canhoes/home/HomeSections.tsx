@@ -249,9 +249,9 @@ const HomeHeroSection = memo(function HomeHeroSection({
 
 const HomeAlertsSection = memo(function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
   return (
-    <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[rgba(212,184,150,0.22)] bg-[rgba(57,45,28,0.28)]">
+    <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[var(--border-paper)] bg-none bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
       {alerts.map((alert) => (
-        <div key={alert} className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.24)] bg-[rgba(57,45,28,0.42)] px-3 py-3 text-sm text-[var(--bg-paper)]">
+        <div key={alert} className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-3 text-sm text-[var(--ink-primary)]">
           {alert}
         </div>
       ))}
@@ -366,7 +366,7 @@ const HomePanel = memo(function HomePanel({
 
 const HomePanelState = memo(function HomePanelState({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(18,23,12,0.72)] px-3 py-4 text-sm text-[rgba(245,237,224,0.88)]">
+    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-4 text-sm text-[var(--ink-primary)] shadow-none">
       {children}
     </div>
   );

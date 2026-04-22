@@ -23,7 +23,7 @@ export function AdminSectionSummary({
       <CardHeader className="space-y-2">
         <p className="editorial-kicker">{kicker}</p>
         <CardTitle>{title}</CardTitle>
-        <p className="body-small max-w-[68ch] text-[var(--color-text-muted)]">{description}</p>
+        <p className="body-small max-w-[68ch] text-[var(--ink-secondary)]">{description}</p>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -31,7 +31,7 @@ export function AdminSectionSummary({
             <div
               key={item.label}
               className={cn(
-                "rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] px-3 py-3",
+                "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] px-3 py-3",
                 item.tone === "highlight"
                   ? "bg-[rgba(122,173,58,0.08)]"
                   : item.tone === "success"
@@ -42,16 +42,16 @@ export function AdminSectionSummary({
               )}
             >
               <div className="space-y-1">
-                <p className="text-xs text-[var(--color-text-muted)]">{item.label}</p>
+                <p className="text-xs text-[var(--ink-secondary)]">{item.label}</p>
                 <p
                   className={cn(
                     "heading-4",
                     item.tone === "highlight"
-                      ? "text-[var(--color-accent)]"
+                      ? "text-[var(--moss)]"
                       : item.tone === "success"
-                        ? "text-[var(--color-success)]"
+                        ? "text-[var(--success)]"
                         : item.tone === "warning"
-                          ? "text-[var(--color-warning)]"
+                          ? "text-[var(--neon-amber)]"
                           : "text-[var(--ink-primary)]"
                   )}
                 >
