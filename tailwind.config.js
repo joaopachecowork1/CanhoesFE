@@ -7,6 +7,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Design system tokens — Canhões do Ano
+        canhoes: {
+          forest:    '#0F1712',
+          moss:      '#4F6336',
+          gold:      '#C8A46B',
+          parchment: '#F1E6D2',
+          amethyst:  '#7A628A',
+        },
         // Keep jungle/moss for Canhões theme compatibility
         jungle: {
           50:  "#f0fdf4",

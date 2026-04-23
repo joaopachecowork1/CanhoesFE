@@ -17,7 +17,7 @@ export function CanhoesBrandMark({
       <CanhoesBrandIcon size="sm" />
 
       <div className="min-w-0">
-        <p className="truncate font-[var(--font-display)] text-[1.06rem] font-bold uppercase tracking-[0.03em] text-[var(--bg-paper)]">
+        <p className="truncate font-[var(--font-display)] text-[1.06rem] font-bold uppercase tracking-[0.03em] text-canhoes-gold">
           Canhoes do Ano
         </p>
         {compact ? null : (

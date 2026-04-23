@@ -194,7 +194,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-[var(--bg-paper)] hover:bg-[rgba(244,234,216,0.1)]"
+                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-canhoes-gold hover:bg-[rgba(244,234,216,0.1)]"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -209,7 +209,7 @@ export function CanhoesChrome({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-[var(--bg-paper)] hover:bg-[rgba(244,234,216,0.1)]"
+                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-canhoes-gold hover:bg-[rgba(244,234,216,0.1)]"
                   onClick={() => handleMenuOpenChange(!isMenuOpen)}
                   aria-expanded={isMenuOpen}
                   aria-label="Abrir menu"
@@ -235,6 +235,12 @@ export function CanhoesChrome({
           </motion.div>
         </div>
       </header>
+
+      <div className="relative z-30 flex items-center gap-0 px-4" aria-hidden="true">
+        <div className="h-px flex-1 bg-canhoes-gold/25" />
+        <span className="px-2 text-[10px] text-canhoes-gold/60 select-none">✦</span>
+        <div className="h-px flex-1 bg-canhoes-gold/25" />
+      </div>
 
       <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
