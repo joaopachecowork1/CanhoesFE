@@ -80,6 +80,7 @@
   --canhoes-forest: #0F1712;
   --canhoes-moss: #4F6336;
   --canhoes-gold: #C8A46B;
+  --canhoes-gold-subtle: rgba(200, 164, 107, 0.10);
   --canhoes-parchment: #F1E6D2;
   --canhoes-amethyst: #7A628A;
   --glow-green: 0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.18), 0 0 40px rgba(0, 255, 136, 0.08);
@@ -125,13 +126,13 @@
   --card-foreground: var(--text-primary);
   --popover: var(--bg-surface);
   --popover-foreground: var(--text-primary);
-  --primary: #4F6336;
+  --primary: var(--canhoes-moss);
   --primary-foreground: #ffffff;
   --secondary: rgba(245, 237, 224, 0.08);
   --secondary-foreground: var(--text-primary);
   --muted: rgba(245, 237, 224, 0.08);
   --muted-foreground: var(--text-muted);
-  --accent: rgba(200, 164, 107, 0.10);
+  --accent: var(--canhoes-gold-subtle);
   --accent-foreground: var(--text-primary);
   --destructive: var(--danger);
   --destructive-foreground: #ffffff;
