@@ -142,7 +142,7 @@ export function CanhoesChrome({
   return (
     <div
       data-theme="canhoes"
-      className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[var(--bg-void)] text-[var(--text-primary)]"
+      className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
     >
       <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
         <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">

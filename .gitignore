@@ -110,3 +110,8 @@ canhoes-vault/
 .cache/
 
 .aider*
+.openclaw/
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+USER.md
