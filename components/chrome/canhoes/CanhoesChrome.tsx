@@ -242,13 +242,13 @@ export function CanhoesChrome({
         <div className="h-px flex-1 bg-canhoes-gold/25" />
       </div>
 
-      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
+      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
           <motion.div
             key={pathname}
-            initial={prefersReducedMotion ? undefined : { opacity: 0 }}
-            animate={prefersReducedMotion ? undefined : { opacity: 1 }}
-            transition={{ duration: 0.12, ease: "easeOut" }}
+                        initial={prefersReducedMotion ? undefined : { opacity: 0, y: 6 }}
+            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className={cn(
               "mx-auto w-full",
               isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"

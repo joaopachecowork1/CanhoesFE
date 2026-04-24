@@ -296,7 +296,7 @@ export const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
 export const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =
-  "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-3 py-3 shadow-[var(--shadow-paper)]";
+  "rounded-xl border border-[var(--border-paper)] bg-[var(--bg-paper)] p-3 shadow-[var(--shadow-paper)] sm:rounded-[var(--radius-md-token)]";
 
 const CONTROL_ROW_CLASS =
   "flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2 text-[var(--ink-primary)]";
@@ -637,8 +637,8 @@ function AdminSettingsAdvancedSheet({
             icon={<ToggleRight className="h-4 w-4" />}
             title="Módulos secundários"
             subtitle="Wishlist · Votação · Stickers · Medidas · Gala"
-            action={
-              <div className="flex items-center gap-2">
+                        action={
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                 <Button type="button" size="sm" variant="outline" className={OUTLINE_BUTTON_CLASS} disabled={allEnabled || allModulesSaving} onClick={() => onSetAllModules(true)}>
                   Todos on
                 </Button>

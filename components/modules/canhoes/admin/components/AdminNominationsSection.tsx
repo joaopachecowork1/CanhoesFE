@@ -1,5 +1,6 @@
 "use client";
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Layers3, Trophy, User, XCircle } from "lucide-react";
@@ -86,11 +87,12 @@ function getNominationStatusIcon(status: NominationStatus) {
 
 export function AdminNominationsSection({
   eventId,
-  loading,
+    loading,
 }: Readonly<{
   eventId: string | null;
   loading: boolean;
 }>) {
+  const [listRef] = useAutoAnimate();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<NominationListFilter>("pending");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -335,10 +337,13 @@ export function AdminNominationsSection({
               {statusFilter === "all"
                 ? "disponivel neste filtro"
                 : NOMINATION_EMPTY_STATE_LABELS[statusFilter]}
-              .
+                            .
             </AdminStateMessage>
           ) : (
-            <div className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] p-2">
+            <div
+              ref={listRef}
+              className="max-h-[56svh] rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] p-2"
+            >
               <VirtualizedList
                 className="px-0 py-0"
                 estimateSize={() => 72}

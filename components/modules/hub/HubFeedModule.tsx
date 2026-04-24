@@ -132,8 +132,8 @@ function HubFeedModuleView({
     />
   );
 
-  return (
-    <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0">
+    return (
+    <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0 max-w-full px-4 sm:px-0">
       <SectionBoundary title="Erro no mural social" description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis." onRetry={handleRetry}>
         <div className="space-y-3">
           {!showComposer ? <CanhoesModuleHeader icon={ScrollText} title={feedCopy.hero.title} description={feedCopy.hero.description} /> : null}

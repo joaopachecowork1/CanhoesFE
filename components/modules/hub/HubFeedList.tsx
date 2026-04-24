@@ -1,5 +1,6 @@
 "use client";
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
 
@@ -67,8 +68,10 @@ export function HubFeedList({
   onToggleCommentReaction,
   onAdminPin,
   onAdminDelete,
-  sentinelRef,
+    sentinelRef,
 }: Readonly<HubFeedListProps>) {
+  const [listRef] = useAutoAnimate();
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -86,39 +89,41 @@ export function HubFeedList({
           />
         ) : null}
 
-        {posts.length > 0 ? (
-          <VirtualizedList
-            items={posts}
-            useWindowScroll
-            overscan={4}
-            getKey={(post) => post.id}
-            estimateSize={() => 420}
-            renderItem={(post, index) => (
-              <PostErrorBoundary key={post.id}>
-                <HubPostCard
-                  post={post}
-                  index={index}
-                  isAdmin={isAdmin}
-                  openComments={openComments[post.id] ?? false}
-                  commentDraft={commentDrafts[post.id] ?? ""}
-                  comments={comments[post.id] ?? []}
-                  currentUserId={currentUserId}
-                  currentUserName={currentUserName}
-                  currentUserImage={currentUserImage}
-                  onToggleReaction={onToggleReaction}
-                  onToggleDownvote={onToggleDownvote}
-                  onToggleComments={onToggleComments}
-                  onVotePoll={onVotePoll}
-                  onAddComment={onAddComment}
-                  onDeleteComment={onDeleteComment}
-                  onCommentDraftChange={onCommentDraftChange}
-                  onToggleCommentReaction={onToggleCommentReaction}
-                  onAdminPin={onAdminPin}
-                  onAdminDelete={onAdminDelete}
-                />
-              </PostErrorBoundary>
-            )}
-          />
+                {posts.length > 0 ? (
+          <div ref={listRef}>
+            <VirtualizedList
+              items={posts}
+              useWindowScroll
+              overscan={4}
+              getKey={(post) => post.id}
+              estimateSize={() => 420}
+              renderItem={(post, index) => (
+                <PostErrorBoundary key={post.id}>
+                  <HubPostCard
+                    post={post}
+                    index={index}
+                    isAdmin={isAdmin}
+                    openComments={openComments[post.id] ?? false}
+                    commentDraft={commentDrafts[post.id] ?? ""}
+                    comments={comments[post.id] ?? []}
+                    currentUserId={currentUserId}
+                    currentUserName={currentUserName}
+                    currentUserImage={currentUserImage}
+                    onToggleReaction={onToggleReaction}
+                    onToggleDownvote={onToggleDownvote}
+                    onToggleComments={onToggleComments}
+                    onVotePoll={onVotePoll}
+                    onAddComment={onAddComment}
+                    onDeleteComment={onDeleteComment}
+                    onCommentDraftChange={onCommentDraftChange}
+                    onToggleCommentReaction={onToggleCommentReaction}
+                    onAdminPin={onAdminPin}
+                    onAdminDelete={onAdminDelete}
+                  />
+                </PostErrorBoundary>
+              )}
+            />
+          </div>
         ) : (
           <EmptyState
             className="py-10"

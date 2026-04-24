@@ -1,5 +1,6 @@
 "use client";
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState, type ReactNode } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -281,8 +282,9 @@ export function PendingProposals({
   categoryProposals,
   measureProposalsAll,
   loading,
-  onUpdate,
+    onUpdate,
 }: Readonly<PendingProposalsProps>) {
+  const [listRef] = useAutoAnimate();
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [categoryFilter, setCategoryFilter] = useState<ProposalFilter>("pending");
   const [measureFilter, setMeasureFilter] = useState<ProposalFilter>("pending");
@@ -658,14 +660,16 @@ export function PendingProposals({
               panel.emptyMessage
             )}
 
-            {!controlsDisabled && panel.items.length > 0 ? (
-              <VirtualizedList
-                items={panel.items}
-                getKey={(proposal) => proposal.id}
-                estimateSize={() => 320}
-                className="max-h-[72svh]"
-                renderItem={(proposal) => <ProposalReviewCard proposal={proposal} />}
-              />
+                        {!controlsDisabled && panel.items.length > 0 ? (
+              <div ref={listRef}>
+                <VirtualizedList
+                  items={panel.items}
+                  getKey={(proposal) => proposal.id}
+                  estimateSize={() => 320}
+                  className="max-h-[72svh]"
+                  renderItem={(proposal) => <ProposalReviewCard proposal={proposal} />}
+                />
+              </div>
             ) : null}
           </ProposalShell>
         ))}

@@ -148,7 +148,7 @@ function HubPostCardComponent({
 
         <div className="flex flex-col sm:flex-row">
           <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-paper-soft)] bg-[rgba(84,64,40,0.04)] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
-            <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5">
+            <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5 min-h-[44px] min-w-[44px] flex items-center justify-center">
               <button
                 type="button"
                 onClick={handleUpvote}

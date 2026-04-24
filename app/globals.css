@@ -209,6 +209,22 @@
   input:focus, textarea:focus, select:focus { outline: none; border-color: var(--border-neon); box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.18); }
   button, [role="button"] { min-height: 44px; min-width: 44px; }
   ::selection { background: rgba(133, 165, 101, 0.2); color: var(--color-text-primary); }
+
+    /* iOS scroll nativo */
+    .scroll-native {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    /* Safe area utilities */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
