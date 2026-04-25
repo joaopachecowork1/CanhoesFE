@@ -5,7 +5,7 @@ import {
   type CategoryProposalDto,
   type MeasureProposalDto,
 } from "@/lib/api/types";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { summarizeModerationStatuses } from "../moderationUtils";
 
@@ -208,29 +208,27 @@ export function usePendingProposals(
     status: ProposalStatus
   ) => {
     const { success, error } = getStatusMessages(status);
-    const mutation =
-      status === "approved"
-        ? approveMeasureProposal
-        : status === "rejected"
-        ? rejectMeasureProposal
-        : updateMeasureProposal;
-        
     const text = getMeasureText(proposal);
 
-    const action =
-      status === "pending"
-        ? () =>
-            updateMeasureProposal.mutate(
-              { proposalId: proposal.id, patch: { text, status } },
-              { onSuccess: () => toast.success(success), onError: (e) => toast.error(getErrorMessage(e, error)) }
-            )
-        : () =>
-            mutation.mutate(proposal.id, {
-              onSuccess: () => toast.success(success),
-              onError: (e) => toast.error(getErrorMessage(e, error)),
-            });
-
-    action();
+    if (status === "approved") {
+      approveMeasureProposal.mutate(proposal.id, {
+        onSuccess: () => toast.success(success),
+        onError: (e) => toast.error(getErrorMessage(e, error)),
+      });
+    } else if (status === "rejected") {
+      rejectMeasureProposal.mutate(proposal.id, {
+        onSuccess: () => toast.success(success),
+        onError: (e) => toast.error(getErrorMessage(e, error)),
+      });
+    } else {
+      updateMeasureProposal.mutate(
+        { proposalId: proposal.id, patch: { text, status } },
+        {
+          onSuccess: () => toast.success(success),
+          onError: (e) => toast.error(getErrorMessage(e, error)),
+        }
+      );
+    }
   };
 
   const handleSaveMeasure = (proposal: MeasureProposalDto) => {

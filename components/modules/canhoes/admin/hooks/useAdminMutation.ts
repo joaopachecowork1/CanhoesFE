@@ -2,8 +2,13 @@ import { useMutation, useQueryClient, type UseMutationOptions } from "@tanstack/
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errors";
 
-export function useAdminMutation<TData = unknown, TError = Error, TVariables = void>(
-  options: UseMutationOptions<TData, TError, TVariables> & {
+export function useAdminMutation<
+  TData = unknown,
+  TError = Error,
+  TVariables = void,
+  TContext = unknown,
+>(
+  options: UseMutationOptions<TData, TError, TVariables, TContext> & {
     successMessage?: string;
     invalidateKeys?: (string | number | null)[][];
   }
@@ -11,7 +16,7 @@ export function useAdminMutation<TData = unknown, TError = Error, TVariables = v
   const queryClient = useQueryClient();
   const { successMessage, invalidateKeys, ...rest } = options;
 
-  return useMutation<TData, TError, TVariables>({
+  return useMutation<TData, TError, TVariables, TContext>({
     ...rest,
     onSuccess: (data, variables, context) => {
       if (successMessage) toast.success(successMessage);
@@ -21,13 +26,27 @@ export function useAdminMutation<TData = unknown, TError = Error, TVariables = v
         });
       }
       if (options.onSuccess) {
-        options.onSuccess(data, variables, context);
+        (
+          options.onSuccess as (
+            data: TData,
+            variables: TVariables,
+            context: TContext | undefined,
+          ) => void
+        )(data, variables, context);
       }
     },
     onError: (error, variables, context) => {
-      toast.error(getErrorMessage(error as Error));
+      toast.error(
+        getErrorMessage(error as Error, "Ocorreu um erro ao processar o pedido."),
+      );
       if (options.onError) {
-        options.onError(error, variables, context);
+        (
+          options.onError as (
+            error: TError,
+            variables: TVariables,
+            context: TContext | undefined,
+          ) => void
+        )(error, variables, context);
       }
     },
   });

@@ -145,9 +145,13 @@ function buildCategoryUsage(
   };
 }
 
+type CategorySheetState =
+  | { mode: "create" }
+  | { category: AwardCategoryDto; mode: "edit" };
+  
 export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promise<void>) {
   const queryClient = useQueryClient();
-  const [sheetState, setSheetState] = useState<any | null>(null);
+  const [sheetState, setSheetState] = useState<CategorySheetState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AwardCategoryDto | null>(
     null
   );

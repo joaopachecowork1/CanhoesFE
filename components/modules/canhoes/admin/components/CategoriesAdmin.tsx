@@ -412,8 +412,8 @@ export function CategoriesAdmin({
     (category) => category.kind === "UserVote"
   ).length;
 
-  const activeCategoryUsage =
-    sheetState?.mode === "edit"
+    const activeCategoryUsage =
+    sheetState?.mode === "edit" && sheetState.category
       ? categoryUsageById[sheetState.category.id]
       : { canDelete: false, deleteReason: null, nomineeCount: 0, voteCount: 0 };
 
@@ -509,8 +509,8 @@ export function CategoriesAdmin({
         form={form}
         isBusy={isBusy}
         onChange={patchForm}
-        onDelete={() => {
-          if (sheetState?.mode !== "edit") return;
+                onDelete={() => {
+          if (sheetState?.mode !== "edit" || !sheetState.category) return;
           setDeleteTarget(sheetState.category);
         }}
         onOpenChange={handleSheetOpenChange}
