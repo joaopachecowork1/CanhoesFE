@@ -66,9 +66,15 @@ function joinMessages(base: string, detail: string | null) {
   return `${base}: ${detail}`;
 }
 
+export function getErrorMessage(error: unknown, fallback?: string): string;
 export function getErrorMessage(
   error: unknown,
   fallback: string,
+  statusMessages?: Partial<Record<number, string>>
+): string;
+export function getErrorMessage(
+  error: unknown,
+  fallback: string = "Ocorreu um erro",
   statusMessages?: Partial<Record<number, string>>
 ) {
   if (error instanceof ApiError) {
