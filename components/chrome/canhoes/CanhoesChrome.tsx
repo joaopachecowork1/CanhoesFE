@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { LogOut, Menu } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
@@ -56,7 +55,7 @@ export function CanhoesChrome({
     overviewReady: Boolean(eventOverview.overview),
     router,
   });
-  const prefersReducedMotion = useReducedMotion();
+  
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -146,12 +145,9 @@ export function CanhoesChrome({
     >
       <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
         <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">
-          <motion.div
-            initial={prefersReducedMotion ? undefined : { opacity: 0 }}
-            animate={prefersReducedMotion ? undefined : { opacity: 1 }}
-            transition={{ duration: 0.14, ease: "easeOut" }}
-            className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
-          >
+                  <div
+                    className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
+                  >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
                 <CanhoesBrandMark compact subtitle="Premios da edicao" />
@@ -232,8 +228,8 @@ export function CanhoesChrome({
                 overview={eventOverview.overview}
               />
             </div>
-          </motion.div>
         </div>
+                    </div>
       </header>
 
       <div className="relative z-30 flex items-center gap-0 px-4" aria-hidden="true">
@@ -244,18 +240,15 @@ export function CanhoesChrome({
 
       <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
-          <motion.div
-            key={pathname}
-                        initial={prefersReducedMotion ? undefined : { opacity: 0, y: 6 }}
-            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className={cn(
-              "mx-auto w-full",
-              isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"
-            )}
-          >
-            {children}
-          </motion.div>
+          <div
+                      key={pathname}
+                      className={cn(
+                        "animate-fade-in mx-auto w-full",
+                        isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"
+                      )}
+                    >
+                      {children}
+                    </div>
         </div>
       </main>
 

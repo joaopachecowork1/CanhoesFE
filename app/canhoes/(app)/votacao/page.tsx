@@ -1,4 +1,4 @@
-"use client";
+
 
 import dynamic from "next/dynamic";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";

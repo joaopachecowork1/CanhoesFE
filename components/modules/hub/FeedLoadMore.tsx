@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 type FeedLoadMoreProps = {
   hasMore: boolean;
   isFetchingNextPage: boolean;
@@ -33,23 +31,20 @@ export function FeedLoadMore({
       </div>
 
       {!isFetchingNextPage ? (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center py-2"
+        <div
+          className="animate-fade-in flex justify-center py-2"
         >
-          <motion.button
+          <button
             type="button"
             onClick={onLoadMore}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="surface-panel-soft px-6 py-2 text-xs font-medium text-[var(--text-muted)] hover:border-[var(--border-moss)] hover:text-[var(--text-primary)]"
+            className="surface-panel-soft px-6 py-2 text-xs font-medium text-[var(--text-muted)] hover:border-[var(--border-moss)] hover:text-[var(--text-primary)] active:scale-95 transition-transform"
             aria-label="Carregar mais posts manualmente"
           >
             Carregar mais ({Math.max(remainingCount, 0)} restantes)
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       ) : null}
     </>
   );
 }
+

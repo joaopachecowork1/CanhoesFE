@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +24,9 @@ export function AdminRouteTabs({
   onSelect,
 }: Readonly<AdminRouteTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sections = items ?? getAdminSectionMeta().map((section) => ({ ...section, count: 0 }));
 
   useEffect(() => {
@@ -83,3 +84,4 @@ export function AdminRouteTabs({
     </div>
   );
 }
+

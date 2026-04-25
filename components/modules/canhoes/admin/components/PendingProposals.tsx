@@ -3,14 +3,13 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState, type ReactNode } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { AdminReviewCard } from "@/components/modules/canhoes/admin/components/AdminReviewCard";
 import { AdminSectionSummary } from "@/components/modules/canhoes/admin/components/AdminSectionSummary";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
 import { ProposalShell } from "@/components/modules/canhoes/admin/components/ProposalShell";
-import { summarizeModerationStatuses, statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
+import { statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +19,6 @@ import type {
   CategoryProposalDto,
   MeasureProposalDto,
 } from "@/lib/api/types";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "./proposalConstants";
 import {
@@ -35,6 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
+import { usePendingProposals } from "../hooks/usePendingProposals";
+
 
 type PendingProposalsProps = {
   eventId: string | null;
@@ -46,7 +45,7 @@ type PendingProposalsProps = {
 
 type ProposalStatus = "pending" | "approved" | "rejected";
 type ProposalFilter = "all" | ProposalStatus;
-type CategoryDraft = { description: string; name: string };
+
 type ProposalCounts = Record<ProposalStatus, number> & { all: number };
 type ProposalType = "category" | "measure";
 
@@ -106,31 +105,6 @@ const PANEL_META: Record<
     title: "Medidas em revisao",
   },
 };
-
-const buildCounts = <T extends { status: string }>(items: T[]): ProposalCounts => ({
-  all: items.length,
-  ...summarizeModerationStatuses(items),
-});
-
-function getStatusMessages(status: ProposalStatus) {
-  switch (status) {
-    case "approved":
-      return {
-        error: "Nao foi possivel aprovar a proposta.",
-        success: "Proposta aprovada",
-      };
-    case "rejected":
-      return {
-        error: "Nao foi possivel rejeitar a proposta.",
-        success: "Proposta rejeitada",
-      };
-    default:
-      return {
-        error: "Nao foi possivel reabrir a proposta.",
-        success: "Proposta reaberta",
-      };
-  }
-}
 
 function renderProposalPanelState(
   loading: boolean,
@@ -285,113 +259,39 @@ export function PendingProposals({
     onUpdate,
 }: Readonly<PendingProposalsProps>) {
   const [listRef] = useAutoAnimate();
-  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
-  const [categoryFilter, setCategoryFilter] = useState<ProposalFilter>("pending");
-  const [measureFilter, setMeasureFilter] = useState<ProposalFilter>("pending");
-  const [categoryDrafts, setCategoryDrafts] = useState<Record<string, CategoryDraft>>({});
-  const [measureDrafts, setMeasureDrafts] = useState<Record<string, string>>({});
   const [deleteRequest, setDeleteRequest] = useState<DeleteConfirmationRequest | null>(null);
+
+  const {
+    state,
+    actions,
+  } = usePendingProposals(eventId, categoryProposals, measureProposalsAll, onUpdate);
+
+  const {
+    categoryFilter,
+    measureFilter,
+    categoryCounts,
+    measureCounts,
+    isBusy,
+  } = state;
+
+  const {
+    setCategoryFilter,
+    setMeasureFilter,
+    getCategoryDraft,
+    setCategoryDraft,
+    getMeasureDraft,
+    setMeasureDraft,
+    handleCategoryStatusChange,
+    handleSaveCategory,
+    handleDeleteCategory,
+    handleMeasureStatusChange,
+    handleSaveMeasure,
+    handleDeleteMeasure,
+  } = actions;
+
 
   const controlsDisabled = !eventId;
 
-  const withProcessing = async (
-    proposalId: string,
-    action: () => Promise<unknown>,
-    successMessage = "Acao concluida",
-    errorFallback = "Nao foi possivel processar a proposta."
-  ) => {
-    setProcessingIds((previous) => new Set(previous).add(proposalId));
-
-    try {
-      await action();
-      await onUpdate();
-      toast.success(successMessage);
-    } catch (error) {
-      logFrontendError("Admin.PendingProposals.withProcessing", error, { proposalId });
-      toast.error(getErrorMessage(error, errorFallback));
-    } finally {
-      setProcessingIds((previous) => {
-        const next = new Set(previous);
-        next.delete(proposalId);
-        return next;
-      });
-    }
-  };
-
-  const getCategoryDraft = (proposal: CategoryProposalDto): CategoryDraft => ({
-    description: categoryDrafts[proposal.id]?.description ?? proposal.description ?? "",
-    name: categoryDrafts[proposal.id]?.name ?? proposal.name,
-  });
-
-  const setCategoryDraft = (
-    proposal: CategoryProposalDto,
-    patch: Partial<CategoryDraft>
-  ) => {
-    setCategoryDrafts((previous) => ({
-      ...previous,
-      [proposal.id]: {
-        description: previous[proposal.id]?.description ?? proposal.description ?? "",
-        name: previous[proposal.id]?.name ?? proposal.name,
-        ...patch,
-      },
-    }));
-  };
-
-  const buildCategoryPatch = (proposal: CategoryProposalDto) => {
-    const draft = getCategoryDraft(proposal);
-    const name = draft.name.trim();
-
-    if (!name) {
-      toast.error("O nome da proposta e obrigatorio");
-      return null;
-    }
-
-    return {
-      description: draft.description.trim() || null,
-      name,
-    };
-  };
-
-  const runCategoryMutation = async (
-    proposal: CategoryProposalDto,
-    action: (patch: { description: string | null; name: string }) => Promise<unknown>,
-    successMessage: string,
-    errorFallback: string
-  ) => {
-    const patch = buildCategoryPatch(proposal);
-    if (!eventId || !patch) return;
-
-    await withProcessing(proposal.id, () => action(patch), successMessage, errorFallback);
-  };
-
-  const getMeasureDraft = (proposal: MeasureProposalDto) =>
-    measureDrafts[proposal.id] ?? proposal.text;
-
-  const setMeasureDraft = (proposalId: string, text: string) => {
-    setMeasureDrafts((previous) => ({ ...previous, [proposalId]: text }));
-  };
-
-  const getMeasureText = (proposal: MeasureProposalDto) => getMeasureDraft(proposal).trim();
-
-  const categoryCounts = buildCounts(categoryProposals);
-  const measureCounts = buildCounts(measureProposalsAll);
-
-  const runCategoryStatusChange = (
-    proposal: CategoryProposalDto,
-    newStatus: ProposalStatus
-  ) => {
-    const { error, success } = getStatusMessages(newStatus);
-    void runCategoryMutation(
-      proposal,
-      (patch) =>
-        canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, {
-          ...patch,
-          status: newStatus,
-        }),
-      success,
-      error
-    );
-  };
 
   const requestDelete = ({
     id,
@@ -404,7 +304,6 @@ export function PendingProposals({
 
   const buildCategoryCard = (proposal: CategoryProposalDto): PendingProposalCard => {
     const draft = getCategoryDraft(proposal);
-    const isBusy = processingIds.has(proposal.id);
 
     return {
       deleteIcon: "trash",
@@ -434,7 +333,7 @@ export function PendingProposals({
       meta: new Date(proposal.createdAtUtc).toLocaleString("pt-PT"),
       onApprove:
         proposal.status !== "approved"
-          ? () => runCategoryStatusChange(proposal, "approved")
+          ? () => handleCategoryStatusChange(proposal, "approved")
           : undefined,
       onDelete: () => {
         if (!eventId) return;
@@ -443,68 +342,27 @@ export function PendingProposals({
           id: proposal.id,
           title: proposal.name,
           type: "category",
-          onConfirm: () => {
-            void withProcessing(
-              proposal.id,
-              () => canhoesEventsRepo.adminDeleteCategoryProposal(eventId, proposal.id),
-              "Proposta removida",
-              "Nao foi possivel apagar a proposta de categoria."
-            );
-          },
+          onConfirm: () => handleDeleteCategory(proposal),
         });
       },
       onReject:
         proposal.status !== "rejected"
-          ? () => runCategoryStatusChange(proposal, "rejected")
+          ? () => handleCategoryStatusChange(proposal, "rejected")
           : undefined,
       onReopen:
         proposal.status !== "pending"
-          ? () => runCategoryStatusChange(proposal, "pending")
+          ? () => handleCategoryStatusChange(proposal, "pending")
           : undefined,
-      onSave: () => {
-        void runCategoryMutation(
-          proposal,
-          (patch) =>
-            canhoesEventsRepo.adminUpdateCategoryProposal(eventId!, proposal.id, patch),
-          "Proposta de categoria atualizada",
-          "Nao foi possivel atualizar a proposta de categoria."
-        );
-      },
+      onSave: () => handleSaveCategory(proposal),
       saveLabel: "Guardar",
       status: proposal.status as ProposalStatus,
       title: draft.name || proposal.name,
     };
   };
 
-  const setMeasureStatus = (proposal: MeasureProposalDto, status: ProposalStatus) => {
-    if (!eventId) return;
-    const { success } = getStatusMessages(status);
-
-    void withProcessing(
-      proposal.id,
-      async () => {
-        const text = getMeasureText(proposal);
-        if (text && text !== proposal.text) {
-          await canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, { text });
-        }
-
-        if (status === "approved") {
-          await canhoesEventsRepo.adminApproveMeasureProposal(eventId, proposal.id);
-        } else if (status === "rejected") {
-          await canhoesEventsRepo.adminRejectMeasureProposal(eventId, proposal.id);
-        } else {
-          await canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, {
-            status: "pending",
-          });
-        }
-      },
-      success
-    );
-  };
 
   const buildMeasureCard = (proposal: MeasureProposalDto): PendingProposalCard => {
     const draftText = getMeasureDraft(proposal);
-    const isBusy = processingIds.has(proposal.id);
 
     return {
       deleteIcon: "trash",
@@ -525,7 +383,7 @@ export function PendingProposals({
       meta: new Date(proposal.createdAtUtc).toLocaleString("pt-PT"),
       note: proposal.status,
       onApprove:
-        proposal.status !== "approved" ? () => setMeasureStatus(proposal, "approved") : undefined,
+        proposal.status !== "approved" ? () => handleMeasureStatusChange(proposal, "approved") : undefined,
       onDelete: () => {
         if (!eventId) return;
 
@@ -533,29 +391,14 @@ export function PendingProposals({
           id: proposal.id,
           title: "Medida proposta",
           type: "measure",
-          onConfirm: () => {
-            void withProcessing(
-              proposal.id,
-              () => canhoesEventsRepo.adminDeleteMeasureProposal(eventId, proposal.id),
-              "Proposta removida"
-            );
-          },
+          onConfirm: () => handleDeleteMeasure(proposal),
         });
       },
       onReject:
-        proposal.status !== "rejected" ? () => setMeasureStatus(proposal, "rejected") : undefined,
+        proposal.status !== "rejected" ? () => handleMeasureStatusChange(proposal, "rejected") : undefined,
       onReopen:
-        proposal.status !== "pending" ? () => setMeasureStatus(proposal, "pending") : undefined,
-      onSave: () => {
-        const text = getMeasureText(proposal);
-        if (!eventId || !text) return;
-
-        void withProcessing(
-          proposal.id,
-          () => canhoesEventsRepo.adminUpdateMeasureProposal(eventId, proposal.id, { text }),
-          "Proposta atualizada"
-        );
-      },
+        proposal.status !== "pending" ? () => handleMeasureStatusChange(proposal, "pending") : undefined,
+      onSave: () => handleSaveMeasure(proposal),
       saveDisabled: !draftText.trim(),
       saveLabel: "Guardar texto",
       status: proposal.status as ProposalStatus,
@@ -693,7 +536,10 @@ export function PendingProposals({
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteRequest?.onConfirm()}
+              onClick={() => {
+                deleteRequest?.onConfirm();
+                clearDeleteRequest();
+              }}
             >
               Apagar proposta
             </AlertDialogAction>
@@ -703,3 +549,5 @@ export function PendingProposals({
     </div>
   );
 }
+
+

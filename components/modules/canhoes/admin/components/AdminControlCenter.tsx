@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { ChevronRight, Layers, Settings2, Timer, ToggleRight } from "lucide-react";
-import { toast } from "sonner";
 
 import type {
   AdminModuleKey,
   EventAdminStateDto,
   EventPhaseDto,
 } from "@/lib/api/types";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-import { useModuleVisibility, type ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
+
+import type { ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,13 +37,7 @@ import {
   ADVANCED_ADMIN_MODULE_ORDER,
   QUICK_ADMIN_MODULE_ORDER,
 } from "../adminContentSections";
-
-export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
-  PROPOSALS: "Nomeações",
-  VOTING: "Votação",
-  RESULTS: "Resultados",
-  DRAW: "Sorteio",
-};
+import { useAdminControlCenter, PHASE_LABELS, type SettingsFeedbackState } from "../hooks/useAdminControlCenter";
 
 export const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
 
@@ -61,10 +53,6 @@ export function selectModuleItems(
   return order.map((key) => itemsByKey[key]).filter((item): item is ModuleVisibilityItem => Boolean(item));
 }
 
-export type SettingsFeedbackState = {
-  message: string;
-  tone: FeedbackTone;
-};
 
 type AdminControlCenterProps = {
   activeEventName: string | null;
@@ -74,21 +62,6 @@ type AdminControlCenterProps = {
   onRefresh: () => Promise<void>;
   state: EventAdminStateDto | null;
 };
-
-type VisibilityActionMessages = {
-  error: string;
-  saving: string;
-  success: string;
-};
-
-function getModuleFeedback(label: string): VisibilityActionMessages {
-  const labelLower = label.toLowerCase();
-  return {
-    saving: `A guardar ${labelLower}...`,
-    success: `${label} atualizado.`,
-    error: `Falha ao guardar ${labelLower}.`,
-  };
-}
 
 function buildModuleItemsByKey(moduleItems: ModuleVisibilityItem[]) {
   return Object.fromEntries(moduleItems.map((item) => [item.key, item])) as Partial<
@@ -104,25 +77,30 @@ export function AdminControlCenter({
   onRefresh,
   state,
 }: Readonly<AdminControlCenterProps>) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [feedback, setFeedback] = useState<SettingsFeedbackState | null>(null);
-  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const {
+    state: hookState,
+    actions,
+  } = useAdminControlCenter(eventId, state, events, onRefresh);
 
   const {
+    advancedOpen,
+    feedback,
     allDisabled,
     allEnabled,
     moduleItems,
-    savingKey: visibilitySavingKey,
-    setAllModules,
-    setNominationsVisible,
-    setResultsVisible,
-    toggleModule,
+    visibilitySavingKey,
     visibleCount,
-  } = useModuleVisibility({
-    eventId,
-    onUpdate: onRefresh,
-    state,
-  });
+  } = hookState;
+
+  const {
+    setAdvancedOpen,
+    handleUpdatePhase,
+    handleActivateEvent,
+    handleModuleToggle,
+    handleNominationsVisibility,
+    handleResultsVisibility,
+    handleSetAllModules,
+  } = actions;
 
   const moduleItemsByKey = buildModuleItemsByKey(moduleItems);
   const quickModuleItems = selectModuleItems(QUICK_ADMIN_MODULE_ORDER, moduleItemsByKey);
@@ -141,111 +119,6 @@ export function AdminControlCenter({
   const currentPhaseLabel = formatPhaseLabel(currentState.activePhase?.type);
   const pendingCount = currentState.counts.pendingProposalCount ?? 0;
 
-  async function runVisibilityAction(messages: VisibilityActionMessages, action: () => Promise<boolean>) {
-    setFeedback({ message: messages.saving, tone: "default" });
-    const ok = await action();
-    setFeedback({
-      message: ok ? messages.success : messages.error,
-      tone: ok ? "success" : "error",
-    });
-    return ok;
-  }
-
-  async function handleUpdatePhase(phaseType: EventPhaseDto["type"]) {
-    if (!eventId || phaseType === currentState.activePhase?.type) return;
-
-    setSavingKey("phase");
-    setFeedback({ message: "A guardar fase...", tone: "default" });
-
-    try {
-      await canhoesEventsRepo.updateAdminPhase(eventId, { phaseType });
-      await onRefresh();
-      toast.success("Fase do evento atualizada");
-      setFeedback({
-        message: `Fase atualizada para ${PHASE_LABELS[phaseType]}.`,
-        tone: "success",
-      });
-    } catch (error) {
-      logFrontendError("AdminControlCenter.updatePhase", error, { phaseType });
-      toast.error(getErrorMessage(error, "Não foi possível mudar a fase."));
-      setFeedback({
-        message: "Falha ao guardar a fase atual.",
-        tone: "error",
-      });
-    } finally {
-      setSavingKey(null);
-    }
-  }
-
-  async function handleActivateEvent(eventIdToActivate: string) {
-    if (!eventIdToActivate || eventIdToActivate === eventId) return;
-
-    setSavingKey("event");
-    setFeedback({ message: "A mudar evento ativo...", tone: "default" });
-
-    try {
-      await canhoesEventsRepo.adminActivateEvent(eventIdToActivate);
-      await onRefresh();
-      toast.success("Evento ativo atualizado");
-
-      const nextEventName =
-        events.find((event) => event.id === eventIdToActivate)?.name ?? "evento";
-
-      setFeedback({
-        message: `Evento ativo atualizado para ${nextEventName}.`,
-        tone: "success",
-      });
-    } catch (error) {
-      logFrontendError("AdminControlCenter.activateEvent", error, {
-        eventId: eventIdToActivate,
-      });
-      toast.error(getErrorMessage(error, "Não foi possível mudar o evento ativo."));
-      setFeedback({
-        message: "Falha ao atualizar o evento ativo.",
-        tone: "error",
-      });
-    } finally {
-      setSavingKey(null);
-    }
-  }
-
-  function handleModuleToggle(item: ModuleVisibilityItem, checked: boolean) {
-    void runVisibilityAction(getModuleFeedback(item.label), () => toggleModule(item.key, checked));
-  }
-
-  function handleNominationsVisibility(checked: boolean) {
-    void runVisibilityAction(
-      {
-        saving: "A guardar exposição de nomeações...",
-        success: checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.",
-        error: "Falha ao guardar a exposição de nomeações.",
-      },
-      () => setNominationsVisible(checked)
-    );
-  }
-
-  function handleResultsVisibility(checked: boolean) {
-    void runVisibilityAction(
-      {
-        saving: "A guardar exposição de resultados...",
-        success: checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.",
-        error: "Falha ao guardar a exposição de resultados.",
-      },
-      () => setResultsVisible(checked)
-    );
-  }
-
-  function handleSetAllModules(visible: boolean) {
-    void runVisibilityAction(
-      {
-        saving: visible ? "A ativar todos os módulos..." : "A desativar todos os módulos...",
-        success: visible ? "Todos os módulos ficaram ativos." : "Todos os módulos ficaram ocultos.",
-        error: visible ? "Falha ao ativar todos os módulos." : "Falha ao desativar todos os módulos.",
-      },
-      () => setAllModules(visible)
-    );
-  }
-
   return (
     <div className="space-y-3">
       <AdminSettingsMainPanel
@@ -256,15 +129,15 @@ export function AdminControlCenter({
         feedback={!advancedOpen ? feedback : null}
         loading={loading}
         moduleCount={moduleItems.length}
-        onActivateEvent={(value) => void handleActivateEvent(value)}
+        onActivateEvent={(value) => handleActivateEvent(value)}
         onOpenAdvanced={() => setAdvancedOpen(true)}
         onToggleQuickModule={handleModuleToggle}
-        onUpdatePhase={(phase) => void handleUpdatePhase(phase)}
+        onUpdatePhase={(phase) => handleUpdatePhase(phase)}
         pendingCount={pendingCount}
         phaseLabels={PHASE_LABELS}
         phaseOptions={PHASE_OPTIONS}
         quickModuleItems={quickModuleItems}
-        savingKey={savingKey}
+        savingKey={visibilitySavingKey}
         state={currentState}
         visibilitySavingKey={visibilitySavingKey}
         visibleCount={visibleCount}
@@ -666,3 +539,4 @@ function AdminSettingsAdvancedSheet({
     </AdminDetailSheet>
   );
 }
+

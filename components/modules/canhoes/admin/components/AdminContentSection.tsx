@@ -89,7 +89,7 @@ export function AdminContentSection({
 
   const content =
     activeView === "categorias" ? (
-      <CategoriesAdmin eventId={eventId} loading={loading} onUpdate={onUpdate} />
+      <CategoriesAdmin eventId={eventId} onUpdate={onUpdate} />
     ) : activeView === "resultados" ? (
       <div className="space-y-6">
         <AdminOfficialResultsSection eventId={eventId} memberCount={memberCount} />

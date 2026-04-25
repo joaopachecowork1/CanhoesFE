@@ -1,5 +1,3 @@
-"use client";
-
 import dynamic from "next/dynamic";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
