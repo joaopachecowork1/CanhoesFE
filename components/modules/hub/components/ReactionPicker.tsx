@@ -81,7 +81,7 @@ export function ReactionPicker({
                       onMouseEnter={() => setHoveredEmoji(emoji)}
                       onMouseLeave={() => setHoveredEmoji(null)}
                       className={cn(
-                        "relative flex h-16 items-center justify-center rounded-2xl border text-2xl transition-colors",
+                        "relative flex h-16 items-center justify-center rounded-2xl border text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]",
                         isActive
                           ? "border-[var(--border-neon)] bg-[rgba(122,173,58,0.14)] shadow-[var(--glow-green-sm)]"
                           : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-deep)]"

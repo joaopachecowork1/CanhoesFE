@@ -293,7 +293,7 @@ export function CanhoesWishlistModule() {
               placeholder="Adicionar imagem (opcional)"
             />
 
-            <Button disabled={!canSubmit || isSaving} onClick={() => void handleCreate()}>
+            <Button disabled={!canSubmit || isSaving} onClick={() => void handleCreate()} aria-label="Adicionar item">
               {isSaving ? "A guardar..." : "Adicionar"}
             </Button>
           </div>

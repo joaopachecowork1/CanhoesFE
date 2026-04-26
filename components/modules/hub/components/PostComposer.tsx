@@ -132,7 +132,8 @@ export function PostComposer({
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder={feedCopy.composer.textPlaceholder}
-            className="min-h-[132px] resize-none"
+            className="min-h-[132px] resize-none text-[var(--ink-secondary)]"
+            style={{ color: "var(--ink-secondary)" }}
           />
         </div>
 

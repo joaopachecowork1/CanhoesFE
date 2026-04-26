@@ -196,6 +196,7 @@ export function CanhoesChrome({
                       event.stopPropagation();
                       logout();
                     }}
+                    aria-label="Terminar sessão"
                   >
                     <LogOut className="h-4 w-4" />
                   </Button>

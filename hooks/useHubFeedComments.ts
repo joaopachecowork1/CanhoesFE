@@ -114,6 +114,7 @@ export function useHubFeedComments({ eventId, posts: _posts, queryClient }: Read
               : post
           )
         );
+        toast.success("Comentario publicado");
       } catch (error) {
         const errorMessage = getErrorMessage(error, "Nao foi possivel publicar o comentario.");
         logFrontendError("HubFeed.addComment", error, { postId });

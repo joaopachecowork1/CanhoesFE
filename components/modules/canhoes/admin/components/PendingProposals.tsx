@@ -21,6 +21,15 @@ import type {
 } from "@/lib/api/types";
 
 import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "./proposalConstants";
+import type {
+  PendingProposalCard,
+  PendingProposalPanel,
+  ProposalCounts,
+  ProposalFilter,
+  ProposalStatus,
+  ProposalType,
+  DeleteConfirmationRequest,
+} from "./proposalTypes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,51 +50,6 @@ type PendingProposalsProps = {
   measureProposalsAll: MeasureProposalDto[];
   loading: boolean;
   onUpdate: () => Promise<void>;
-};
-
-type ProposalStatus = "pending" | "approved" | "rejected";
-type ProposalFilter = "all" | ProposalStatus;
-
-type ProposalCounts = Record<ProposalStatus, number> & { all: number };
-type ProposalType = "category" | "measure";
-
-type PendingProposalCard = {
-  deleteIcon?: "trash";
-  deleteLabel?: string;
-  id: string;
-  isBusy: boolean;
-  meta: string;
-  note?: string;
-  onApprove?: () => void;
-  onDelete: () => void;
-  onReject?: () => void;
-  onReopen?: () => void;
-  onSave: () => void;
-  saveDisabled?: boolean;
-  saveLabel: string;
-  status: ProposalStatus;
-  title: string;
-  fields: Array<{ disabled?: boolean; icon: "description" | "measure" | "name"; id: string; label: string; multiline?: boolean; onChange: (value: string) => void; placeholder?: string; value: string }>;
-};
-
-type PendingProposalPanel = {
-  counts: ProposalCounts;
-  description: string;
-  emptyMessage: string;
-  filter: ProposalFilter;
-  items: PendingProposalCard[];
-  setFilter: (filter: ProposalFilter) => void;
-  subtitle: string;
-  title: string;
-  totalCount: number;
-  type: ProposalType;
-};
-
-type DeleteConfirmationRequest = {
-  id: string;
-  title: string;
-  type: ProposalType;
-  onConfirm: () => void;
 };
 
 const PANEL_META: Record<

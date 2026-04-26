@@ -38,18 +38,33 @@ import {
 function StickerSubmitLoadingState() {
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Skeleton className="h-11 rounded-[var(--radius-md-token)]" />
-        <Skeleton className="h-11 rounded-[var(--radius-md-token)]" />
+      <div className="page-hero px-4 py-4 sm:px-5 sm:py-5">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24 rounded" />
+          <Skeleton className="h-6 w-48 rounded" />
+          <Skeleton className="h-4 w-full rounded" />
+        </div>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <Skeleton className="h-44 rounded-[var(--radius-md-token)]" />
-        <Skeleton className="h-44 rounded-[var(--radius-md-token)]" />
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-4 w-64 rounded" />
-        <Skeleton className="h-10 w-40 rounded-full" />
-      </div>
+      <Card>
+        <CardHeader className="space-y-1">
+          <Skeleton className="h-4 w-32 rounded" />
+          <Skeleton className="h-5 w-48 rounded" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Skeleton className="h-10 rounded-[var(--radius-md-token)]" />
+            <Skeleton className="h-10 rounded-[var(--radius-md-token)]" />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+            <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
+            <Skeleton className="aspect-square rounded-[var(--radius-md-token)]" />
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-4 w-64 rounded" />
+            <Skeleton className="h-10 w-40 rounded-full" />
+          </div>
+        </CardContent>
+      </Card>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <div key={index} className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.9)] p-3">

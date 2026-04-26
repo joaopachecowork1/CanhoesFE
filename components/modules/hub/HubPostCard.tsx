@@ -51,6 +51,7 @@ interface HubPostCardProps {
   currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
+  isPendingReaction?: boolean;
   onToggleReaction: (postId: string, emoji: string) => void;
   onToggleDownvote: (postId: string) => void;
   onToggleComments: (postId: string) => void;
@@ -77,6 +78,7 @@ function HubPostCardComponent({
   currentUserId,
   currentUserName,
   currentUserImage,
+  isPendingReaction,
   onToggleReaction,
   onToggleDownvote,
   onToggleComments,
@@ -153,7 +155,7 @@ function HubPostCardComponent({
                 type="button"
                 onClick={handleUpvote}
                 className={cn(
-                  "canhoes-tap rounded p-1 transition-colors",
+                  "canhoes-tap rounded p-1 transition-colors min-h-11 min-w-11",
                   post.likedByMe
                     ? "text-[var(--moss)]"
                     : "text-[var(--ink-muted)] hover:text-[var(--moss)]"
@@ -180,7 +182,7 @@ function HubPostCardComponent({
                 type="button"
                 onClick={handleDownvote}
                 className={cn(
-                  "canhoes-tap rounded p-1 transition-colors",
+                  "canhoes-tap rounded p-1 transition-colors min-h-11 min-w-11",
                   post.downvotedByMe
                     ? "text-[var(--neon-red)]"
                     : "text-[var(--ink-muted)] hover:text-[var(--neon-red)]"
@@ -260,6 +262,7 @@ function HubPostCardComponent({
                   myReactions={post.myReactions ?? []}
                   isPinned={post.isPinned}
                   commentsExpanded={openComments}
+                  isPending={isPendingReaction}
                   onToggleReaction={handleReaction}
                   onToggleComments={onToggleComments}
                 />

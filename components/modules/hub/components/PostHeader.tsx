@@ -59,7 +59,7 @@ export function PostHeader({
             </p>
             {isPinned ? <Badge variant="secondary">Fixado</Badge> : null}
           </div>
-          <p className="text-xs text-[var(--text-muted)]" title={formatDateTime(createdAtUtc)}>
+          <p className="text-xs text-[var(--ink-secondary)]" title={formatDateTime(createdAtUtc)}>
             {relativeTime}
           </p>
         </div>

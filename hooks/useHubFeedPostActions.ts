@@ -161,6 +161,7 @@ export function useHubFeedPostActions({
             return { ...post, likedByMe: result.liked, myReactions: Array.from(myReactions) };
           })
         );
+        toast.success("Reacao atualizada");
       } catch (error) {
         if (appliedOptimisticUpdate && previousPost) {
           queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
@@ -305,6 +306,7 @@ export function useHubFeedPostActions({
     showParticles,
     setShowParticles,
     toggleReaction,
+    toggleReactionPending: toggleReactionMutation.isPending,
     toggleDownvote,
     votePoll,
     adminPin,

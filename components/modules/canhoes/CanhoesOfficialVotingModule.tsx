@@ -186,7 +186,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
       ) : null}
 
       {votedCategoriesCount === totalCategoriesCount && totalCategoriesCount > 0 ? (
-        <Card className="rounded-2xl border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.1)] text-[var(--ink-primary)]">
+        <Card className="rounded-2xl border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.1)] px-4 text-[var(--ink-primary)]">
           <CardContent className="py-6 text-center font-semibold text-[var(--moss)]">
             Boletim oficial completo
           </CardContent>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { sanitizeErrorDetail } from "@/lib/errors";
 
 type AuthMeErrorPayload = {
   code: string;
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         {
           code: "AUTH_PROFILE_FETCH_FAILED",
           message: "The backend rejected the authenticated session profile request.",
-          detail: responseBody || undefined,
+          detail: sanitizeErrorDetail(responseBody || null) || undefined,
         },
         traceId
       );
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
         message: isAbort
           ? "The auth profile endpoint timed out while contacting the backend service."
           : "The auth profile endpoint could not reach the backend service.",
-        detail: error instanceof Error ? error.message : String(error),
+        detail: sanitizeErrorDetail(error instanceof Error ? error.message : String(error)),
       },
       traceId
     );

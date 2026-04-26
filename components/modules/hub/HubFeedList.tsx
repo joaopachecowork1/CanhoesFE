@@ -28,6 +28,7 @@ type HubFeedListProps = {
   comments: Record<string, HubCommentDto[]>;
   openComments: Record<string, boolean>;
   commentDrafts: Record<string, string>;
+  isPendingReaction: boolean;
   onSortChange: (sort: FeedSortOrder) => void;
   onLoadMore: () => void;
   onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
@@ -56,6 +57,7 @@ export function HubFeedList({
   comments,
   openComments,
   commentDrafts,
+  isPendingReaction,
   onSortChange,
   onLoadMore,
   onToggleReaction,
@@ -68,7 +70,7 @@ export function HubFeedList({
   onToggleCommentReaction,
   onAdminPin,
   onAdminDelete,
-    sentinelRef,
+  sentinelRef,
 }: Readonly<HubFeedListProps>) {
   const [listRef] = useAutoAnimate();
 
@@ -113,6 +115,7 @@ export function HubFeedList({
                     currentUserId={currentUserId}
                     currentUserName={currentUserName}
                     currentUserImage={currentUserImage}
+                    isPendingReaction={isPendingReaction}
                     onToggleReaction={onToggleReaction}
                     onToggleDownvote={onToggleDownvote}
                     onToggleComments={onToggleComments}

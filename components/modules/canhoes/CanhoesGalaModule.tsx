@@ -21,13 +21,18 @@ import { Separator } from "@/components/ui/separator";
 
 function GalaLoadingState() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Skeleton className="h-6 w-32 rounded" />
+        <Skeleton className="h-4 w-full rounded" />
+      </div>
       {Array.from({ length: 3 }).map((_, index) => (
         <Card key={index}>
           <CardHeader className="pb-2">
             <Skeleton className="h-5 w-48 rounded" />
           </CardHeader>
           <CardContent className="space-y-3">
+            <Skeleton className="h-16 w-full rounded-[var(--radius-md-token)]" />
             <Skeleton className="h-16 w-full rounded-[var(--radius-md-token)]" />
             <Skeleton className="h-16 w-full rounded-[var(--radius-md-token)]" />
             <Skeleton className="h-4 w-40 rounded" />

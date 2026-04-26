@@ -151,7 +151,7 @@ export function CanhoesCategoriesModule() {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                         <div className="space-y-2">
                             <label htmlFor="category-name-input" className="canhoes-field-label">Nome</label>
                             <Input

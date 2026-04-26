@@ -92,6 +92,7 @@ export function HubPostComments({
             size="sm"
             className="h-8 rounded-full px-3 text-[var(--bg-paper)]"
             onClick={() => onToggleComments(postId)}
+            aria-label="Fechar comentários"
           >
             Fechar
           </Button>
@@ -133,12 +134,12 @@ export function HubPostComments({
                         {comment.userName === postAuthorName && (
                           <Badge
                             variant="outline"
-                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
+                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
                           >
                             OP
                           </Badge>
                         )}
-                        <span className="text-[10px] text-[var(--text-muted)]">
+                        <span className="text-xs text-[var(--ink-secondary)]">
                           {formatDateTime(comment.createdAtUtc)}
                         </span>
                       </div>

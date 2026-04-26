@@ -33,7 +33,7 @@ export function MetricCard({
         tone === "purple" && "border-[rgba(177,140,255,0.2)] bg-[rgba(177,140,255,0.06)] hover:border-[rgba(177,140,255,0.4)]"
       )}
     >
-      <p className="font-[var(--font-mono)] text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+      <p className="font-[var(--font-mono)] text-xs font-bold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
         {label}
       </p>
       <div className="flex items-baseline gap-1 mt-2">
@@ -60,7 +60,7 @@ export function ChecklistItem({
             : "border-[var(--border-paper)] bg-[rgba(212,184,150,0.1)] text-[var(--ink-muted)] group-hover:border-[var(--border-moss)]"
         )}
       >
-        <CheckCircle2 className={cn("h-4.5 w-4.5 transition-transform duration-300", done && "scale-110")} />
+        <CheckCircle2 className={cn("h-4.5 w-4.5 transition-transform duration-300", done && "scale-110")} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <span className={cn(

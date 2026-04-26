@@ -271,35 +271,3 @@ export const feedCopy = {
       "O post ficou registado, mas o ficheiro ainda nao esta acessivel no arquivo.",
   },
 } as const;
-
-export const stateCopy = {
-  loading: "A carregar...",
-  empty: {
-    default: "Sem dados para mostrar.",
-    categories: "Ainda nao ha categorias nesta edicao.",
-    measures: "Ainda nao ha medidas nesta edicao.",
-    nominees: "Ainda nao ha nomeacoes nesta edicao.",
-    stickers: "Ainda nao ha stickers com imagem para mostrar.",
-    wishlist: "Ainda nao ha itens na wishlist.",
-    votes: "Ainda nao ha votos registados nesta edicao.",
-    feed: "O mural desta edicao ainda espera pelo primeiro post.",
-    comments: "Este registo ainda nao tem respostas.",
-    results: "Ainda nao ha resultados oficiais nesta edicao.",
-    members: "Nenhum membro encontrado nesta edicao.",
-  },
-  error: {
-    default: "Nao foi possivel carregar os dados.",
-    categories: "Nao foi possivel carregar as categorias.",
-    measures: "Nao foi possivel carregar as medidas.",
-    nominees: "Nao foi possivel carregar as nomeacoes.",
-    stickers: "Nao foi possivel carregar os stickers.",
-    wishlist: "Nao foi possivel carregar a wishlist.",
-    votes: "Nao foi possivel carregar os votos.",
-    feed: "Nao foi possivel carregar o mural.",
-    results: "Nao foi possivel carregar os resultados.",
-    members: "Nao foi possivel carregar os membros.",
-  },
-  action: {
-    retry: "Tentar novamente",
-  },
-} as const;

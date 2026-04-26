@@ -93,6 +93,7 @@ function HubFeedModuleView({
     showParticles,
     setShowParticles,
     toggleReaction,
+    toggleReactionPending,
     toggleDownvote,
     votePoll,
     toggleComments,
@@ -130,6 +131,7 @@ function HubFeedModuleView({
       comments={comments}
       openComments={openComments}
       commentDrafts={commentDrafts}
+      isPendingReaction={toggleReactionPending}
       onSortChange={handleSortChange}
       onLoadMore={handleLoadMore}
       onToggleReaction={toggleReaction}

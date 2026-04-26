@@ -68,7 +68,7 @@ export function AdminRouteTabs({
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="font-[var(--font-mono)] text-[9px] uppercase tracking-[0.11em]">
+                <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.11em]">
                   {section.label}
                 </span>
                 {section.count > 0 ? (

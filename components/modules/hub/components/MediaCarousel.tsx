@@ -142,7 +142,6 @@ export function MediaCarousel({
                     className="cursor-pointer object-contain transition-opacity hover:opacity-90"
                     onError={() => markAsFailed(currentImageUrl)}
                     onClick={() => handleClick(0)}
-                    unoptimized
                   />
                 </div>
               )
@@ -177,7 +176,6 @@ export function MediaCarousel({
                           className="cursor-pointer object-contain transition-opacity hover:opacity-90"
                           onError={() => markAsFailed(url)}
                           onClick={() => handleClick(index)}
-                          unoptimized
                         />
                       </div>
                     )}

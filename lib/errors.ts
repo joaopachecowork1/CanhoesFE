@@ -109,3 +109,11 @@ export function getErrorMessage(
 export function logFrontendError(context: string, error: unknown, details?: unknown) {
   logger.error(context, error, details);
 }
+
+export function sanitizeErrorDetail(detail: string | null): string {
+  if (!detail) return "Ocorreu um erro";
+  return detail
+    .replace(/at\s+.*:\d+:\d+/g, "")
+    .replace(/\/home\/[^\s]+/g, "")
+    .substring(0, 200);
+}

@@ -81,7 +81,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
 }>) {
   return (
     <section className={cn(HERO_CARD_CLASS, "editorial-shell transition-all duration-500 ease-in-out")}>
-      <div className="relative z-10 space-y-6 px-5 py-7 sm:px-7 sm:py-8">
+      <div className="relative z-10 space-y-6 px-4 py-6 sm:px-7 sm:py-8">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-1">
             <p className="font-[var(--font-mono)] text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--moss-light)] opacity-90">

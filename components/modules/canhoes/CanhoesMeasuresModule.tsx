@@ -152,7 +152,7 @@ export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasu
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="canhoes-helper-text">A proposta fica pendente até aprovação de um admin.</p>
-            <Button disabled={!canSubmitProposal || isSubmitting} onClick={() => void handleProposalSubmit()}>
+            <Button disabled={!canSubmitProposal || isSubmitting} onClick={() => void handleProposalSubmit()} aria-label="Submeter proposta">
               {submitButtonLabel}
             </Button>
           </div>

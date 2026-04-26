@@ -5,7 +5,6 @@ import type { LucideIcon } from "lucide-react";
 import { ImageOff, Upload } from "lucide-react";
 
 import type { NomineeDto } from "@/lib/api/types";
-import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { absMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -14,14 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 
-/**
- * Formata o label de uma fase do evento.
- * 
- * @param phaseType - O tipo da fase (ex: PROPOSALS, VOTING).
- */
-export function formatEventPhaseLabel(phaseType?: string | null) {
-  return getPhaseLabel(phaseType);
-}
+export { getPhaseLabel as formatEventPhaseLabel } from "@/lib/canhoesEvent";
 
 /**
  * Retorna a variante de Badge adequada para o estado de um nominee.

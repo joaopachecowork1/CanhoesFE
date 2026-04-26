@@ -9,9 +9,33 @@ import { countVisibleModules } from "@/lib/modules";
 import type { EventAdminStateDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { AdminDashboard } from "./AdminDashboard";
 import { AdminStateMessage } from "./AdminStateMessage";
+
+function AdminOverviewLoadingState() {
+  return (
+    <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-16 rounded" />
+            <Skeleton className="h-5 w-64 rounded" />
+            <Skeleton className="h-4 w-full rounded" />
+          </div>
+          <Skeleton className="h-6 w-32 rounded-full" />
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
+          <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
+          <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
+          <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
+        </div>
+      </div>
+    </section>
+  );
+}
 
 type AdminOverviewSectionProps = {
   activeEventName: string | null;
@@ -41,6 +65,7 @@ export function AdminOverviewSection({
 
   return (
     <div className="space-y-4">
+      {loading ? <AdminOverviewLoadingState /> : (
       <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -89,10 +114,11 @@ export function AdminOverviewSection({
           </div>
         </div>
       </section>
-
-      {state ? null : (
-        <AdminStateMessage variant="panel">{adminCopy.state.noState}</AdminStateMessage>
       )}
+
+      {!loading && !state ? (
+        <AdminStateMessage variant="panel">{adminCopy.state.noState}</AdminStateMessage>
+      ) : null}
 
       <AdminDashboard
         eventId={eventId}

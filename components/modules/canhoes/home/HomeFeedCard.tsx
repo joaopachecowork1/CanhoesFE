@@ -18,11 +18,11 @@ export function FeedPostCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-1.5 rounded-full bg-[var(--moss)] opacity-60 group-hover:scale-125 group-hover:opacity-100 transition-all duration-300" />
-          <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+          <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
             {post.authorName}
           </p>
         </div>
-        <span className="text-[10px] font-medium tracking-wide text-[var(--ink-muted)] opacity-80">
+        <span className="text-xs font-medium tracking-wide text-[var(--ink-muted)] opacity-80">
           {new Date(post.createdAtUtc).toLocaleDateString("pt-PT", { day: '2-digit', month: 'short' })}
         </span>
       </div>

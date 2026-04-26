@@ -6,6 +6,21 @@ import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAut
 import { IS_MOCK_MODE } from "@/lib/mock";
 import { getMockResponse } from "@/lib/mock/mockFetch";
 import { logger } from "@/lib/logger";
+import { sanitizeErrorDetail } from "@/lib/errors";
+
+const rateLimitStore = new Map<string, { count: number; reset: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+  if (!record || record.reset < now) {
+    rateLimitStore.set(ip, { count: 1, reset: now + 60000 });
+    return true;
+  }
+  if (record.count >= 100) return false;
+  record.count++;
+  return true;
+}
 
 /**
  * Proxy to the backend (avoids CORS) + injects Google id_token.
@@ -178,6 +193,22 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
 }
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }, method: string) {
+  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() 
+    || request.headers.get("x-real-ip") 
+    || "unknown";
+  
+  if (!checkRateLimit(clientIp)) {
+    const traceId = request.headers.get("x-request-id") || crypto.randomUUID();
+    return createProxyErrorResponse(
+      429,
+      {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Too many requests. Please wait before trying again.",
+      },
+      traceId
+    );
+  }
+
   const traceId = request.headers.get("x-request-id") || crypto.randomUUID();
   const proxyPath = normalizeProxyPath(params);
   if (!proxyPath) {
@@ -220,7 +251,7 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
     });
   } catch (error) {
     const duration = Date.now() - startMs;
-    const detail = error instanceof Error ? error.message : String(error);
+    const detail = sanitizeErrorDetail(error instanceof Error ? error.message : String(error));
     const isBackendUnreachable =
       /fetch failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|socket hang up/i.test(detail);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { Loader2 } from "lucide-react";
 
 import { NumberTicker } from "@/components/animations/NumberTicker";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ type HubPostActionsProps = {
   myReactions: string[];
   isPinned?: boolean;
   commentsExpanded: boolean;
+  isPending?: boolean;
   onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
   onToggleComments: (postId: string) => void;
 };
@@ -30,6 +32,7 @@ function HubPostActionsComponent({
   myReactions,
   isPinned,
   commentsExpanded,
+  isPending,
   onToggleReaction,
   onToggleComments,
 }: Readonly<HubPostActionsProps>) {
@@ -47,10 +50,15 @@ function HubPostActionsComponent({
             variant={isActive ? "secondary" : "outline"}
             size="sm"
             onClick={(e) => onToggleReaction(postId, emoji, e)}
+            disabled={isPending}
             className="rounded-full px-2.5"
             aria-label={`${isActive ? "Remover" : "Adicionar"} reação ${label} (${reactionCount})`}
           >
-            <span className="text-sm leading-none">{emoji}</span>
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <span className="text-sm leading-none">{emoji}</span>
+            )}
             <NumberTicker value={reactionCount} className="text-xs text-current" />
           </Button>
         );
