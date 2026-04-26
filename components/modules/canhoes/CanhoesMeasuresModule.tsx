@@ -35,11 +35,11 @@ function MeasuresLoadingState() {
   );
 }
 
-export function CanhoesMeasuresModule() {
+export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasureDto[] }) {
   const { overview, event } = useEventOverview();
   const eventId = event?.id ?? null;
 
-  const [measures, setMeasures] = useState<GalaMeasureDto[]>([]);
+  const [measures, setMeasures] = useState<GalaMeasureDto[]>(initialData ?? []);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [proposalText, setProposalText] = useState("");
@@ -66,6 +66,12 @@ export function CanhoesMeasuresModule() {
   }, []);
 
   useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      setMeasures(initialData);
+      setIsLoading(false);
+      return;
+    }
+
     setMeasures([]);
     setErrorMessage(null);
     setSearch("");
@@ -77,7 +83,7 @@ export function CanhoesMeasuresModule() {
     }
 
     void loadData(eventId);
-  }, [eventId, loadData]);
+  }, [eventId, loadData, initialData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";

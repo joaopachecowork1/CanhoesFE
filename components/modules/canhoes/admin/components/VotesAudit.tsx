@@ -17,10 +17,15 @@ import { AdminStateMessage } from "./AdminStateMessage";
 type VoteAuditRow = {
   categoryId: string;
   categoryName: string;
-  nomineeId: string;
-  userId: string;
-  userName: string;
-  updatedAtUtc: string;
+  nomineeId?: string;
+  optionId?: string;
+  optionLabel?: string;
+  userId?: string;
+  voterUserId?: string;
+  userName?: string;
+  voterName?: string;
+  updatedAtUtc?: string;
+  voteId?: string;
 };
 
 type Props = {
@@ -49,7 +54,7 @@ function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
     <article className="grid gap-1 border-b border-[rgba(212,184,150,0.14)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{vote.categoryName}</p>
       <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm"><p className="truncate">Votou: {vote.userName}</p></div>
-      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">{new Date(vote.updatedAtUtc).toLocaleString("pt-PT")}</p>
+      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">{vote.updatedAtUtc ? new Date(vote.updatedAtUtc).toLocaleString("pt-PT") : ""}</p>
     </article>
   );
 }
@@ -74,8 +79,8 @@ export function VotesAudit({ eventId, loading }: Readonly<Props>) {
     return votes.filter(
       (vote) =>
         vote.categoryName.toLowerCase().includes(normalizedTerm) ||
-        vote.userName.toLowerCase().includes(normalizedTerm) ||
-        vote.nomineeId.toLowerCase().includes(normalizedTerm)
+        vote.userName?.toLowerCase().includes(normalizedTerm) ||
+        vote.nomineeId?.toLowerCase().includes(normalizedTerm)
     );
   }, [votes, search]);
 
@@ -127,7 +132,7 @@ export function VotesAudit({ eventId, loading }: Readonly<Props>) {
           <VirtualizedList
             className="px-0 py-0"
             estimateSize={() => 52}
-            getKey={(vote) => `${vote.categoryId}-${vote.userId}-${vote.nomineeId}-${vote.updatedAtUtc}`}
+            getKey={(vote) => `${vote.categoryId}-${vote.userId ?? vote.voterUserId}-${vote.nomineeId ?? ""}-${vote.updatedAtUtc ?? ""}`}
             items={filteredVotes}
             renderItem={(vote) => <VotesAuditRowItem vote={vote} />}
           />

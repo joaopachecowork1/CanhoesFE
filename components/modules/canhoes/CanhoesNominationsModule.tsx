@@ -14,7 +14,7 @@ import { CanhoesFeatureCard, CanhoesModuleHeader } from "@/components/modules/ca
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type HomeAction = {
   label: string;
@@ -14,25 +15,29 @@ type HomeAction = {
 
 type ClickableHomeAction = HomeAction;
 
-export function ActionButton({ action }: Readonly<{ action: ClickableHomeAction }>) {
-  return <ActionLinkButton action={action} variant={action.tone ?? "default"} />;
+export function ActionButton({ action, className }: Readonly<{ action: ClickableHomeAction; className?: string }>) {
+  return <ActionLinkButton action={action} variant={action.tone ?? "default"} className={className} />;
 }
 
 export function ActionLinkButton({
   action,
+  className,
   variant,
 }: Readonly<{
   action: ClickableHomeAction;
+  className?: string;
   variant: "default" | "outline" | "secondary";
 }>) {
-  const className =
+  const combinedClassName = cn(
+    className,
     variant === "outline"
       ? "border-[rgba(212,184,150,0.3)] bg-[rgba(212,184,150,0.08)] text-[var(--bg-paper)] hover:bg-[rgba(212,184,150,0.14)]"
-      : undefined;
+      : undefined
+  );
 
   if (action.href) {
     return (
-      <Button variant={variant} className={className} asChild>
+      <Button variant={variant} className={combinedClassName} asChild>
         <Link href={action.href}>
           {action.label}
           <ArrowRight className="h-4 w-4" />

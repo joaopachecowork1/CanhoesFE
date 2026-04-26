@@ -174,7 +174,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       });
     });
 
-    connection.on("CommentCreated", ({ postId, comment: newlyCreatedComment }: { postId: string; comment: HubCommentDto }) => {
+    connection.on("CommentCreated", ({ postId, comment: _newlyCreatedComment }: { postId: string; comment: HubCommentDto }) => {
       queryClient.invalidateQueries({ queryKey: ["hub-comments", postId] });
       
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
@@ -193,7 +193,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       });
     });
 
-    connection.on("PollVoted", ({ postId, optionId }: { postId: string; optionId: string }) => {
+    connection.on("PollVoted", (_data: { postId: string; optionId: string }) => {
       queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
     });
 

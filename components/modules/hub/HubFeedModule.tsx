@@ -18,6 +18,14 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { HubFeedList } from "./HubFeedList";
 import { useCreateFeedPost } from "./useCreateFeedPost";
 import { useFeedInfiniteScroll } from "./useFeedInfiniteScroll";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
+
+type FeedPageData = {
+  posts: EventFeedPostFullDto[];
+  nextCursor: number | null;
+};
+
+type FeedInfiniteData = { pages: FeedPageData[]; pageParams: unknown[] };
 
 const loadParticles = () =>
   import("@/components/animations/Particles").then((module) => ({
@@ -55,7 +63,7 @@ export function HubFeedModule({
   initialData,
 }: Readonly<{
   showComposer?: boolean;
-  initialData?: any;
+  initialData?: FeedInfiniteData;
 }>) {
   const state = useHubFeedModuleState(initialData);
 
@@ -154,7 +162,7 @@ function HubFeedModuleView({
   );
 }
 
-function useHubFeedModuleState(initialData?: any) {
+function useHubFeedModuleState(initialData?: FeedInfiniteData) {
   const { data: session, status } = useSession();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();

@@ -11,13 +11,13 @@ interface ParticlesProps {
   onComplete?: () => void;
 }
 
-export const Particles = React.memo(({
+export const Particles = React.memo(function Particles({
   count = 20,
   colors,
   className,
   durationMs = 780,
   onComplete,
-}: Readonly<ParticlesProps>) => {
+}: Readonly<ParticlesProps>) {
   const particleColors = React.useMemo(
     () =>
       colors ?? [
@@ -76,4 +76,4 @@ export const Particles = React.memo(({
       ))}
     </div>
   );
-}
+});

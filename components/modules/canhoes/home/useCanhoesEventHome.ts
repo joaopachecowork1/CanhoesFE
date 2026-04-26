@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getPhaseLabel, getPhaseSummary, formatPhaseWindow } from "@/lib/canhoesEvent";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import type { EventHomeSnapshotDto, EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
-import { useEventOverview } from "@/hooks/useEventOverview";
 
 export type HomeAction = {
   label: string;

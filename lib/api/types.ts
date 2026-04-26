@@ -126,7 +126,7 @@ export type EventCategoryDto = {
   title?: string;
   name: string;
   description: string | null;
-  isActive: boolean;
+  isActive?: boolean;
   kind?: string;
   sortOrder?: number;
   voteQuestion?: string | null;
@@ -342,6 +342,84 @@ export type EventVotingBoardDto = {
   }>;
 };
 
+export type OfficialVotingBoardDto = {
+  eventId: string;
+  phaseId: string | null;
+  canVote: boolean;
+  endsAt: string | null;
+  categories: OfficialVotingCategoryDto[];
+};
+
+export type OfficialVotingCategoryDto = {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: string;
+  nominees: Array<{
+    id: string;
+    label: string;
+    voteCount?: number;
+  }>;
+  myNomineeId: string | null;
+  totalVotes?: number;
+};
+
+export type CanhoesCategoryResultDto = {
+  categoryId: string;
+  categoryName: string;
+  totalVotes: number;
+  top: Array<{
+    nomineeId: string;
+    title: string;
+    imageUrl: string | null;
+    voteCount: number;
+  }>;
+};
+
+export type CastOfficialVoteRequest = {
+  categoryId: string;
+  nomineeId: string;
+};
+
+export type AwardCategoryDto = {
+  id: string;
+  name: string;
+  description?: string | null;
+  kind: string;
+  voteQuestion?: string | null;
+  voteRules?: string | null;
+  isActive?: boolean;
+  sortOrder?: number;
+};
+
+export type CreateAwardCategoryRequest = {
+  name: string;
+  description?: string | null;
+  kind: string;
+  voteQuestion?: string | null;
+  voteRules?: string | null;
+  sortOrder?: number | null;
+};
+
+export type UpdateAwardCategoryRequest = Partial<CreateAwardCategoryRequest> & { isActive?: boolean };
+
+export type AdminCategoryResultDto = {
+  categoryId: string;
+  categoryName: string;
+  totalVotes: number;
+  participationRate: number;
+  nominees: AdminCategoryNomineeResult[];
+};
+
+export type AdminCategoryNomineeResult = {
+  nomineeId: string;
+  nomineeTitle?: string;
+  title: string;
+  imageUrl: string | null;
+  voteCount: number;
+  voterUserIds: string[];
+};
+
 export type AdminOfficialResultsDto = {
   eventId: string;
   generatedAt: string;
@@ -364,4 +442,40 @@ export type EventAdminBootstrapDto = {
   event: EventSummaryDto;
   adminState: EventAdminStateDto;
   secretSantaState: EventAdminSecretSantaStateDto;
+};
+
+export type HubCommentDto = {
+  id: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  authorName?: string;
+  content: string;
+  text?: string;
+  createdAt: string;
+  createdAtUtc?: string;
+  reactionCounts?: Record<string, number>;
+  myReactions?: string[];
+};
+
+export type AdminVoteAuditRowDto = {
+  voteId: string;
+  categoryId: string;
+  categoryName: string;
+  optionId: string;
+  optionLabel: string;
+  nomineeId?: string;
+  voterUserId: string;
+  voterName: string;
+  userName?: string;
+  userId?: string;
+  updatedAtUtc?: string;
+  votedAt: string;
+};
+
+export type HubPollDto = {
+  question: string;
+  options: Array<{ id: string; text: string; voteCount: number }>;
+  myOptionId: string | null;
+  totalVotes: number;
 };

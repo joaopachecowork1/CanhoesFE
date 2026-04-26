@@ -7,11 +7,10 @@ type LogLevel = "debug" | "info" | "warn" | "error";
 
 const IS_PROD = process.env.NODE_ENV === "production";
 
-async function sendToTelemetry(level: LogLevel, message: string, data?: any) {
+async function sendToTelemetry(level: LogLevel, message: string, data?: unknown) {
   if (!IS_PROD) return;
 
   try {
-    // Simple fire-and-forget telemetry call to our backend
     await fetch("/api/telemetry/log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,29 +30,29 @@ async function sendToTelemetry(level: LogLevel, message: string, data?: any) {
 }
 
 export const logger = {
-  debug: (message: string, ...args: any[]) => {
+  debug: (message: string, ...args: unknown[]) => {
     if (!IS_PROD) {
       console.debug(`[DEBUG] ${message}`, ...args);
     }
   },
 
-  info: (message: string, ...args: any[]) => {
+  info: (message: string, ...args: unknown[]) => {
     if (!IS_PROD) {
       console.info(`[INFO] ${message}`, ...args);
     }
   },
 
-  warn: (message: string, ...args: any[]) => {
+  warn: (message: string, ...args: unknown[]) => {
     console.warn(`[WARN] ${message}`, ...args);
-    sendToTelemetry("warn", message, args);
+    sendToTelemetry("warn", message, { args });
   },
 
-  error: (message: string, error?: any, context?: any) => {
+  error: (message: string, error?: unknown, context?: unknown) => {
     console.error(`[ERROR] ${message}`, error, context);
-    sendToTelemetry("error", message, { 
-      error: error instanceof Error ? error.message : error,
+    sendToTelemetry("error", message, {
+      error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      context 
+      context,
     });
   },
 };

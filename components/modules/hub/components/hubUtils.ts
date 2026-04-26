@@ -8,7 +8,8 @@ export function initials(name: string) {
   return (a + b).toUpperCase();
 }
 
-export function formatDateTime(value: string | Date) {
+export function formatDateTime(value?: string | Date | null) {
+  if (!value) return "";
   try {
     const d = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(d.getTime())) return "";

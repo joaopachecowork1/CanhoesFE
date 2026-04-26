@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
+import React, { type ComponentProps, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ImageOff, Upload } from "lucide-react";
 
@@ -69,6 +69,15 @@ export function CanhoesModuleHeader({
 /**
  * Miniatura de media (imagem ou ícone de fallback).
  */
+type CanhoesMediaThumbProps = {
+  alt: string;
+  frameClassName?: string;
+  iconClassName?: string;
+  imageClassName?: string;
+  normalizeSrc?: boolean;
+  src?: string | null;
+};
+
 export function CanhoesMediaThumb({
   alt,
   frameClassName,
@@ -108,6 +117,15 @@ export function CanhoesMediaThumb({
 /**
  * Trigger para upload de ficheiros com estilo Canhões.
  */
+type CanhoesFileTriggerProps = {
+  accept?: string;
+  className?: string;
+  fileName?: string | null;
+  iconClassName?: string;
+  onChange?: (file: File | null) => void;
+  placeholder?: string;
+};
+
 export function CanhoesFileTrigger({
   accept = "image/*",
   className,
@@ -129,7 +147,7 @@ export function CanhoesFileTrigger({
         type="file"
         accept={accept}
         className="sr-only"
-        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+        onChange={(event) => onChange?.(event.target.files?.[0] ?? null)}
       />
     </label>
   );
@@ -137,6 +155,7 @@ export function CanhoesFileTrigger({
 
 type CanhoesFeatureCardProps = {
   children: ReactNode;
+  className?: string;
   description?: string;
   footer?: ReactNode;
   headerAction?: ReactNode;
@@ -159,6 +178,7 @@ type CanhoesFeatureCardProps = {
  */
 export function CanhoesFeatureCard({
   children,
+  className,
   description,
   footer,
   headerAction,
@@ -170,6 +190,7 @@ export function CanhoesFeatureCard({
     <Card
       className={cn(
         "rounded-2xl transition-colors",
+        className,
         variant === "default" && "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)]",
         variant === "official" && "canhoes-bits-panel canhoes-bits-panel--official"
       )}

@@ -5,7 +5,7 @@ import { MessageSquare, Gift, Vote, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
-import { SectionBoundary } from "@/components/ui/section-boundary";
+
 import { homeCopy as homeCopyText } from "@/lib/canhoesCopy";
 import { openComposeSheet } from "@/lib/canhoesEvent";
 import { cn } from "@/lib/utils";

@@ -155,7 +155,6 @@ export function MediaCarousel({
                 }}
               >
                 {media.map((url, index) => {
-                  const isActive = index === currentIndex;
                   const isAdjacent = Math.abs(index - currentIndex) === 1;
                   return (
                   <div

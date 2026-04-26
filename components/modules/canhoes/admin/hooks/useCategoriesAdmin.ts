@@ -20,7 +20,7 @@ const EMPTY_ADMIN_VOTES = [] as Awaited<
 type CategoryFormState = {
   description: string;
   isActive: boolean;
-  kind: AwardCategoryDto["kind"];
+  kind: string;
   name: string;
   sortOrder: string;
   voteQuestion: string;
@@ -49,12 +49,12 @@ function buildInitialForm(sortOrder: number): CategoryFormState {
 function buildFormFromCategory(category: AwardCategoryDto): CategoryFormState {
   return {
     description: category.description ?? "",
-    isActive: category.isActive,
+    isActive: category.isActive ?? false,
     kind: category.kind,
     name: category.name,
     sortOrder: String(category.sortOrder),
     voteQuestion: category.voteQuestion ?? "",
-    voteRules: category.voteRules ?? "",
+    voteRules: "",
   };
 }
 
@@ -192,8 +192,8 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
     () =>
       [...categories].sort(
         (left, right) =>
-          left.sortOrder -
-            right.sortOrder || left.name.localeCompare(right.name, "pt-PT")
+          (left.sortOrder ?? 0) -
+            (right.sortOrder ?? 0) || left.name.localeCompare(right.name, "pt-PT")
       ),
     [categories]
   );

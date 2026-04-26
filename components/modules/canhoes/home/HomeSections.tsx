@@ -1,15 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { memo, type ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-import { Clock3, Loader2, MessageSquare, Vote } from "lucide-react";
+import { memo } from "react";
+import { Clock3, Loader2, MessageSquare } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
-import { ErrorAlert } from "@/components/ui/error-alert";
-import { SectionBoundary } from "@/components/ui/section-boundary";
+import { Card, CardContent } from "@/components/ui/card";
+import { CanhoesHeroEmblem as HeroEmblemIcon } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { homeCopy as homeCopyText } from "@/lib/canhoesCopy";
 import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { cn } from "@/lib/utils";
@@ -17,31 +13,10 @@ import { cn } from "@/lib/utils";
 import type { CanhoesEventHomeViewModel } from "./useCanhoesEventHome";
 import { ActionButton } from "./HomeActions";
 import { MetricCard } from "./HomeCards";
-
-const HomeFeedPanel = dynamic(() => import("./HomePanels").then(m => m.HomeFeedPanel), {
-  loading: () => <div className="min-h-[200px] animate-pulse rounded-lg bg-[var(--bg-paper-soft)]" />
-});
-
-const HomeSecretSantaPanel = dynamic(() => import("./HomePanels").then(m => m.HomeSecretSantaPanel), {
-  loading: () => <div className="min-h-[150px] animate-pulse rounded-lg bg-[var(--bg-paper-soft)]" />
-});
-
-const HomeChecklistPanel = dynamic(() => import("./HomePanels").then(m => m.HomeChecklistPanel), {
-  loading: () => <div className="min-h-[150px] animate-pulse rounded-lg bg-[var(--bg-paper-soft)]" />
-});
-
-const CanhoesHeroEmblem = dynamic(() => import("@/components/chrome/canhoes/CanhoesHeroEmblem").then(m => m.CanhoesHeroEmblem), {
-  ssr: true,
-  loading: () => <div className="h-12 w-12 rounded-xl animate-pulse bg-white/10" />
-});
+import type { MetricItem } from "./HomeCards";
 
 const HERO_CARD_CLASS =
   "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)] before:absolute before:inset-0 before:bg-[url('/noise.png')] before:opacity-[0.03] before:pointer-events-none";
-
-const PANEL_CARD_CLASS =
-  "rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)] transition-all duration-300 ease-out";
-
-// ... (rest of type definitions unchanged)
 
 export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadingState() {
   return (
@@ -58,7 +33,34 @@ export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadin
   );
 });
 
-// ...
+export const CanhoesEventHomeErrorState = memo(function CanhoesEventHomeErrorState({ errorMessage }: Readonly<{ errorMessage?: string | null }>) {
+  return (
+    <Card className={HERO_CARD_CLASS}>
+      <CardContent className="flex min-h-[12rem] items-center justify-center">
+        <p className="text-sm text-[rgba(245,237,224,0.7)]">{errorMessage ?? "Erro ao carregar o evento"}</p>
+      </CardContent>
+    </Card>
+  );
+});
+
+export const CanhoesEventHomeContent = memo(function CanhoesEventHomeContent({ viewModel }: Readonly<{ viewModel: CanhoesEventHomeViewModel }>) {
+  const { event, homeCopy, overview, phaseDeadline, phaseLabel, phaseSummary } = viewModel;
+  const metrics: MetricItem[] = [];
+
+  return (
+    <div className="space-y-6">
+      <HomeHeroSection
+        event={event}
+        homeCopy={homeCopy}
+        metrics={metrics}
+        overview={overview}
+        phaseDeadline={phaseDeadline}
+        phaseLabel={phaseLabel}
+        phaseSummary={phaseSummary}
+      />
+    </div>
+  );
+});
 
 const HomeHeroSection = memo(function HomeHeroSection({
   event,
@@ -89,7 +91,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
               {homeCopyText.heroTitle}
             </h1>
           </div>
-          <CanhoesHeroEmblem compact className="mt-1 scale-110 sm:scale-125" />
+          <HeroEmblemIcon compact className="mt-1 scale-110 sm:scale-125" />
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -143,46 +145,5 @@ const HomeHeroSection = memo(function HomeHeroSection({
         </div>
       </div>
     </section>
-  );
-});
-
-const HomeAlertsSection = memo(function HomeAlertsSection({ alerts }: Readonly<{ alerts: AlertItem[] }>) {
-  return (
-    <HomePanel title={homeCopyText.alertsTitle} icon={Clock3} cardClassName="border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]">
-      {alerts.map((alert) => (
-        <div key={alert} className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-3 text-sm text-[var(--ink-primary)]">
-          {alert}
-        </div>
-      ))}
-    </HomePanel>
-  );
-});
-
-const HomePanel = memo(function HomePanel({
-  cardClassName,
-  children,
-  footer,
-  icon: Icon,
-  title,
-}: Readonly<{
-  cardClassName?: string;
-  children: ReactNode;
-  footer?: ReactNode;
-  icon: LucideIcon;
-  title: string;
-}>) {
-  return (
-    <Card className={cn(PANEL_CARD_CLASS, cardClassName)}>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-[var(--ink-primary)]">
-          <Icon className="h-4 w-4 text-[var(--moss)]" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {children}
-        {footer}
-      </CardContent>
-    </Card>
   );
 });

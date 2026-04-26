@@ -73,7 +73,7 @@ type CategoryUsage = {
   voteCount: number;
 };
 
-const CATEGORY_KIND_LABELS: Record<AwardCategoryDto["kind"], string> = {
+const CATEGORY_KIND_LABELS: Record<string, string> = {
   Sticker: "Sticker",
   UserVote: "Voto oficial",
 };
@@ -266,7 +266,7 @@ function CategoryEditorSheet({
               <Label>Tipo</Label>
               <Select
                 value={form.kind}
-                onValueChange={(value: AwardCategoryDto["kind"]) => onChange({ kind: value })}
+                onValueChange={(value: string) => onChange({ kind: value })}
                 disabled={isBusy}
               >
                 <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}>

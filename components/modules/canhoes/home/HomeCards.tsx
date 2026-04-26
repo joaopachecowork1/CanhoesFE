@@ -6,6 +6,15 @@ import { cn } from "@/lib/utils";
 const ITEM_CLASS =
   "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-4 transition-all duration-300 ease-out hover:border-[var(--border-moss)] hover:shadow-sm";
 
+export type MetricItem = {
+  hint: string;
+  label: string;
+  tone?: "green" | "purple";
+  value: string;
+};
+
+export type AlertItem = string;
+
 export function MetricCard({
   hint,
   label,
