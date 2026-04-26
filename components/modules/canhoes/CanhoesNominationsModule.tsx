@@ -10,12 +10,11 @@ import { useEventOverview } from "@/hooks/useEventOverview";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { CanhoesFeatureCard, CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
@@ -45,7 +44,7 @@ function NominationsLoadingState() {
   );
 }
 
-export function CanhoesNominationsModule() {
+export function CanhoesNominationsModule({ initialCategories }: { initialCategories?: EventCategoryDto[] }) {
   const queryClient = useQueryClient();
   const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
 
@@ -60,6 +59,7 @@ export function CanhoesNominationsModule() {
       const categories = await canhoesEventsRepo.getUserCategories(queryEventId);
       return categories.filter((category) => category.isActive);
     },
+    initialData: initialCategories,
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -268,96 +268,89 @@ function CategoryNominationCard({
   });
 
   return (
-    <Card className="canhoes-bits-panel canhoes-bits-panel--official rounded-2xl">
-      <CardHeader className="space-y-1 pb-3">
-        <CardTitle className="text-[var(--text-primary)]">{category.name}</CardTitle>
-        {category.description ? (
-          <p className="text-sm text-[var(--text-muted)]">{category.description}</p>
-        ) : null}
-      </CardHeader>
-
-      <CardContent className="space-y-3">
-        {alreadyNominated ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="bg-[rgba(255,184,0,0.08)] border border-[var(--neon-amber)] text-[var(--neon-amber)]">
-              <Clock className="mr-1 h-3.5 w-3.5" />
-              Aguarda aprovacao
-            </Badge>
-            <span className="text-sm font-medium text-[var(--text-primary)]">{nominatedTitle || "Ja nomeaste nesta categoria"}</span>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-            <div className="space-y-2">
-              <Input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Ex.: Nome da pessoa ou item"
-                className="border-[var(--border-moss)] focus-visible:border-[var(--border-neon)]"
-                maxLength={120}
+    <CanhoesFeatureCard
+      title={category.name}
+      description={category.description ?? undefined}
+      variant="official"
+    >
+      {alreadyNominated ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className="bg-[rgba(255,184,0,0.08)] border border-[var(--neon-amber)] text-[var(--neon-amber)]">
+            <Clock className="mr-1 h-3.5 w-3.5" />
+            Aguarda aprovacao
+          </Badge>
+          <span className="text-sm font-medium text-[var(--text-primary)]">{nominatedTitle || "Ja nomeaste nesta categoria"}</span>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="space-y-2">
+            <Input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Ex.: Nome da pessoa ou item"
+              className="border-[var(--border-moss)] focus-visible:border-[var(--border-neon)]"
+              maxLength={120}
+              disabled={!isPhaseOpen || createNomination.isPending}
+            />
+            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+              <span>2 a 120 caracteres.</span>
+              <span className="font-[var(--font-mono)]">{titleTrimmed.length}/120</span>
+            </div>
+            {file ? <p className="text-xs text-[var(--text-muted)]">Ficheiro selecionado: {file.name}</p> : null}
+            <div className="space-y-1 text-xs text-[var(--text-muted)]">
+              <label htmlFor={`nomination-file-${category.id}`}>Upload opcional</label>
+              <input
+                id={`nomination-file-${category.id}`}
+                type="file"
+                accept="image/*"
+                className="block w-full text-xs"
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
                 disabled={!isPhaseOpen || createNomination.isPending}
               />
-              <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-                <span>2 a 120 caracteres.</span>
-                <span className="font-[var(--font-mono)]">{titleTrimmed.length}/120</span>
-              </div>
-              {file ? <p className="text-xs text-[var(--text-muted)]">Ficheiro selecionado: {file.name}</p> : null}
-              <div className="space-y-1 text-xs text-[var(--text-muted)]">
-                <label htmlFor={`nomination-file-${category.id}`}>Upload opcional</label>
-                <input
-                  id={`nomination-file-${category.id}`}
-                  type="file"
-                  accept="image/*"
-                  className="block w-full text-xs"
-                  onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                  disabled={!isPhaseOpen || createNomination.isPending}
-                />
-              </div>
             </div>
-
-            <Button
-              type="button"
-              onClick={() => createNomination.mutate()}
-              disabled={!isPhaseOpen || !isValid || createNomination.isPending}
-              className={cn(
-                "min-w-36",
-                isValid && !createNomination.isPending
-                  ? "bg-[linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,212,170,0.12))] border border-[var(--border-neon)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(0,255,136,0.22)] hover:shadow-[0_0_18px_rgba(0,255,136,0.18)] active:scale-[0.98]"
-                  : "opacity-50"
-              )}
-            >
-              {createNomination.isPending ? "A submeter..." : "Submeter"}
-            </Button>
-          </div>
-        )}
-
-        <CanhoesDecorativeDivider tone="moss" />
-
-        <div className="pt-1 space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-[var(--text-primary)]">Nomeacoes aprovadas</h4>
-            <span className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
-              {approvedNominees.length} nominee(s)
-            </span>
           </div>
 
-          {approvedNominees.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria oficial.</p>
-          ) : (
-            <VirtualizedList
-              items={approvedNominees}
-              getKey={(nominee) => nominee.id}
-              estimateSize={() => 52}
-              className="max-h-[34svh]"
-              renderItem={(nominee) => (
-                <div className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--neon-green)]" />
-                  <span className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.title}</span>
-                </div>
-              )}
-            />
-          )}
+          <Button
+            type="button"
+            onClick={() => createNomination.mutate()}
+            disabled={!isPhaseOpen || !isValid || createNomination.isPending}
+            className={cn(
+              "min-w-36",
+              isValid && !createNomination.isPending
+                ? "bg-[linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,212,170,0.12))] border border-[var(--border-neon)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(0,255,136,0.22)] hover:shadow-[0_0_18px_rgba(0,255,136,0.18)] active:scale-[0.98]"
+                : "opacity-50"
+            )}
+          >
+            {createNomination.isPending ? "A submeter..." : "Submeter"}
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      <div className="pt-1 space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-medium text-[var(--text-primary)]">Nomeacoes aprovadas</h4>
+          <span className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
+            {approvedNominees.length} nominee(s)
+          </span>
+        </div>
+
+        {approvedNominees.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)]">Ainda sem nomeacoes aprovadas nesta categoria oficial.</p>
+        ) : (
+          <VirtualizedList
+            items={approvedNominees}
+            getKey={(nominee) => nominee.id}
+            estimateSize={() => 52}
+            className="max-h-[34svh]"
+            renderItem={(nominee) => (
+              <div className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--neon-green)]" />
+                <span className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.title}</span>
+              </div>
+            )}
+          />
+        )}
+      </div>
+    </CanhoesFeatureCard>
   );
 }

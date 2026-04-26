@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+import { logger } from "@/lib/logger";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -44,7 +46,7 @@ export const authOptions: NextAuthOptions = {
       session.idToken = token.idToken;
 
       if (!session.idToken) {
-        console.warn("[Auth Session Callback] ⚠️ NO ID TOKEN IN SESSION - Login will likely fail");
+        logger.warn("[Auth Session Callback] ⚠️ NO ID TOKEN IN SESSION - Login will likely fail");
       }
 
       return session;

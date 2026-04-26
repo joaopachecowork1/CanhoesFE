@@ -31,20 +31,20 @@ export function CompactSegmentTabs({
               type="button"
               onClick={() => onSelect(item.id)}
               className={cn(
-                "canhoes-tap inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors duration-150",
+                "canhoes-tap inline-flex min-h-[44px] items-center gap-2 rounded-full border px-5 py-2 text-[13px] font-bold tracking-tight transition-all duration-300 ease-out active:scale-[0.96]",
                 isActive
                   ? "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]"
-                  : "border-[rgba(212,184,150,0.12)] bg-[rgba(14,19,10,0.92)] text-[rgba(243,234,216,0.82)] hover:bg-[rgba(20,26,13,0.96)] active:bg-[rgba(20,26,13,0.96)]"
+                  : "border-[rgba(212,184,150,0.12)] bg-[rgba(14,19,10,0.85)] text-[rgba(243,234,216,0.7)] hover:border-[rgba(212,184,150,0.24)] hover:bg-[rgba(20,26,13,0.92)] hover:text-[rgba(243,234,216,0.9)]"
               )}
               aria-pressed={isActive}
             >
               <span className="truncate">{item.label}</span>
               {item.badge ? (
                 <span className={cn(
-                  "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors duration-150",
+                  "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold transition-all duration-300",
                   isActive
-                    ? "bg-[rgba(95,123,56,0.12)] text-[var(--ink-secondary)]"
-                    : "border border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.12)] text-[var(--bg-paper)]"
+                    ? "bg-[var(--moss)] text-white"
+                    : "border border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.12)] text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                 )}>
                   {item.badge}
                 </span>

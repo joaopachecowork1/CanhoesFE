@@ -11,6 +11,7 @@ function toFormData(files: File[]) {
 
 export const canhoesEventsRepo = {
   getActiveContext: () => canhoesFetch<T.EventActiveContextDto>("/v1/events/active/context"),
+  getActiveHomeSnapshot: () => canhoesFetch<T.EventHomeSnapshotDto>("/v1/events/active/home-snapshot"),
   getAdminBootstrap: (eventId: string, includeLists = false) =>
     canhoesFetch<T.EventAdminBootstrapDto>(`/v1/events/${eventId}/admin/bootstrap?includeLists=${includeLists}`),
   getEventHomeSnapshot: (eventId: string) => canhoesFetch<T.EventHomeSnapshotDto>(`/v1/events/${eventId}/home-snapshot`),

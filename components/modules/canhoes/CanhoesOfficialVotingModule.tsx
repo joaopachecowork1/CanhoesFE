@@ -12,12 +12,12 @@ import { CompactSegmentTabs } from "./CompactSegmentTabs";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CanhoesFeatureCard, CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { Card, CardContent } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
+import { useSignalR } from "@/hooks/useSignalR";
 
 function OfficialVotingLoadingState() {
   return (
@@ -36,67 +36,83 @@ function OfficialVotingLoadingState() {
   );
 }
 
-export function CanhoesOfficialVotingModule() {
+export function CanhoesOfficialVotingModule({ initialData }: { initialData?: OfficialVotingBoardDto }) {
   const queryClient = useQueryClient();
   const { event } = useEventOverview();
 
   const eventId = event?.id ?? null;
-  const queryEventId = eventId ?? "";
+  const activeEventId = eventId ?? "";
 
-  const boardQuery = useQuery({
-    queryKey: ["official-voting", queryEventId],
+  const votingBoardQuery = useQuery({
+    queryKey: ["official-voting", activeEventId],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(queryEventId),
+    queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(activeEventId),
+    initialData,
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 3,
     refetchOnWindowFocus: false,
   });
 
-  const boardCategories = useMemo(
-    () => boardQuery.data?.categories ?? [],
-    [boardQuery.data]
+  const { connection } = useSignalR(eventId);
+
+  useEffect(() => {
+    if (!connection) return;
+
+    connection.on("VoteCast", () => {
+      // Someone voted, refresh the board to show updated counts (if public)
+      void queryClient.invalidateQueries({ queryKey: ["official-voting", activeEventId] });
+    });
+
+    return () => {
+      connection.off("VoteCast");
+    };
+  }, [connection, queryClient, activeEventId]);
+
+  const officialVotingCategories = useMemo(
+    () => votingBoardQuery.data?.categories ?? [],
+    [votingBoardQuery.data]
   );
 
   const { selectedId: selectedCategoryId, setSelectedId: setSelectedCategoryId, selectedItem: selectedCategory } =
-    useCategorySelection(boardCategories, (c) => c.id);
+    useCategorySelection(officialVotingCategories, (category) => category.id);
 
-  const castVote = useMutation({
-    mutationFn: (payload: CastOfficialVoteRequest) =>
-      canhoesEventsRepo.castOfficialVote(queryEventId, payload),
-    onMutate: async (payload) => {
-      if (!eventId) return { previous: null };
+  const castOfficialVoteMutation = useMutation({
+    mutationFn: (votePayload: CastOfficialVoteRequest) =>
+      canhoesEventsRepo.castOfficialVote(activeEventId, votePayload),
+    onMutate: async (votePayload) => {
+      if (!eventId) return { previousBoardData: null };
 
-      await queryClient.cancelQueries({ queryKey: ["official-voting", queryEventId] });
-      const previous = queryClient.getQueryData<OfficialVotingBoardDto>(["official-voting", queryEventId]);
+      await queryClient.cancelQueries({ queryKey: ["official-voting", activeEventId] });
+      const previousBoardData = queryClient.getQueryData<OfficialVotingBoardDto>(["official-voting", activeEventId]);
 
-      queryClient.setQueryData<OfficialVotingBoardDto>(["official-voting", queryEventId], (old) => {
-        if (!old) return old;
+      queryClient.setQueryData<OfficialVotingBoardDto>(["official-voting", activeEventId], (oldData) => {
+        if (!oldData) return oldData;
         return {
-          ...old,
-          categories: old.categories.map((category) =>
-            category.id === payload.categoryId
-              ? { ...category, myNomineeId: payload.nomineeId }
+          ...oldData,
+          categories: oldData.categories.map((category) =>
+            category.id === votePayload.categoryId
+              ? { ...category, myNomineeId: votePayload.nomineeId }
               : category
           ),
         };
       });
 
-      return { previous };
+      return { previousBoardData };
     },
-    onError: (error, _payload, context) => {
-      if (eventId && context?.previous) {
-        queryClient.setQueryData(["official-voting", queryEventId], context.previous);
+    onError: (error, _votePayload, mutationContext) => {
+      if (eventId && mutationContext?.previousBoardData) {
+        queryClient.setQueryData(["official-voting", activeEventId], mutationContext.previousBoardData);
       }
       logFrontendError("CanhoesOfficialVoting.castVote", error, { eventId });
       toast.error(getErrorMessage(error, "Nao foi possivel registar o voto. Tenta novamente."));
     },
     onSuccess: async () => {
       if (!eventId) return;
-      await queryClient.invalidateQueries({ queryKey: ["official-voting", queryEventId], exact: true });
+      await queryClient.invalidateQueries({ queryKey: ["official-voting", activeEventId], exact: true });
     },
   });
 
-  if (boardQuery.isLoading) {
+  if (votingBoardQuery.isLoading) {
     return (
       <div className="space-y-3">
         <CanhoesModuleHeader
@@ -109,22 +125,24 @@ export function CanhoesOfficialVotingModule() {
     );
   }
 
-  if (!eventId || boardQuery.error || !boardQuery.data) {
+  if (!eventId || votingBoardQuery.error || !votingBoardQuery.data) {
     return (
       <ErrorAlert
         title="Erro ao carregar boletim oficial"
-        description={getErrorMessage(boardQuery.error, "Nao foi possivel abrir o boletim oficial.")}
+        description={getErrorMessage(votingBoardQuery.error, "Nao foi possivel abrir o boletim oficial.")}
         actionLabel="Tentar novamente"
         tone="official"
-        onAction={() => void boardQuery.refetch()}
+        onAction={() => void votingBoardQuery.refetch()}
       />
     );
   }
 
-  const board = boardQuery.data;
-  const totalCategories = board.categories.length;
-  const votedCategories = board.categories.filter((category) => Boolean(category.myNomineeId)).length;
-  const completion = totalCategories > 0 ? Math.round((votedCategories / totalCategories) * 100) : 0;
+  const officialVotingBoard = votingBoardQuery.data;
+  const totalCategoriesCount = officialVotingBoard.categories.length;
+  const votedCategoriesCount = officialVotingBoard.categories.filter((category) => Boolean(category.myNomineeId)).length;
+  const votingCompletionPercentage = totalCategoriesCount > 0 
+    ? Math.round((votedCategoriesCount / totalCategoriesCount) * 100) 
+    : 0;
 
   return (
     <div className="space-y-4">
@@ -132,24 +150,24 @@ export function CanhoesOfficialVotingModule() {
         icon={Vote}
         title="Boletim oficial"
         description="Area oficial de voto, separada das sondagens do mural."
-        badgeLabel={`${votedCategories}/${totalCategories}`}
+        badgeLabel={`${votedCategoriesCount}/${totalCategoriesCount}`}
       />
 
       <Card className="rounded-2xl border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)]">
         <CardContent className="space-y-3 py-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[var(--ink-secondary)]">Votaste em {votedCategories} de {totalCategories} categorias oficiais</span>
-            <span className="font-[var(--font-mono)] text-[var(--ink-primary)]">{completion}%</span>
+            <span className="text-[var(--ink-secondary)]">Votaste em {votedCategoriesCount} de {totalCategoriesCount} categorias oficiais</span>
+            <span className="font-[var(--font-mono)] text-[var(--ink-primary)]">{votingCompletionPercentage}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-[rgba(95,123,56,0.16)]">
-            <div className="h-full rounded-full bg-[var(--moss)] transition-all" style={{ width: `${completion}%` }} />
+            <div className="h-full rounded-full bg-[var(--moss)] transition-all" style={{ width: `${votingCompletionPercentage}%` }} />
           </div>
         </CardContent>
       </Card>
 
       <CompactSegmentTabs
         activeId={selectedCategoryId ?? ""}
-        items={boardCategories.map((category) => ({
+        items={officialVotingCategories.map((category) => ({
           id: category.id,
           label: category.title,
           badge: category.myNomineeId ? "Votado" : undefined,
@@ -160,14 +178,14 @@ export function CanhoesOfficialVotingModule() {
       {selectedCategory ? (
         <OfficialVotingCategoryCard
           category={selectedCategory}
-          canVote={board.canVote}
-          isBusy={castVote.isPending}
-          onVote={(payload) => castVote.mutate(payload)}
-          pendingPayload={castVote.variables ?? null}
+          canVote={officialVotingBoard.canVote}
+          isBusy={castOfficialVoteMutation.isPending}
+          onVote={(votePayload) => castOfficialVoteMutation.mutate(votePayload)}
+          pendingPayload={castOfficialVoteMutation.variables ?? null}
         />
       ) : null}
 
-      {votedCategories === totalCategories && totalCategories > 0 ? (
+      {votedCategoriesCount === totalCategoriesCount && totalCategoriesCount > 0 ? (
         <Card className="rounded-2xl border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.1)] text-[var(--ink-primary)]">
           <CardContent className="py-6 text-center font-semibold text-[var(--moss)]">
             Boletim oficial completo
@@ -191,78 +209,69 @@ function OfficialVotingCategoryCard({
   onVote: (payload: CastOfficialVoteRequest) => void;
   pendingPayload: CastOfficialVoteRequest | null;
 }>) {
-  const voteMap = useMemo(() => {
+  const nomineeVoteMap = useMemo(() => {
     const totalVotes = category.totalVotes ?? 0;
     return category.nominees.map((nominee) => {
       const count = nominee.voteCount ?? 0;
-      const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-      return { id: nominee.id, count, pct };
+      const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+      return { id: nominee.id, count, percentage };
     });
   }, [category.nominees, category.totalVotes]);
 
   return (
-    <Card className="relative rounded-2xl border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)]">
+    <CanhoesFeatureCard
+      title={category.title}
+      description={category.description ?? undefined}
+      icon={Flame}
+      className="relative"
+    >
       {canVote ? null : (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-[rgba(42,30,21,0.12)] backdrop-blur-[1px] text-xs uppercase tracking-[0.12em] text-[var(--ink-muted)]">
           Boletim encerrado
         </div>
       )}
 
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-[var(--ink-primary)]">
-          <Flame className="h-4 w-4 text-[var(--bark)]" />
-          {category.title}
-        </CardTitle>
-        {category.description ? (
-          <p className="text-sm text-[var(--ink-secondary)]">{category.description}</p>
-        ) : null}
-      </CardHeader>
+      {category.nominees.length > 0 ? (
+        <VirtualizedList
+          items={category.nominees}
+          getKey={(nominee) => nominee.id}
+          estimateSize={() => 72}
+          className="max-h-[52svh]"
+          renderItem={(nominee) => {
+            const isNomineeSelected = category.myNomineeId === nominee.id;
+            const isVotePending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
+            const nomineeVoteStatistics = nomineeVoteMap.find((voteEntry) => voteEntry.id === nominee.id);
+            let statusIcon = null;
 
-      <CardContent className="space-y-2">
-        <CanhoesDecorativeDivider tone="moss" />
+            if (isVotePending) {
+              statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+            } else if (isNomineeSelected) {
+              statusIcon = <CheckCircle2 className="h-4 w-4" />;
+            }
 
-        {category.nominees.length > 0 ? (
-          <VirtualizedList
-            items={category.nominees}
-            getKey={(nominee) => nominee.id}
-            estimateSize={() => 72}
-            className="max-h-[52svh]"
-            renderItem={(nominee) => {
-              const selected = category.myNomineeId === nominee.id;
-              const pending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
-              const stats = voteMap.find((entry) => entry.id === nominee.id);
-              let statusIcon = null;
+            return (
+              <button
+                type="button"
+                disabled={!canVote || isBusy}
+                onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
+                className={cn(
+                  "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3 border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] shadow-none",
+                  isNomineeSelected && "border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.08)]"
+                )}
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-[var(--ink-primary)]">{nominee.label}</p>
+                  {category.totalVotes && category.totalVotes > 0 ? (
+                    <p className="text-xs text-[var(--ink-secondary)]">{nomineeVoteStatistics?.count ?? 0} votos ({nomineeVoteStatistics?.percentage ?? 0}%)</p>
+                  ) : null}
+                </div>
 
-              if (pending) {
-                statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-              } else if (selected) {
-                statusIcon = <CheckCircle2 className="h-4 w-4" />;
-              }
-
-              return (
-                <button
-                  type="button"
-                  disabled={!canVote || isBusy}
-                  onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
-                  className={cn(
-                    "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3 border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] shadow-none",
-                    selected && "border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.08)]"
-                  )}
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-[var(--ink-primary)]">{nominee.label}</p>
-                    {category.totalVotes && category.totalVotes > 0 ? (
-                      <p className="text-xs text-[var(--ink-secondary)]">{stats?.count ?? 0} votos ({stats?.pct ?? 0}%)</p>
-                    ) : null}
-                  </div>
-
-                  <div className="shrink-0 text-[var(--moss)]">{statusIcon}</div>
-                </button>
-              );
-            }}
-          />
-        ) : null}
-      </CardContent>
-    </Card>
+                <div className="shrink-0 text-[var(--moss)]">{statusIcon}</div>
+              </button>
+            );
+          }}
+        />
+      ) : null}
+    </CanhoesFeatureCard>
   );
 }

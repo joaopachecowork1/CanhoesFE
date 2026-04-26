@@ -7,9 +7,10 @@ import {
 } from "@/components/modules/canhoes/home/HomeSections";
 import { useCanhoesEventHome } from "@/components/modules/canhoes/home/useCanhoesEventHome";
 import { SectionBoundary } from "@/components/ui/section-boundary";
+import type { EventHomeSnapshotDto } from "@/lib/api/types";
 
-export function CanhoesEventHomeModule() {
-  const { errorMessage, isLoading, viewModel } = useCanhoesEventHome();
+export function CanhoesEventHomeModule({ initialData }: { initialData?: EventHomeSnapshotDto }) {
+  const { errorMessage, isLoading, viewModel } = useCanhoesEventHome(initialData);
 
   if (isLoading) {
     return <CanhoesEventHomeLoadingState />;

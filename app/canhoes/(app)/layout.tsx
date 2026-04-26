@@ -55,7 +55,7 @@ export default function CanhoesAppLayout({
     if (!loading && !isLogged) {
       router.replace("/canhoes/login");
     }
-  }, [isLogged, loading, router, user]);
+  }, [isLogged, loading, router]);
 
   if (loading && !user) {
     return <AuthLoadingState label="A preparar os Canhoes..." />;

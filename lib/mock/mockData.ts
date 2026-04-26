@@ -493,9 +493,9 @@ export const MOCK_HUB_POSTS: EventFeedPostFullDto[] = [
   },
 ];
 
-// ─── Pending Admin ────────────────────────────────────────────────────────────
+// ─── Internal Helpers (Private) ───────────────────────────────────────────────
 
-export const MOCK_PENDING = {
+const MOCK_PENDING = {
   nominees: MOCK_NOMINEES.filter((n) => n.status === "pending"),
   categoryProposals: MOCK_CATEGORY_PROPOSALS.filter(
     (p) => p.status === "pending"
@@ -545,13 +545,6 @@ export const MOCK_VOTES = {
   ],
 };
 
-// ─── Proposals History ────────────────────────────────────────────────────────
-
-export const MOCK_PROPOSALS_HISTORY = {
-  categoryProposals: MOCK_CATEGORY_PROPOSALS,
-  measureProposals: MOCK_MEASURE_PROPOSALS,
-};
-
 // Events v1
 
 export const MOCK_EVENT_SUMMARY: EventSummaryDto = {
@@ -560,7 +553,7 @@ export const MOCK_EVENT_SUMMARY: EventSummaryDto = {
   isActive: true,
 };
 
-export const MOCK_EVENT_PHASES: EventPhaseDto[] = [
+const MOCK_EVENT_PHASES: EventPhaseDto[] = [
   {
     id: "phase-draw",
     type: "DRAW",
@@ -602,7 +595,7 @@ export const MOCK_EVENT_CONTEXT: EventContextDto = {
   activePhase: MOCK_EVENT_PHASES.find((phase) => phase.isActive) ?? null,
 };
 
-export const MOCK_EVENT_MODULES: EventModulesDto = {
+const MOCK_EVENT_MODULES: EventModulesDto = {
   feed: true,
   secretSanta: true,
   wishlist: true,

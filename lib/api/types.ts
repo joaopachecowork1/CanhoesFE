@@ -84,29 +84,6 @@ export type EventVotingOverviewDto = {
   remainingVoteCount: number;
 };
 
-export type OfficialVotingCategoryDto = {
-  id: string;
-  title: string;
-  description?: string | null;
-  kind?: string;
-  nominees: Array<{ id: string; label: string; voteCount?: number }>;
-  myNomineeId: string | null;
-  totalVotes: number;
-};
-
-export type OfficialVotingBoardDto = {
-  eventId: string;
-  phaseId?: string | null;
-  endsAt?: string | null;
-  categories: OfficialVotingCategoryDto[];
-  canVote: boolean;
-};
-
-export type CastOfficialVoteRequest = {
-  categoryId: string;
-  nomineeId: string;
-};
-
 export type EventWishlistItemDto = {
   id: string;
   userId: string;
@@ -268,90 +245,6 @@ export type AdminMemberDto = {
   displayName: string | null;
   isAdmin: boolean;
 };
-
-export type AwardCategoryDto = {
-  id: string;
-  name: string;
-  sortOrder: number;
-  isActive: boolean;
-  kind: string;
-  description: string | null;
-  voteQuestion: string | null;
-  voteRules: string | null;
-};
-
-export type CreateAwardCategoryRequest = {
-  name: string;
-  sortOrder?: number | null;
-  kind: string;
-  description?: string | null;
-  voteQuestion?: string | null;
-  voteRules?: string | null;
-};
-
-export type UpdateAwardCategoryRequest = {
-  name?: string | null;
-  sortOrder?: number | null;
-  isActive?: boolean | null;
-  kind?: string | null;
-  description?: string | null;
-  voteQuestion?: string | null;
-  voteRules?: string | null;
-};
-
-export type AdminCategoryNomineeResultDto = {
-  nomineeId: string;
-  title: string;
-  imageUrl: string | null;
-  voteCount: number;
-  voterUserIds: string[];
-};
-
-export type AdminVoteAuditRowDto = {
-  categoryId: string;
-  categoryName: string;
-  nomineeId: string;
-  userId: string;
-  userName: string;
-  updatedAtUtc: string;
-};
-
-export type HubPollOptionDto = {
-  id: string;
-  text: string;
-  voteCount: number;
-};
-
-export type HubPollDto = {
-  question: string;
-  options: HubPollOptionDto[];
-  myOptionId: string | null;
-  totalVotes: number;
-};
-
-export type HubCommentDto = {
-  id: string;
-  postId: string;
-  authorId: string;
-  userId?: string;
-  authorName: string;
-  userName?: string;
-  text: string;
-  createdAtUtc: string;
-  reactionCounts?: Record<string, number>;
-  myReactions?: string[];
-};
-
-export type AdminCategoryResultDto = {
-  categoryId: string;
-  categoryName: string;
-  totalVotes: number;
-  nominees: AdminCategoryNomineeResultDto[];
-  participationRate: number;
-  top: AdminCategoryNomineeResultDto[];
-};
-
-export type CanhoesCategoryResultDto = AdminCategoryResultDto;
 
 export type AdminListCountsDto = {
   nomineesTotal: number;

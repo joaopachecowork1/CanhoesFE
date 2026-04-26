@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { type InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { EventFeedPostFullDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
 
 import { useHubFeedComments } from "./useHubFeedComments";
 import { useHubFeedPostActions } from "./useHubFeedPostActions";
+import { useSignalR } from "./useSignalR";
 
 export type FeedSortOrder = "hot" | "new" | "top";
 const PAGE_SIZE = 15;
@@ -33,76 +34,77 @@ function hotScore(post: EventFeedPostFullDto): number {
   return (reactionCount + commentCount * 2) / Math.pow(hoursAgo + 2, 1.5);
 }
 
-function sortPosts(posts: EventFeedPostFullDto[], sort: FeedSortOrder): EventFeedPostFullDto[] {
-  const sorted = [...posts];
-  const pinned = sorted.filter((post) => post.isPinned);
-  const rest = sorted.filter((post) => !post.isPinned);
+function sortPosts(allPosts: EventFeedPostFullDto[], sortOrder: FeedSortOrder): EventFeedPostFullDto[] {
+  const postsToSort = [...allPosts];
+  const pinnedPosts = postsToSort.filter((post) => post.isPinned);
+  const regularPosts = postsToSort.filter((post) => !post.isPinned);
 
-  switch (sort) {
+  switch (sortOrder) {
     case "hot":
-      rest.sort((a, b) => hotScore(b) - hotScore(a));
+      regularPosts.sort((a, b) => hotScore(b) - hotScore(a));
       break;
     case "top":
-      rest.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
+      regularPosts.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
       break;
     case "new":
     default:
-      rest.sort((a, b) => String(b.createdAtUtc).localeCompare(String(a.createdAtUtc)));
+      regularPosts.sort((a, b) => String(b.createdAtUtc).localeCompare(String(a.createdAtUtc)));
       break;
   }
 
-  return [...pinned, ...rest];
+  return [...pinnedPosts, ...regularPosts];
 }
 
-function sanitizePosts(posts: EventFeedPostFullDto[] | null | undefined) {
-  return (Array.isArray(posts) ? posts : []).filter(
+function sanitizePosts(rawPosts: EventFeedPostFullDto[] | null | undefined) {
+  return (Array.isArray(rawPosts) ? rawPosts : []).filter(
     (post): post is EventFeedPostFullDto => Boolean(post?.id)
   );
 }
 
 function prependPostToFeed(
-  old: FeedInfiniteData | undefined,
-  createdPost: EventFeedPostFullDto
+  previousFeedData: FeedInfiniteData | undefined,
+  newlyCreatedPost: EventFeedPostFullDto
 ): FeedInfiniteData | undefined {
-  if (!old) return old;
+  if (!previousFeedData) return previousFeedData;
 
-  const [firstPage, ...restPages] = old.pages;
-  if (!firstPage) return old;
+  const [firstPage, ...remainingPages] = previousFeedData.pages;
+  if (!firstPage) return previousFeedData;
 
   return {
-    ...old,
+    ...previousFeedData,
     pages: [
       {
         ...firstPage,
-        posts: [createdPost, ...firstPage.posts.filter((post) => post.id !== createdPost.id)],
+        posts: [newlyCreatedPost, ...firstPage.posts.filter((post) => post.id !== newlyCreatedPost.id)],
       },
-      ...restPages,
+      ...remainingPages,
     ],
   };
 }
 
-export function useHubFeed(eventId: string | null) {
+export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteData) {
   const queryClient = useQueryClient();
-  const [sort, setSort] = useState<FeedSortOrder>("hot");
+  const [sortOrder, setSortOrder] = useState<FeedSortOrder>("hot");
 
-  const postsQuery = useInfiniteQuery({
+  const postsInfiniteQuery = useInfiniteQuery({
     queryKey: ["hub-posts", eventId],
     enabled: Boolean(eventId),
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const data = (await canhoesEventsRepo.getFeedPosts(eventId!, {
-        skip: pageParam,
+      const feedApiResponse = (await canhoesEventsRepo.getFeedPosts(eventId!, {
+        skip: pageParam as number,
         take: PAGE_SIZE,
       })) as FeedApiResponse;
 
-      const posts = sanitizePosts(data.items ?? []);
-      const nextSkip = data.hasMore ? pageParam + PAGE_SIZE : null;
+      const sanitizedPosts = sanitizePosts(feedApiResponse.items ?? []);
+      const nextPageSkip = feedApiResponse.hasMore ? (pageParam as number) + PAGE_SIZE : null;
 
       return {
-        posts,
-        nextCursor: nextSkip,
+        posts: sanitizedPosts,
+        nextCursor: nextPageSkip,
       };
     },
+    initialData,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     staleTime: 30_000,
     gcTime: 5 * 60 * 1000,
@@ -110,16 +112,16 @@ export function useHubFeed(eventId: string | null) {
     refetchOnReconnect: true,
   });
 
-  const safePosts = useMemo(
-    () => postsQuery.data?.pages.flatMap((page) => page.posts) ?? [],
-    [postsQuery.data]
+  const allSanitizedPosts = useMemo(
+    () => postsInfiniteQuery.data?.pages.flatMap((page) => page.posts) ?? [],
+    [postsInfiniteQuery.data]
   );
 
-  const displayedPosts = useMemo(() => sortPosts(safePosts, sort), [safePosts, sort]);
-  const allPostsCount = displayedPosts.length;
+  const sortedDisplayedPosts = useMemo(() => sortPosts(allSanitizedPosts, sortOrder), [allSanitizedPosts, sortOrder]);
+  const totalPostsInView = sortedDisplayedPosts.length;
 
   const { comments, openComments, commentDrafts, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft } =
-    useHubFeedComments({ eventId, posts: safePosts, queryClient });
+    useHubFeedComments({ eventId, posts: allSanitizedPosts, queryClient });
 
   const {
     showParticles,
@@ -131,42 +133,87 @@ export function useHubFeed(eventId: string | null) {
     adminDelete,
   } = useHubFeedPostActions({ eventId, queryClient });
 
-  const hasMore = postsQuery.hasNextPage ?? false;
-  const isFetchingNextPage = postsQuery.isFetchingNextPage;
+  const hasMorePosts = postsInfiniteQuery.hasNextPage ?? false;
+  const isFetchingNextPage = postsInfiniteQuery.isFetchingNextPage;
 
-  const loadMore = useCallback(() => {
-    if (hasMore && !isFetchingNextPage) {
-      void postsQuery.fetchNextPage();
+  const loadMorePosts = useCallback(() => {
+    if (hasMorePosts && !isFetchingNextPage) {
+      void postsInfiniteQuery.fetchNextPage();
     }
-  }, [hasMore, isFetchingNextPage, postsQuery]);
+  }, [hasMorePosts, isFetchingNextPage, postsInfiniteQuery]);
 
   const refreshPosts = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
   }, [queryClient, eventId]);
 
+  const { connection } = useSignalR(eventId);
+
   useEffect(() => {
-    const handlePostCreated = (event: Event) => {
-      const createdPost = (event as CustomEvent<EventFeedPostFullDto | undefined>).detail;
-      if (!createdPost?.id) return;
+    if (!connection) return;
 
-      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
-        prependPostToFeed(old, createdPost)
+    connection.on("PostCreated", (newlyCreatedPost: EventFeedPostFullDto) => {
+      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) =>
+        prependPostToFeed(previousData, newlyCreatedPost)
       );
-    };
+    });
 
-    globalThis.addEventListener("hub:postCreated", handlePostCreated);
-    return () => globalThis.removeEventListener("hub:postCreated", handlePostCreated);
-  }, [queryClient, eventId]);
+    connection.on("PostLiked", ({ postId, liked: isLiked }: { postId: string; liked: boolean }) => {
+      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
+        if (!previousData) return previousData;
+        return {
+          ...previousData,
+          pages: previousData.pages.map((page) => ({
+            ...page,
+            posts: page.posts.map((post) =>
+              post.id === postId
+                ? { ...post, likeCount: (post.likeCount ?? 0) + (isLiked ? 1 : -1) }
+                : post
+            ),
+          })),
+        };
+      });
+    });
+
+    connection.on("CommentCreated", ({ postId, comment: newlyCreatedComment }: { postId: string; comment: HubCommentDto }) => {
+      queryClient.invalidateQueries({ queryKey: ["hub-comments", postId] });
+      
+      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
+        if (!previousData) return previousData;
+        return {
+          ...previousData,
+          pages: previousData.pages.map((page) => ({
+            ...page,
+            posts: page.posts.map((post) =>
+              post.id === postId
+                ? { ...post, commentCount: (post.commentCount ?? 0) + 1 }
+                : post
+            ),
+          })),
+        };
+      });
+    });
+
+    connection.on("PollVoted", ({ postId, optionId }: { postId: string; optionId: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
+    });
+
+    return () => {
+      connection.off("PostCreated");
+      connection.off("PostLiked");
+      connection.off("CommentCreated");
+      connection.off("PollVoted");
+    };
+  }, [connection, queryClient, eventId]);
 
   return {
-    posts: displayedPosts,
-    allPostsCount,
-    errorMessage: postsQuery.error ? getErrorMessage(postsQuery.error, "Erro ao carregar o feed.") : null,
-    loading: postsQuery.isLoading,
-    sort,
-    setSort,
-    hasMore,
-    loadMore,
+    posts: sortedDisplayedPosts,
+    allPostsCount: totalPostsInView,
+    errorMessage: postsInfiniteQuery.error ? getErrorMessage(postsInfiniteQuery.error, "Erro ao carregar o feed.") : null,
+    loading: postsInfiniteQuery.isLoading,
+    sort: sortOrder,
+    setSort: setSortOrder,
+    hasMore: hasMorePosts,
+    loadMore: loadMorePosts,
     isFetchingNextPage,
     comments,
     openComments,

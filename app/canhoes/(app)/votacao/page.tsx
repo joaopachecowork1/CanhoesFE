@@ -1,20 +1,12 @@
+import { CanhoesOfficialVotingModule } from "@/components/modules/canhoes/CanhoesOfficialVotingModule";
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { OfficialVotingBoardDto } from "@/lib/api/types";
 
+export default async function VotingPage() {
+  // We need to know the active event ID first, but our server fetch can handle 
+  // the 'active' alias if the backend supports it, or we fetch the summary first.
+  // Assuming the backend supports /events/active/voting-board
+  const initialData = await canhoesServerFetch<OfficialVotingBoardDto>("events/active/voting-board");
 
-import dynamic from "next/dynamic";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
-import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
-
-const CanhoesOfficialVotingModule = dynamic(
-  () => import("@/components/modules/canhoes/CanhoesOfficialVotingModule").then((m) => ({ default: m.CanhoesOfficialVotingModule })),
-  { loading: () => <FeedSkeleton /> }
-);
-
-export default function VotacaoPage() {
-  return (
-    <div className="zone-voting">
-      <EventModuleGate moduleKey="voting">
-        <CanhoesOfficialVotingModule />
-      </EventModuleGate>
-    </div>
-  );
+  return <CanhoesOfficialVotingModule initialData={initialData ?? undefined} />;
 }

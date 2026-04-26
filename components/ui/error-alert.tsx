@@ -15,6 +15,17 @@ type ErrorAlertProps = {
   title?: string;
 };
 
+/**
+ * Alerta de erro estilizado com suporte para diferentes tons e ações.
+ * Ideal para exibir falhas de carregamento ou erros de submissão de formulários.
+ * 
+ * @param actionLabel - Texto opcional para o botão de ação (ex: "Tentar novamente").
+ * @param className - Classes CSS opcionais.
+ * @param description - Mensagem detalhada do erro.
+ * @param onAction - Função executada ao clicar no botão de ação.
+ * @param tone - O tom visual do alerta, influenciando cores e brilho.
+ * @param title - Título curto do erro.
+ */
 export function ErrorAlert({
   actionLabel,
   className,

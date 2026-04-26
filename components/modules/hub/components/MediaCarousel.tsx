@@ -60,6 +60,7 @@ export type MediaCarouselProps = {
   aspect?: "square" | "portrait" | "video";
   onImageClick?: (index: number) => void;
   authorName?: string;
+  isPriority?: boolean;
 };
 
 export function MediaCarousel({
@@ -68,6 +69,7 @@ export function MediaCarousel({
   aspect = "square",
   onImageClick,
   authorName,
+  isPriority = false,
 }: Readonly<MediaCarouselProps>) {
   const media = (urls ?? []).filter(Boolean);
   const [failedMedia, setFailedMedia] = useState<Record<string, boolean>>({});
@@ -90,6 +92,14 @@ export function MediaCarousel({
     onImageClick?.(index);
   }, [onImageClick]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      setCurrentIndex((prev) => Math.max(0, prev - 1));
+    } else if (e.key === "ArrowRight") {
+      setCurrentIndex((prev) => Math.min(media.length - 1, prev + 1));
+    }
+  }, [media.length, setCurrentIndex]);
+
   if (media.length === 0) return null;
 
   const maxH = aspect === "portrait" ? "max-h-[32rem]" : aspect === "video" ? "max-h-[28rem]" : "max-h-[24rem]";
@@ -103,6 +113,8 @@ export function MediaCarousel({
           role="region"
           aria-roledescription="carousel"
           aria-label="Galeria de imagens do post"
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
         >
           <div
             className={cn(
@@ -123,9 +135,10 @@ export function MediaCarousel({
                     src={absMediaUrl(currentImageUrl)}
                     alt={authorName ? `Imagem de ${authorName}` : "Media do post"}
                     fill
-                    loading="lazy"
+                    priority={isPriority}
+                    loading={isPriority ? "eager" : "lazy"}
                     decoding="async"
-                    sizes="(max-width: 640px) 100vw, 400px"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                     className="cursor-pointer object-contain transition-opacity hover:opacity-90"
                     onError={() => markAsFailed(currentImageUrl)}
                     onClick={() => handleClick(0)}
@@ -158,9 +171,10 @@ export function MediaCarousel({
                           src={absMediaUrl(url)}
                           alt={`Imagem ${index + 1} de ${media.length}`}
                           fill
-                          loading={isActive || isAdjacent ? "eager" : "lazy"}
+                          priority={isPriority && index === 0}
+                          loading={ (isPriority && index === 0) || isAdjacent ? "eager" : "lazy"}
                           decoding="async"
-                          sizes="(max-width: 640px) 100vw, 400px"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                           className="cursor-pointer object-contain transition-opacity hover:opacity-90"
                           onError={() => markAsFailed(url)}
                           onClick={() => handleClick(index)}

@@ -4,7 +4,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
 
-import { PostErrorBoundary } from "@/components/ui/post-error-boundary";
+import { SectionBoundary } from "@/components/ui/section-boundary";
 import { EmptyState } from "@/components/ui/empty-state";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { feedCopy } from "@/lib/canhoesCopy";
@@ -97,8 +97,12 @@ export function HubFeedList({
               overscan={4}
               getKey={(post) => post.id}
               estimateSize={() => 420}
-              renderItem={(post, index) => (
-                <PostErrorBoundary key={post.id}>
+                            renderItem={(post, index) => (
+                <SectionBoundary
+                  key={post.id}
+                  title="Erro no post"
+                  description="Ocorreu um erro ao renderizar este post."
+                >
                   <HubPostCard
                     post={post}
                     index={index}
@@ -120,7 +124,7 @@ export function HubFeedList({
                     onAdminPin={onAdminPin}
                     onAdminDelete={onAdminDelete}
                   />
-                </PostErrorBoundary>
+                </SectionBoundary>
               )}
             />
           </div>

@@ -50,10 +50,16 @@ const LazyFeedInsightsPanel = dynamic(loadFeedInsightsPanel, {
 });
 
 
-export function HubFeedModule({ showComposer = true }: Readonly<{ showComposer?: boolean }>) {
-  const state = useHubFeedModuleState();
+export function HubFeedModule({
+  showComposer = true,
+  initialData,
+}: Readonly<{
+  showComposer?: boolean;
+  initialData?: any;
+}>) {
+  const state = useHubFeedModuleState(initialData);
 
-  if (state.loading) return <FeedSkeleton count={3} />;
+  if (state.loading && !initialData) return <FeedSkeleton count={3} />;
 
   return <HubFeedModuleView showComposer={showComposer} state={state} />;
 }
@@ -148,13 +154,13 @@ function HubFeedModuleView({
   );
 }
 
-function useHubFeedModuleState() {
+function useHubFeedModuleState(initialData?: any) {
   const { data: session, status } = useSession();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();
   const { event: activeEvent } = useEventOverview();
   const eventId = activeEvent?.id ?? null;
-  const feed = useHubFeed(eventId);
+  const feed = useHubFeed(eventId, initialData);
   const sentinelRef = useFeedInfiniteScroll({ enabled: feed.hasMore, isFetchingNextPage: feed.isFetchingNextPage, onLoadMore: feed.loadMore });
   const currentUserName = session?.user?.name?.trim() || session?.user?.email?.trim() || "Tu";
   const handleCreatePost = useCreateFeedPost({ eventId });

@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Leaf } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
+import dynamic from "next/dynamic";
 import { CanhoesBrandMark } from "@/components/chrome/canhoes/CanhoesBrandMark";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+
+const LeafRain = dynamic(() => import("@/components/animations/LeafRain"), {
+  ssr: false, // Particles don't need SSR
+});
 
 const authErrorMessages: Record<string, string> = {
   AccessDenied: "A conta Google autenticou, mas nao tem acesso a esta area.",
@@ -28,19 +33,6 @@ export default function CanhoesLoginPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [leafParticles, setLeafParticles] = useState<
-    Array<{ delay: number; id: number; x: number }>
-  >([]);
-
-  useEffect(() => {
-    setLeafParticles(
-      Array.from({ length: 16 }, (_, index) => ({
-        delay: Math.random() * 4.5,
-        id: index,
-        x: Math.random() * 100,
-      }))
-    );
-  }, []);
 
   useEffect(() => {
     const timeoutId = globalThis.setTimeout(() => setIsVisible(true), 100);
@@ -68,28 +60,10 @@ export default function CanhoesLoginPage() {
   };
 
   return (
-    <div className="relative isolate min-h-[100svh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(0,255,136,0.16),transparent_30rem),linear-gradient(180deg,var(--bg-deep)_0%,var(--bg-void)_100%)]">
+    <div className="relative isolate min-h-[100svh] overflow-hidden bg-[linear-gradient(180deg,var(--bg-deep)_0%,var(--bg-void)_100%)]">
       <CanhoesGlowBackdrop tone="shell" className="opacity-90" />
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[linear-gradient(180deg,rgba(177,140,255,0.12),transparent)]"
-      />
-
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {leafParticles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute -top-8 text-[rgba(212,184,150,0.18)]"
-            style={{
-              animation: `leaf-fall ${8 + Math.random() * 4}s linear ${particle.delay}s infinite`,
-              left: `${particle.x}%`,
-            }}
-          >
-            <Leaf className="h-5 w-5" />
-          </div>
-        ))}
-      </div>
+      <LeafRain />
 
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-4 py-10">
         <section
@@ -100,7 +74,7 @@ export default function CanhoesLoginPage() {
             transition: "opacity 420ms ease, transform 420ms ease",
           }}
         >
-          <CanhoesGlowBackdrop tone="shell" />
+
 
           <div className="space-y-6">
             <div className="flex items-center justify-center">
@@ -120,7 +94,7 @@ export default function CanhoesLoginPage() {
               </p>
             </div>
 
-            <CanhoesDecorativeDivider tone="purple" />
+            <CanhoesDecorativeDivider tone="moss" />
 
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="canhoes-shell-chip rounded-[var(--radius-md-token)] px-3 py-2">

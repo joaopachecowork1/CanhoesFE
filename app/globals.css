@@ -277,6 +277,35 @@
   .field-base::placeholder { color: var(--ink-muted); }
   .field-base:hover { border-color: var(--border-paper); }
   .field-base:focus-visible { border-color: var(--border-moss); background: var(--bg-paper); box-shadow: 0 0 0 3px rgba(95,123,56,0.14); }
-  .field-base:disabled { cursor: not-allowed; opacity: 0.5; }
+    .field-base:disabled { cursor: not-allowed; opacity: 0.5; }
   .field-label { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes leaf-fall {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px) translateX(0px) rotate(0deg);
+    }
+    10% {
+      opacity: 0.8;
+    }
+    25% {
+      transform: translateY(25vh) translateX(15px) rotate(90deg);
+    }
+    50% {
+      transform: translateY(50vh) translateX(-10px) rotate(180deg);
+    }
+    75% {
+      transform: translateY(75vh) translateX(20px) rotate(270deg);
+    }
+    90% {
+      opacity: 0.4;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(105vh) translateX(0px) rotate(360deg);
+    }
+  }
+}
+

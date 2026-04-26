@@ -35,138 +35,113 @@ function updateInfiniteFeedPosts(
   };
 }
 
-export function useHubFeedComments({ eventId, posts, queryClient }: Readonly<UseHubFeedCommentsArgs>) {
+export function useHubFeedComments({ eventId, posts: _posts, queryClient }: Readonly<UseHubFeedCommentsArgs>) {
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
-  const [comments, setComments] = useState<Record<string, HubCommentDto[]>>({});
-  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
-  const fetchedCommentPostsRef = useRef<Set<string>>(new Set());
+  const [commentsMap, setCommentsMap] = useState<Record<string, HubCommentDto[]>>({});
+  const [commentDraftsMap, setCommentDraftsMap] = useState<Record<string, string>>({});
+  const [loadingCommentsMap, setLoadingCommentsMap] = useState<Record<string, boolean>>({});
 
+  // Clean up when event changes
   useEffect(() => {
-    fetchedCommentPostsRef.current = new Set();
     setOpenComments({});
-    setComments({});
-    setCommentDrafts({});
+    setCommentsMap({});
+    setCommentDraftsMap({});
+    setLoadingCommentsMap({});
   }, [eventId]);
 
-  useEffect(() => {
-    if (!eventId) return;
+  const fetchComments = useCallback(
+    async (postId: string) => {
+      if (!eventId || loadingCommentsMap[postId]) return;
 
-    const postIdsNeedingPreview = posts
-      .filter(
-        (post) =>
-          (post.commentCount ?? 0) > 0 &&
-          !fetchedCommentPostsRef.current.has(post.id) &&
-          comments[post.id] === undefined
-      )
-      .map((post) => post.id);
-
-    if (postIdsNeedingPreview.length === 0) return;
-
-    let cancelled = false;
-    postIdsNeedingPreview.forEach((id) => fetchedCommentPostsRef.current.add(id));
-
-    void Promise.allSettled(
-      postIdsNeedingPreview.map(async (postId) => {
-        try {
-          const list = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
-          if (cancelled) return;
-
-          setComments((currentComments) =>
-            currentComments[postId] === undefined
-              ? { ...currentComments, [postId]: (list ?? []).filter(Boolean) }
-              : currentComments
-          );
-        } catch {
-          fetchedCommentPostsRef.current.delete(postId);
-        }
-      })
-    );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [comments, eventId, posts]);
+      setLoadingCommentsMap((previousLoadingState) => ({ ...previousLoadingState, [postId]: true }));
+      try {
+        const fetchedComments = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
+        setCommentsMap((previousCommentsMap) => ({
+          ...previousCommentsMap,
+          [postId]: (fetchedComments ?? []).filter(Boolean),
+        }));
+      } catch (error) {
+        const errorMessage = getErrorMessage(error, "Nao foi possivel carregar os comentarios deste post.");
+        logFrontendError("HubFeed.fetchComments", error, { postId });
+        toast.error(errorMessage);
+      } finally {
+        setLoadingCommentsMap((previousLoadingState) => ({ ...previousLoadingState, [postId]: false }));
+      }
+    },
+    [eventId, loadingCommentsMap]
+  );
 
   const toggleComments = useCallback(
     async (postId: string) => {
-      if (!eventId) return;
-
-      setOpenComments((currentState) => ({
-        ...currentState,
-        [postId]: !currentState[postId],
+      const isOpening = !openComments[postId];
+      
+      setOpenComments((previousOpenState) => ({
+        ...previousOpenState,
+        [postId]: isOpening,
       }));
 
-      if (comments[postId]) return;
-
-      try {
-        const list = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
-        setComments((currentComments) => ({
-          ...currentComments,
-          [postId]: (list ?? []).filter(Boolean),
-        }));
-      } catch (error) {
-        const message = getErrorMessage(error, "Nao foi possivel carregar os comentarios deste post.");
-        logFrontendError("HubFeed.toggleComments", error, { postId });
-        toast.error(message);
+      // Fetch on-demand if opening and not already loaded
+      if (isOpening && !commentsMap[postId]) {
+        await fetchComments(postId);
       }
     },
-    [comments, eventId]
+    [commentsMap, eventId, fetchComments, openComments]
   );
 
   const addComment = useCallback(
     async (postId: string) => {
       if (!eventId) return;
 
-      const draft = (commentDrafts[postId] ?? "").trim();
-      if (!draft) return;
+      const commentDraftText = (commentDraftsMap[postId] ?? "").trim();
+      if (!commentDraftText) return;
 
       try {
-        const createdComment = await canhoesEventsRepo.createFeedPostComment(eventId, postId, { text: draft });
+        const newlyCreatedComment = await canhoesEventsRepo.createFeedPostComment(eventId, postId, { text: commentDraftText });
 
-        setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: "" }));
-        setOpenComments((currentState) => ({ ...currentState, [postId]: true }));
-        setComments((currentComments) => ({
-          ...currentComments,
+        setCommentDraftsMap((previousDraftsMap) => ({ ...previousDraftsMap, [postId]: "" }));
+        setOpenComments((previousOpenState) => ({ ...previousOpenState, [postId]: true }));
+        setCommentsMap((previousCommentsMap) => ({
+          ...previousCommentsMap,
           [postId]: [
-            ...(currentComments[postId] ?? []),
-            ...(createdComment ? [createdComment] : []),
+            ...(previousCommentsMap[postId] ?? []),
+            ...(newlyCreatedComment ? [newlyCreatedComment] : []),
           ],
         }));
-        queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (old) =>
-          updateInfiniteFeedPosts(old, (post) =>
+        queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (previousFeedData) =>
+          updateInfiniteFeedPosts(previousFeedData, (post) =>
             post.id === postId
               ? { ...post, commentCount: (post.commentCount ?? 0) + 1 }
               : post
           )
         );
       } catch (error) {
-        const message = getErrorMessage(error, "Nao foi possivel publicar o comentario.");
+        const errorMessage = getErrorMessage(error, "Nao foi possivel publicar o comentario.");
         logFrontendError("HubFeed.addComment", error, { postId });
-        toast.error(message);
+        toast.error(errorMessage);
       }
     },
-    [commentDrafts, eventId, queryClient]
+    [commentDraftsMap, eventId, queryClient]
   );
 
   const toggleCommentReaction = useCallback(
     async (postId: string, commentId: string, emoji: string) => {
       if (!eventId) return;
 
-      setComments((currentComments) => ({
-        ...currentComments,
-        [postId]: (currentComments[postId] ?? []).map((comment) => {
+      setCommentsMap((previousCommentsMap) => ({
+        ...previousCommentsMap,
+        [postId]: (previousCommentsMap[postId] ?? []).map((comment) => {
           if (comment.id !== commentId) return comment;
 
           const myReactions = new Set(comment.myReactions ?? []);
-          const wasActive = myReactions.has(emoji);
+          const wasReactionActive = myReactions.has(emoji);
 
-          if (wasActive) myReactions.delete(emoji);
+          if (wasReactionActive) myReactions.delete(emoji);
           else myReactions.add(emoji);
 
           const reactionCounts = { ...comment.reactionCounts };
           reactionCounts[emoji] = Math.max(
             0,
-            (reactionCounts[emoji] ?? 0) + (wasActive ? -1 : 1)
+            (reactionCounts[emoji] ?? 0) + (wasReactionActive ? -1 : 1)
           );
 
           return {
@@ -180,14 +155,14 @@ export function useHubFeedComments({ eventId, posts, queryClient }: Readonly<Use
       try {
         await canhoesEventsRepo.toggleFeedCommentReaction(eventId, postId, commentId, emoji);
       } catch (error) {
-        const message = getErrorMessage(error, "Nao foi possivel atualizar a reacao do comentario.");
+        const errorMessage = getErrorMessage(error, "Nao foi possivel atualizar a reacao do comentario.");
         logFrontendError("HubFeed.toggleCommentReaction", error, { commentId, emoji, postId });
-        toast.error(message);
+        toast.error(errorMessage);
         try {
-          const list = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
-          setComments((currentComments) => ({
-            ...currentComments,
-            [postId]: (list ?? []).filter(Boolean),
+          const refreshedComments = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
+          setCommentsMap((previousCommentsMap) => ({
+            ...previousCommentsMap,
+            [postId]: (refreshedComments ?? []).filter(Boolean),
           }));
         } catch {
           // Keep the optimistic state if the recovery fetch also fails.
@@ -201,19 +176,19 @@ export function useHubFeedComments({ eventId, posts, queryClient }: Readonly<Use
     async (postId: string, commentId: string) => {
       if (!eventId) return;
 
-      const previousComments = comments[postId] ?? [];
-      const nextComments = previousComments.filter(
+      const rollbackCommentsList = commentsMap[postId] ?? [];
+      const updatedCommentsList = rollbackCommentsList.filter(
         (comment) => comment.id !== commentId
       );
 
-      if (nextComments.length === previousComments.length) return;
+      if (updatedCommentsList.length === rollbackCommentsList.length) return;
 
-      setComments((currentComments) => ({
-        ...currentComments,
-        [postId]: nextComments,
+      setCommentsMap((previousCommentsMap) => ({
+        ...previousCommentsMap,
+        [postId]: updatedCommentsList,
       }));
-      queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (old) =>
-        updateInfiniteFeedPosts(old, (post) =>
+      queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (previousFeedData) =>
+        updateInfiniteFeedPosts(previousFeedData, (post) =>
           post.id === postId
             ? { ...post, commentCount: Math.max(0, (post.commentCount ?? 0) - 1) }
             : post
@@ -224,33 +199,33 @@ export function useHubFeedComments({ eventId, posts, queryClient }: Readonly<Use
         await canhoesEventsRepo.deleteFeedPostComment(eventId, postId, commentId);
         toast.success("Comentario removido");
       } catch (error) {
-        setComments((currentComments) => ({
-          ...currentComments,
-          [postId]: previousComments,
+        setCommentsMap((previousCommentsMap) => ({
+          ...previousCommentsMap,
+          [postId]: rollbackCommentsList,
         }));
-        queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (old) =>
-          updateInfiniteFeedPosts(old, (post) =>
+        queryClient.setQueryData<FeedInfiniteData>([FEED_POSTS_QUERY_KEY, eventId], (previousFeedData) =>
+          updateInfiniteFeedPosts(previousFeedData, (post) =>
             post.id === postId
               ? { ...post, commentCount: (post.commentCount ?? 0) + 1 }
               : post
           )
         );
-        const message = getErrorMessage(error, "Nao foi possivel remover o comentario.");
+        const errorMessage = getErrorMessage(error, "Nao foi possivel remover o comentario.");
         logFrontendError("HubFeed.deleteComment", error, { commentId, postId });
-        toast.error(message);
+        toast.error(errorMessage);
       }
     },
-    [comments, eventId, queryClient]
+    [commentsMap, eventId, queryClient]
   );
 
-  const setCommentDraft = useCallback((postId: string, text: string) => {
-    setCommentDrafts((currentDrafts) => ({ ...currentDrafts, [postId]: text }));
+  const setCommentDraft = useCallback((postId: string, draftText: string) => {
+    setCommentDraftsMap((previousDraftsMap) => ({ ...previousDraftsMap, [postId]: draftText }));
   }, []);
 
   return {
-    comments,
+    comments: commentsMap,
     openComments,
-    commentDrafts,
+    commentDrafts: commentDraftsMap,
     toggleComments,
     addComment,
     deleteComment,

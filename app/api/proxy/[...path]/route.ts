@@ -5,6 +5,7 @@ import { authOptions } from "@/auth";
 import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAuth";
 import { IS_MOCK_MODE } from "@/lib/mock";
 import { getMockResponse } from "@/lib/mock/mockFetch";
+import { logger } from "@/lib/logger";
 
 /**
  * Proxy to the backend (avoids CORS) + injects Google id_token.
@@ -201,7 +202,7 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
 
     const duration = Date.now() - startMs;
     if (duration > 500) {
-      console.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms`);
+      logger.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms`);
     }
 
     if (response.status === 204) {
@@ -224,7 +225,7 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
       /fetch failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|socket hang up/i.test(detail);
 
     if (duration > 500) {
-      console.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms (error)`);
+      logger.warn(`[PROXY-SLOW] ${method} /${proxyPath} — ${duration}ms (error)`);
     }
 
     if (isBackendUnreachable) {

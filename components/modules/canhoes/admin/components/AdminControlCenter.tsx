@@ -38,13 +38,9 @@ import {
   QUICK_ADMIN_MODULE_ORDER,
 } from "../adminContentSections";
 import { useAdminControlCenter, PHASE_LABELS, type SettingsFeedbackState } from "../hooks/useAdminControlCenter";
+import { getPhaseLabel } from "@/lib/canhoesEvent";
 
 export const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
-
-export function formatPhaseLabel(phaseType: EventPhaseDto["type"] | null | undefined) {
-  if (!phaseType) return "Sem fase";
-  return PHASE_LABELS[phaseType];
-}
 
 export function selectModuleItems(
   order: readonly AdminModuleKey[],
@@ -116,7 +112,7 @@ export function AdminControlCenter({
 
   const currentState = state;
   const activeEventLabel = activeEventName ?? "Sem edição ativa";
-  const currentPhaseLabel = formatPhaseLabel(currentState.activePhase?.type);
+  const currentPhaseLabel = getPhaseLabel(currentState.activePhase?.type);
   const pendingCount = currentState.counts.pendingProposalCount ?? 0;
 
   return (

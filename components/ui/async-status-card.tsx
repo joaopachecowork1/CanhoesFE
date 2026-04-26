@@ -17,6 +17,19 @@ type AsyncStatusCardProps = {
   timeoutMs?: number;
 };
 
+/**
+ * Card de estado de carregamento assíncrono.
+ * Exibe um spinner e uma mensagem enquanto aguarda por dados,
+ * com suporte para timeout e ação de recuperação (retry).
+ * 
+ * @param actionLabel - Texto do botão de ação em caso de timeout.
+ * @param className - Classes CSS opcionais.
+ * @param hint - Mensagem de apoio opcional.
+ * @param label - Título ou estado atual (ex: "A carregar feeds").
+ * @param onAction - Função para tentar novamente após timeout.
+ * @param timeoutHint - Mensagem exibida após o timeout expirar.
+ * @param timeoutMs - Tempo em milissegundos antes de considerar timeout.
+ */
 export function AsyncStatusCard({
   actionLabel = "Tentar novamente",
   className,

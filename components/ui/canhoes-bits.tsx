@@ -3,6 +3,13 @@ import { cn } from "@/lib/utils";
 type CanhoesGlowTone = "admin" | "danger" | "official" | "shell" | "social";
 type CanhoesDividerTone = "amber" | "moss" | "purple";
 
+/**
+ * Backdrop decorativo com efeito de brilho (glow) e padrão de grelha.
+ * Utilizado para dar profundidade e destaque visual a painéis e alertas.
+ * 
+ * @param className - Classes CSS adicionais para o contentor.
+ * @param tone - O tom visual do brilho, alinhado com o contexto da aplicação (ex: admin, social).
+ */
 export function CanhoesGlowBackdrop({
   className,
   tone = "shell",
@@ -23,6 +30,12 @@ export function CanhoesGlowBackdrop({
   );
 }
 
+/**
+ * Divisor decorativo estilizado para a identidade visual do Canhões.
+ * 
+ * @param className - Classes CSS adicionais.
+ * @param tone - O tom de cor do divisor (amber, moss, purple).
+ */
 export function CanhoesDecorativeDivider({
   className,
   tone = "moss",

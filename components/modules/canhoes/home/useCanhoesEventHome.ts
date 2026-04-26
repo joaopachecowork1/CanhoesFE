@@ -33,23 +33,21 @@ export type CanhoesEventHomeViewModel = {
   wishlistAction: HomeAction;
 };
 
-export function useCanhoesEventHome() {
-  const { event, overview, isLoading: overviewLoading, error: overviewError } = useEventOverview();
-  const eventId = event?.id ?? null;
-
+export function useCanhoesEventHome(initialData?: EventHomeSnapshotDto) {
   const snapshotQuery = useQuery<EventHomeSnapshotDto>({
-    enabled: Boolean(eventId),
-    queryKey: ["canhoes", "home-snapshot", eventId],
-    queryFn: () => canhoesEventsRepo.getEventHomeSnapshot(eventId!),
+    queryKey: ["canhoes", "active-home-snapshot"],
+    queryFn: () => canhoesEventsRepo.getActiveHomeSnapshot(),
+    initialData,
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,
     retry: 1,
   });
 
   const viewModel = useMemo(() => {
-    if (!event || !overview || !snapshotQuery.data) return null;
+    if (!snapshotQuery.data) return null;
 
     const snapshot = snapshotQuery.data;
+    const { event, overview } = snapshot;
 
     return {
       event,
@@ -68,14 +66,14 @@ export function useCanhoesEventHome() {
       voting: snapshot.voting,
       wishlistAction: { label: "Abrir", href: "/canhoes", tone: "secondary" as const },
     } satisfies CanhoesEventHomeViewModel;
-  }, [event, overview, snapshotQuery.data]);
+  }, [snapshotQuery.data]);
 
-  const error = overviewError ?? snapshotQuery.error;
+  const error = snapshotQuery.error;
   const errorMessage = error instanceof Error ? error.message : error ? String(error) : null;
 
   return {
     errorMessage,
-    isLoading: overviewLoading || snapshotQuery.isLoading,
+    isLoading: snapshotQuery.isLoading,
     viewModel,
   };
 }

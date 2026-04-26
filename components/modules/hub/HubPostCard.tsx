@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
 import { BlurFade } from "@/components/animations/BlurFade";
-import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
+import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { parsePostText } from "@/lib/postUtils";
@@ -144,7 +144,7 @@ function HubPostCardComponent({
   return (
     <BlurFade delay={index * 50}>
       <article className="reddit-post canhoes-paper-panel overflow-hidden rounded-[var(--radius-md-token)] border-[var(--border-paper)] text-[var(--ink-primary)]">
-        <CanhoesGlowBackdrop tone="admin" />
+
 
         <div className="flex flex-col sm:flex-row">
           <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-paper-soft)] bg-[rgba(84,64,40,0.04)] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
@@ -236,6 +236,7 @@ function HubPostCardComponent({
                   aspect="video"
                   onImageClick={handleImageClick}
                   authorName={post.authorName}
+                  isPriority={index < 2}
                 />
               ) : null}
             </div>

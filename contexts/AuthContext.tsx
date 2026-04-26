@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAuth";
@@ -149,27 +149,43 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     return null;
   }, [backendUserQuery.error]);
 
+  const loginGoogle = useCallback(() => {
+    void signIn("google", { callbackUrl: "/canhoes" });
+  }, []);
+
+  const logout = useCallback(() => {
+    void signOut({ callbackUrl: "/canhoes/login", redirect: true });
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    await backendUserQuery.refetch();
+  }, [backendUserQuery]);
+
+  const isLoading = status === "loading";
+  const isProfileLoading = backendUserQuery.isLoading;
+
   const value = useMemo<AuthContextType>(
     () => ({
       user,
       isLogged: isLoggedIn || isDevAuthBypass,
-      loading: !isDevAuthBypass && status === "loading",
-      profileLoading: !isDevAuthBypass && isLoggedIn && backendUserQuery.isLoading,
+      loading: !isDevAuthBypass && isLoading,
+      profileLoading: !isDevAuthBypass && isLoggedIn && isProfileLoading,
       profileError,
       isDevAuthBypass,
-      loginGoogle: () => void signIn("google", { callbackUrl: "/canhoes" }),
-      logout: () => signOut({ callbackUrl: "/canhoes/login", redirect: true }),
-      refreshProfile: async () => {
-        await backendUserQuery.refetch();
-      },
+      loginGoogle,
+      logout,
+      refreshProfile,
     }),
     [
-      backendUserQuery,
+      user,
       isLoggedIn,
       isDevAuthBypass,
+      isLoading,
+      isProfileLoading,
       profileError,
-      status,
-      user,
+      loginGoogle,
+      logout,
+      refreshProfile,
     ]
   );
 

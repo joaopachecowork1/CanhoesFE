@@ -2,6 +2,8 @@
 
 import { ApiError } from "@/lib/api/canhoesClient";
 
+import { logger } from "./logger";
+
 const DEFAULT_STATUS_MESSAGES: Partial<Record<number, string>> = {
   400: "O pedido nao e valido.",
   401: "A tua sessao expirou. Entra novamente para continuar.",
@@ -105,10 +107,5 @@ export function getErrorMessage(
 }
 
 export function logFrontendError(context: string, error: unknown, details?: unknown) {
-  if (details === undefined) {
-    console.error(`[${context}]`, error);
-    return;
-  }
-
-  console.error(`[${context}]`, error, details);
+  logger.error(context, error, details);
 }

@@ -27,14 +27,16 @@ type VirtualizedListProps<T> = {
 };
 
 /**
- * Virtualized list using @tanstack/react-virtual.
- * Renders only visible items in the viewport (~10-15 DOM nodes)
- * regardless of total item count.
- *
- * Default estimateSize is 60px — tune per use case.
- *
- * Use `getKey` to provide stable keys when items can be reordered
- * or removed. Falls back to index if not provided.
+ * Lista virtualizada de alta performance para renderizar grandes volumes de dados.
+ * Renderiza apenas os itens visíveis no viewport (~10-15 nós DOM), independentemente do total.
+ * 
+ * @param className - Classes CSS para o contentor.
+ * @param estimateSize - Função que retorna o tamanho estimado de cada item (padrão: 60px).
+ * @param getKey - Função para fornecer chaves estáveis (estratégico para reordenação).
+ * @param items - Lista de dados a processar.
+ * @param renderItem - Função que define como cada item é desenhado.
+ * @param useWindowScroll - Se true, utiliza o scroll da janela em vez de um contentor interno.
+ * @param overscan - Número de itens extras a renderizar fora da área visível (suaviza o scroll).
  */
 export function VirtualizedList<T>(props: Readonly<VirtualizedListProps<T>>) {
   return props.useWindowScroll ? (
