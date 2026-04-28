@@ -35,7 +35,7 @@ function updateInfiniteFeedPosts(
   };
 }
 
-export function useHubFeedComments({ eventId, posts: _posts, queryClient }: Readonly<UseHubFeedCommentsArgs>) {
+export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHubFeedCommentsArgs, 'posts'>>) {
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [commentsMap, setCommentsMap] = useState<Record<string, HubCommentDto[]>>({});
   const [commentDraftsMap, setCommentDraftsMap] = useState<Record<string, string>>({});
@@ -85,7 +85,7 @@ export function useHubFeedComments({ eventId, posts: _posts, queryClient }: Read
         await fetchComments(postId);
       }
     },
-    [commentsMap, eventId, fetchComments, openComments]
+    [commentsMap, fetchComments, openComments]
   );
 
   const addComment = useCallback(

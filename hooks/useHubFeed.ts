@@ -121,7 +121,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
   const totalPostsInView = sortedDisplayedPosts.length;
 
   const { comments, openComments, commentDrafts, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft } =
-    useHubFeedComments({ eventId, posts: allSanitizedPosts, queryClient });
+    useHubFeedComments({ eventId, queryClient });
 
   const {
     showParticles,
@@ -175,7 +175,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       });
     });
 
-    connection.on("CommentCreated", ({ postId, comment: _newlyCreatedComment }: { postId: string; comment: HubCommentDto }) => {
+    connection.on("CommentCreated", ({ postId }: { postId: string; comment: HubCommentDto }) => {
       queryClient.invalidateQueries({ queryKey: ["hub-comments", postId] });
       
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
@@ -194,7 +194,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       });
     });
 
-    connection.on("PollVoted", (_data: { postId: string; optionId: string }) => {
+    connection.on("PollVoted", () => {
       queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
     });
 

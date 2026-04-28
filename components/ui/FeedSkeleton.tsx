@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+
 import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 
 interface FeedSkeletonProps {
@@ -63,29 +63,4 @@ function FeedPostSkeleton({ index }: FeedPostSkeletonProps) {
   );
 }
 
-export function InlineSkeleton({ className }: { className?: string }) {
-  return <Skeleton className={cn("h-4", className)} />;
-}
 
-export function CardSkeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "rounded-[var(--radius-lg-token)] border border-[var(--color-moss)]/14 bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-paper)]",
-        className
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-10 rounded-full" />
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-3 w-32 rounded" />
-          <Skeleton className="h-2.5 w-20 rounded" />
-        </div>
-      </div>
-      <div className="mt-4 space-y-2">
-        <Skeleton className="h-3 w-full rounded" />
-        <Skeleton className="h-3 w-5/6 rounded" />
-      </div>
-    </div>
-  );
-}

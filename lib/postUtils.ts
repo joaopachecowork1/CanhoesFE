@@ -28,7 +28,7 @@ export function parsePostText(text: string | undefined | null) {
 /**
  * Format relative time (Reddit-style: "2h", "3d", "1mo").
  */
-export function formatRelativeTime(utcString: string): string {
+function formatRelativeTime(utcString: string): string {
   const then = new Date(utcString).getTime();
   const now = Date.now();
   const diffMs = now - then;

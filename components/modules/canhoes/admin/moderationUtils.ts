@@ -6,7 +6,7 @@
  * proposals, or measure proposals.
  */
 
-export type ModerationStatus = "pending" | "approved" | "rejected";
+type ModerationStatus = "pending" | "approved" | "rejected";
 
 /**
  * Maps a moderation status string to a shadcn Badge variant.

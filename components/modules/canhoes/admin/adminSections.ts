@@ -2,7 +2,7 @@ import { BarChart2, FolderTree, Settings2, Users, type LucideIcon } from "lucide
 
 export type AdminSectionId = "dashboard" | "conteudo" | "membros" | "configuracoes";
 
-export type AdminSectionCountContext = {
+type AdminSectionCountContext = {
   memberCount: number;
   pendingNominationsCount: number;
   pendingReviewCount: number;
@@ -17,7 +17,7 @@ export type AdminSectionItem = {
   label: string;
 };
 
-export const ADMIN_SECTIONS = [
+const ADMIN_SECTIONS = [
   {
     id: "dashboard",
     label: "Resumo",
@@ -48,7 +48,7 @@ export const ADMIN_SECTIONS = [
   },
 ] as const;
 
-export const ADMIN_SECTION_IDS = ADMIN_SECTIONS.map((section) => section.id) as readonly AdminSectionId[];
+const ADMIN_SECTION_IDS = ADMIN_SECTIONS.map((section) => section.id) as readonly AdminSectionId[];
 
 export function isAdminSectionId(value: string): value is AdminSectionId {
   return ADMIN_SECTION_IDS.includes(value as AdminSectionId);

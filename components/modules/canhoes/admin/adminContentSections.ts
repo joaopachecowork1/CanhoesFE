@@ -4,7 +4,7 @@ import type { AdminModuleKey } from "@/lib/api/types";
 
 export type AdminContentSectionId = "queue" | "categorias" | "resultados";
 
-export type AdminContentSectionCountContext = {
+type AdminContentSectionCountContext = {
   categoriesCount: number;
   pendingCategoryProposalsCount: number;
   pendingMeasureProposalsCount: number;
@@ -20,7 +20,7 @@ export type AdminContentSectionItem = {
   label: string;
 };
 
-export const ADMIN_CONTENT_SECTIONS = [
+const ADMIN_CONTENT_SECTIONS = [
   {
     id: "queue",
     label: "Queue",
@@ -47,7 +47,7 @@ export const ADMIN_CONTENT_SECTIONS = [
   },
 ] as const;
 
-export const ADMIN_CONTENT_SECTION_IDS = ADMIN_CONTENT_SECTIONS.map((section) => section.id) as readonly AdminContentSectionId[];
+const ADMIN_CONTENT_SECTION_IDS = ADMIN_CONTENT_SECTIONS.map((section) => section.id) as readonly AdminContentSectionId[];
 
 export function isAdminContentSectionId(value: string): value is AdminContentSectionId {
   return ADMIN_CONTENT_SECTION_IDS.includes(value as AdminContentSectionId);

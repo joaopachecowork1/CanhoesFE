@@ -19,7 +19,7 @@ export function ActionButton({ action, className }: Readonly<{ action: Clickable
   return <ActionLinkButton action={action} variant={action.tone ?? "default"} className={className} />;
 }
 
-export function ActionLinkButton({
+function ActionLinkButton({
   action,
   className,
   variant,
