@@ -15,6 +15,10 @@ module.exports = {
           parchment: '#F1E6D2',
           amethyst:  '#7A628A',
         },
+        'neon-green':   '#00FF88',
+        'neon-teal':    '#00D4AA',
+        'surface-card': 'rgba(255,255,255,0.04)',
+        'surface-hover':'rgba(255,255,255,0.08)',
         // Keep jungle/moss for Canhões theme compatibility
         jungle: {
           50:  "#f0fdf4",
@@ -42,6 +46,20 @@ module.exports = {
           900: "#193b18",
           950: "#0a200b",
         },
+      },
+      fontSize: {
+        'display': ['clamp(1.75rem, 5vw, 2.5rem)', { lineHeight: '1.15', fontWeight: '700' }],
+        'heading':  ['clamp(1.25rem, 3vw, 1.75rem)', { lineHeight: '1.3' }],
+        'body':     ['clamp(0.875rem, 2vw, 1rem)',   { lineHeight: '1.6' }],
+      },
+      boxShadow: {
+        'neon':         '0 0 12px rgba(0,255,136,0.25)',
+        'neon-lg':      '0 0 24px rgba(0,255,136,0.4)',
+        'card':         '0 4px 24px rgba(0,0,0,0.4)',
+      },
+      backgroundImage: {
+        'neon-glow':    'linear-gradient(180deg, rgba(0,255,136,0.18), rgba(0,212,170,0.12))',
+        'card-subtle':  'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
       },
       keyframes: {
         "fade-in": {

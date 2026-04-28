@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Cigarette, Inbox } from "lucide-react";
+import { Cigarette } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -9,10 +9,9 @@ import {
   CanhoesMediaThumb,
   CanhoesModuleHeader,
   formatEventPhaseLabel,
-  getNomineeStatusBadgeVariant,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
+import { StickerFeedList } from "./StickerFeedList";
 import { useEventOverview } from "@/hooks/useEventOverview";
-import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
@@ -25,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -342,71 +340,11 @@ export function CanhoesStickerSubmitModule() {
           <Badge variant="secondary">{stickersWithImage.length}</Badge>
         </div>
 
-        {!isLoading && !errorMessage && stickersWithImage.length === 0 ? (
-          <EmptyState icon={Inbox} title="Sem stickers" description="Ainda nao ha stickers com imagem para mostrar." />
-        ) : null}
-
-        {stickersWithImage.length > 20 ? (
-          <VirtualizedList
-            items={stickersWithImage}
-            getKey={(nominee) => nominee.id}
-            estimateSize={() => 380}
-            className="max-h-[64svh]"
-            renderItem={(nominee) => (
-              <Card className="overflow-hidden">
-                <CanhoesMediaThumb
-                  alt={nominee.title}
-                  src={nominee.imageUrl}
-                  frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
-                  iconClassName="h-6 w-6"
-                />
-
-                <CardContent className="space-y-3 pt-4">
-                  <div className="space-y-1">
-                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
-                      {nominee.title}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
-                    </p>
-                  </div>
-
-                  <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
-                    {nominee.status}
-                  </Badge>
-                </CardContent>
-              </Card>
-            )}
-          />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {stickersWithImage.map((nominee) => (
-              <Card key={nominee.id} className="overflow-hidden">
-                <CanhoesMediaThumb
-                  alt={nominee.title}
-                  src={nominee.imageUrl}
-                  frameClassName="aspect-square h-auto w-full rounded-none bg-[var(--color-bg-surface)]"
-                  iconClassName="h-6 w-6"
-                />
-
-                <CardContent className="space-y-3 pt-4">
-                  <div className="space-y-1">
-                    <p className="truncate font-semibold text-[var(--color-text-primary)]">
-                      {nominee.title}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">
-                      {new Date(nominee.createdAtUtc).toLocaleString("pt-PT")}
-                    </p>
-                  </div>
-
-                  <Badge variant={getNomineeStatusBadgeVariant(nominee.status)}>
-                    {nominee.status}
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+        {!isLoading && !errorMessage ? (
+          <div className="pt-4">
+            <StickerFeedList stickers={stickersWithImage} />
           </div>
-        )}
+        ) : null}
       </section>
     </div>
   );

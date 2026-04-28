@@ -16,12 +16,6 @@ function readArray<T>(value: unknown, keys: readonly string[]): T[] {
   return [];
 }
 
-export function normalizeArrayResponse<T>(value: unknown): T[] {
-  const direct = readArray<T>(value, ["items", "data", "results", "list"]);
-  if (direct.length > 0) return direct;
-  return Array.isArray(value) ? (value as T[]) : [];
-}
-
 export function normalizeWishlistItems(value: unknown): EventWishlistItemDto[] {
   const direct = readArray<EventWishlistItemDto>(value, [
     "items",

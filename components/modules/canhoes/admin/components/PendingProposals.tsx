@@ -9,6 +9,7 @@ import { AdminSectionSummary } from "@/components/modules/canhoes/admin/componen
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { AdminStatusFilters } from "@/components/modules/canhoes/admin/components/AdminStatusFilters";
 import { ProposalShell } from "@/components/modules/canhoes/admin/components/ProposalShell";
+import { AdminDrawer } from "@/components/modules/canhoes/admin/components/AdminDrawer";
 import { statusBadgeVariant } from "@/components/modules/canhoes/admin/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -175,43 +176,78 @@ function ProposalCardActions({
 }
 
 function ProposalReviewCard({ proposal }: Readonly<{ proposal: PendingProposalCard }>) {
-  return (
-    <AdminReviewCard
-      title={proposal.title}
-      meta={proposal.meta}
-      status={
-        <Badge variant={statusBadgeVariant(proposal.status)}>{proposal.status}</Badge>
-      }
-      actions={
-        <ProposalCardActions
-          isBusy={proposal.isBusy}
-          onSave={proposal.onSave}
-          saveLabel={proposal.saveLabel}
-          saveDisabled={proposal.saveDisabled}
-          onApprove={proposal.onApprove}
-          onReject={proposal.onReject}
-          onReopen={proposal.onReopen}
-          onDelete={proposal.onDelete}
-          deleteLabel={proposal.deleteLabel}
-          deleteIcon={
-            proposal.deleteIcon === "trash" ? <Trash2 className="h-4 w-4" /> : undefined
-          }
-        />
-      }
-    >
-      {proposal.note ? (
-        <div className="flex items-center gap-2 text-[var(--ink-primary)]">
-          <Gavel className="h-4 w-4" />
-          <span className="editorial-kicker">
-            {PROPOSAL_STATUS_LABELS[proposal.note as keyof typeof PROPOSAL_STATUS_LABELS] ?? proposal.note}
-          </span>
-        </div>
-      ) : null}
+  const [isOpen, setIsOpen] = useState(false);
 
-      {proposal.fields.map((field) => (
-        <ProposalFieldInput key={field.id} field={field} />
-      ))}
-    </AdminReviewCard>
+  return (
+    <>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="w-full flex items-center justify-between p-3 border-b border-[var(--border-paper-soft)] hover:bg-[var(--bg-paper-soft)] transition-colors text-left"
+      >
+        <div className="flex flex-col min-w-0 pr-4">
+          <p className="text-sm font-medium text-[var(--ink-primary)] truncate">
+            {proposal.title}
+          </p>
+          <p className="text-[10px] text-[var(--ink-muted)]">
+            {proposal.meta}
+          </p>
+        </div>
+        <Badge variant={statusBadgeVariant(proposal.status)} className="shrink-0 text-[10px]">
+          {proposal.status}
+        </Badge>
+      </button>
+
+      <AdminDrawer
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Detalhes da Proposta"
+        description="Reve e fecha a proposta"
+      >
+        <AdminReviewCard
+          title={proposal.title}
+          meta={proposal.meta}
+          status={
+            <Badge variant={statusBadgeVariant(proposal.status)}>{proposal.status}</Badge>
+          }
+          actions={
+            <ProposalCardActions
+              isBusy={proposal.isBusy}
+              onSave={() => {
+                proposal.onSave();
+                setIsOpen(false);
+              }}
+              saveLabel={proposal.saveLabel}
+              saveDisabled={proposal.saveDisabled}
+              onApprove={proposal.onApprove ? () => { proposal.onApprove!(); setIsOpen(false); } : undefined}
+              onReject={proposal.onReject ? () => { proposal.onReject!(); setIsOpen(false); } : undefined}
+              onReopen={proposal.onReopen ? () => { proposal.onReopen!(); setIsOpen(false); } : undefined}
+              onDelete={() => {
+                proposal.onDelete();
+                setIsOpen(false);
+              }}
+              deleteLabel={proposal.deleteLabel}
+              deleteIcon={
+                proposal.deleteIcon === "trash" ? <Trash2 className="h-4 w-4" /> : undefined
+              }
+            />
+          }
+        >
+          {proposal.note ? (
+            <div className="flex items-center gap-2 text-[var(--ink-primary)]">
+              <Gavel className="h-4 w-4" />
+              <span className="editorial-kicker">
+                {PROPOSAL_STATUS_LABELS[proposal.note as keyof typeof PROPOSAL_STATUS_LABELS] ?? proposal.note}
+              </span>
+            </div>
+          ) : null}
+
+          {proposal.fields.map((field) => (
+            <ProposalFieldInput key={field.id} field={field} />
+          ))}
+        </AdminReviewCard>
+      </AdminDrawer>
+    </>
   );
 }
 
@@ -468,11 +504,11 @@ export function PendingProposals({
             )}
 
                         {!controlsDisabled && panel.items.length > 0 ? (
-              <div ref={listRef}>
+              <div ref={listRef} className="border border-[var(--border-paper-soft)] rounded-md bg-[var(--bg-paper-soft)]">
                 <VirtualizedList
                   items={panel.items}
                   getKey={(proposal) => proposal.id}
-                  estimateSize={() => 320}
+                  estimateSize={() => 60}
                   className="max-h-[72svh]"
                   renderItem={(proposal) => <ProposalReviewCard proposal={proposal} />}
                 />

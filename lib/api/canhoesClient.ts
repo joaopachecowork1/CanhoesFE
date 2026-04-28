@@ -215,12 +215,7 @@ function isUnauthorizedStatus(status: number) {
 let consecutive401Count = 0;
 const MAX_CONSECUTIVE_401S = 3;
 
-/**
- * Reset the 401 counter on any successful request.
- */
-export function resetAuthFailureCounter() {
-  consecutive401Count = 0;
-}
+
 
 // Pending GET requests for deduplication
 const pendingGetRequests = new Map<string, Promise<unknown>>();

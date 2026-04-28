@@ -1,6 +1,6 @@
 "use client";
 
-export const MAX_MEDIA_FILES = 10;
+
 export const MAX_FILE_MB = 15;
 export const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 

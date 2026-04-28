@@ -42,8 +42,8 @@ import {
   ADMIN_SELECT_ITEM_CLASS,
   ADMIN_SELECT_TRIGGER_CLASS,
   AdminDetailPanel,
-  AdminDetailSheet,
 } from "./adminContentUi";
+import { AdminDrawer } from "./AdminDrawer";
 
 type CategoriesAdminProps = {
   eventId: string | null;
@@ -195,10 +195,9 @@ function CategoryEditorSheet({
     : "Atualiza nome, ordem, tipo e estado da categoria selecionada.";
 
   return (
-    <AdminDetailSheet
+    <AdminDrawer
       open={Boolean(sheetState)}
       onOpenChange={onOpenChange}
-      kicker="Categorias"
       title={title}
       description={description}
     >
@@ -370,7 +369,7 @@ function CategoryEditorSheet({
           </div>
         </>
       ) : null}
-    </AdminDetailSheet>
+    </AdminDrawer>
   );
 }
 

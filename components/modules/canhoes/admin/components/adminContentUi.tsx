@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 export const ADMIN_CONTENT_CARD_CLASS =
   "canhoes-paper-panel canhoes-admin-shell-panel border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)]";
 
-export const ADMIN_CONTENT_DETAIL_PANEL_CLASS =
+const ADMIN_CONTENT_DETAIL_PANEL_CLASS =
   "canhoes-admin-shell-panel rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-3 shadow-none";
 
 const ADMIN_CONTENT_LIST_PANEL_CLASS =

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * Inclui estados como default, primary, destructive, outline, secondary, ghost, link e glow.
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md-token)] text-sm font-medium transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--moss)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md-token)] text-sm font-medium transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--moss)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] min-h-[44px]",
   {
     variants: {
       variant: {
@@ -19,8 +19,10 @@ const buttonVariants = cva(
         outline: "border border-[var(--border-paper)] bg-[rgba(245,234,216,0.78)] text-[var(--ink-primary)] shadow-none hover:bg-[var(--bg-paper-soft)] hover:border-[var(--border-moss)] hover:shadow-sm",
         secondary: "border border-[var(--border-subtle)] bg-[rgba(244,234,216,0.08)] text-[var(--text-primary)] shadow-none hover:bg-[rgba(244,234,216,0.14)] hover:border-[rgba(212,184,150,0.18)]",
         ghost: "border-transparent bg-transparent text-[var(--text-primary)] shadow-none hover:bg-[rgba(244,234,216,0.08)] hover:text-[var(--moss)]",
+        "ghost-subtle": "border-transparent bg-transparent text-[var(--text-muted)] shadow-none hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--text-primary)]",
         link: "px-0 text-[var(--moss)] underline-offset-4 shadow-none hover:text-[var(--ink-primary)] hover:underline decoration-[rgba(95,123,56,0.3)] decoration-2 hover:underline-offset-4",
         glow: "border border-[rgba(95,123,56,0.22)] bg-[rgba(95,123,56,0.12)] text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] hover:bg-[rgba(95,123,56,0.16)] hover:shadow-[0_0_15px_rgba(95,123,56,0.2)]",
+        neon: "bg-neon-glow border border-neon-green/30 text-neon-green hover:bg-neon-green/25 shadow-neon font-semibold",
       },
       size: {
         default: "h-11 px-4 py-2",

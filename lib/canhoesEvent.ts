@@ -1,7 +1,7 @@
-import type { EventPhaseDto, EventSummaryDto } from "@/lib/api/types";
+import type { EventPhaseDto } from "@/lib/api/types";
 
 export const OPEN_COMPOSE_SHEET_EVENT = "canhoes:openCompose";
-export const REFRESH_EVENT_OVERVIEW_EVENT = "canhoes:refreshOverview";
+
 
 // --- Phase helpers ---
 export function getPhaseLabel(phaseType?: string | null) {
@@ -43,21 +43,4 @@ export function formatPhaseWindow(phase?: EventPhaseDto | null) {
   }).format(new Date(phase.endDate));
 }
 
-// --- Event helpers ---
-/**
- * The shell and event home both need the same "active event or first fallback"
- * rule. Keep that decision in one place so the dashboard and navigation do not
- * drift when multiple event summaries are returned.
- */
-export function pickActiveEvent(events: readonly EventSummaryDto[]) {
-  return events.find((event) => event.isActive) ?? events[0] ?? null;
-}
 
-/**
- * Opens the shared compose flow owned by the shell. The FAB and any secondary
- * CTA should use this helper so post creation always lands in the same place.
- */
-export function openComposeSheet() {
-  if (globalThis.window === undefined) return;
-  globalThis.window.dispatchEvent(new CustomEvent(OPEN_COMPOSE_SHEET_EVENT));
-}

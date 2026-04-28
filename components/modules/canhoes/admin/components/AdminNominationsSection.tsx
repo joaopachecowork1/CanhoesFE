@@ -40,9 +40,9 @@ import {
   ADMIN_SELECT_ITEM_CLASS,
   ADMIN_SELECT_TRIGGER_CLASS,
   AdminDetailPanel,
-  AdminDetailSheet,
   AdminSelectableButton,
 } from "./adminContentUi";
+import { AdminDrawer } from "./AdminDrawer";
 
 type NominationStatus = "pending" | "approved" | "rejected";
 type NominationListFilter = "all" | NominationStatus;
@@ -389,10 +389,9 @@ export function AdminNominationsSection({
         </CardContent>
       </Card>
 
-      <AdminDetailSheet
+      <AdminDrawer
         open={Boolean(selectedNomination)}
         onOpenChange={(open) => !open && setSelectedNominationId(null)}
-        kicker="Moderacao"
         title={selectedNomination?.title ?? ""}
         description={
           selectedNomination
@@ -478,7 +477,7 @@ export function AdminNominationsSection({
             </div>
           </>
         ) : null}
-      </AdminDetailSheet>
+      </AdminDrawer>
 
       <AlertDialog
         open={Boolean(rejectingNominationId)}
