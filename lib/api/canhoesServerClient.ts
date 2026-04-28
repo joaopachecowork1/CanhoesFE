@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 export async function canhoesServerFetch<T>(path: string): Promise<T | null> {
   const baseUrl = process.env.CANHOES_API_URL || "http://localhost:5000";
   const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
-  const url = `${baseUrl}/v1/${normalizedPath}`;
+  const url = `${baseUrl}/api/v1/${normalizedPath}`;
 
   // Forward cookies for authentication
   const cookieStore = await cookies();

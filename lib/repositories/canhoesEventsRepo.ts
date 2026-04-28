@@ -9,6 +9,56 @@ function toFormData(files: File[]) {
   return formData;
 }
 
+function mapEventVotingBoardToOfficialVotingBoard(
+  board: T.EventVotingBoardDto
+): T.OfficialVotingBoardDto {
+  return {
+    eventId: board.eventId,
+    phaseId: board.phaseId,
+    canVote: board.canVote,
+    endsAt: null,
+    categories: board.categories.map((category) => ({
+      id: category.id,
+      title: category.title,
+      description: category.description,
+      kind: category.kind,
+      nominees: category.options.map((option) => ({
+        id: option.id,
+        label: option.label,
+      })),
+      myNomineeId: category.myOptionId,
+    })),
+  };
+}
+
+function mapEventCategory(category: T.EventCategoryDto): T.EventCategoryDto {
+  return {
+    ...category,
+    name: category.name ?? category.title ?? "",
+    title: category.title ?? category.name ?? "",
+  };
+}
+
+function mapResultNominee(
+  nominee: T.CanhoesCategoryResultDto["top"][number] & { votes?: number; voteCount?: number }
+): T.CanhoesCategoryResultDto["top"][number] {
+  return {
+    ...nominee,
+    voteCount: nominee.voteCount ?? nominee.votes ?? 0,
+  };
+}
+
+function mapCategoryResult(
+  categoryResult: T.CanhoesCategoryResultDto & {
+    top?: Array<T.CanhoesCategoryResultDto["top"][number] & { votes?: number; voteCount?: number }>;
+  }
+): T.CanhoesCategoryResultDto {
+  return {
+    ...categoryResult,
+    top: (categoryResult.top ?? []).map(mapResultNominee),
+  };
+}
+
 export const canhoesEventsRepo = {
   getActiveContext: () => canhoesFetch<T.EventActiveContextDto>("/v1/events/active/context"),
   getActiveHomeSnapshot: () => canhoesFetch<T.EventHomeSnapshotDto>("/v1/events/active/home-snapshot"),
@@ -57,24 +107,34 @@ export const canhoesEventsRepo = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  getAdminNominationsSummary: (eventId: string, status = "pending") =>
-    canhoesFetch<T.AdminNomineeDto[]>(`/v1/events/${eventId}/admin/nominees?status=${encodeURIComponent(status)}`),
-  getAdminNominationsPaged: (eventId: string, skip = 0, take = 5) =>
-    canhoesFetch<{ nominations: T.AdminNomineeDto[] }>(`/v1/events/${eventId}/admin/nominees?skip=${skip}&take=${take}`),
+  getAdminNominationsSummary: (eventId: string, status?: string) =>
+    canhoesFetch<T.AdminNomineeSummaryDto[]>(
+      `/v1/events/${eventId}/admin/nominations/summary${status ? `?status=${encodeURIComponent(status)}` : ""}`
+    ),
+  getAdminNominationsPaged: (eventId: string, skip = 0, take = 5, status?: string) =>
+    canhoesFetch<T.AdminNomineesPagedResponseDto>(
+      `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+    ),
   loadAdminNominationsPage: (eventId: string, skip = 0, take = 50, status?: string) =>
-    canhoesFetch<{ nominations: T.AdminNomineeDto[] }>(
-      `/v1/events/${eventId}/admin/nominees?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+    canhoesFetch<T.AdminNomineesPagedResponseDto>(
+      `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
     ),
   loadAllAdminVotes: (eventId: string) =>
-    canhoesFetch<T.AdminVoteAuditRowDto[]>(`/v1/events/${eventId}/admin/votes/paged`),
+    canhoesFetch<T.AdminVotesPagedResponseDto>(`/v1/events/${eventId}/admin/votes/paged?skip=0&take=200`),
   getAdminVotesPaged: (eventId: string, skip = 0, take = 50) =>
-    canhoesFetch<T.AdminVoteAuditRowDto[]>(`/v1/events/${eventId}/admin/votes/paged?skip=${skip}&take=${take}`),
+    canhoesFetch<T.AdminVotesPagedResponseDto>(`/v1/events/${eventId}/admin/votes/paged?skip=${skip}&take=${take}`),
   loadAllAdminOfficialResults: (eventId: string) =>
-    canhoesFetch<T.AdminCategoryResultDto[]>(`/v1/events/${eventId}/admin/official-results/paged`),
+    canhoesFetch<T.PagedResultDto<T.AdminCategoryResultDto>>(
+      `/v1/events/${eventId}/admin/official-results/paged?skip=0&take=200`
+    ),
   getAdminOfficialResultsPaged: (eventId: string, skip = 0, take = 50) =>
-    canhoesFetch<T.AdminCategoryResultDto[]>(`/v1/events/${eventId}/admin/official-results/paged?skip=${skip}&take=${take}`),
+    canhoesFetch<T.PagedResultDto<T.AdminCategoryResultDto>>(
+      `/v1/events/${eventId}/admin/official-results/paged?skip=${skip}&take=${take}`
+    ),
   getResults: (eventId: string) =>
-    canhoesFetch<T.CanhoesCategoryResultDto[]>(`/v1/events/${eventId}/results`),
+    canhoesFetch<T.CanhoesCategoryResultDto[]>(`/v1/events/${eventId}/results`).then((results) =>
+      results.map(mapCategoryResult)
+    ),
   getMeasures: (eventId: string) =>
     canhoesFetch<T.GalaMeasureDto[]>(`/v1/events/${eventId}/measures`),
   createMeasureProposal: (eventId: string, payload: { text: string }) =>
@@ -97,7 +157,9 @@ export const canhoesEventsRepo = {
       method: "DELETE",
     }),
   adminGetCategoryProposals: (eventId: string, status = "pending") =>
-    canhoesFetch<T.CategoryProposalDto[]>(`/v1/events/${eventId}/admin/category-proposals?status=${encodeURIComponent(status)}`),
+    canhoesFetch<T.PagedResultDto<T.CategoryProposalDto>>(
+      `/v1/events/${eventId}/admin/category-proposals?status=${encodeURIComponent(status)}&skip=0&take=200`
+    ),
   adminUpdateCategoryProposal: (eventId: string, proposalId: string, payload: { description: string | null; name: string; status?: string }) =>
     canhoesFetch<T.CategoryProposalDto>(`/v1/events/${eventId}/admin/category-proposals/${proposalId}`, {
       method: "PUT",
@@ -108,7 +170,9 @@ export const canhoesEventsRepo = {
       method: "DELETE",
     }),
   adminGetMeasureProposals: (eventId: string, status = "pending") =>
-    canhoesFetch<T.MeasureProposalDto[]>(`/v1/events/${eventId}/admin/measure-proposals?status=${encodeURIComponent(status)}`),
+    canhoesFetch<T.PagedResultDto<T.MeasureProposalDto>>(
+      `/v1/events/${eventId}/admin/measure-proposals?status=${encodeURIComponent(status)}&skip=0&take=200`
+    ),
   adminUpdateMeasureProposal: (eventId: string, proposalId: string, payload: { text?: string | null; status?: string | null }) =>
     canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}`, {
       method: "PUT",
@@ -146,7 +210,9 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
   loadAdminMembersPage: (eventId: string, skip = 0, take = 50) =>
-    canhoesFetch<{ items: T.AdminMemberDto[] }>(`/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`),
+    canhoesFetch<T.PagedResultDto<T.AdminMemberDto>>(
+      `/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`
+    ),
   adminGetSecretSantaState: (eventId: string) =>
     canhoesFetch<T.EventAdminSecretSantaStateDto>(`/v1/events/${eventId}/admin/secret-santa/state`),
   adminDrawSecretSanta: (eventId: string, payload?: unknown) =>
@@ -157,9 +223,13 @@ export const canhoesEventsRepo = {
   adminGetCategories: (eventId: string) =>
     canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/admin/categories`),
   getCategories: (eventId: string) =>
-    canhoesFetch<T.EventCategoryDto[]>(`/v1/events/${eventId}/categories`),
+    canhoesFetch<T.PagedResultDto<T.EventCategoryDto>>(`/v1/events/${eventId}/categories?skip=0&take=200`).then(
+      (page) => page.items.map(mapEventCategory)
+    ),
   getUserCategories: (eventId: string) =>
-    canhoesFetch<T.EventCategoryDto[]>(`/v1/events/${eventId}/categories`),
+    canhoesFetch<T.PagedResultDto<T.EventCategoryDto>>(`/v1/events/${eventId}/categories?skip=0&take=200`).then(
+      (page) => page.items.map(mapEventCategory)
+    ),
   getMyNominationStatus: (eventId: string) =>
     canhoesFetch<T.MyNominationStatusDto>(`/v1/events/${eventId}/nominations/my-status`),
   getApprovedNominees: (eventId: string) =>
@@ -179,16 +249,23 @@ export const canhoesEventsRepo = {
     });
   },
   getOfficialVotingBoard: (eventId: string) =>
-    canhoesFetch<T.OfficialVotingBoardDto>(`/v1/events/${eventId}/official-voting`),
+    canhoesFetch<T.EventVotingBoardDto>(`/v1/events/${eventId}/voting`).then(
+      mapEventVotingBoardToOfficialVotingBoard
+    ),
   castOfficialVote: (eventId: string, payload: T.CastOfficialVoteRequest) =>
-    canhoesFetch<void>(`/v1/events/${eventId}/official-votes`, {
+    canhoesFetch<void>(`/v1/events/${eventId}/votes`, {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        categoryId: payload.categoryId,
+        optionId: payload.nomineeId,
+      }),
     }),
   getSecretSantaOverview: (eventId: string) =>
     canhoesFetch<T.EventSecretSantaOverviewDto>(`/v1/events/${eventId}/secret-santa/overview`),
   getWishlist: (eventId: string) =>
-    canhoesFetch<T.EventWishlistItemDto[]>(`/v1/events/${eventId}/wishlist`),
+    canhoesFetch<T.PagedResultDto<T.EventWishlistItemDto>>(`/v1/events/${eventId}/wishlist?skip=0&take=200`).then(
+      (page) => page.items
+    ),
   getMembers: (eventId: string) =>
     canhoesFetch<T.PublicUserDto[]>(`/v1/events/${eventId}/members`),
   createWishlistItem: (
@@ -218,12 +295,12 @@ export const canhoesEventsRepo = {
       body: JSON.stringify(payload),
     }),
   adminApproveNomination: (eventId: string, nomineeId: string) =>
-    canhoesFetch(`/v1/events/${eventId}/admin/nominees/${nomineeId}/approve`, { method: "PUT" }),
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/approve`, { method: "POST" }),
   adminRejectNomination: (eventId: string, nomineeId: string) =>
-    canhoesFetch(`/v1/events/${eventId}/admin/nominees/${nomineeId}/reject`, { method: "PUT" }),
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/reject`, { method: "POST" }),
   adminSetNominationCategory: (eventId: string, nomineeId: string, payload: { categoryId: string | null }) =>
-    canhoesFetch(`/v1/events/${eventId}/admin/nominees/${nomineeId}/category`, {
-      method: "PUT",
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/set-category`, {
+      method: "POST",
       body: JSON.stringify(payload),
     }),
 };

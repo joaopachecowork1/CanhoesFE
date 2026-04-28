@@ -164,7 +164,10 @@ export function AdminOfficialResultsSection({
   const resultsQuery = useQuery<AdminCategoryResultDto[]>({
     queryKey: ["canhoes", "admin", "official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
-    queryFn: async () => canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId) as Promise<AdminCategoryResultDto[]>,
+    queryFn: async () => {
+      const page = await canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId);
+      return page.items;
+    },
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,

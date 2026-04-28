@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
-import type { EventFeedPostFullDto } from "@/lib/api/types";
+import type { EventActiveContextDto, EventFeedPostFullDto } from "@/lib/api/types";
 
 const HubFeedModule = dynamic(
   () => import("@/components/modules/hub/HubFeedModule").then((m) => ({ default: m.HubFeedModule })),
@@ -18,7 +18,12 @@ type FeedApiResponse = {
 };
 
 export default async function CanhoesFeedPage() {
-  const firstPage = await canhoesServerFetch<FeedApiResponse>("events/active/feed?skip=0&take=15");
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const firstPage = activeContext
+    ? await canhoesServerFetch<FeedApiResponse>(
+        `events/${activeContext.event.id}/feed/posts?skip=0&take=15`
+      )
+    : null;
   
   const initialData = firstPage ? {
     pages: [{

@@ -28,7 +28,10 @@ export function usePendingProposals(eventId: string | null): UsePendingProposals
   // Carrega propostas de categorias pendentes
   const categoryQuery = useQuery<CategoryProposalDto[]>({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetCategoryProposals(eventId!, "pending"),
+    queryFn: async () => {
+      const page = await canhoesEventsRepo.adminGetCategoryProposals(eventId!, "pending");
+      return page.items;
+    },
     queryKey: ["canhoes", "admin", "category-proposals", "pending", eventId],
     staleTime: 1000 * 60 * 2, // 2 minutos
     gcTime: 1000 * 60 * 5, // 5 minutos
@@ -38,7 +41,10 @@ export function usePendingProposals(eventId: string | null): UsePendingProposals
   // Carrega propostas de medidas pendentes
   const measureQuery = useQuery<MeasureProposalDto[]>({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetMeasureProposals(eventId!, "pending"),
+    queryFn: async () => {
+      const page = await canhoesEventsRepo.adminGetMeasureProposals(eventId!, "pending");
+      return page.items;
+    },
     queryKey: ["canhoes", "admin", "measure-proposals", "pending", eventId],
     staleTime: 1000 * 60 * 2, // 2 minutos
     gcTime: 1000 * 60 * 5, // 5 minutos

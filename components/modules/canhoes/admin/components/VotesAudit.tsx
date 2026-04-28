@@ -64,7 +64,10 @@ export function VotesAudit({ eventId, loading }: Readonly<Props>) {
 
   const votesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.loadAllAdminVotes(eventId!),
+    queryFn: async () => {
+      const page = await canhoesEventsRepo.loadAllAdminVotes(eventId!);
+      return page.votes;
+    },
     queryKey: ["canhoes", "admin", "votes", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,

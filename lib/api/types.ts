@@ -439,9 +439,42 @@ export type AdminOfficialResultsDto = {
 };
 
 export type EventAdminBootstrapDto = {
-  event: EventSummaryDto;
-  adminState: EventAdminStateDto;
-  secretSantaState: EventAdminSecretSantaStateDto;
+  events: EventSummaryDto[];
+  state: EventAdminStateDto;
+  counts: AdminListCountsDto;
+};
+
+export type PagedResultDto<T> = {
+  items: T[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminVotesPagedResponseDto = {
+  total: number;
+  votes: AdminVoteAuditRowDto[];
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminNomineesPagedResponseDto = {
+  total: number;
+  nominations: AdminNomineeDto[];
+  skip: number;
+  take: number;
+  hasMore: boolean;
+};
+
+export type AdminNomineeSummaryDto = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  status: ProposalStatus;
+  submittedByUserId: string;
+  submittedByName: string;
 };
 
 export type HubCommentDto = {

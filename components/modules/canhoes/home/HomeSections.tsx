@@ -16,7 +16,7 @@ import { MetricCard } from "./HomeCards";
 import type { MetricItem } from "./HomeCards";
 
 const HERO_CARD_CLASS =
-  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)] before:absolute before:inset-0 before:bg-[url('/noise.png')] before:opacity-[0.03] before:pointer-events-none";
+  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)]";
 
 export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadingState() {
   return (

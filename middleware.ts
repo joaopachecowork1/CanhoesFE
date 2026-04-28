@@ -1,21 +1,28 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+const devAuthBypassEnabled =
+  (process.env.DEV_AUTH_BYPASS_ENABLED ??
+    process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS_ENABLED ??
+    "false")
+    .trim()
+    .toLowerCase() === "true";
+
+export function shouldRedirectUnauthenticated(token: unknown) {
+  if (devAuthBypassEnabled) {
+    return false;
+  }
+
+  return !token;
+}
+
 export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAdmin = (token as { isAdmin?: boolean })?.isAdmin;
-    const path = req.nextUrl.pathname;
-    
-    if (path.startsWith("/canhoes/admin") && !isAdmin) {
-      return NextResponse.redirect(new URL("/canhoes/feed", req.url));
-    }
-    
+  function middleware(_req) {
     return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => !shouldRedirectUnauthenticated(token),
     },
   }
 );

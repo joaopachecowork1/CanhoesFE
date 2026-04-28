@@ -27,7 +27,7 @@ function AdminStateCard({ action, description, title }: Readonly<{ action?: Reac
 
 export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
   const { loading, profileError, isLogged, refreshProfile, user, loginGoogle, logout } = useAuth();
-  const { isAdmin, isLoading: adminLoading } = useAdminStatus();
+  const { error: adminError, isAdmin, isLoading: adminLoading } = useAdminStatus();
   const router = useRouter();
 
   if (loading || (isLogged && !user) || adminLoading) {
@@ -42,11 +42,11 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
     );
   }
 
-  if (isLogged && profileError && !isAdmin) {
+  if (isLogged && (profileError || adminError) && !isAdmin) {
     return (
       <AdminStateCard
         title="Perfil nao validado"
-        description={`A sessao autenticou, mas o backend nao conseguiu validar o teu perfil agora: ${profileError.message}`}
+        description={`A sessao autenticou, mas o backend nao conseguiu validar o teu perfil agora: ${(profileError ?? adminError)?.message}`}
         action={
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button

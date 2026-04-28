@@ -114,8 +114,8 @@ export function AdminNominationsSection({
     queryKey: ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"],
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (!Array.isArray(data) || data.length === 0) return false;
-      return data.some((nomination) => nomination.status === "pending") ? 30_000 : false;
+      if (!data || !Array.isArray(data.nominations) || data.nominations.length === 0) return false;
+      return data.nominations.some((nomination) => nomination.status === "pending") ? 30_000 : false;
     },
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
@@ -123,7 +123,7 @@ export function AdminNominationsSection({
 
   const categories = categoriesQuery.data ?? [];
   const nominations = useMemo(
-    () => (Array.isArray(nominationsQuery.data) ? nominationsQuery.data : []),
+    () => nominationsQuery.data?.nominations ?? [],
     [nominationsQuery.data]
   ) as AdminNomineeDto[];
 
@@ -165,14 +165,30 @@ export function AdminNominationsSection({
   };
 
   const updateCachedNomination = (nomineeId: string, updater: (nomination: AdminNomineeDto) => AdminNomineeDto) => {
-    queryClient.setQueryData<AdminNomineeDto[]>(["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"], (current) =>
-      current?.map((nomination) => (nomination.id === nomineeId ? updater(nomination) : nomination)) ?? current
+    queryClient.setQueryData<{ nominations: AdminNomineeDto[] }>(
+      ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"],
+      (current) =>
+        current
+          ? {
+              ...current,
+              nominations: current.nominations.map((nomination) =>
+                nomination.id === nomineeId ? updater(nomination) : nomination
+              ),
+            }
+          : current
     );
   };
 
   const removeNominationFromCache = (nomineeId: string) => {
-    queryClient.setQueryData<AdminNomineeDto[]>(["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"], (current) =>
-      current?.filter((nomination) => nomination.id !== nomineeId) ?? current
+    queryClient.setQueryData<{ nominations: AdminNomineeDto[] }>(
+      ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"],
+      (current) =>
+        current
+          ? {
+              ...current,
+              nominations: current.nominations.filter((nomination) => nomination.id !== nomineeId),
+            }
+          : current
     );
   };
 

@@ -5,7 +5,7 @@ import { Gift, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useSecretSanta } from "@/hooks/useSecretSanta";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -25,10 +25,8 @@ function buildDefaultEventCode(eventId?: string | null) {
 }
 
 export function CanhoesSecretSantaModule() {
-  const { user } = useAuth();
   const { event, overview, refresh: refreshOverview, isLoading: isOverviewLoading } = useEventOverview();
-  
-  const isAdmin = Boolean(user?.isAdmin) || Boolean(overview?.permissions.isAdmin);
+  const { isAdmin } = useAdminStatus();
   const eventId = event?.id;
 
   const { data, isLoading, error, refetch, drawSecretSanta, isDrawing } = useSecretSanta(eventId);

@@ -51,6 +51,7 @@ export function CanhoesChrome({
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
   const canCompose = Boolean(eventOverview.overview?.modules.feed);
   const { navigateToAdmin: handleNavigateAdmin } = useAdminNavigation({
+    canAccessAdmin: isAdmin,
     adminLoading,
     overviewReady: Boolean(eventOverview.overview),
     router,

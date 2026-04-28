@@ -13,9 +13,7 @@ const EMPTY_AWARD_CATEGORIES: AwardCategoryDto[] = [];
 const EMPTY_ADMIN_NOMINATIONS_SUMMARY = [] as Awaited<
   ReturnType<typeof canhoesEventsRepo.getAdminNominationsSummary>
 >;
-const EMPTY_ADMIN_VOTES = [] as Awaited<
-  ReturnType<typeof canhoesEventsRepo.loadAllAdminVotes>
->;
+const EMPTY_ADMIN_VOTES = [] as Awaited<ReturnType<typeof canhoesEventsRepo.loadAllAdminVotes>>["votes"];
 
 type CategoryFormState = {
   description: string;
@@ -181,6 +179,7 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
     queryKey: ["canhoes", "admin", "votes", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
+    select: (page) => page.votes,
   });
 
   const categories = categoriesQuery.data ?? EMPTY_AWARD_CATEGORIES;
