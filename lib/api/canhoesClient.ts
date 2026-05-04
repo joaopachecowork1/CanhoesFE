@@ -6,12 +6,15 @@
  * Features:
  * - Auto-deduplicates GET requests to prevent duplicate backend calls
  * - Safe 401/403 handling (returns null instead of throwing, to avoid crash on bootstrap)
- * - Rate limiting with exponential backoff retry logic
+ * - Retry with exponential backoff for 5xx/429 responses
  * - Supports strict auth mode when needed via { canhoes: { throwOnUnauthorized: true } }
+ * - Accepts an optional AbortSignal from TanStack Query for cancellation on unmount
  */
 
 export const CANHOES_API_URL =
   process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:5000";
+
+import { API_TIMEOUT_MS } from "@/lib/api/config";
 
 // Retry configuration
 const RETRY_CONFIG = {
@@ -20,73 +23,6 @@ const RETRY_CONFIG = {
   maxDelayMs: 1200,
   retryableStatusCodes: [429, 500, 502, 503, 504],
 };
-
-// Request timeout (snappy by default)
-const REQUEST_TIMEOUT_MS = 6000;
-
-// Track requests per endpoint for rate limiting
-// Use bounded maps with periodic cleanup to prevent memory leaks in long sessions
-const MAX_MAP_SIZE = 500;
-const CLEANUP_INTERVAL_MS = 60_000; // Clean up every 60 seconds
-
-const requestCounts = new Map<string, number>();
-const lastRequestTimes = new Map<string, number>();
-
-// Periodic cleanup to prevent unbounded growth in long sessions
-let cleanupScheduled = false;
-function scheduleCleanup() {
-  if (cleanupScheduled || typeof globalThis === "undefined") return;
-  cleanupScheduled = true;
-  const cleanup = () => {
-    const now = Date.now();
-    for (const [key, time] of lastRequestTimes.entries()) {
-      if (now - time > 120_000) { // Remove entries older than 2 minutes
-        lastRequestTimes.delete(key);
-        requestCounts.delete(key);
-      }
-    }
-    // Also cap map size if cleanup didn't remove enough
-    if (lastRequestTimes.size > MAX_MAP_SIZE) {
-      const entries = [...lastRequestTimes.entries()].sort((a, b) => b[1] - a[1]);
-      for (let i = MAX_MAP_SIZE; i < entries.length; i++) {
-        lastRequestTimes.delete(entries[i][0]);
-        requestCounts.delete(entries[i][0]);
-      }
-    }
-    cleanupScheduled = false;
-    scheduleCleanup(); // Reschedule for next cleanup
-  };
-  setTimeout(cleanup, CLEANUP_INTERVAL_MS);
-}
-scheduleCleanup();
-
-/**
- * Check if a request should be rate limited
- */
-function shouldRateLimit(endpoint: string): boolean {
-  const now = Date.now();
-  const endpointKey = `GET:${endpoint}`;
-
-  const nowTime = lastRequestTimes.get(endpointKey) || 0;
-  const timeDiff = now - nowTime;
-
-  // Reset counter if 1 minute passed
-  if (timeDiff > 60_000) {
-    requestCounts.delete(endpointKey);
-  }
-
-  const count = requestCounts.get(endpointKey) || 0;
-  const maxRequests = parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_MAX || "100", 10);
-
-  // Rate limited if more than max requests in window
-  if (count >= maxRequests) {
-    return true;
-  }
-
-  requestCounts.set(endpointKey, count + 1);
-
-  return false;
-}
 
 /**
  * Calculate retry delay with exponential backoff
@@ -181,6 +117,8 @@ type CanhoesRequestInit = RequestInit & {
     throwOnUnauthorized?: boolean;
     skipDeduplication?: boolean;
   };
+  /** Optional AbortSignal from the caller (e.g. TanStack Query's queryFn signal). */
+  signal?: AbortSignal;
 };
 
 function normalizePath(path: string) {
@@ -255,15 +193,18 @@ function createTimeoutSignal(timeoutMs: number): { signal: AbortSignal; cleanup:
 }
 
 /**
- * Fetch wrapper with automatic timeout and AbortController.
- * Aborts the request if it takes longer than REQUEST_TIMEOUT_MS.
+ * Fetch wrapper with automatic timeout and optional external AbortSignal.
+ * The request is aborted when either the timeout fires or the external signal fires.
  */
 async function fetchWithTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs: number = REQUEST_TIMEOUT_MS
+  timeoutMs: number = API_TIMEOUT_MS,
+  externalSignal?: AbortSignal
 ): Promise<Response> {
-  const { signal, cleanup } = createTimeoutSignal(timeoutMs);
+  const { signal: timeoutSignal, cleanup } = createTimeoutSignal(timeoutMs);
+  const signal =
+    externalSignal ? AbortSignal.any([timeoutSignal, externalSignal]) : timeoutSignal;
 
   try {
     const response = await fetch(url, {
@@ -285,14 +226,14 @@ async function fetchWithTimeout(
 }
 
 /**
- * Fetches data from the Canhoes backend via proxy with rate limiting and retry logic.
+ * Fetches data from the Canhoes backend via proxy with retry and deduplication.
  *
  * Default behavior:
  * - Returns null on 401/403 (doesn't throw, to avoid crash on bootstrap)
  * - Throws ApiError on other failures
  * - Deduplicates GET requests automatically
- * - Rate limits requests (configurable via NEXT_PUBLIC_RATE_LIMIT_MAX/TTL)
  * - Retries failed requests with exponential backoff
+ * - Accepts an optional AbortSignal for cancellation on component unmount
  *
  * For strict auth on 401/403, pass { canhoes: { throwOnUnauthorized: true } }
  */
@@ -305,14 +246,6 @@ export async function canhoesFetch<T>(
     throw new ApiError("Invalid API path: path cannot be empty", 400);
   }
 
-  // Check rate limiting before making request
-  if (shouldRateLimit(normalized)) {
-    const waitTime = (parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_TTL || "300000", 10) /
-      parseInt(process.env.NEXT_PUBLIC_RATE_LIMIT_MAX || "100", 10)) * 1000;
-
-    await new Promise((resolve) => setTimeout(resolve, waitTime));
-  }
-
   const proxyUrl = `/api/proxy/${normalized}`;
 
   const headers = new Headers(init?.headers || {});
@@ -322,7 +255,7 @@ export async function canhoesFetch<T>(
 
   // Remove custom canhoes config before passing to fetch
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { headers: _ignoredHeaders, canhoes, ...restInit } = init || {};
+  const { headers: _ignoredHeaders, canhoes, signal: externalSignal, ...restInit } = init || {};
 
   // Check for pending identical GET request
   const dedupKey = getDeduplicationKey(path, init);
@@ -333,12 +266,17 @@ export async function canhoesFetch<T>(
   const fetchPromise = (async () => {
     try {
       const res = await withRetry(() =>
-        fetchWithTimeout(proxyUrl, {
-          ...restInit,
-          headers,
-          credentials: "include",
-          cache: "no-store",
-        })
+        fetchWithTimeout(
+          proxyUrl,
+          {
+            ...restInit,
+            headers,
+            credentials: "include",
+            cache: "no-store",
+          },
+          API_TIMEOUT_MS,
+          externalSignal
+        )
       );
 
       if (res.ok) {

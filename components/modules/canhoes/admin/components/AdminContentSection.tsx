@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { lazy, Suspense, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type {
@@ -14,11 +14,24 @@ import {
   type AdminContentSectionId,
 } from "../adminContentSections";
 import { AdminContentTabs } from "./AdminContentTabs";
-import { AdminNominationsSection } from "./AdminNominationsSection";
-import { AdminOfficialResultsSection } from "./AdminOfficialResultsSection";
-import { CategoriesAdmin } from "./CategoriesAdmin";
-import { PendingProposals } from "./PendingProposals";
-import { VotesAudit } from "./VotesAudit";
+
+// OPTIMIZATION: Lazy-load heavy admin sections — only admins use them and only
+// one tab is visible at a time. This keeps the shared JS bundle smaller.
+const AdminNominationsSection = lazy(() =>
+  import("./AdminNominationsSection").then((m) => ({ default: m.AdminNominationsSection }))
+);
+const AdminOfficialResultsSection = lazy(() =>
+  import("./AdminOfficialResultsSection").then((m) => ({ default: m.AdminOfficialResultsSection }))
+);
+const CategoriesAdmin = lazy(() =>
+  import("./CategoriesAdmin").then((m) => ({ default: m.CategoriesAdmin }))
+);
+const PendingProposals = lazy(() =>
+  import("./PendingProposals").then((m) => ({ default: m.PendingProposals }))
+);
+const VotesAudit = lazy(() =>
+  import("./VotesAudit").then((m) => ({ default: m.VotesAudit }))
+);
 
 type AdminContentSectionProps = {
   categoryProposals: CategoryProposalDto[];
@@ -89,25 +102,29 @@ export function AdminContentSection({
 
   const content =
     activeView === "categorias" ? (
-      <CategoriesAdmin eventId={eventId} onUpdate={onUpdate} />
+      <Suspense fallback={null}>
+        <CategoriesAdmin eventId={eventId} onUpdate={onUpdate} />
+      </Suspense>
     ) : activeView === "resultados" ? (
-      <div className="space-y-6">
-        <AdminOfficialResultsSection eventId={eventId} memberCount={memberCount} />
-
-        <VotesAudit eventId={eventId} loading={loading} />
-      </div>
+      <Suspense fallback={null}>
+        <div className="space-y-6">
+          <AdminOfficialResultsSection eventId={eventId} memberCount={memberCount} />
+          <VotesAudit eventId={eventId} loading={loading} />
+        </div>
+      </Suspense>
     ) : (
-      <div className="space-y-6">
-        <AdminNominationsSection eventId={eventId} loading={loading} />
-
-        <PendingProposals
-          categoryProposals={safeCategoryProposals}
-          eventId={eventId}
-          loading={loading}
-          measureProposalsAll={safeMeasureProposals}
-          onUpdate={onUpdate}
-        />
-      </div>
+      <Suspense fallback={null}>
+        <div className="space-y-6">
+          <AdminNominationsSection eventId={eventId} loading={loading} />
+          <PendingProposals
+            categoryProposals={safeCategoryProposals}
+            eventId={eventId}
+            loading={loading}
+            measureProposalsAll={safeMeasureProposals}
+            onUpdate={onUpdate}
+          />
+        </div>
+      </Suspense>
     );
 
   return (

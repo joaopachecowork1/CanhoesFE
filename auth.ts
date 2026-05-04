@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
     error: "/canhoes/login",
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user: _user, account }) {
       if (account?.id_token) {
         token.idToken = account.id_token;
       }
@@ -33,11 +33,11 @@ export const authOptions: NextAuthOptions = {
         token.idToken = account.access_token;
       }
 
-      if (user) {
-        token.isAdmin = Boolean((user as { isAdmin?: boolean }).isAdmin);
+      if (account) {
+        // isAdmin is always false at login time — it is enriched client-side
+        // after the /api/me call resolves the backend user profile.
+        token.isAdmin = false;
       }
-
-      token.isAdmin = Boolean(token.isAdmin);
 
       return token;
     },

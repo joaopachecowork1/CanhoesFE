@@ -9,6 +9,7 @@ function toFormData(files: File[]) {
   return formData;
 }
 
+// TODO: remove when BE always returns the normalised OfficialVotingBoardDto shape directly
 function mapEventVotingBoardToOfficialVotingBoard(
   board: T.EventVotingBoardDto
 ): T.OfficialVotingBoardDto {
@@ -31,6 +32,7 @@ function mapEventVotingBoardToOfficialVotingBoard(
   };
 }
 
+// TODO: remove when BE always returns `name` and `title` consistently
 function mapEventCategory(category: T.EventCategoryDto): T.EventCategoryDto {
   return {
     ...category,
@@ -39,6 +41,7 @@ function mapEventCategory(category: T.EventCategoryDto): T.EventCategoryDto {
   };
 }
 
+// TODO: remove when BE always returns `voteCount` (not the legacy `votes` field)
 function mapResultNominee(
   nominee: T.CanhoesCategoryResultDto["top"][number] & { votes?: number; voteCount?: number }
 ): T.CanhoesCategoryResultDto["top"][number] {
@@ -90,12 +93,6 @@ export const canhoesEventsRepo = {
     canhoesFetch<{ pinned: boolean }>(`/v1/events/${eventId}/admin/feed/posts/${postId}/pin`, { method: "POST" }),
   adminDeleteFeedPost: (eventId: string, postId: string) =>
     canhoesFetch(`/v1/events/${eventId}/admin/feed/posts/${postId}`, { method: "DELETE" }),
-  uploadFeedImage: (eventId: string, files: File[]) =>
-    canhoesFetch<string[]>(`/v1/events/${eventId}/feed/uploads`, {
-      method: "POST",
-      body: toFormData(files),
-      canhoes: { skipDeduplication: true },
-    }),
   uploadFeedImages: (eventId: string, files: File[]) =>
     canhoesFetch<string[]>(`/v1/events/${eventId}/feed/uploads`, {
       method: "POST",

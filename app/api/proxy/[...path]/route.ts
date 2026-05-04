@@ -1,26 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
 import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAuth";
 import { IS_MOCK_MODE } from "@/lib/mock";
 import { getMockResponse } from "@/lib/mock/mockFetch";
 import { logger } from "@/lib/logger";
 import { sanitizeErrorDetail } from "@/lib/errors";
+import { API_TIMEOUT_MS } from "@/lib/api/config";
 
-const rateLimitStore = new Map<string, { count: number; reset: number }>();
+/**
+ * Headers from the backend response that are safe to forward to the client.
+ * Forwarding these allows the browser and Next.js edge cache to benefit from
+ * backend cache hints (e.g. Cache-Control: public, max-age=30).
+ */
+const FORWARDED_RESPONSE_HEADERS = ["cache-control", "etag", "last-modified", "vary"] as const;
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip);
-  if (!record || record.reset < now) {
-    rateLimitStore.set(ip, { count: 1, reset: now + 60000 });
-    return true;
-  }
-  if (record.count >= 100) return false;
-  record.count++;
-  return true;
-}
 
 /**
  * Proxy to the backend (avoids CORS) + injects Google id_token.
@@ -29,6 +22,7 @@ function checkRateLimit(ip: string): boolean {
  * Backend auth: expects Authorization: Bearer <Google id_token>.
  *
  * Note: This proxy allows unauthenticated GET requests to public endpoints.
+ * Rate limiting is handled entirely by the backend ([EnableRateLimiting("standard")]).
  */
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
@@ -86,13 +80,13 @@ function hasRequestBody(method: string) {
   return method !== "GET" && method !== "DELETE";
 }
 
-async function resolveIdToken(request: NextRequest) {
+async function resolveIdToken(request: NextRequest): Promise<string | undefined> {
   const token = await getToken({ req: request });
-  const fromJwt = token?.idToken;
-  if (fromJwt) return fromJwt;
-
-  const session = await getServerSession(authOptions);
-  return session?.idToken;
+  if (!token) return undefined;
+  if (!token.idToken) {
+    logger.warn("[Proxy] JWT present but idToken is missing — check auth.ts jwt callback");
+  }
+  return token.idToken as string | undefined;
 }
 
 function buildBackendHeaders(request: NextRequest, idToken: string | undefined) {
@@ -165,7 +159,7 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
   const body = hasRequestBody(method) ? await request.arrayBuffer() : undefined;
 
   const controller = new AbortController();
-  const timerId = setTimeout(() => controller.abort(), 6_000);
+  const timerId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
     const response = await fetch(backendUrl, {
@@ -193,22 +187,6 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
 }
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }, method: string) {
-  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() 
-    || request.headers.get("x-real-ip") 
-    || "unknown";
-  
-  if (!checkRateLimit(clientIp)) {
-    const traceId = request.headers.get("x-request-id") || crypto.randomUUID();
-    return createProxyErrorResponse(
-      429,
-      {
-        code: "RATE_LIMIT_EXCEEDED",
-        message: "Too many requests. Please wait before trying again.",
-      },
-      traceId
-    );
-  }
-
   const traceId = request.headers.get("x-request-id") || crypto.randomUUID();
   const proxyPath = normalizeProxyPath(params);
   if (!proxyPath) {
@@ -237,17 +215,21 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
     }
 
     if (response.status === 204) {
-      return new NextResponse(null, {
-        status: 204,
-      });
+      return new NextResponse(null, { status: 204 });
+    }
+
+    const forwardedHeaders: Record<string, string> = {
+      "Content-Type": response.headers.get("Content-Type") || "application/json",
+    };
+    for (const header of FORWARDED_RESPONSE_HEADERS) {
+      const value = response.headers.get(header);
+      if (value) forwardedHeaders[header] = value;
     }
 
     const responseData = await response.text();
     return new NextResponse(responseData || null, {
       status: response.status,
-      headers: {
-        "Content-Type": response.headers.get("Content-Type") || "application/json",
-      },
+      headers: forwardedHeaders,
     });
   } catch (error) {
     const duration = Date.now() - startMs;

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import type {
   AdminModuleKey,
   EventAdminStateDto,
@@ -7,15 +9,24 @@ import type {
 } from "@/lib/api/types";
 
 import type { ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
+import { useModuleVisibility } from "@/hooks/useModuleVisibility";
+import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { getPhaseLabel } from "@/lib/canhoesEvent";
 
 import { AdminStateMessage } from "./AdminStateMessage";
 import {
   ADVANCED_ADMIN_MODULE_ORDER,
   QUICK_ADMIN_MODULE_ORDER,
 } from "../adminContentSections";
-import { useAdminControlCenter, PHASE_LABELS } from "../hooks/useAdminControlCenter";
-import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { AdminSettingsMainPanel, AdminSettingsAdvancedSheet } from "./AdminControlCenterPanels";
+
+export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
+  PROPOSALS: "Nomeações",
+  VOTING: "Votação",
+  RESULTS: "Resultados",
+  DRAW: "Sorteio",
+};
 
 export const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
 
@@ -26,6 +37,16 @@ export function selectModuleItems(
   return order.map((key) => itemsByKey[key]).filter((item): item is ModuleVisibilityItem => Boolean(item));
 }
 
+function buildModuleItemsByKey(moduleItems: ModuleVisibilityItem[]) {
+  return Object.fromEntries(moduleItems.map((item) => [item.key, item])) as Partial<
+    Record<AdminModuleKey, ModuleVisibilityItem>
+  >;
+}
+
+export type SettingsFeedbackState = {
+  message: string;
+  tone: "default" | "error" | "success";
+};
 
 type AdminControlCenterProps = {
   activeEventName: string | null;
@@ -36,12 +57,6 @@ type AdminControlCenterProps = {
   state: EventAdminStateDto | null;
 };
 
-function buildModuleItemsByKey(moduleItems: ModuleVisibilityItem[]) {
-  return Object.fromEntries(moduleItems.map((item) => [item.key, item])) as Partial<
-    Record<AdminModuleKey, ModuleVisibilityItem>
-  >;
-}
-
 export function AdminControlCenter({
   activeEventName,
   eventId,
@@ -50,30 +65,118 @@ export function AdminControlCenter({
   onRefresh,
   state,
 }: Readonly<AdminControlCenterProps>) {
-  const {
-    state: hookState,
-    actions,
-  } = useAdminControlCenter(eventId, state, events, onRefresh);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [feedback, setFeedback] = useState<SettingsFeedbackState | null>(null);
 
   const {
-    advancedOpen,
-    feedback,
     allDisabled,
     allEnabled,
     moduleItems,
-    visibilitySavingKey,
+    savingKey: visibilitySavingKey,
+    setAllModules,
+    setNominationsVisible,
+    setResultsVisible,
+    toggleModule,
     visibleCount,
-  } = hookState;
+  } = useModuleVisibility({ eventId, onUpdate: onRefresh, state });
 
-  const {
-    setAdvancedOpen,
-    handleUpdatePhase,
-    handleActivateEvent,
-    handleModuleToggle,
-    handleNominationsVisibility,
-    handleResultsVisibility,
-    handleSetAllModules,
-  } = actions;
+  const runVisibilityAction = async (
+    messages: { saving: string; success: string; error: string },
+    action: () => Promise<boolean>
+  ) => {
+    setFeedback({ message: messages.saving, tone: "default" });
+    const ok = await action();
+    setFeedback({
+      message: ok ? messages.success : messages.error,
+      tone: ok ? "success" : "error",
+    });
+    return ok;
+  };
+
+  const handleUpdatePhase = async (phaseType: EventPhaseDto["type"]) => {
+    if (!eventId || phaseType === state?.activePhase?.type) return;
+
+    setFeedback({ message: "A guardar fase...", tone: "default" });
+    try {
+      await canhoesEventsRepo.updateAdminPhase(eventId, { phaseType });
+      await onRefresh();
+      toast.success("Fase do evento atualizada");
+      setFeedback({
+        message: `Fase atualizada para ${PHASE_LABELS[phaseType]}.`,
+        tone: "success",
+      });
+    } catch (error) {
+      logFrontendError("AdminControlCenter.updatePhase", error, { phaseType });
+      toast.error(getErrorMessage(error, "Não foi possível mudar a fase."));
+      setFeedback({ message: "Falha ao guardar a fase atual.", tone: "error" });
+    }
+  };
+
+  const handleActivateEvent = async (eventIdToActivate: string) => {
+    if (!eventIdToActivate || eventIdToActivate === eventId) return;
+
+    setFeedback({ message: "A mudar evento ativo...", tone: "default" });
+    try {
+      await canhoesEventsRepo.adminActivateEvent(eventIdToActivate);
+      await onRefresh();
+      toast.success("Evento ativo atualizado");
+      const nextEventName =
+        events.find((event) => event.id === eventIdToActivate)?.name ?? "evento";
+      setFeedback({
+        message: `Evento ativo atualizado para ${nextEventName}.`,
+        tone: "success",
+      });
+    } catch (error) {
+      logFrontendError("AdminControlCenter.activateEvent", error, { eventId: eventIdToActivate });
+      toast.error(getErrorMessage(error, "Não foi possível mudar o evento ativo."));
+      setFeedback({ message: "Falha ao atualizar o evento ativo.", tone: "error" });
+    }
+  };
+
+  const handleModuleToggle = (item: ModuleVisibilityItem, checked: boolean) => {
+    const labelLower = item.label.toLowerCase();
+    runVisibilityAction(
+      {
+        saving: `A guardar ${labelLower}...`,
+        success: `${item.label} atualizado.`,
+        error: `Falha ao guardar ${labelLower}.`,
+      },
+      () => toggleModule(item.key, checked)
+    );
+  };
+
+  const handleNominationsVisibility = (checked: boolean) => {
+    runVisibilityAction(
+      {
+        saving: "A guardar exposição de nomeações...",
+        success: checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.",
+        error: "Falha ao guardar a exposição de nomeações.",
+      },
+      () => setNominationsVisible(checked)
+    );
+  };
+
+  const handleResultsVisibility = (checked: boolean) => {
+    runVisibilityAction(
+      {
+        saving: "A guardar exposição de resultados...",
+        success: checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.",
+        error: "Falha ao guardar a exposição de resultados.",
+      },
+      () => setResultsVisible(checked)
+    );
+  };
+
+  const handleSetAllModules = (visible: boolean) => {
+    runVisibilityAction(
+      {
+        saving: visible ? "A ativar todos os módulos..." : "A desativar todos os módulos...",
+        success: visible ? "Todos os módulos ficaram ativos." : "Todos os módulos ficaram ocultos.",
+        error: visible ? "Falha ao ativar todos os módulos." : "Falha ao desativar todos os módulos.",
+      },
+      () => setAllModules(visible)
+    );
+  };
 
   const moduleItemsByKey = buildModuleItemsByKey(moduleItems);
   const quickModuleItems = selectModuleItems(QUICK_ADMIN_MODULE_ORDER, moduleItemsByKey);

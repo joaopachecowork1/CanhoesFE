@@ -37,7 +37,7 @@ export function EventModuleGate({
 
   if (access.error || !access.event || !access.overview) {
     return (
-      <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+      <Card>
         <CardContent className="space-y-4 p-4 sm:p-5">
           <ErrorAlert
             title={`Erro ao abrir ${access.module.label}`}
