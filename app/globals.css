@@ -67,7 +67,7 @@
   --bark-dark: #3d2b18;
   --beige: #e0c7a6;
   --sand: #bea486;
-  --neon-green: #00ff88;
+  --neon-green: #EAB308;
   --neon-amber: #ffb800;
   --neon-cyan: #00d4aa;
   --neon-red: #ff3a3a;
@@ -83,18 +83,18 @@
   --canhoes-gold-subtle: rgba(200, 164, 107, 0.10);
   --canhoes-parchment: #F1E6D2;
   --canhoes-amethyst: #7A628A;
-  --glow-green: 0 0 6px #00ff88, 0 0 20px rgba(0, 255, 136, 0.18), 0 0 40px rgba(0, 255, 136, 0.08);
-  --glow-green-sm: 0 0 4px #00ff88, 0 0 10px rgba(0, 255, 136, 0.16);
+  --glow-green: 0 0 6px #EAB308, 0 0 20px rgba(234, 179, 8, 0.18), 0 0 40px rgba(234, 179, 8, 0.08);
+  --glow-green-sm: 0 0 4px #EAB308, 0 0 10px rgba(234, 179, 8, 0.16);
   --glow-amber: 0 0 6px #ffb800, 0 0 20px rgba(255, 184, 0, 0.25);
   --glow-purple: 0 0 8px rgba(177, 140, 255, 0.45), 0 0 22px rgba(177, 140, 255, 0.2);
   --glow-purple-sm: 0 0 6px rgba(177, 140, 255, 0.28), 0 0 16px rgba(177, 140, 255, 0.14);
-  --glow-moss: 0 10px 30px rgba(74, 92, 47, 0.4);
+  --glow-moss: 0 10px 30px rgba(234, 179, 8, 0.4);
   --glow-paper: 0 18px 40px rgba(10, 12, 8, 0.2);
   --success: var(--color-success);
   --danger: var(--color-danger);
   --fire: #ff6b35;
   --border-subtle: var(--color-border);
-  --border-moss: rgba(74, 92, 47, 0.5);
+  --border-moss: rgba(234, 179, 8, 0.5);
   --border-neon: var(--color-border-strong);
   --border-paper: var(--color-border-paper);
   --border-paper-soft: var(--color-border-paper-soft);
@@ -172,7 +172,7 @@
   --color-danger-hover: #c94f31;
   --color-success: var(--success);
   --color-moss: var(--moss);
-  --color-moss-subtle: rgba(74, 92, 47, 0.16);
+  --color-moss-subtle: rgba(234, 179, 8, 0.16);
   --color-moss-light: var(--moss-light);
   --color-beige: var(--beige);
   --color-beige-dark: var(--sand);
@@ -206,7 +206,7 @@
   a { color: inherit; text-decoration: none; }
   button { touch-action: manipulation; }
   input, textarea, select { min-height: 3rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md-token); color: var(--text-primary); padding: 0.875rem 1rem; font-size: 1rem; }
-  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--border-neon); box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.18); }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--border-neon); box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.18); }
   button, [role="button"] { min-height: 44px; min-width: 44px; }
   ::selection { background: rgba(133, 165, 101, 0.2); color: var(--color-text-primary); }
 
@@ -276,7 +276,7 @@
   .field-base { display: flex; width: 100%; min-width: 0; border-radius: var(--radius-md-token); border: 1px solid var(--border-paper-soft); background: var(--bg-paper-soft); padding: 0.75rem 1rem; font-size: 1rem; color: var(--ink-primary); box-shadow: none; outline: none; transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out); }
   .field-base::placeholder { color: var(--ink-muted); }
   .field-base:hover { border-color: var(--border-paper); }
-  .field-base:focus-visible { border-color: var(--border-moss); background: var(--bg-paper); box-shadow: 0 0 0 3px rgba(95,123,56,0.14); }
+  .field-base:focus-visible { border-color: var(--border-moss); background: var(--bg-paper); box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.14); }
     .field-base:disabled { cursor: not-allowed; opacity: 0.5; }
   .field-label { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
   .canhoes-field-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-secondary); display: block; margin-bottom: 0.5rem; }
@@ -310,4 +310,5 @@
     }
   }
 }
+
 

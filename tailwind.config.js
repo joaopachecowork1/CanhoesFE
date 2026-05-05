@@ -53,12 +53,12 @@ module.exports = {
         'body':     ['clamp(0.875rem, 2vw, 1rem)',   { lineHeight: '1.6' }],
       },
       boxShadow: {
-        'neon':         '0 0 12px rgba(0,255,136,0.25)',
-        'neon-lg':      '0 0 24px rgba(0,255,136,0.4)',
+        'neon':         '0 0 12px rgba(234,179,8,0.25)',
+        'neon-lg':      '0 0 24px rgba(234,179,8,0.4)',
         'card':         '0 4px 24px rgba(0,0,0,0.4)',
       },
       backgroundImage: {
-        'neon-glow':    'linear-gradient(180deg, rgba(0,255,136,0.18), rgba(0,212,170,0.12))',
+        'neon-glow':    'linear-gradient(180deg, rgba(234,179,8,0.18), rgba(234,179,8,0.12))',
         'card-subtle':  'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
       },
       keyframes: {
@@ -75,8 +75,8 @@ module.exports = {
           to:   { opacity: "1", transform: "translateY(0)" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 8px oklch(0.68 0.22 280 / 20%)" },
-          "50%":       { boxShadow: "0 0 20px oklch(0.68 0.22 280 / 50%)" },
+          "0%, 100%": { boxShadow: "0 0 8px rgba(234,179,8,0.20)" },
+          "50%":       { boxShadow: "0 0 20px rgba(234,179,8,0.50)" },
         },
         "ambient-float": {
           "0%, 100%": { transform: "translateY(0px)" },
@@ -99,8 +99,8 @@ module.exports = {
           "50%":       { transform: "translateY(-6px)" },
         },
         "canhoes-pulse": {
-          "0%, 100%": { boxShadow: "0 0 12px oklch(0.72 0.19 152 / 25%)" },
-          "50%":       { boxShadow: "0 0 28px oklch(0.72 0.19 152 / 45%), 0 0 8px oklch(0.72 0.19 152 / 30%)" },
+          "0%, 100%": { boxShadow: "0 0 12px rgba(234,179,8,0.25)" },
+          "50%":       { boxShadow: "0 0 28px rgba(234,179,8,0.45), 0 0 8px oklch(0.72 0.19 152 / 30%)" },
         },
       },
       animation: {
@@ -119,3 +119,4 @@ module.exports = {
   },
   plugins: [],
 };
+

@@ -30,8 +30,8 @@
     --color-text-primary: #f3ead8;
     --color-text-secondary: #e2d4ba;
     --color-text-muted: #bcc5a8;
-    --color-accent: #5f7b38;
-    --color-accent-hover: #739247;
+    --color-accent: #EAB308;
+    --color-accent-hover: #D9A800;
     --color-danger: #e05a3a;
     --color-success: #4caf50;
     --color-warning: #ffb800;
@@ -131,3 +131,4 @@
       background-position: -200% 0;
     }
   }
+
