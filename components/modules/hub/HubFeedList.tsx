@@ -1,6 +1,5 @@
 "use client";
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
 
@@ -72,8 +71,6 @@ export function HubFeedList({
   onAdminDelete,
   sentinelRef,
 }: Readonly<HubFeedListProps>) {
-  const [listRef] = useAutoAnimate();
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -92,12 +89,12 @@ export function HubFeedList({
         ) : null}
 
                 {posts.length > 0 ? (
-          <div ref={listRef} className="space-y-3">
             <VirtualizedList
               items={posts}
               overscan={4}
               getKey={(post) => post.id}
               estimateSize={() => 220}
+              className="space-y-3"
               renderItem={(post, index) => (
                 <SectionBoundary
                   key={post.id}
@@ -129,7 +126,6 @@ export function HubFeedList({
                 </SectionBoundary>
               )}
             />
-          </div>
         ) : (
           <EmptyState
             className="py-10"
