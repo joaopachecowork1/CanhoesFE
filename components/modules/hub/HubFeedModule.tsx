@@ -117,7 +117,7 @@ function HubFeedModuleView({
   const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
   const handleLoadMore = state.loadMore;
 
-  const feedList = (console.log("HubFeed posts:", posts),
+  const feedList = (
     <HubFeedList
       posts={posts}
       sort={sort}
