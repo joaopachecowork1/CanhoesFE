@@ -79,7 +79,7 @@ export function AdminOverviewSection({
               </p>
             </div>
 
-            <Badge className="border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] text-[var(--ink-primary)] shadow-none sm:self-start">
+            <Badge className="border-[var(--border-paper)] bg-[rgba(234,179,8,0.1)] text-[var(--ink-primary)] shadow-none sm:self-start">
               {visibleModuleCount} módulos ativos
             </Badge>
           </div>
@@ -148,7 +148,7 @@ function OverviewMetric({
         <span
           className={
             tone === "highlight"
-              ? "flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)]"
+              ? "flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(234,179,8,0.24)] bg-[rgba(234,179,8,0.12)] text-[var(--ink-primary)]"
               : "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(212,184,150,0.18)] text-[var(--ink-primary)]"
           }
         >

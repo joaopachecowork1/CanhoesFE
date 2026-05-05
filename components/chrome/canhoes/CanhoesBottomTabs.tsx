@@ -35,7 +35,7 @@ export function CanhoesBottomTabs({
     buttonClassName: cn(
       "border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.04)] text-[var(--bg-paper)]",
       isComposeOpen &&
-        "border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.16)] text-[var(--bg-paper)]"
+        "border-[rgba(234,179,8,0.24)] bg-[rgba(234,179,8,0.16)] text-[var(--bg-paper)]"
     ),
     icon: Plus,
     iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--moss)]"),
@@ -74,7 +74,7 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
       isMoreItem && "text-[var(--bg-paper)]",
-      isActive && "bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]"
+      isActive && "bg-[rgba(234,179,8,0.14)] text-[var(--bg-paper)]"
     ),
     icon: entry.item.icon,
     iconClassName: cn(

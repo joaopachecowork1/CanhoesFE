@@ -301,9 +301,9 @@ export function AdminNominationsSection({
                     className={cn(
                       ADMIN_OUTLINE_BUTTON_CLASS,
                       "min-h-10 rounded-full",
-                      isActive ? "border-[var(--border-neon)] bg-[rgba(122,173,58,0.12)]" : "",
+                      isActive ? "border-[rgba(234,179,8,0.22)] bg-[rgba(234,179,8,0.12)]" : "",
                       status === "pending" && statusCounts.pending > 0
-                        ? "text-[var(--neon-amber)]"
+                        ? "text-[var(--color-accent)]"
                         : ""
                     )}
                     onClick={() => setStatusFilter(status)}
@@ -473,7 +473,7 @@ export function AdminNominationsSection({
               <Button
                 type="button"
                 disabled={anyMutationPending || selectedNomination.status === "approved"}
-                className="min-h-11 border-[var(--border-neon)] bg-[rgba(0,255,136,0.12)] text-[var(--neon-green)] hover:bg-[rgba(0,255,136,0.18)]"
+                className="min-h-11 border-[rgba(234,179,8,0.22)] bg-[rgba(234,179,8,0.12)] text-[var(--color-accent)] hover:bg-[rgba(234,179,8,0.18)]"
                 onClick={() => approveNomination.mutate(selectedNomination.id)}
                 aria-label={`Aprovar nomeação "${selectedNomination.title || selectedNomination.id}"`}
               >

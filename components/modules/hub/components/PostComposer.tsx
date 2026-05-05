@@ -70,7 +70,7 @@ export function PostComposer({
     ? "border-[rgba(177,140,255,0.26)] [box-shadow:var(--glow-purple-sm)]"
     : "";
   const mediaButtonActiveClassName = files.length > 0
-    ? "border-[rgba(0,255,136,0.18)] shadow-[var(--glow-green-sm)]"
+    ? "border-[rgba(234,179,8,0.18)] shadow-[var(--glow-green-sm)]"
     : "";
 
   return (

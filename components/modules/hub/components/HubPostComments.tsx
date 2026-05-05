@@ -134,7 +134,7 @@ export function HubPostComments({
                         {comment.userName === postAuthorName && (
                           <Badge
                             variant="outline"
-                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
+                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(234,179,8,0.1)] text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
                           >
                             OP
                           </Badge>

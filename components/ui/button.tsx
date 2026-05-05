@@ -13,15 +13,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "border border-[rgba(95,123,56,0.36)] bg-[var(--moss)] text-white shadow-[var(--shadow-elevation-sm)] hover:bg-[var(--moss-light)] hover:border-[rgba(95,123,56,0.48)] hover:shadow-[var(--shadow-elevation-md)]",
+        default: "border border-[rgba(234,179,8,0.36)] bg-[var(--moss)] text-white shadow-[var(--shadow-elevation-sm)] hover:bg-[var(--moss-light)] hover:border-[rgba(234,179,8,0.48)] hover:shadow-[var(--shadow-elevation-md)]",
         primary: "button-pill button-pill-primary hover:shadow-lg hover:-translate-y-0.5",
         destructive: "border border-[rgba(224,90,58,0.22)] bg-[linear-gradient(180deg,var(--color-danger),var(--color-danger-hover))] text-white shadow-[var(--shadow-elevation-sm)] hover:border-[rgba(224,90,58,0.3)] hover:brightness-110",
         outline: "border border-[var(--border-paper)] bg-[rgba(245,234,216,0.78)] text-[var(--ink-primary)] shadow-none hover:bg-[var(--bg-paper-soft)] hover:border-[var(--border-moss)] hover:shadow-sm",
         secondary: "border border-[var(--border-subtle)] bg-[rgba(244,234,216,0.08)] text-[var(--text-primary)] shadow-none hover:bg-[rgba(244,234,216,0.14)] hover:border-[rgba(212,184,150,0.18)]",
         ghost: "border-transparent bg-transparent text-[var(--text-primary)] shadow-none hover:bg-[rgba(244,234,216,0.08)] hover:text-[var(--moss)]",
         "ghost-subtle": "border-transparent bg-transparent text-[var(--text-muted)] shadow-none hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--text-primary)]",
-        link: "px-0 text-[var(--moss)] underline-offset-4 shadow-none hover:text-[var(--ink-primary)] hover:underline decoration-[rgba(95,123,56,0.3)] decoration-2 hover:underline-offset-4",
-        glow: "border border-[rgba(95,123,56,0.22)] bg-[rgba(95,123,56,0.12)] text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] hover:bg-[rgba(95,123,56,0.16)] hover:shadow-[0_0_15px_rgba(95,123,56,0.2)]",
+        link: "px-0 text-[var(--moss)] underline-offset-4 shadow-none hover:text-[var(--ink-primary)] hover:underline decoration-[rgba(234,179,8,0.3)] decoration-2 hover:underline-offset-4",
+        glow: "border border-[rgba(234,179,8,0.22)] bg-[rgba(234,179,8,0.12)] text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] hover:bg-[rgba(234,179,8,0.16)] hover:shadow-[0_0_15px_rgba(234,179,8,0.2)]",
         neon: "bg-neon-glow border border-neon-green/30 text-neon-green hover:bg-neon-green/25 shadow-neon font-semibold",
       },
       size: {

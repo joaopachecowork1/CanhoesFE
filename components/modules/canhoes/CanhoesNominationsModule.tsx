@@ -317,7 +317,7 @@ function CategoryNominationCard({
             className={cn(
               "min-w-36",
               isValid && !createNomination.isPending
-                ? "bg-[linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,212,170,0.12))] border border-[var(--border-neon)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(0,255,136,0.22)] hover:shadow-[0_0_18px_rgba(0,255,136,0.18)] active:scale-[0.98]"
+                ? "bg-[linear-gradient(180deg,rgba(234,179,8,0.18),rgba(234,179,8,0.12))] border border-[rgba(234,179,8,0.22)] text-[var(--color-accent)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(234,179,8,0.22)] hover:shadow-[0_0_18px_rgba(234,179,8,0.18)] active:scale-[0.98]"
                 : "opacity-50"
             )}
           >
@@ -343,8 +343,8 @@ function CategoryNominationCard({
             estimateSize={() => 52}
             className="max-h-[34svh]"
             renderItem={(nominee) => (
-              <div className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 transition-colors duration-150 hover:border-[rgba(122,173,58,0.2)]">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--neon-green)]" />
+              <div className="canhoes-list-item flex items-center gap-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] px-3 py-2.5 transition-colors duration-150 hover:border-[rgba(234,179,8,0.2)]">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--color-accent)]" />
                 <span className="truncate text-sm font-medium text-[var(--text-primary)]">{nominee.title}</span>
               </div>
             )}

@@ -163,7 +163,7 @@ export function CanhoesChrome({
                           pageContext.tone === "social" &&
                             "bg-[rgba(118,98,166,0.14)] text-[var(--accent-purple-soft)]",
                           pageContext.tone === "official" &&
-                            "bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]",
+                            "bg-[rgba(234,179,8,0.14)] text-[var(--bg-paper)]",
                           pageContext.tone === "admin" &&
                             "bg-[rgba(201,164,106,0.14)] text-[var(--bg-paper)]",
                           pageContext.tone === "event" &&

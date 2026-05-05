@@ -45,7 +45,7 @@ export function ReactionBar({
             className={cn(
               "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[11px] font-medium transition-[transform,background-color,border-color,color,box-shadow] hover:-translate-y-[1px]",
               isActive
-                ? "border-[rgba(122,173,58,0.52)] bg-[rgba(122,173,58,0.18)] text-[var(--bg-paper)] [box-shadow:var(--glow-green-sm)]"
+                ? "border-[rgba(234,179,8,0.52)] bg-[rgba(234,179,8,0.18)] text-[var(--bg-paper)]"
                 : "border-[var(--border-subtle)] bg-[rgba(255,255,255,0.06)] text-[rgba(242,234,216,0.8)] hover:bg-[rgba(255,255,255,0.12)] hover:text-[var(--bg-paper)]"
             )}
           >

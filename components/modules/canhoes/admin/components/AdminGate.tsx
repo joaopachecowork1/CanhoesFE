@@ -13,7 +13,7 @@ import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 function AdminStateCard({ action, description, title }: Readonly<{ action?: ReactNode; description: string; title: string }>) {
   return (
     <section className="canhoes-paper-panel canhoes-admin-shell-panel mx-auto max-w-xl px-5 py-10 text-center sm:px-6">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(234,179,8,0.24)] bg-[rgba(234,179,8,0.12)] text-[var(--color-accent)] shadow-[var(--glow-green-sm)]">
         <Shield className="h-7 w-7" />
       </div>
       <div className="mt-5 space-y-2">
@@ -36,7 +36,7 @@ export function AdminGate({ children }: Readonly<{ children: ReactNode }>) {
         title="A preparar o admin"
         description="A verificar a sessao e as permissoes administrativas deste evento."
         action={
-          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-moss)] border-t-transparent animate-spin" />
+          <div className="mx-auto h-9 w-9 rounded-full border-4 border-[var(--color-accent)] border-t-transparent animate-spin" />
         }
       />
     );

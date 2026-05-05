@@ -76,7 +76,7 @@ function FeedInsightCard({
   const iconClassName =
     tone === "purple"
       ? "border-[rgba(177,140,255,0.24)] bg-[linear-gradient(180deg,rgba(36,28,53,0.96),rgba(20,16,32,0.96))] text-[var(--accent-purple-soft)] [box-shadow:var(--glow-purple-sm)]"
-      : "border-[rgba(0,255,136,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)]";
+      : "border-[rgba(234,179,8,0.18)] bg-[rgba(47,56,26,0.92)] text-[var(--color-accent)] shadow-[var(--glow-green-sm)]";
 
   return (
     <Card className="surface-panel-soft text-[var(--text-primary)]">
