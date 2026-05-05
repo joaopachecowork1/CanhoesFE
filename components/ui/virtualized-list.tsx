@@ -95,7 +95,7 @@ function WindowVirtualizedList<T>({
   });
 
   return (
-    <div role="list" className={cn("relative", className)} style={{ contain: "strict" }}>
+    <div role="list" className={cn("relative w-full", className)}>
       <VirtualizedItems
         getKey={getKey}
         items={items}
