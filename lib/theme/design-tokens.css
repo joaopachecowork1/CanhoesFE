@@ -36,6 +36,19 @@
     --color-success: #4caf50;
     --color-warning: #ffb800;
 
+    /* Canhoes brand tokens (moss restored) */
+    --canhoes-moss: #4F6336;
+    --moss: var(--canhoes-moss);
+    --moss-light: rgba(79, 99, 54, 0.92);
+    --moss-glow: #85a565;
+    --nav-indicator-color: var(--moss-light);
+    --glow-moss: 0 4px 12px rgba(79, 99, 54, 0.25);
+
+    /* Accent (kept yellow) */
+    --accent: #EAB308;
+    --accent-hover: #D9A800;
+    --color-accent: var(--accent);
+
     --shadow-elevation-sm: 0 6px 14px rgba(0, 0, 0, 0.16);
     --shadow-elevation-md: 0 10px 24px rgba(0, 0, 0, 0.18);
     --shadow-elevation-lg: 0 18px 40px rgba(0, 0, 0, 0.22);

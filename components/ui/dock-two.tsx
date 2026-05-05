@@ -45,7 +45,7 @@ const DockButton = React.forwardRef<HTMLButtonElement, DockItem>(
           {label}
         </span>
         {isActive && (
-          <span className="absolute bottom-1.5 h-0.5 w-4 rounded-full bg-canhoes-gold/70" />
+          <span className="absolute bottom-1.5 h-0.5 w-4 rounded-full bg-[var(--nav-indicator-color)] shadow-[var(--glow-moss)]" />
         )}
       </button>
     );

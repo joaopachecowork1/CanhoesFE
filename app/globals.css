@@ -228,6 +228,46 @@
 }
 
 @layer components {
+  .nav-item {
+    position: relative;
+    transition: color 200ms var(--ease-out);
+  }
+
+  .nav-item::after {
+    content: "";
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: -4px;
+    height: 3px;
+    background: var(--nav-indicator-color);
+    border-radius: 999px;
+    box-shadow: var(--glow-moss);
+    transform: scaleX(0);
+    opacity: 0;
+    transform-origin: center;
+    transition: transform 250ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+
+  .nav-item.active::after,
+  .nav-item[aria-current="page"]::after {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  /* Acessibilidade: Focus Amarelo para alto contraste */
+  .nav-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-item::after {
+      transition: none !important;
+    }
+  }
+
   .page-shell {
     width: 100%;
     padding-left: 1rem;
