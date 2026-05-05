@@ -92,14 +92,14 @@ export function HubFeedList({
         ) : null}
 
                 {posts.length > 0 ? (
-          <div ref={listRef} className="flex flex-col min-h-[50vh]">
+          <div ref={listRef}>
             <VirtualizedList
               items={posts}
+
               overscan={4}
               getKey={(post) => post.id}
-              estimateSize={() => 450}
-              useWindowScroll={true}
-              renderItem={(post, index) => (
+              estimateSize={() => 220}
+                            renderItem={(post, index) => (
                 <SectionBoundary
                   key={post.id}
                   title="Erro no post"

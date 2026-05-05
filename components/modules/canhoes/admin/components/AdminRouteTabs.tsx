@@ -62,7 +62,6 @@ export function AdminRouteTabs({
                 className={cn(
                   "canhoes-tap inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-semibold transition-[background-color,border-color,color,box-shadow]",
                   "snap-start",
-                  "nav-item",
                   isActive
                     ? "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-primary)] shadow-[var(--shadow-paper)]"
                     : "border-[var(--border-paper)] bg-[var(--bg-paper-soft)] text-[var(--ink-secondary)] hover:bg-[var(--bg-paper)]"
