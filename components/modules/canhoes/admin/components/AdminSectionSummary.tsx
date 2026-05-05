@@ -33,7 +33,7 @@ export function AdminSectionSummary({
               className={cn(
                 "rounded-[var(--radius-md-token)] border border-[var(--border-paper)] px-3 py-3",
                 item.tone === "highlight"
-                  ? "bg-[rgba(234,179,8,0.08)]"
+                  ? "bg-[rgba(122,173,58,0.08)]"
                   : item.tone === "success"
                     ? "bg-[rgba(97,220,168,0.08)]"
                     : item.tone === "warning"

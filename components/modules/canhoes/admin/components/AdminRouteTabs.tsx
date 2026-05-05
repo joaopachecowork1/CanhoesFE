@@ -72,7 +72,7 @@ export function AdminRouteTabs({
                   {section.label}
                 </span>
                 {section.count > 0 ? (
-                  <Badge className="h-4 min-w-4 rounded-full border-[var(--border-paper)] bg-[rgba(234,179,8,0.1)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
+                  <Badge className="h-4 min-w-4 rounded-full border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] px-1 text-[9px] font-semibold leading-none text-[var(--ink-primary)] shadow-none">
                     {section.count}
                   </Badge>
                 ) : null}

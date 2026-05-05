@@ -44,7 +44,7 @@ export function CompactSegmentTabs({
                   "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold transition-all duration-300",
                   isActive
                     ? "bg-[var(--moss)] text-white"
-                    : "border border-[rgba(234,179,8,0.24)] bg-[rgba(234,179,8,0.12)] text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
+                    : "border border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.12)] text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                 )}>
                   {item.badge}
                 </span>

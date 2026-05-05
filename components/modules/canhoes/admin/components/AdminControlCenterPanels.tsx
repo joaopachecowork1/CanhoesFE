@@ -131,7 +131,7 @@ function VisibilityTile({ checked, id, label, onChange, pending }: Readonly<Visi
 
 function VisibilityRow({ checked, id, label, onChange, pending }: Readonly<VisibilityRowProps>) {
   return (
-    <div className={cn(CONTROL_ROW_CLASS, checked && "border-[rgba(234,179,8,0.24)] bg-[rgba(234,179,8,0.08)]")}>
+    <div className={cn(CONTROL_ROW_CLASS, checked && "border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.08)]")}>
       <div className="min-w-0">
         <Label htmlFor={id} className={cn("cursor-pointer text-sm font-medium", checked ? "text-[var(--ink-primary)]" : "text-[var(--ink-secondary)]")}>{label}</Label>
       </div>
@@ -219,7 +219,7 @@ export function AdminSettingsMainPanel({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
-              <Badge className="border-[var(--border-paper)] bg-[rgba(234,179,8,0.1)] text-[var(--ink-primary)] shadow-none">
+              <Badge className="border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] text-[var(--ink-primary)] shadow-none">
                 {visibleCount}/{moduleCount}
               </Badge>
             </div>
@@ -284,7 +284,7 @@ export function AdminSettingsMainPanel({
           title="Visibilidade de módulos"
           subtitle="Feed · Nomeações · Categorias · Amigos · Pendentes"
           action={
-            <Badge className="border-[rgba(234,179,8,0.18)] bg-[rgba(234,179,8,0.12)] text-[var(--ink-primary)] shadow-none">
+            <Badge className="border-[rgba(122,173,58,0.18)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)] shadow-none">
               {visibleCount}/{moduleCount}
             </Badge>
           }

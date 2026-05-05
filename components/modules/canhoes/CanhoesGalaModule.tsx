@@ -65,8 +65,8 @@ function NomineeRankCard({
       className={cn(
         "canhoes-list-item flex items-center gap-3 rounded-[var(--radius-md-token)] border px-3 py-3 animate-[stagger-fade-in_0.3s_ease-out_both] transition-colors duration-200",
         isWinner
-          ? "border-[rgba(234,179,8,0.3)] bg-[linear-gradient(180deg,rgba(234,179,8,0.06),transparent)] shadow-[0_0_12px_rgba(234,179,8,0.08)]"
-          : "border-[rgba(212,184,150,0.1)] hover:border-[rgba(234,179,8,0.15)]"
+          ? "border-[rgba(0,255,136,0.3)] bg-[linear-gradient(180deg,rgba(0,255,136,0.06),transparent)] shadow-[0_0_12px_rgba(0,255,136,0.08)]"
+          : "border-[rgba(212,184,150,0.1)] hover:border-[rgba(122,173,58,0.15)]"
       )}
       style={{ animationDelay: `${rank * 0.08}s` }}
     >

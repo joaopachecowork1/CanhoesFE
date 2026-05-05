@@ -16,7 +16,7 @@ import { MetricCard } from "./HomeCards";
 import type { MetricItem } from "./HomeCards";
 
 const HERO_CARD_CLASS =
-  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(234,179,8,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)]";
+  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)]";
 
 export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadingState() {
   return (
@@ -95,7 +95,7 @@ const HomeHeroSection = memo(function HomeHeroSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <Badge className="border-[rgba(234,179,8,0.4)] bg-[rgba(234,179,8,0.25)] text-white px-4 py-1.5 shadow-[0_0_15px_rgba(234,179,8,0.2)] transition-all hover:scale-105">
+          <Badge className="border-[rgba(95,123,56,0.4)] bg-[rgba(95,123,56,0.25)] text-white px-4 py-1.5 shadow-[0_0_15px_rgba(95,123,56,0.2)] transition-all hover:scale-105">
             {phaseLabel}
           </Badge>
           {overview.nextPhase ? (

@@ -14,7 +14,7 @@ function Progress({
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn("bg-primary/20 relative h-2 w-full overflow-hidden rounded-[var(--radius-sm-token)]", className)}
-      style={{ boxShadow: "0 0 12px rgba(234,179,8,0.12) inset" }}
+      style={{ boxShadow: "0 0 12px rgba(0,255,136,0.12) inset" }}
       {...props}
     >
       <ProgressPrimitive.Indicator
