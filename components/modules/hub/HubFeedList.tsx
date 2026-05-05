@@ -94,36 +94,38 @@ export function HubFeedList({
               overscan={4}
               getKey={(post) => post.id}
               estimateSize={() => 220}
-              className="space-y-3"
+              useWindowScroll={true}
               renderItem={(post, index) => (
-                <SectionBoundary
-                  key={post.id}
-                  title="Erro no post"
-                  description="Ocorreu um erro ao renderizar este post."
-                >
-                  <HubPostCard
-                    post={post}
-                    index={index}
-                    isAdmin={isAdmin}
-                    openComments={openComments[post.id] ?? false}
-                    commentDraft={commentDrafts[post.id] ?? ""}
-                    comments={comments[post.id] ?? []}
-                    currentUserId={currentUserId}
-                    currentUserName={currentUserName}
-                    currentUserImage={currentUserImage}
-                    isPendingReaction={isPendingReaction}
-                    onToggleReaction={onToggleReaction}
-                    onToggleDownvote={onToggleDownvote}
-                    onToggleComments={onToggleComments}
-                    onVotePoll={onVotePoll}
-                    onAddComment={onAddComment}
-                    onDeleteComment={onDeleteComment}
-                    onCommentDraftChange={onCommentDraftChange}
-                    onToggleCommentReaction={onToggleCommentReaction}
-                    onAdminPin={onAdminPin}
-                    onAdminDelete={onAdminDelete}
-                  />
-                </SectionBoundary>
+                <div className="mb-3">
+                  <SectionBoundary
+                    key={post.id}
+                    title="Erro no post"
+                    description="Ocorreu um erro ao renderizar este post."
+                  >
+                    <HubPostCard
+                      post={post}
+                      index={index}
+                      isAdmin={isAdmin}
+                      openComments={openComments[post.id] ?? false}
+                      commentDraft={commentDrafts[post.id] ?? ""}
+                      comments={comments[post.id] ?? []}
+                      currentUserId={currentUserId}
+                      currentUserName={currentUserName}
+                      currentUserImage={currentUserImage}
+                      isPendingReaction={isPendingReaction}
+                      onToggleReaction={onToggleReaction}
+                      onToggleDownvote={onToggleDownvote}
+                      onToggleComments={onToggleComments}
+                      onVotePoll={onVotePoll}
+                      onAddComment={onAddComment}
+                      onDeleteComment={onDeleteComment}
+                      onCommentDraftChange={onCommentDraftChange}
+                      onToggleCommentReaction={onToggleCommentReaction}
+                      onAdminPin={onAdminPin}
+                      onAdminDelete={onAdminDelete}
+                    />
+                  </SectionBoundary>
+                </div>
               )}
             />
         ) : (
