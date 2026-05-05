@@ -92,13 +92,12 @@ export function HubFeedList({
         ) : null}
 
                 {posts.length > 0 ? (
-          <div ref={listRef} className="h-full">
+          <div ref={listRef} className="space-y-3">
             <VirtualizedList
               items={posts}
               overscan={4}
               getKey={(post) => post.id}
               estimateSize={() => 220}
-              className="h-full"
               renderItem={(post, index) => (
                 <SectionBoundary
                   key={post.id}
