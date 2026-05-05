@@ -159,7 +159,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
             <span className="text-[var(--ink-secondary)]">Votaste em {votedCategoriesCount} de {totalCategoriesCount} categorias oficiais</span>
             <span className="font-[var(--font-mono)] text-[var(--ink-primary)]">{votingCompletionPercentage}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[rgba(234,179,8,0.16)]">
+          <div className="h-2 overflow-hidden rounded-full bg-[rgba(95,123,56,0.16)]">
             <div className="h-full rounded-full bg-[var(--moss)] transition-all" style={{ width: `${votingCompletionPercentage}%` }} />
           </div>
         </CardContent>
@@ -186,7 +186,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
       ) : null}
 
       {votedCategoriesCount === totalCategoriesCount && totalCategoriesCount > 0 ? (
-        <Card className="rounded-2xl border-[rgba(234,179,8,0.28)] bg-[rgba(234,179,8,0.1)] px-4 text-[var(--ink-primary)]">
+        <Card className="rounded-2xl border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.1)] px-4 text-[var(--ink-primary)]">
           <CardContent className="py-6 text-center font-semibold text-[var(--moss)]">
             Boletim oficial completo
           </CardContent>
@@ -256,7 +256,7 @@ function OfficialVotingCategoryCard({
                 onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
                 className={cn(
                   "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3 border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] shadow-none",
-                  isNomineeSelected && "border-[rgba(234,179,8,0.28)] bg-[rgba(234,179,8,0.08)]"
+                  isNomineeSelected && "border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.08)]"
                 )}
               >
                 <div className="min-w-0">
@@ -275,4 +275,3 @@ function OfficialVotingCategoryCard({
     </CanhoesFeatureCard>
   );
 }
-

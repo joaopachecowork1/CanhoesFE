@@ -26,7 +26,7 @@ const ADMIN_CONTENT_ROW_CLASS =
   "w-full rounded-[var(--radius-md-token)] border px-3 py-2.5 text-left text-[var(--ink-primary)] transition-colors min-h-11";
 
 const ADMIN_CONTENT_ROW_ACTIVE_CLASS =
-  "border-[var(--border-paper)] bg-[rgba(234,179,8,0.1)]";
+  "border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)]";
 
 const ADMIN_CONTENT_ROW_IDLE_CLASS =
   "border-[var(--border-paper)] bg-[var(--bg-paper)] hover:bg-[var(--bg-paper-soft)]";

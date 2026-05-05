@@ -50,7 +50,7 @@ export function AdminContentTabs({
                     className={cn(
                       "rounded-full px-1.5 text-[0.65rem] shadow-none",
                       isActive
-                        ? "border-[var(--border-paper)] bg-[rgba(234,179,8,0.1)] text-[var(--ink-primary)]"
+                        ? "border-[var(--border-paper)] bg-[rgba(122,173,58,0.1)] text-[var(--ink-primary)]"
                         : "border-[var(--border-paper)] bg-[var(--bg-paper)] text-[var(--ink-secondary)]"
                     )}
                   >
