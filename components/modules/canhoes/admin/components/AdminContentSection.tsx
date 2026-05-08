@@ -94,7 +94,7 @@ export function AdminContentSection({
       <div className="space-y-6">
         <AdminOfficialResultsSection eventId={eventId} memberCount={memberCount} />
 
-        <VotesAudit eventId={eventId} loading={loading} />
+        <VotesAudit eventId={eventId} />
       </div>
     ) : (
       <div className="space-y-6">

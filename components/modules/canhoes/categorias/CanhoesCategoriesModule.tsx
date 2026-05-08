@@ -1,12 +1,13 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { Flame, Inbox, Trophy } from "lucide-react";
+import { Flame, Inbox, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
-import type { EventCategoryDto } from "@/lib/api/types";
+import type { AwardCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import {
     CanhoesModuleHeader,
@@ -22,13 +23,16 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { VirtualizedList } from "@/components/ui/virtualized-list";
 
 function CategoriesLoadingState() {
     return (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
             {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
+                <div
+                    key={index}
+                    className="flex items-center gap-3.5 rounded-2xl border border-white/5 bg-white/[0.03] p-4"
+                >
+                    <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
                     <div className="min-w-0 flex-1 space-y-2">
                         <Skeleton className="h-4 w-3/5 rounded" />
                         <Skeleton className="h-3 w-4/5 rounded" />
@@ -42,7 +46,7 @@ function CategoriesLoadingState() {
 
 export function CanhoesCategoriesModule() {
     const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
-    const [categoryList, setCategoryList] = useState<EventCategoryDto[]>([]);
+    const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -55,11 +59,12 @@ export function CanhoesCategoriesModule() {
         setErrorMessage(null);
 
         try {
-            setCategoryList(await canhoesEventsRepo.getCategories(currentEventId));
+            const result = await awardsRepo.getCategories(currentEventId);
+            setCategoryList(result.items);
         } catch (error) {
             const message = getErrorMessage(
                 error,
-                "Nao foi possivel carregar as categorias desta edicao."
+                "Não foi possível carregar as categorias desta edição."
             );
             logFrontendError("CanhoesCategories.loadCategories", error, { eventId: currentEventId });
             setErrorMessage(message);
@@ -106,7 +111,7 @@ export function CanhoesCategoriesModule() {
 
         setIsSubmitting(true);
         try {
-            await canhoesEventsRepo.createProposal(event.id, {
+            await awardsRepo.createCategoryProposal(event.id, {
                 description: categoryDescription.trim() || null,
                 name: categoryName.trim(),
             });
@@ -118,7 +123,7 @@ export function CanhoesCategoriesModule() {
         } catch (error) {
             const message = getErrorMessage(
                 error,
-                "Nao foi possivel enviar a proposta de categoria."
+                "Não foi possível enviar a proposta de categoria."
             );
             logFrontendError("CanhoesCategories.handleProposalSubmit", error, {
                 eventId: event.id,
@@ -130,22 +135,28 @@ export function CanhoesCategoriesModule() {
     };
 
     return (
-        <div className="space-y-4">
-            <CanhoesModuleHeader
-                icon={Flame}
-                title="Categorias oficiais"
-                description="Consulta as categorias oficiais e propoe novas enquanto a fase de propostas estiver aberta."
-                badgeLabel={
-                    overview
-                        ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}`
-                        : undefined
-                }
-            />
+        <div className="space-y-5">
+            {/* ── Sticky header com backdrop blur ── */}
+            <div className="sticky top-0 z-10 -mx-4 px-4 pb-4 pt-2 backdrop-blur-xl bg-[var(--bg-void)]/80 border-b border-white/5">
+                <CanhoesModuleHeader
+                    icon={Flame}
+                    title="Categorias oficiais"
+                    description="Consulta as categorias oficiais e propõe novas enquanto a fase de propostas estiver aberta."
+                    badgeLabel={
+                        overview
+                            ? `Fase: ${formatEventPhaseLabel(overview.activePhase?.type)}`
+                            : undefined
+                    }
+                />
+            </div>
 
-            <Card className="canhoes-bits-panel canhoes-bits-panel--official">
+            {/* ── Propor categoria ── */}
+            <Card>
                 <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-fire)]/12">
+                            <Trophy className="h-4 w-4 text-[var(--color-fire)]" />
+                        </div>
                         Propor categoria oficial
                     </CardTitle>
                 </CardHeader>
@@ -174,7 +185,7 @@ export function CanhoesCategoriesModule() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="canhoes-helper-text">A proposta entra em revisao antes de ficar oficial.</p>
+                        <p className="canhoes-helper-text">A proposta entra em revisão antes de ficar oficial.</p>
                         <Button disabled={!canSubmitProposal || isSubmitting} onClick={() => void handleProposalSubmit()}>
                             {submitButtonLabel}
                         </Button>
@@ -182,18 +193,23 @@ export function CanhoesCategoriesModule() {
                 </CardContent>
             </Card>
 
-            <Card className="canhoes-bits-panel canhoes-bits-panel--official">
+            {/* ── Lista de categorias ── */}
+            <Card>
                 <CardHeader className="pb-2">
                     <CardTitle>Categorias oficiais</CardTitle>
                 </CardHeader>
 
                 <CardContent className="space-y-3">
-                    <Input
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Procurar categoria oficial"
-                        className="h-9"
-                    />
+                    {/* Search com ícone */}
+                    <div className="relative">
+                        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)] pointer-events-none" />
+                        <Input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Procurar categoria oficial"
+                            className="h-10 pl-9"
+                        />
+                    </div>
 
                     {errorMessage ? (
                         <ErrorAlert
@@ -213,31 +229,41 @@ export function CanhoesCategoriesModule() {
                         <EmptyState
                             icon={Inbox}
                             title="Sem categorias oficiais"
-                            description="Ainda nao ha categorias oficiais nesta edicao."
+                            description="Ainda não há categorias oficiais nesta edição."
                             tone="official"
                         />
                     ) : null}
 
                     {filteredCategoryList.length > 0 ? (
-                        <VirtualizedList
-                            items={filteredCategoryList}
-                            getKey={(category) => category.id}
-                            estimateSize={() => 88}
-                            className="max-h-[46svh]"
-                            renderItem={(category) => (
-                                <div className="canhoes-list-item flex items-center justify-between gap-3 p-2.5">
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                        <div className="space-y-2.5">
+                            {filteredCategoryList.map((category, index) => (
+                                <div
+                                    key={category.id}
+                                    className="flex items-center gap-3.5 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition-all duration-200 hover:border-white/10 hover:bg-white/[0.06] animate-fade-slide-up"
+                                    style={{ "--item-index": index } as CSSProperties}
+                                >
+                                    {/* Ícone translúcido */}
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--moss)]/12">
+                                        <Trophy className="h-5 w-5 text-[var(--moss-glow)]" />
+                                    </div>
+
+                                    {/* Conteúdo textual */}
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-bold text-[var(--ink-primary)]">
                                             {category.name}
                                         </p>
-                                        <p className="text-xs text-[var(--color-text-muted)]">
-                                            {category.description || "Sem descricao adicional."}
+                                        <p className="mt-0.5 truncate text-xs text-[var(--ink-secondary)]">
+                                            {category.description || "Sem descrição adicional."}
                                         </p>
                                     </div>
-                                    <Badge variant="secondary">{category.isActive ? "Ativa" : "Inativa"}</Badge>
+
+                                    {/* Badge de estado */}
+                                    <Badge variant={category.isActive ? "default" : "outline"}>
+                                        {category.isActive ? "Ativa" : "Inativa"}
+                                    </Badge>
                                 </div>
-                            )}
-                        />
+                            ))}
+                        </div>
                     ) : null}
 
                     {filteredCategoryList.length > 0 ? (

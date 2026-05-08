@@ -21,7 +21,7 @@ export function CanhoesBrandMark({
           Canhoes do Ano
         </p>
         {compact ? null : (
-          <p className="truncate font-[var(--font-mono)] text-[0.64rem] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.74)]">
+          <p className="truncate font-[var(--font-mono)] text-[0.64rem] uppercase tracking-[0.16em] text-[rgba(255,255,255,0.74)]">
             {subtitle}
           </p>
         )}

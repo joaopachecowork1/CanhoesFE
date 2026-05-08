@@ -29,7 +29,7 @@ const LeafRain: React.FC = () => {
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="absolute -top-8 text-[rgba(212,184,150,0.18)]"
+          className="absolute -top-8 text-[rgba(255,255,255,0.18)]"
           style={{
             animation: `leaf-fall ${particle.duration}s linear ${particle.delay}s infinite`,
             left: `${particle.x}%`,

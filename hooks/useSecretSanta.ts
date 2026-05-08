@@ -1,49 +1,40 @@
+"use client";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { eventRepo } from "@/lib/repositories/eventRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 
-import type { EventSecretSantaOverviewDto, EventWishlistItemDto } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-import { normalizeWishlistItems } from "@/lib/api/responseNormalization";
-
-interface SecretSantaData {
-  overview: EventSecretSantaOverviewDto;
-  wishlistItems: EventWishlistItemDto[];
-}
-
-export function useSecretSanta(eventId: string | null | undefined) {
+export function useSecretSanta(eventId?: string) {
   const queryClient = useQueryClient();
 
-  const query = useQuery<SecretSantaData>({
-    queryKey: ["secretSanta", eventId],
-    enabled: Boolean(eventId),
-    queryFn: async () => {
-      if (!eventId) throw new Error("Event ID is required");
-      
-      const [overview, rawWishlistItems] = await Promise.all([
-        canhoesEventsRepo.getSecretSantaOverview(eventId),
-        canhoesEventsRepo.getWishlist(eventId),
-      ]);
-
-      return {
-        overview,
-        wishlistItems: normalizeWishlistItems(rawWishlistItems),
-      };
-    },
+  const { data: overview, isLoading, error, refetch } = useQuery({
+    queryKey: ["secretSantaOverview", eventId],
+    queryFn: () => eventRepo.getSecretSantaOverview(eventId!),
+    enabled: !!eventId,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
+  });
+
+  const { data: wishlistData } = useQuery({
+    queryKey: ["wishlist", eventId, 0, 1000],
+    queryFn: () => eventRepo.getWishlist(eventId!, 0, 1000),
+    enabled: !!eventId && !!overview?.hasAssignment,
   });
 
   const drawMutation = useMutation({
-    mutationFn: async ({ eventCode }: { eventCode: string | null }) => {
-      if (!eventId) throw new Error("Event ID is required");
-      await canhoesEventsRepo.adminDrawSecretSanta(eventId, { eventCode });
-    },
+    mutationFn: (payload: { eventCode: string | null }) => 
+      adminRepo.drawSecretSanta(eventId!, payload),
     onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: ["secretSanta", eventId] });
-    },
+      void queryClient.invalidateQueries({ queryKey: ["secretSantaOverview", eventId] });
+      void queryClient.invalidateQueries({ queryKey: ["eventOverview", eventId] });
+    }
   });
 
   return {
-    ...query,
+    data: overview ? { overview, wishlistItems: wishlistData?.items ?? [] } : null,
+    overview: overview ?? null,
+    isLoading: isLoading,
+    error,
+    refetch,
     drawSecretSanta: drawMutation.mutateAsync,
     isDrawing: drawMutation.isPending,
   };

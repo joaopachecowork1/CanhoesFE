@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getPhaseLabel, getPhaseSummary, formatPhaseWindow } from "@/lib/canhoesEvent";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { eventRepo } from "@/lib/repositories/eventRepo";
 import type { EventHomeSnapshotDto, EventOverviewDto, EventSummaryDto } from "@/lib/api/types";
 
 export type HomeAction = {
@@ -35,7 +35,7 @@ export type CanhoesEventHomeViewModel = {
 export function useCanhoesEventHome(initialData?: EventHomeSnapshotDto) {
   const snapshotQuery = useQuery<EventHomeSnapshotDto>({
     queryKey: ["canhoes", "active-home-snapshot"],
-    queryFn: () => canhoesEventsRepo.getActiveHomeSnapshot(),
+    queryFn: () => eventRepo.getActiveHomeSnapshot(),
     initialData,
     staleTime: 1000 * 60 * 2,
     refetchOnWindowFocus: false,

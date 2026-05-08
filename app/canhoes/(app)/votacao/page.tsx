@@ -1,4 +1,4 @@
-import { CanhoesOfficialVotingModule } from "@/components/modules/canhoes/CanhoesOfficialVotingModule";
+import { CanhoesOfficialVotingModule } from "@/components/modules/canhoes/votacao/CanhoesOfficialVotingModule";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, EventVotingBoardDto, OfficialVotingBoardDto } from "@/lib/api/types";
 
@@ -9,14 +9,16 @@ function mapEventVotingBoardToOfficialVotingBoard(
     eventId: board.eventId,
     phaseId: board.phaseId,
     canVote: board.canVote,
-    endsAt: null,
     categories: board.categories.map((category) => ({
       id: category.id,
+      eventId: board.eventId,
       title: category.title,
       description: category.description,
       kind: category.kind,
+      voteQuestion: category.voteQuestion,
       nominees: category.options.map((option) => ({
         id: option.id,
+        categoryId: category.id,
         label: option.label,
       })),
       myNomineeId: category.myOptionId,

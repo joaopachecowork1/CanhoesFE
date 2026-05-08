@@ -26,7 +26,7 @@ export default function GlobalError({
       <body className="min-h-screen bg-[var(--bg-void)] text-[var(--text-primary)] antialiased">
         <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-6 px-6 text-center">
           <div className="space-y-2">
-            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.68)]">
+            <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(255,255,255,0.68)]">
               Erro critico
             </p>
             <h1 className="text-2xl font-semibold text-[var(--bg-paper)]">

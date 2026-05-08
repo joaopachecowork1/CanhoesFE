@@ -11,9 +11,9 @@ import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { Skeleton } from "@/components/ui/skeleton";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { cn } from "@/lib/utils";
-import type { CanhoesCategoryResultDto } from "@/lib/api/types";
+import type { PublicCategoryResultDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +55,7 @@ function NomineeRankCard({
   nominee,
   rank,
 }: Readonly<{
-  nominee: CanhoesCategoryResultDto["top"][number];
+  nominee: PublicCategoryResultDto["top"][number];
   rank: number;
 }>) {
   const isWinner = rank === 0;
@@ -66,7 +66,7 @@ function NomineeRankCard({
         "canhoes-list-item flex items-center gap-3 rounded-[var(--radius-md-token)] border px-3 py-3 animate-[stagger-fade-in_0.3s_ease-out_both] transition-colors duration-200",
         isWinner
           ? "border-[rgba(0,255,136,0.3)] bg-[linear-gradient(180deg,rgba(0,255,136,0.06),transparent)] shadow-[0_0_12px_rgba(0,255,136,0.08)]"
-          : "border-[rgba(212,184,150,0.1)] hover:border-[rgba(122,173,58,0.15)]"
+          : "border-[rgba(255,255,255,0.1)] hover:border-[rgba(122,173,58,0.15)]"
       )}
       style={{ animationDelay: `${rank * 0.08}s` }}
     >
@@ -74,14 +74,14 @@ function NomineeRankCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-text-primary)]">
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--ink-primary)]">
             {renderPlacementIcon(rank)} #{rank + 1}
           </span>
-          <span className="truncate font-semibold text-[var(--color-text-primary)]">
+          <span className="truncate font-semibold text-[var(--ink-primary)]">
             {nominee.title}
           </span>
         </div>
-        <p className="body-small text-[var(--color-text-muted)]">{nominee.voteCount} votos</p>
+        <p className="body-small text-[var(--ink-secondary)]">{nominee.voteCount} votos</p>
       </div>
 
       <Badge variant={isWinner ? "default" : "outline"}>
@@ -95,7 +95,7 @@ export function CanhoesGalaModule() {
   const { event } = useEventOverview();
   const eventId = event?.id ?? null;
 
-  const [resultsByCategory, setResultsByCategory] = useState<CanhoesCategoryResultDto[]>([]);
+  const [resultsByCategory, setResultsByCategory] = useState<PublicCategoryResultDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -104,12 +104,12 @@ export function CanhoesGalaModule() {
     setErrorMessage(null);
 
     try {
-      const nextResults = await canhoesEventsRepo.getResults(currentEventId);
+      const nextResults = await awardsRepo.getResults(currentEventId);
       setResultsByCategory(nextResults);
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel carregar os resultados da gala."
+        "Não foi possível carregar os resultados da gala."
       );
       logFrontendError("CanhoesGala.loadResults", error, { eventId: currentEventId });
       setErrorMessage(message);
@@ -140,7 +140,7 @@ export function CanhoesGalaModule() {
       <CanhoesModuleHeader
         icon={Trophy}
         title="Gala"
-        description="Resultados finais por categoria, em formato legivel em mobile."
+        description="Resultados finais por categoria, em formato legível em mobile."
         badgeLabel={`Total votos: ${totalVotes}`}
       />
 
@@ -156,7 +156,7 @@ export function CanhoesGalaModule() {
       ) : null}
 
       {!isLoading && !errorMessage && resultsByCategory.length === 0 ? (
-        <p className="body-small text-[var(--color-text-muted)]">Sem resultados ainda.</p>
+        <p className="body-small text-[var(--ink-secondary)]">Sem resultados ainda.</p>
       ) : null}
 
       {resultsByCategory.length > 0 ? (
@@ -173,7 +173,7 @@ export function CanhoesGalaModule() {
               <CardContent className="space-y-3">
                 <div className="space-y-3">
                   {categoryResult.top.length === 0 ? (
-                    <p className="body-small text-[var(--color-text-muted)]">Sem nomeações aprovadas.</p>
+                    <p className="body-small text-[var(--ink-secondary)]">Sem nomeações aprovadas.</p>
                   ) : (
                     categoryResult.top.map((nominee, index) => (
                       <NomineeRankCard key={nominee.nomineeId} nominee={nominee} rank={index} />
@@ -182,7 +182,7 @@ export function CanhoesGalaModule() {
                 </div>
 
                 <Separator />
-                <p className="body-small text-[var(--color-text-muted)]">Só mostra o Top 3, com imagem quando existir.</p>
+                <p className="body-small text-[var(--ink-secondary)]">Só mostra o Top 3, com imagem quando existir.</p>
               </CardContent>
             </Card>
           ))}

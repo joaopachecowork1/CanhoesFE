@@ -3,11 +3,11 @@ import { type InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/r
 
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 
 import { useHubFeedComments } from "./useHubFeedComments";
 import { useHubFeedPostActions } from "./useHubFeedPostActions";
-import { useSignalR } from "./useSignalR";
+import { useSignalR } from "@/hooks/useSignalR";
 
 export type FeedSortOrder = "hot" | "new" | "top";
 const PAGE_SIZE = 15;
@@ -82,7 +82,7 @@ function prependPostToFeed(
   };
 }
 
-export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteData) {
+export function useHubFeed(eventId: string | null, currentUserId: string | null, initialData?: FeedInfiniteData) {
   const queryClient = useQueryClient();
   const [sortOrder, setSortOrder] = useState<FeedSortOrder>("hot");
 
@@ -91,7 +91,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
     enabled: Boolean(eventId),
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const feedApiResponse = (await canhoesEventsRepo.getFeedPosts(eventId!, {
+      const feedApiResponse = (await feedRepo.getPosts(eventId!, {
         skip: pageParam as number,
         take: PAGE_SIZE,
       })) as FeedApiResponse;
@@ -127,7 +127,6 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
     showParticles,
     setShowParticles,
     toggleReaction,
-    toggleReactionPending,
     toggleDownvote,
     votePoll,
     adminPin,
@@ -158,7 +157,10 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       );
     });
 
-    connection.on("PostLiked", ({ postId, liked: isLiked }: { postId: string; liked: boolean }) => {
+    connection.on("PostLiked", ({ postId, liked: isLiked, userId }: { postId: string; liked: boolean; userId?: string }) => {
+      const isMe = userId && currentUserId && userId.toLowerCase() === currentUserId.toLowerCase();
+      if (isMe) return;
+
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
         if (!previousData) return previousData;
         return {
@@ -167,7 +169,7 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
             ...page,
             posts: page.posts.map((post) =>
               post.id === postId
-                ? { ...post, likeCount: (post.likeCount ?? 0) + (isLiked ? 1 : -1) }
+                ? { ...post, likeCount: Math.max(0, (post.likeCount ?? 0) + (isLiked ? 1 : -1)) }
                 : post
             ),
           })),
@@ -175,9 +177,32 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
       });
     });
 
-    connection.on("CommentCreated", ({ postId }: { postId: string; comment: HubCommentDto }) => {
+    connection.on("PostDownvoted", ({ postId, downvoted: isDownvoted, userId }: { postId: string; downvoted: boolean; userId?: string }) => {
+      const isMe = userId && currentUserId && userId.toLowerCase() === currentUserId.toLowerCase();
+      if (isMe) return;
+
+      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
+        if (!previousData) return previousData;
+        return {
+          ...previousData,
+          pages: previousData.pages.map((page) => ({
+            ...page,
+            posts: page.posts.map((post) =>
+              post.id === postId
+                ? { ...post, downvoteCount: Math.max(0, (post.downvoteCount ?? 0) + (isDownvoted ? 1 : -1)) }
+                : post
+            ),
+          })),
+        };
+      });
+    });
+
+    connection.on("CommentCreated", ({ postId, comment }: { postId: string; comment: HubCommentDto }) => {
       queryClient.invalidateQueries({ queryKey: ["hub-comments", postId] });
       
+      const isMe = comment.userId && currentUserId && comment.userId.toLowerCase() === currentUserId.toLowerCase();
+      if (isMe) return;
+
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
         if (!previousData) return previousData;
         return {
@@ -201,10 +226,11 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
     return () => {
       connection.off("PostCreated");
       connection.off("PostLiked");
+      connection.off("PostDownvoted");
       connection.off("CommentCreated");
       connection.off("PollVoted");
     };
-  }, [connection, queryClient, eventId]);
+  }, [connection, queryClient, eventId, currentUserId]);
 
   return {
     posts: sortedDisplayedPosts,
@@ -223,7 +249,6 @@ export function useHubFeed(eventId: string | null, initialData?: FeedInfiniteDat
     setShowParticles,
     refresh: refreshPosts,
     toggleReaction,
-    toggleReactionPending,
     toggleDownvote,
     votePoll,
     toggleComments,

@@ -2,13 +2,12 @@
 
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { eventRepo } from "@/lib/repositories/eventRepo";
 
 export function useEventOverview() {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["eventOverview"],
-    queryFn: () => canhoesEventsRepo.getActiveContext(),
+    queryFn: () => eventRepo.getActiveContext(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     retry: 1,

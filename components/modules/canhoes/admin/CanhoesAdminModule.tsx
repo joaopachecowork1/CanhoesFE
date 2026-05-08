@@ -13,7 +13,7 @@ import { usePendingProposals } from "@/hooks/usePendingProposals";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { ApiError } from "@/lib/api/canhoesClient";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { getPhaseLabel } from "@/lib/canhoesEvent";
 
 import { type AdminSectionId, getAdminSectionItem } from "./adminSections";
@@ -37,10 +37,10 @@ const AdminControlCenter = lazy(() =>
 function getAdminErrorMessage(error: unknown) {
     if (!error) return null;
     if (error instanceof ApiError) {
-        return getErrorMessage(error, "Nao foi possivel carregar o admin.");
+        return getErrorMessage(error, "Não foi possível carregar o admin.");
     }
-    if (error instanceof Error) return error.message || "Nao foi possivel carregar o admin.";
-    return "Nao foi possivel carregar o admin.";
+    if (error instanceof Error) return error.message || "Não foi possível carregar o admin.";
+    return "Não foi possível carregar o admin.";
 }
 
 type CanhoesAdminModuleProps = {
@@ -50,9 +50,9 @@ type CanhoesAdminModuleProps = {
 // OPTIMIZATION: Moved outside component to avoid recreation on every render
 const LOADING_FALLBACK = (
     <AsyncStatusCard
-        label="A abrir secao do admin"
-        hint="A preparar os dados e o layout desta area."
-        timeoutHint="Se esta secao nao abrir, recarrega a pagina para recuperar o admin."
+        label="A abrir seccão do admin"
+        hint="A preparar os dados e o layout desta área."
+        timeoutHint="Se esta seccão não abrir, recarrega a página para recuperar o admin."
         actionLabel="Recarregar"
         onAction={() => globalThis.location.reload()}
     />
@@ -171,7 +171,6 @@ function buildSectionContent({
         membros: () => (
             <Suspense fallback={LOADING_FALLBACK}>
                 <AdminMembersSection
-                    activeEventName={activeEventName}
                     eventId={eventId}
                     onUpdate={handleRefresh}
                     loading={loading}
@@ -273,25 +272,25 @@ export default function CanhoesAdminModule({
     const { data: pendingNominationCount = 0, isLoading: pendingNominationCountLoading } =
         useQuery({
             enabled: Boolean(activeEvent?.id),
-            queryFn: () => canhoesEventsRepo.getAdminNominationsSummary(activeEvent!.id, "pending"),
-            queryKey: ["canhoes", "admin", "nominations-summary", "pending", activeEvent?.id],
+            queryFn: () => adminRepo.getNominationsPaged(activeEvent!.id, 0, 1000, "pending"),
+            queryKey: ["canhoes", "admin", "nominations", "summary", "pending", activeEvent?.id],
             refetchOnWindowFocus: false,
-            select: (data) => data.length,
+            select: (data) => data.total,
             staleTime: 1000 * 60 * 2,
         });
 
     const loading = bootstrapLoading || proposalsLoading || pendingNominationCountLoading;
-    const totalCategories = eventState?.counts.categoryCount ?? summary.totalCategories;
+    const totalCategories = eventState?.counts.categoryCount ?? summary?.officialResultsCategoriesCount ?? 0;
 
     const handleRefresh = useCallback(async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "category-proposals", "pending", activeEvent?.id], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "measure-proposals", "pending", activeEvent?.id], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", activeEvent?.id], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", activeEvent?.id], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", activeEvent?.id], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "members", activeEvent?.id, 0, 50], exact: true }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", activeEvent?.id], exact: true }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "categories", "pending", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "measures", "pending", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "categories", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "votes", "summary", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "members", activeEvent?.id, 0, 50] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", activeEvent?.id] }),
             refreshOverview(),
         ]);
     }, [activeEvent?.id, queryClient, refreshOverview]);
@@ -308,7 +307,10 @@ export default function CanhoesAdminModule({
       loading,
       measureProposals,
       pendingNominationCount,
-      summary,
+      summary: {
+          memberCount: summary?.membersTotal ?? 0,
+          officialResultsCategoryCount: summary?.officialResultsCategoriesCount ?? 0,
+      }
     });
 
     useEffect(() => {
@@ -361,12 +363,19 @@ export default function CanhoesAdminModule({
                 loading={loading}
                 pendingNominationCount={pendingNominationCount}
                 section={section}
-                summary={summary}
+                summary={{
+                    memberCount: summary?.membersTotal ?? 0,
+                    pendingCategoryProposalCount: summary?.categoryProposalsPendingTotal ?? 0,
+                    pendingMeasureProposalCount: summary?.measureProposalsPendingTotal ?? 0,
+                    totalCategories: totalCategories,
+                    totalNominees: summary?.nomineesTotal ?? 0,
+                    visibleModuleCount: Object.values(eventState?.moduleVisibility ?? {}).filter(v => v).length,
+                }}
             />
 
             <SectionBoundary
-                title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta secao"}`}
-                description="Esta secao do admin falhou ao renderizar, mas o resto do painel continua disponivel."
+                title={`Erro ao abrir ${activeSectionMeta?.label ?? "esta seccão"}`}
+                description="Esta seccão do admin falhou ao renderizar, mas o resto do painel continua disponível."
                 onRetry={() => void handleRefresh()}
                 resetKey={section}
             >

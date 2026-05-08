@@ -36,7 +36,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
-      className={cn("field-base data-[placeholder]:text-[var(--ink-muted)] [&_svg:not([class*='text-'])]:text-[var(--ink-muted)] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full items-center justify-between gap-2 whitespace-nowrap text-base data-[size=default]:min-h-11 data-[size=sm]:min-h-11 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4", className)}
+      className={cn("field-base data-[placeholder]:text-[var(--color-text-muted)] [&_svg:not([class*='text-'])]:text-[var(--color-text-muted)] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex w-full items-center justify-between gap-2 whitespace-nowrap text-base data-[size=default]:min-h-11 data-[size=sm]:min-h-11 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4", className)}
       {...props}
     >
       {children}
@@ -100,7 +100,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
-      className={cn("relative flex w-full cursor-default items-center gap-2 rounded-[var(--radius-sm-token)] py-2 pr-8 pl-3 text-sm font-medium text-[var(--ink-primary)] outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-[var(--bg-paper-soft)] focus:text-[var(--ink-primary)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2", className)}
+      className={cn("relative flex w-full cursor-default items-center gap-2 rounded-[var(--radius-sm-token)] py-2 pr-8 pl-3 text-sm font-medium text-[var(--color-text-primary)] outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-white/[0.06] focus:text-[var(--color-text-primary)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2", className)}
       {...props}
     >
       <span
@@ -123,7 +123,7 @@ function SelectSeparator({
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("pointer-events-none -mx-1 my-1 h-px bg-[var(--border-paper-soft)]", className)}
+      className={cn("pointer-events-none -mx-1 my-1 h-px bg-white/8", className)}
       {...props}
     />
   )

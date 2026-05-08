@@ -31,7 +31,7 @@ function ActionLinkButton({
   const combinedClassName = cn(
     className,
     variant === "outline"
-      ? "border-[rgba(212,184,150,0.3)] bg-[rgba(212,184,150,0.08)] text-[var(--bg-paper)] hover:bg-[rgba(212,184,150,0.14)]"
+      ? "border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.08)] text-[var(--color-text-primary)] hover:bg-[rgba(255,255,255,0.14)]"
       : undefined
   );
 

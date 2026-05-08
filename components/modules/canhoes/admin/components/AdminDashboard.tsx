@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 
 import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
 
@@ -63,7 +63,7 @@ export function AdminDashboard({
 }: Readonly<AdminDashboardProps>) {
   const recentNomineesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getAdminNominationsPaged(eventId!, 0, 5),
+    queryFn: () => adminRepo.getNominationsPaged(eventId!, 0, 5),
     queryKey: ["canhoes", "admin", "recent-nominees", eventId],
     refetchOnWindowFocus: false,
     select: (page) => page.nominations,

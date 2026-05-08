@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { cn } from "@/lib/utils";
-import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/hooks/useComposer";
+import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/components/modules/hub/hooks/useComposer";
 
 export interface PostComposerSubmitData {
   text: string;
@@ -141,10 +141,10 @@ export function PostComposer({
           <div className="surface-panel-soft p-4 text-[var(--text-primary)] sm:p-5">
             <div className="space-y-3">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <p className="editorial-kicker text-[rgba(245,237,224,0.62)]">
+                <p className="editorial-kicker text-[rgba(255,255,255,0.62)]">
                   {feedCopy.composer.mediaSelected}
                 </p>
-                <p className="text-xs text-[rgba(245,237,224,0.62)]">
+                <p className="text-xs text-[rgba(255,255,255,0.62)]">
                   {files.length}/{MAX_MEDIA_FILES}
                 </p>
               </div>

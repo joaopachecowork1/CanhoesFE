@@ -4,12 +4,12 @@ import { useAdminMutation } from "./useAdminMutation";
 import {
   type CategoryProposalDto,
   type MeasureProposalDto,
+  type ProposalStatus,
 } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { summarizeModerationStatuses } from "../moderationUtils";
 
-type ProposalStatus = "pending" | "approved" | "rejected";
 type ProposalFilter = "all" | ProposalStatus;
 type CategoryDraft = { description: string; name: string };
 
@@ -17,17 +17,17 @@ const getStatusMessages = (status: ProposalStatus) => {
   switch (status) {
     case "approved":
       return {
-        error: "Nao foi possivel aprovar a proposta.",
+        error: "Não foi possível aprovar a proposta.",
         success: "Proposta aprovada",
       };
     case "rejected":
       return {
-        error: "Nao foi possivel rejeitar a proposta.",
+        error: "Não foi possível rejeitar a proposta.",
         success: "Proposta rejeitada",
       };
     default:
       return {
-        error: "Nao foi possivel reabrir a proposta.",
+        error: "Não foi possível reabrir a proposta.",
         success: "Proposta reaberta",
       };
   }
@@ -63,7 +63,7 @@ export function usePendingProposals(
         status?: ProposalStatus;
       };
     }) =>
-      canhoesEventsRepo.adminUpdateCategoryProposal(
+      adminRepo.updateCategoryProposal(
         eventId!,
         data.proposalId,
         data.patch
@@ -73,16 +73,16 @@ export function usePendingProposals(
 
   const deleteCategoryProposal = useAdminMutation({
     mutationFn: (proposalId: string) =>
-      canhoesEventsRepo.adminDeleteCategoryProposal(eventId!, proposalId),
+      adminRepo.deleteCategoryProposal(eventId!, proposalId),
     onSuccess: onUpdate,
   });
 
   const updateMeasureProposal = useAdminMutation({
     mutationFn: (data: {
       proposalId: string;
-      patch: { text: string; status?: ProposalStatus };
+      patch: { text?: string; status?: string };
     }) =>
-      canhoesEventsRepo.adminUpdateMeasureProposal(
+      adminRepo.updateMeasureProposal(
         eventId!,
         data.proposalId,
         data.patch
@@ -90,21 +90,9 @@ export function usePendingProposals(
     onSuccess: onUpdate,
   });
 
-  const approveMeasureProposal = useAdminMutation({
-    mutationFn: (proposalId: string) =>
-      canhoesEventsRepo.adminApproveMeasureProposal(eventId!, proposalId),
-    onSuccess: onUpdate,
-  });
-
-  const rejectMeasureProposal = useAdminMutation({
-    mutationFn: (proposalId: string) =>
-      canhoesEventsRepo.adminRejectMeasureProposal(eventId!, proposalId),
-    onSuccess: onUpdate,
-  });
-
   const deleteMeasureProposal = useAdminMutation({
     mutationFn: (proposalId: string) =>
-      canhoesEventsRepo.adminDeleteMeasureProposal(eventId!, proposalId),
+      adminRepo.deleteMeasureProposal(eventId!, proposalId),
     onSuccess: onUpdate,
   });
 
@@ -146,7 +134,7 @@ export function usePendingProposals(
     const name = draft.name.trim();
 
     if (!name) {
-      toast.error("O nome da proposta e obrigatorio");
+      toast.error("O nome da proposta é obrigatório");
       return;
     }
 
@@ -160,7 +148,7 @@ export function usePendingProposals(
           status: newStatus,
         },
       },
-      { onSuccess: () => toast.success(success), onError: (e) => toast.error(getErrorMessage(e,error)) }
+      { onSuccess: () => toast.success(success), onError: (e) => toast.error(getErrorMessage(e, error)) }
     );
   };
 
@@ -183,7 +171,7 @@ export function usePendingProposals(
           toast.error(
             getErrorMessage(
               err,
-              "Nao foi possivel atualizar a proposta de categoria."
+              "Não foi possível atualizar a proposta de categoria."
             )
           ),
       }
@@ -197,7 +185,7 @@ export function usePendingProposals(
         toast.error(
           getErrorMessage(
             err,
-            "Nao foi possivel apagar a proposta de categoria."
+            "Não foi possível apagar a proposta de categoria."
           )
         ),
     });
@@ -210,25 +198,13 @@ export function usePendingProposals(
     const { success, error } = getStatusMessages(status);
     const text = getMeasureText(proposal);
 
-    if (status === "approved") {
-      approveMeasureProposal.mutate(proposal.id, {
+    updateMeasureProposal.mutate(
+      { proposalId: proposal.id, patch: { text, status } },
+      {
         onSuccess: () => toast.success(success),
         onError: (e) => toast.error(getErrorMessage(e, error)),
-      });
-    } else if (status === "rejected") {
-      rejectMeasureProposal.mutate(proposal.id, {
-        onSuccess: () => toast.success(success),
-        onError: (e) => toast.error(getErrorMessage(e, error)),
-      });
-    } else {
-      updateMeasureProposal.mutate(
-        { proposalId: proposal.id, patch: { text, status } },
-        {
-          onSuccess: () => toast.success(success),
-          onError: (e) => toast.error(getErrorMessage(e, error)),
-        }
-      );
-    }
+      }
+    );
   };
 
   const handleSaveMeasure = (proposal: MeasureProposalDto) => {
@@ -240,7 +216,7 @@ export function usePendingProposals(
       {
         onSuccess: () => toast.success("Proposta atualizada"),
         onError: (err) =>
-          toast.error(getErrorMessage(err, "Nao foi possivel atualizar a proposta.")),
+          toast.error(getErrorMessage(err, "Não foi possível atualizar a proposta.")),
       }
     );
   };
@@ -249,7 +225,7 @@ export function usePendingProposals(
     deleteMeasureProposal.mutate(proposal.id, {
       onSuccess: () => toast.success("Proposta removida"),
       onError: (err) =>
-        toast.error(getErrorMessage(err, "Nao foi possivel apagar a proposta.")),
+        toast.error(getErrorMessage(err, "Não foi possível apagar a proposta.")),
     });
   };
 
@@ -265,8 +241,6 @@ export function usePendingProposals(
         updateCategoryProposal.isPending ||
         deleteCategoryProposal.isPending ||
         updateMeasureProposal.isPending ||
-        approveMeasureProposal.isPending ||
-        rejectMeasureProposal.isPending ||
         deleteMeasureProposal.isPending,
     },
     actions: {

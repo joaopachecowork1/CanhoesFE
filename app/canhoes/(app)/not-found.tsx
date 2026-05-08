@@ -6,10 +6,10 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 
 export default function CanhoesNotFound() {
   return (
-    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
+    <Card className="rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(180deg,rgba(18,24,11,0.92),rgba(11,14,8,0.94))] text-[var(--bg-paper)] shadow-[var(--shadow-panel)]">
       <CardContent className="space-y-4 p-5 sm:p-6">
         <div className="space-y-1">
-          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(245,237,224,0.68)]">
+          <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-[rgba(255,255,255,0.68)]">
             Nao encontrado
           </p>
           <h1 className="text-xl font-semibold text-[var(--bg-paper)]">Esta area nao existe</h1>

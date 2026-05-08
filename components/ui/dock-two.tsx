@@ -35,18 +35,27 @@ const DockButton = React.forwardRef<HTMLButtonElement, DockItem>(
         className={cn(
           "relative flex min-h-[3.375rem] w-full flex-col items-center justify-center gap-1 rounded-[0.95rem] border px-2 py-2 text-[11px] font-semibold leading-none transition-colors active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--moss)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-void)]",
           isActive
-            ? "border-[rgba(95,123,56,0.22)] bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]"
-            : "border-transparent bg-transparent text-[rgba(243,234,216,0.78)] hover:bg-[rgba(244,234,216,0.06)]",
+            ? "border-transparent bg-transparent text-[var(--neon-amber)]"
+            : "border-transparent bg-transparent text-[rgba(255,255,255,0.78)] hover:bg-[rgba(255,255,255,0.06)]",
           buttonClassName
         )}
       >
-        <Icon className={cn("h-5 w-5 shrink-0", iconClassName)} />
-        <span className="truncate font-[var(--font-mono)] text-[10px] uppercase tracking-[0.08em]">
+        <span
+          className={cn(
+            "inline-flex items-center justify-center",
+            isActive && "text-[var(--neon-amber)]"
+          )}
+        >
+          <Icon className={cn("h-5 w-5 shrink-0", iconClassName)} />
+        </span>
+        <span
+          className={cn(
+            "truncate font-[var(--font-mono)] text-[10px] uppercase tracking-[0.08em]",
+            isActive && "underline decoration-[var(--neon-amber)] decoration-2 underline-offset-[6px]"
+          )}
+        >
           {label}
         </span>
-        {isActive && (
-          <span className="absolute bottom-1.5 h-0.5 w-4 rounded-full bg-[var(--nav-indicator-color)] shadow-[var(--glow-moss)]" />
-        )}
       </button>
     );
   }

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
+import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminStatus } from "@/hooks/useAdminStatus";

@@ -140,14 +140,14 @@ export function CanhoesChrome({
   }, [eventOverview.event?.name, pageContext.title]);
 
   return (
-    <div
-      data-theme="canhoes"
-      className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
-    >
-      <header className="sticky top-0 z-40 border-b border-[rgba(212,184,150,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
+      <div
+        data-theme="canhoes"
+        className="bg-circuit relative isolate flex h-[100svh] min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
+      >
+      <header className="sticky top-0 z-40 border-b border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
         <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">
                   <div
-                    className="rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
+                    className="rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
                   >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
@@ -163,22 +163,22 @@ export function CanhoesChrome({
                           pageContext.tone === "social" &&
                             "bg-[rgba(118,98,166,0.14)] text-[var(--accent-purple-soft)]",
                           pageContext.tone === "official" &&
-                            "bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]",
+                            "bg-[rgba(95,123,56,0.14)] text-[var(--color-text-primary)]",
                           pageContext.tone === "admin" &&
-                            "bg-[rgba(201,164,106,0.14)] text-[var(--bg-paper)]",
+                            "bg-[rgba(201,164,106,0.14)] text-[var(--color-text-primary)]",
                           pageContext.tone === "event" &&
-                            "bg-[rgba(244,234,216,0.08)] text-[rgba(243,234,216,0.82)]"
+                            "bg-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.82)]"
                         )}
                       >
                         {pageContext.toneLabel}
                       </Badge>
-                      <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+                      <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
                         {pageContext.title}
                       </p>
                     </div>
 
                     {pageContext.description ? (
-                      <p className="line-clamp-1 text-xs text-[rgba(243,234,216,0.66)]">
+                      <p className="line-clamp-1 text-xs text-[rgba(255,255,255,0.66)]">
                         {pageContext.description}
                       </p>
                     ) : null}
@@ -191,7 +191,7 @@ export function CanhoesChrome({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-canhoes-gold hover:bg-[rgba(244,234,216,0.1)]"
+                    className="min-h-10 h-10 w-10 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] text-canhoes-gold hover:bg-[rgba(255,255,255,0.1)]"
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -207,7 +207,7 @@ export function CanhoesChrome({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.05)] text-canhoes-gold hover:bg-[rgba(244,234,216,0.1)]"
+                  className="min-h-10 h-10 w-10 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] text-canhoes-gold hover:bg-[rgba(255,255,255,0.1)]"
                   onClick={() => handleMenuOpenChange(!isMenuOpen)}
                   aria-expanded={isMenuOpen}
                   aria-label="Abrir menu"
@@ -218,8 +218,8 @@ export function CanhoesChrome({
             </div>
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <div className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.06)] px-3 py-1">
-                <p className="truncate text-sm font-semibold text-[var(--bg-paper)]">
+              <div className="inline-flex min-h-8 items-center gap-2 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] px-3 py-1">
+                <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
                   {userLabel}
                 </p>
               </div>
@@ -240,7 +240,7 @@ export function CanhoesChrome({
         <div className="h-px flex-1 bg-canhoes-gold/25" />
       </div>
 
-      <main className="relative z-10 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
+      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
         <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
           <div
                       key={pathname}

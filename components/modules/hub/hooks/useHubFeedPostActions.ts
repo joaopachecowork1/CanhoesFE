@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import type { EventFeedPostFullDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 import { HEART_REACTION } from "@/lib/reactions";
 
 export type HubFeedParticlesState = {
@@ -46,7 +46,11 @@ function findPostInFeed(old: FeedInfiniteData | undefined, postId: string) {
 
 function applyPostReaction(post: EventFeedPostFullDto, emoji: string) {
   const myReactions = new Set(post.myReactions ?? []);
-  const wasActive = myReactions.has(emoji);
+
+  // For HEART_REACTION, use likedByMe as source of truth (backend tracks it separately)
+  const wasActive = emoji === HEART_REACTION
+    ? (post.likedByMe ?? false)
+    : myReactions.has(emoji);
 
   if (wasActive) myReactions.delete(emoji);
   else myReactions.add(emoji);
@@ -58,14 +62,24 @@ function applyPostReaction(post: EventFeedPostFullDto, emoji: string) {
   );
 
   let nextLikeCount = post.likeCount ?? 0;
+  let nextDownvoteCount = post.downvoteCount ?? 0;
+  let nextDownvotedByMe = post.downvotedByMe ?? false;
+
   if (emoji === HEART_REACTION) {
     nextLikeCount = Math.max(0, nextLikeCount + (wasActive ? -1 : 1));
+    // Upvoting cancels an active downvote
+    if (!wasActive && nextDownvotedByMe) {
+      nextDownvotedByMe = false;
+      nextDownvoteCount = Math.max(0, nextDownvoteCount - 1);
+    }
   }
 
   return {
     ...post,
     likeCount: nextLikeCount,
     likedByMe: emoji === HEART_REACTION ? !wasActive : post.likedByMe,
+    downvotedByMe: nextDownvotedByMe,
+    downvoteCount: nextDownvoteCount,
     myReactions: Array.from(myReactions),
     reactionCounts,
   };
@@ -131,8 +145,8 @@ export function useHubFeedPostActions({
   const toggleReactionMutation = useMutation({
     mutationFn: async ({ postId, emoji }: { postId: string; emoji: string }) => {
       if (!eventId) throw new Error("Missing eventId");
-      if (emoji === HEART_REACTION) return canhoesEventsRepo.toggleFeedPostLike(eventId, postId);
-      return canhoesEventsRepo.toggleFeedPostReaction(eventId, postId, emoji);
+      if (emoji === HEART_REACTION) return feedRepo.togglePostLike(eventId, postId);
+      return feedRepo.togglePostReaction(eventId, postId, emoji);
     },
   });
 
@@ -151,17 +165,28 @@ export function useHubFeedPostActions({
       });
 
       try {
-        const result = await toggleReactionMutation.mutateAsync({ postId, emoji }) as { liked: boolean };
-        queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
-          updateInfiniteFeedPosts(old, (post) => {
-            if (post.id !== postId) return post;
-            const myReactions = new Set(post.myReactions ?? []);
-            if (result.liked) myReactions.add(HEART_REACTION);
-            else myReactions.delete(HEART_REACTION);
-            return { ...post, likedByMe: result.liked, myReactions: Array.from(myReactions) };
-          })
-        );
-        toast.success("Reacao atualizada");
+        const result = (await toggleReactionMutation.mutateAsync({
+          postId,
+          emoji,
+        })) as { liked?: boolean } | undefined;
+
+        if (result && typeof result.liked === "boolean") {
+          const liked = result.liked;
+          queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
+            updateInfiniteFeedPosts(old, (post): EventFeedPostFullDto => {
+              if (post.id !== postId) return post;
+              const myReactions = new Set(post.myReactions ?? []);
+              if (liked) myReactions.add(HEART_REACTION);
+              else myReactions.delete(HEART_REACTION);
+              return {
+                ...post,
+                likedByMe: liked,
+                myReactions: Array.from(myReactions),
+              };
+            })
+          );
+        }
+        toast.success("Reação atualizada");
       } catch (error) {
         if (appliedOptimisticUpdate && previousPost) {
           queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
@@ -170,7 +195,7 @@ export function useHubFeedPostActions({
             )
           );
         }
-        const message = getErrorMessage(error, "Nao foi possivel atualizar a reacao do post.");
+        const message = getErrorMessage(error, "Não foi possível atualizar a reação do post.");
         logFrontendError("HubFeed.toggleReaction", error, { emoji, postId });
         toast.error(message);
       }
@@ -188,28 +213,43 @@ export function useHubFeedPostActions({
         return updateInfiniteFeedPosts(old, (post) => {
           if (post.id !== postId) return post;
           const wasDownvoted = post.downvotedByMe ?? false;
+          let nextLikeCount = post.likeCount ?? 0;
+          let nextLikedByMe = post.likedByMe ?? false;
+          // Downvoting cancels an active upvote
+          if (!wasDownvoted && nextLikedByMe) {
+            nextLikedByMe = false;
+            nextLikeCount = Math.max(0, nextLikeCount - 1);
+          }
           return {
             ...post,
             downvotedByMe: !wasDownvoted,
             downvoteCount: Math.max(0, (post.downvoteCount ?? 0) + (wasDownvoted ? -1 : 1)),
+            likedByMe: nextLikedByMe,
+            likeCount: nextLikeCount,
           };
         });
       });
 
       try {
-        const result = await canhoesEventsRepo.toggleFeedPostDownvote(eventId, postId);
-        queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
-          updateInfiniteFeedPosts(old, (post) => {
-            if (post.id !== postId) return post;
-            return {
-              ...post,
-              downvotedByMe: result.downvoted,
-              downvoteCount: result.downvoted
-                ? (post.downvoteCount ?? 0) + (post.downvotedByMe ? 0 : 1)
-                : Math.max(0, (post.downvoteCount ?? 0) - (post.downvotedByMe ? 1 : 0)),
-            };
-          })
-        );
+        const result = (await feedRepo.togglePostDownvote(eventId, postId)) as
+          | { downvoted?: boolean }
+          | undefined;
+
+        if (result && typeof result.downvoted === "boolean") {
+          const downvoted = result.downvoted;
+          queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
+            updateInfiniteFeedPosts(old, (post): EventFeedPostFullDto => {
+              if (post.id !== postId) return post;
+              return {
+                ...post,
+                downvotedByMe: downvoted,
+                downvoteCount: downvoted
+                  ? (post.downvoteCount ?? 0) + (post.downvotedByMe ? 0 : 1)
+                  : Math.max(0, (post.downvoteCount ?? 0) - (post.downvotedByMe ? 1 : 0)),
+              };
+            })
+          );
+        }
       } catch (error) {
         if (previousPost) {
           queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
@@ -218,7 +258,7 @@ export function useHubFeedPostActions({
             )
           );
         }
-        const message = getErrorMessage(error, "Nao foi possivel atualizar o downvote do post.");
+        const message = getErrorMessage(error, "Não foi possível atualizar o downvote do post.");
         logFrontendError("HubFeed.toggleDownvote", error, { postId });
         toast.error(message);
       }
@@ -242,7 +282,7 @@ export function useHubFeedPostActions({
       );
 
       try {
-        await canhoesEventsRepo.voteFeedPoll(eventId, postId, optionId);
+        await feedRepo.votePoll(eventId, postId, optionId);
       } catch (error) {
         if (previousPost) {
           queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) =>
@@ -251,7 +291,7 @@ export function useHubFeedPostActions({
             )
           );
         }
-        const message = getErrorMessage(error, "Nao foi possivel registar o teu voto.");
+        const message = getErrorMessage(error, "Não foi possível registar o teu voto.");
         logFrontendError("HubFeed.votePoll", error, { optionId, postId });
         toast.error(message);
       }
@@ -263,7 +303,7 @@ export function useHubFeedPostActions({
     if (!eventId) return;
 
     try {
-      const result = await canhoesEventsRepo.adminPinFeedPost(eventId, postId);
+      const result = await feedRepo.adminPinPost(eventId, postId);
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) => {
         const updated = updateInfiniteFeedPosts(old, (post) =>
           post.id === postId ? { ...post, isPinned: result.pinned } : post
@@ -272,7 +312,7 @@ export function useHubFeedPostActions({
         return sortPinnedPosts(updated);
       });
     } catch (error) {
-      const message = getErrorMessage(error, "Nao foi possivel atualizar o destaque do post.");
+      const message = getErrorMessage(error, "Não foi possível atualizar o destaque do post.");
       logFrontendError("HubFeed.adminPin", error, { postId });
       toast.error(message);
     }
@@ -282,7 +322,7 @@ export function useHubFeedPostActions({
     if (!eventId) return;
 
     try {
-      await canhoesEventsRepo.adminDeleteFeedPost(eventId, postId);
+      await feedRepo.adminDeletePost(eventId, postId);
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) => {
         if (!old) return old;
 
@@ -296,7 +336,7 @@ export function useHubFeedPostActions({
       });
       toast.success("Post removido");
     } catch (error) {
-      const message = getErrorMessage(error, "Nao foi possivel remover o post.");
+      const message = getErrorMessage(error, "Não foi possível remover o post.");
       logFrontendError("HubFeed.adminDelete", error, { postId });
       toast.error(message);
     }
@@ -306,7 +346,6 @@ export function useHubFeedPostActions({
     showParticles,
     setShowParticles,
     toggleReaction,
-    toggleReactionPending: toggleReactionMutation.isPending,
     toggleDownvote,
     votePoll,
     adminPin,

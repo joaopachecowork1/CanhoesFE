@@ -9,13 +9,13 @@ import {
   CanhoesMediaThumb,
   CanhoesModuleHeader,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CompactSegmentTabs } from "@/components/modules/canhoes/CompactSegmentTabs";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/shared/CompactSegmentTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { eventRepo } from "@/lib/repositories/eventRepo";
 import type { PublicUserDto, EventWishlistItemDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,12 +34,12 @@ function WishlistLoadingState() {
           <Skeleton key={index} className="h-9 w-28 rounded-full" />
         ))}
       </div>
-      <div className="space-y-2 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.72)] p-4">
+      <div className="space-y-2 rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.12)] bg-[rgba(22,28,15,0.72)] p-4">
         <Skeleton className="h-5 w-48 rounded" />
         <Skeleton className="h-4 w-28 rounded" />
         <div className="space-y-3 pt-2">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex gap-3 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] p-3">
+            <div key={index} className="flex gap-3 rounded-[var(--radius-md-token)] border border-[rgba(255,255,255,0.1)] p-3">
               <Skeleton className="h-14 w-14 rounded-[var(--radius-md-token)]" />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-4 w-2/3 rounded" />
@@ -65,7 +65,7 @@ function groupWishlistItemsByUser(items: EventWishlistItemDto[]) {
 
   for (const itemsForUser of wishlistByUser.values()) {
     itemsForUser.sort((leftItem, rightItem) =>
-      (rightItem.updatedAt || "").localeCompare(leftItem.updatedAt || "")
+      (rightItem.updatedAtUtc || "").localeCompare(leftItem.updatedAtUtc || "")
     );
   }
 
@@ -87,7 +87,7 @@ export function CanhoesWishlistModule() {
 
   const [formState, setFormState] = useState({
     title: "",
-    link: "",
+    url: "",
     notes: "",
     selectedFile: null as File | null,
   });
@@ -116,17 +116,17 @@ export function CanhoesWishlistModule() {
     setErrorMessage(null);
 
     try {
-      const [nextMembers, nextWishlistItems] = await Promise.all([
-        canhoesEventsRepo.getMembers(currentEventId),
-        canhoesEventsRepo.getWishlist(currentEventId),
+      const [nextMembers, nextWishlistPage] = await Promise.all([
+        eventRepo.getMembers(currentEventId),
+        eventRepo.getWishlist(currentEventId, 0, 1000), // Get all items
       ]);
 
       setMemberList(Array.isArray(nextMembers) ? nextMembers : []);
-      setWishlistItems(Array.isArray(nextWishlistItems) ? nextWishlistItems : []);
+      setWishlistItems(nextWishlistPage.items);
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel carregar a wishlist desta edicao."
+        "Não foi possível carregar a wishlist desta edição."
       );
       logFrontendError("CanhoesWishlist.loadWishlist", error, { eventId: currentEventId });
       setErrorMessage(message);
@@ -140,7 +140,7 @@ export function CanhoesWishlistModule() {
     setWishlistItems([]);
     setErrorMessage(null);
     setSelectedMemberId(null);
-    setFormState({ title: "", link: "", notes: "", selectedFile: null });
+    setFormState({ title: "", url: "", notes: "", selectedFile: null });
 
     if (!eventId) {
       setIsLoading(false);
@@ -155,23 +155,23 @@ export function CanhoesWishlistModule() {
 
     setIsSaving(true);
     try {
-      const createdItem = await canhoesEventsRepo.createWishlistItem(eventId, {
+      const createdItem = await eventRepo.createWishlistItem(eventId, {
         notes: formState.notes.trim() || null,
         title: formState.title.trim(),
-        link: formState.link.trim() || null,
+        url: formState.url.trim() || null,
       });
 
       if (formState.selectedFile) {
-        await canhoesEventsRepo.uploadWishlistImage(eventId, createdItem.id, formState.selectedFile);
+        await eventRepo.uploadWishlistImage(eventId, createdItem.id, formState.selectedFile);
       }
 
-      setFormState({ title: "", link: "", notes: "", selectedFile: null });
+      setFormState({ title: "", url: "", notes: "", selectedFile: null });
       await loadWishlist(eventId);
       toast.success("Item adicionado");
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel guardar este item da wishlist."
+        "Não foi possível guardar este item da wishlist."
       );
       logFrontendError("CanhoesWishlist.handleCreate", error);
       toast.error(message);
@@ -185,7 +185,7 @@ export function CanhoesWishlistModule() {
     setDeletingItemId(wishlistItemId);
 
     try {
-      await canhoesEventsRepo.deleteWishlistItem(eventId, wishlistItemId);
+      await eventRepo.deleteWishlistItem(eventId, wishlistItemId);
       setWishlistItems((currentItems) =>
         currentItems.filter((wishlistItem) => wishlistItem.id !== wishlistItemId)
       );
@@ -193,7 +193,7 @@ export function CanhoesWishlistModule() {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel remover este item da wishlist."
+        "Não foi possível remover este item da wishlist."
       );
       logFrontendError("CanhoesWishlist.handleDelete", error, { wishlistItemId });
       toast.error(message);
@@ -208,7 +208,7 @@ export function CanhoesWishlistModule() {
   if (!errorMessage) {
     if (memberList.length === 0 && !isInitialLoading) {
       wishlistContent = (
-        <EmptyState icon={Inbox} title="Sem membros" description="Ainda nao ha membros na wishlist." />
+        <EmptyState icon={Inbox} title="Sem membros" description="Ainda não há membros na wishlist." />
       );
     } else if (memberList.length > 0) {
       wishlistContent = (
@@ -217,7 +217,7 @@ export function CanhoesWishlistModule() {
             activeId={selectedMember?.id ?? ""}
             items={memberList.map((member) => ({
               id: member.id,
-              label: member.displayName || member.email || member.name,
+              label: member.displayName || member.email || member.id,
               badge: String((wishlistByUser.get(member.id) ?? []).length),
             }))}
             onSelect={setSelectedMemberId}
@@ -242,7 +242,7 @@ export function CanhoesWishlistModule() {
       <CanhoesModuleHeader
         icon={Gift}
         title="Wishlist"
-        description="Toda a gente ve a wishlist de toda a gente. So tu ves o teu amigo secreto."
+        description="Toda a gente vê a wishlist de toda a gente. Só tu vês o teu amigo secreto."
         badgeLabel={`${wishlistItems.length} itens`}
         badgeVariant="secondary"
       />
@@ -268,8 +268,8 @@ export function CanhoesWishlistModule() {
               <label htmlFor="wishlist-url-input" className="canhoes-field-label">URL</label>
               <Input
                 id="wishlist-url-input"
-                value={formState.link}
-                onChange={(event) => setFormState((prev) => ({ ...prev, link: event.target.value }))}
+                value={formState.url}
+                onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
                 placeholder="URL opcional"
               />
             </div>
@@ -335,7 +335,7 @@ function WishlistMemberPanel({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex flex-wrap items-center gap-2">
-          <span className="truncate">{member.displayName || member.email}</span>
+          <span className="truncate">{member.displayName || member.email || member.id}</span>
           {isCurrentUser ? <Badge variant="outline">tu</Badge> : null}
           {member.isAdmin && !isCurrentUser ? <Badge variant="outline">admin</Badge> : null}
           <span className="body-small ml-auto text-[var(--color-text-muted)]">{items.length} itens</span>
@@ -360,8 +360,8 @@ function WishlistMemberPanel({
                   {wishlistItem.notes ? (
                     <p className="line-clamp-2 text-xs text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
                   ) : null}
-                  {wishlistItem.link ? (
-                    <a href={wishlistItem.link} target="_blank" rel="noreferrer" className="canhoes-link mt-1.5 inline-flex items-center gap-1 text-xs">
+                  {wishlistItem.url ? (
+                    <a href={wishlistItem.url} target="_blank" rel="noreferrer" className="canhoes-link mt-1.5 inline-flex items-center gap-1 text-xs">
                       <LinkIcon className="h-3.5 w-3.5" />
                       Abrir link
                     </a>
@@ -370,7 +370,7 @@ function WishlistMemberPanel({
 
                 <div className="flex shrink-0 flex-col items-end justify-between gap-2">
                   <p className="text-[11px] text-[var(--color-text-muted)]">
-                    {new Date(wishlistItem.updatedAt ?? wishlistItem.updatedAtUtc).toLocaleDateString()}
+                    {new Date(wishlistItem.updatedAtUtc).toLocaleDateString()}
                   </p>
 
                   {isCurrentUser ? (

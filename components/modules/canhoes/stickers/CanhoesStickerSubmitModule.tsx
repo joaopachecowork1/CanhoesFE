@@ -14,9 +14,9 @@ import { StickerFeedList } from "./StickerFeedList";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import type {
-  EventCategoryDto,
+  AwardCategoryDto,
   NomineeDto,
 } from "@/lib/api/types";
 
@@ -65,7 +65,7 @@ function StickerSubmitLoadingState() {
       </Card>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.9)] p-3">
+          <div key={index} className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.12)] bg-[rgba(22,28,15,0.9)] p-3">
             <Skeleton className="aspect-square w-full rounded-[var(--radius-md-token)]" />
             <Skeleton className="h-4 w-4/5 rounded" />
             <Skeleton className="h-3 w-2/3 rounded" />
@@ -81,7 +81,7 @@ export function CanhoesStickerSubmitModule() {
   const { overview, event } = useEventOverview();
   const eventId = event?.id ?? null;
 
-  const [categoryList, setCategoryList] = useState<EventCategoryDto[]>([]);
+  const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
   const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,15 +111,17 @@ export function CanhoesStickerSubmitModule() {
     setErrorMessage(null);
 
     try {
-      const [nextCategories, nextNominees] = await Promise.all([
-        canhoesEventsRepo.getUserCategories(currentEventId),
-        canhoesEventsRepo.getApprovedNominees(currentEventId),
+      const [categoriesResult, nextNominees] = await Promise.all([
+        awardsRepo.getCategories(currentEventId),
+        awardsRepo.getApprovedNominees(currentEventId),
       ]);
 
-      setCategoryList(Array.isArray(nextCategories) ? nextCategories : []);
-      setNomineeList(Array.isArray(nextNominees) ? nextNominees : []);
+      const nextCategories = categoriesResult.items;
 
-      const defaultStickerCategory = (nextCategories ?? []).find((category) =>
+      setCategoryList(nextCategories);
+      setNomineeList(nextNominees);
+
+      const defaultStickerCategory = nextCategories.find((category) =>
         category.name.toLowerCase().includes("sticker")
       );
 
@@ -129,7 +131,7 @@ export function CanhoesStickerSubmitModule() {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel carregar os stickers desta edicao."
+        "Não foi possível carregar os stickers desta edição."
       );
       logFrontendError("CanhoesStickerSubmit.loadStickerData", error, { eventId: currentEventId });
       setErrorMessage(message);
@@ -162,7 +164,7 @@ export function CanhoesStickerSubmitModule() {
     ? isSubmitting
       ? "A submeter..."
       : "Submeter sticker"
-    : "Nomeacoes fechadas";
+    : "Nomeações fechadas";
 
   const stickersWithImage = nomineeList.filter((nominee) => nominee.imageUrl);
 
@@ -175,7 +177,7 @@ export function CanhoesStickerSubmitModule() {
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error("So podes enviar imagens");
+      toast.error("Só podes enviar imagens");
       return;
     }
 
@@ -193,14 +195,13 @@ export function CanhoesStickerSubmitModule() {
     setIsSubmitting(true);
 
     try {
-      const createdNominee = await canhoesEventsRepo.createNomination(eventId, {
+      const createdNominee = await awardsRepo.createNomination(eventId, {
         categoryId: selectedCategoryId || null,
-        kind: "stickers",
         title: stickerTitle.trim(),
       });
 
       if (selectedFile) {
-        await canhoesEventsRepo.uploadNomineeImage(eventId, createdNominee.id, selectedFile);
+        await awardsRepo.uploadNomineeImage(eventId, createdNominee.id, selectedFile);
       }
 
       setStickerTitle("");
@@ -210,7 +211,7 @@ export function CanhoesStickerSubmitModule() {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel submeter o sticker."
+        "Não foi possível submeter o sticker."
       );
       logFrontendError("CanhoesStickerSubmit.handleSubmit", error);
       toast.error(message);
@@ -230,7 +231,7 @@ export function CanhoesStickerSubmitModule() {
           <CanhoesModuleHeader
             icon={Cigarette}
             title="Arquivo de stickers"
-            description="O fluxo de upload agora segue a mesma logica do feed: preview real, validacao explicita e URLs de imagem normalizadas para funcionar em mobile, Vercel e backend remoto."
+            description="O fluxo de upload agora segue a mesma lógica do feed: preview real, validação explícita e URLs de imagem normalizadas para funcionar em mobile, Vercel e backend remoto."
             badgeLabel={
               phaseType ? `Fase: ${formatEventPhaseLabel(phaseType)}` : undefined
             }
@@ -240,7 +241,7 @@ export function CanhoesStickerSubmitModule() {
 
       <Card>
         <CardHeader className="space-y-1">
-          <p className="editorial-kicker">Submissao</p>
+          <p className="editorial-kicker">Submissão</p>
           <CardTitle>Enviar um novo sticker</CardTitle>
         </CardHeader>
 
@@ -274,12 +275,12 @@ export function CanhoesStickerSubmitModule() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="sticker-title-input" className="canhoes-field-label">Titulo</label>
+              <label htmlFor="sticker-title-input" className="canhoes-field-label">Título</label>
               <Input
                 id="sticker-title-input"
                 value={stickerTitle}
                 onChange={(event) => setStickerTitle(event.target.value)}
-                placeholder="Ex: O sticker mais lendario"
+                placeholder="Ex: O sticker mais lendário"
               />
             </div>
           </div>
@@ -295,7 +296,7 @@ export function CanhoesStickerSubmitModule() {
                 placeholder="Adicionar imagem (opcional)"
               />
               <p className="canhoes-helper-text">
-                Preview local antes do submit. O sticker fica pendente ate um
+                Preview local antes do submit. O sticker fica pendente até um
                 admin aprovar.
               </p>
             </div>
@@ -314,7 +315,7 @@ export function CanhoesStickerSubmitModule() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="canhoes-helper-text">
-              O upload usa o mesmo padrao de media do feed para evitar URLs
+              O upload usa o mesmo padrão de média do feed para evitar URLs
               partidas depois de guardar.
             </p>
 

@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { feedCopy } from "@/lib/canhoesCopy";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
-import type { FeedSortOrder } from "@/hooks/useHubFeed";
+import type { FeedSortOrder } from "@/components/modules/hub/hooks/useHubFeed";
 
 import { FeedLoadMore } from "./FeedLoadMore";
 import { FeedSortBar } from "./FeedSortBar";
@@ -27,7 +27,6 @@ type HubFeedListProps = {
   comments: Record<string, HubCommentDto[]>;
   openComments: Record<string, boolean>;
   commentDrafts: Record<string, string>;
-  isPendingReaction: boolean;
   onSortChange: (sort: FeedSortOrder) => void;
   onLoadMore: () => void;
   onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
@@ -37,7 +36,6 @@ type HubFeedListProps = {
   onAddComment: (postId: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
-  onToggleCommentReaction: (postId: string, commentId: string, emoji: string) => void;
   onAdminPin: (postId: string) => void;
   onAdminDelete: (postId: string) => void;
   sentinelRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -56,7 +54,6 @@ export function HubFeedList({
   comments,
   openComments,
   commentDrafts,
-  isPendingReaction,
   onSortChange,
   onLoadMore,
   onToggleReaction,
@@ -66,7 +63,6 @@ export function HubFeedList({
   onAddComment,
   onDeleteComment,
   onCommentDraftChange,
-  onToggleCommentReaction,
   onAdminPin,
   onAdminDelete,
   sentinelRef,
@@ -112,7 +108,6 @@ export function HubFeedList({
                       currentUserId={currentUserId}
                       currentUserName={currentUserName}
                       currentUserImage={currentUserImage}
-                      isPendingReaction={isPendingReaction}
                       onToggleReaction={onToggleReaction}
                       onToggleDownvote={onToggleDownvote}
                       onToggleComments={onToggleComments}
@@ -120,7 +115,6 @@ export function HubFeedList({
                       onAddComment={onAddComment}
                       onDeleteComment={onDeleteComment}
                       onCommentDraftChange={onCommentDraftChange}
-                      onToggleCommentReaction={onToggleCommentReaction}
                       onAdminPin={onAdminPin}
                       onAdminDelete={onAdminDelete}
                     />

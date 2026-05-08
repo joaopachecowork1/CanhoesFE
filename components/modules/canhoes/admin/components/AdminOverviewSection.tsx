@@ -12,11 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { AdminDashboard } from "./AdminDashboard";
+import { AdminSectionPanel } from "./adminContentUi";
 import { AdminStateMessage } from "./AdminStateMessage";
 
 function AdminOverviewLoadingState() {
   return (
-    <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
+    <AdminSectionPanel>
       <div className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
@@ -33,7 +34,7 @@ function AdminOverviewLoadingState() {
           <Skeleton className="h-20 rounded-[var(--radius-md-token)]" />
         </div>
       </div>
-    </section>
+    </AdminSectionPanel>
   );
 }
 
@@ -66,7 +67,7 @@ export function AdminOverviewSection({
   return (
     <div className="space-y-4">
       {loading ? <AdminOverviewLoadingState /> : (
-      <section className="canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5">
+      <AdminSectionPanel>
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
@@ -113,7 +114,7 @@ export function AdminOverviewSection({
             />
           </div>
         </div>
-      </section>
+      </AdminSectionPanel>
       )}
 
       {!loading && !state ? (
@@ -149,7 +150,7 @@ function OverviewMetric({
           className={
             tone === "highlight"
               ? "flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(122,173,58,0.24)] bg-[rgba(122,173,58,0.12)] text-[var(--ink-primary)]"
-              : "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(212,184,150,0.18)] text-[var(--ink-primary)]"
+              : "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-paper)] bg-[rgba(255,255,255,0.18)] text-[var(--ink-primary)]"
           }
         >
           {icon}

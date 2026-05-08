@@ -14,6 +14,20 @@ import { cn } from "@/lib/utils";
 export const ADMIN_CONTENT_CARD_CLASS =
   "canhoes-paper-panel canhoes-admin-shell-panel border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)]";
 
+export const ADMIN_SECTION_PANEL_CLASS =
+  "canhoes-admin-shell-panel rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5";
+
+/**
+ * Standardised section wrapper for admin panels.
+ * Replaces the repeated inline className pattern across admin components.
+ */
+export function AdminSectionPanel({
+  children,
+  className,
+}: Readonly<{ children: ReactNode; className?: string }>) {
+  return <section className={cn(ADMIN_SECTION_PANEL_CLASS, className)}>{children}</section>;
+}
+
 const ADMIN_CONTENT_DETAIL_PANEL_CLASS =
   "canhoes-admin-shell-panel rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-4 py-3 shadow-none";
 

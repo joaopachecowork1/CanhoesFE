@@ -5,7 +5,7 @@ import { Award, BarChart2, ChevronDown, ChevronUp, Medal } from "lucide-react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { AdminCategoryResultDto } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { cn } from "@/lib/utils";
 import { AdminStateMessage } from "@/components/modules/canhoes/admin/components/AdminStateMessage";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 
 const EMPTY_ADMIN_CATEGORY_RESULTS: AdminCategoryResultDto[] = [];
+
 import {
   ADMIN_CONTENT_CARD_CLASS,
   ADMIN_OUTLINE_BUTTON_CLASS,
@@ -165,7 +166,7 @@ export function AdminOfficialResultsSection({
     queryKey: ["canhoes", "admin", "official-results", queryEventId],
     enabled: Boolean(eventId) && isAdmin,
     queryFn: async () => {
-      const page = await canhoesEventsRepo.loadAllAdminOfficialResults(queryEventId);
+      const page = await adminRepo.getOfficialResultsPaged(queryEventId);
       return page.items;
     },
     placeholderData: keepPreviousData,

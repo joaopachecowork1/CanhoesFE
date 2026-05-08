@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic";
-import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
+import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, GalaMeasureDto } from "@/lib/api/types";
 
 const CanhoesMeasuresModule = dynamic(
-  () => import("@/components/modules/canhoes/CanhoesMeasuresModule").then((m) => ({ default: m.CanhoesMeasuresModule })),
+  () => import("@/components/modules/canhoes/medidas/CanhoesMeasuresModule").then((m) => ({ default: m.CanhoesMeasuresModule })),
   { loading: () => <FeedSkeleton /> }
 );
 

@@ -1,12 +1,12 @@
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
-import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
+import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { IS_LOCAL_MODE } from "@/lib/mock";
 
 const CanhoesGalaModule = dynamic(
-  () => import("@/components/modules/canhoes/CanhoesGalaModule").then((m) => ({ default: m.CanhoesGalaModule })),
+  () => import("@/components/modules/canhoes/gala/CanhoesGalaModule").then((m) => ({ default: m.CanhoesGalaModule })),
   { loading: () => <FeedSkeleton /> }
 );
 

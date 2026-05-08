@@ -40,7 +40,7 @@ export function formatPhaseWindow(phase?: EventPhaseDto | null) {
   return new Intl.DateTimeFormat("pt-PT", {
     day: "2-digit",
     month: "short",
-  }).format(new Date(phase.endDate));
+  }).format(new Date(phase.endDateUtc));
 }
 
 

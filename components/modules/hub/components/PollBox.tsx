@@ -2,14 +2,14 @@
 
 import React from "react";
 
-import type { HubPollDto } from "@/lib/api/types";
+import type { EventFeedPollDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 export function PollBox({
   poll,
   onVote,
 }: Readonly<{
-  poll: HubPollDto;
+  poll: EventFeedPollDto;
   onVote: (optionId: string) => void;
 }>) {
   const totalVotes = Math.max(0, poll.totalVotes || 0);

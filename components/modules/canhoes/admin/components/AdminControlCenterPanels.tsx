@@ -295,7 +295,7 @@ export function AdminSettingsMainPanel({
                 <VisibilityTile
                   key={item.key}
                   id={`quick-visibility-${item.key}`}
-                  checked={item.checked}
+                  checked={item.isEnabled}
                   label={item.label}
                   pending={visibilitySavingKey === item.key}
                   onChange={(checked) => onToggleQuickModule(item, checked)}
@@ -393,7 +393,7 @@ export function AdminSettingsAdvancedSheet({
                 <VisibilityRow
                   key={item.key}
                   id={`advanced-visibility-${item.key}`}
-                  checked={item.checked}
+                  checked={item.isEnabled}
                   label={item.label}
                   pending={visibilitySavingKey === item.key}
                   onChange={(checked) => onToggleAdvancedModule(item, checked)}

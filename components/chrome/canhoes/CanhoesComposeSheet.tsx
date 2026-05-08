@@ -7,9 +7,9 @@ import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
 
 import { feedCopy } from "@/lib/canhoesCopy";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 import { cn } from "@/lib/utils";
-import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/hooks/useComposer";
+import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/components/modules/hub/hooks/useComposer";
 import { useEventOverview } from "@/hooks/useEventOverview";
 
 import { Button } from "@/components/ui/button";
@@ -139,7 +139,7 @@ export function CanhoesComposeSheet({
     if (!trimmedText) return;
 
     if (!eventId) {
-      toast.error("Nao ha evento ativo para publicar no mural.");
+      toast.error("Não há evento ativo para publicar no mural.");
       return;
     }
 
@@ -154,7 +154,7 @@ export function CanhoesComposeSheet({
         setUploadLabel(composeCopy.uploading);
         setUploadProgress(0);
 
-        const uploadedUrls = await canhoesEventsRepo.uploadFeedImages(eventId, files);
+        const uploadedUrls = await feedRepo.uploadFeedImages(eventId, files);
 
         if (!uploadedUrls || uploadedUrls.length !== files.length) {
           throw new Error("Falha ao enviar as imagens");
@@ -169,7 +169,7 @@ export function CanhoesComposeSheet({
         ? pollOptions.map((option) => option.trim()).filter(Boolean)
         : [];
 
-      const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
+      const createdPost = await feedRepo.createPost(eventId, {
         content: trimmedText,
         mediaUrls,
         pollOptions: isPollEnabled ? trimmedPollOptions : null,
@@ -186,7 +186,7 @@ export function CanhoesComposeSheet({
       onOpenChange(false);
     } catch (error) {
       const message = getErrorMessage(error, composeCopy.publishError, {
-        413: "As imagens escolhidas sao demasiado pesadas para publicar.",
+        413: "As imagens escolhidas são demasiado pesadas para publicar.",
       });
       logFrontendError("CanhoesComposeSheet.createPost", error);
       toast.error(message);
@@ -197,19 +197,25 @@ export function CanhoesComposeSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="pb-safe">
-        <div className="flex justify-center pt-2">
-          <span className="h-1.5 w-14 rounded-full bg-[rgba(245,237,224,0.24)]" />
+      <SheetContent side="bottom" className="relative overflow-hidden border-t border-white/10 bg-[rgba(10,14,8,0.75)] backdrop-blur-3xl pb-safe sm:max-w-2xl sm:mx-auto sm:mb-8 sm:rounded-[2rem] sm:border sm:border-white/10 sm:shadow-[0_0_80px_-20px_rgba(79,99,54,0.3)]">
+        {/* React Bits inspired animated background glow */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]">
+          <div className="absolute -top-[20%] left-[20%] h-[300px] w-[300px] animate-pulse rounded-full bg-[var(--moss)]/15 blur-[100px]" style={{ animationDuration: '5s' }} />
+          <div className="absolute -bottom-[20%] -right-[10%] h-[250px] w-[250px] animate-pulse rounded-full bg-[var(--accent-purple)]/15 blur-[80px]" style={{ animationDuration: '7s', animationDelay: '1s' }} />
         </div>
-        <SheetHeader className="pb-3">
+
+        <div className="flex justify-center pt-2 sm:hidden">
+          <span className="h-1.5 w-14 rounded-full bg-white/20" />
+        </div>
+        <SheetHeader className="relative z-10 pb-3 sm:pt-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--color-text-primary)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--ink-primary)]">
               <Leaf className="h-4 w-4" />
             </span>
 
             <div className="space-y-1">
               <SheetTitle>{composeCopy.sheetTitle}</SheetTitle>
-              <p className="body-small text-[var(--color-text-muted)]">
+              <p className="body-small text-[var(--ink-secondary)]">
                 {composeCopy.sheetDescription}
               </p>
             </div>
@@ -222,7 +228,7 @@ export function CanhoesComposeSheet({
               value={text}
               onChange={(event) => setText(event.target.value)}
               placeholder={composeCopy.textPlaceholder}
-              className="min-h-24 resize-none"
+              className="relative z-10 min-h-[120px] resize-none border-white/10 bg-white/[0.02] text-base shadow-inner transition-all focus-visible:border-[var(--moss)] focus-visible:bg-white/[0.04] focus-visible:shadow-[0_0_0_1px_var(--moss)] sm:min-h-[140px] sm:text-sm"
               autoFocus
             />
 
@@ -264,8 +270,8 @@ export function CanhoesComposeSheet({
                   className={cn(
                     "canhoes-tap relative flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
                     files.length > 0
-                      ? "border-[var(--color-moss)] bg-[var(--color-moss)] text-[var(--color-text-primary)] shadow-[var(--glow-green-sm)]"
-                      : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)]"
+                      ? "border-[var(--moss)] bg-[var(--moss)] text-[var(--ink-primary)] shadow-[var(--glow-green-sm)]"
+                      : "border-[rgba(255,255,255,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--ink-primary)]"
                   )}
                 >
                   <ImagePlus className="h-4 w-4" />
@@ -284,8 +290,8 @@ export function CanhoesComposeSheet({
                   className={cn(
                     "canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
                     isPollEnabled
-                      ? "border-[var(--color-brown)] bg-[var(--color-brown)] text-[var(--color-text-primary)] shadow-[var(--shadow-card)]"
-                      : "border-[rgba(212,184,150,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--bg-paper)]"
+                      ? "border-[var(--color-brown)] bg-[var(--color-brown)] text-[var(--ink-primary)] shadow-[var(--shadow-card)]"
+                      : "border-[rgba(255,255,255,0.18)] bg-[rgba(18,23,12,0.72)] text-[var(--ink-primary)]"
                   )}
                 >
                   <BarChart3 className="h-4 w-4" />
@@ -295,7 +301,7 @@ export function CanhoesComposeSheet({
               <Button
                 onClick={() => void handleCreatePost()}
                 disabled={isSubmitting || !text.trim()}
-                className="min-w-[120px]"
+                className="relative z-10 min-w-[120px] transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_-5px_var(--moss)] active:scale-95"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -308,7 +314,7 @@ export function CanhoesComposeSheet({
           </div>
         ) : (
           <div className="space-y-3 px-4 pb-4">
-            <p className="body-small text-[var(--color-text-muted)]">
+            <p className="body-small text-[var(--ink-secondary)]">
               {composeCopy.authPrompt}
             </p>
             <Button onClick={() => signIn("google")} className="w-full">

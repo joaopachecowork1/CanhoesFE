@@ -2,18 +2,16 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
+  AdminVoteAuditRowDto,
   AwardCategoryDto,
   CreateAwardCategoryRequest,
   UpdateAwardCategoryRequest,
 } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { useAdminMutation } from "./useAdminMutation";
 
 const EMPTY_AWARD_CATEGORIES: AwardCategoryDto[] = [];
-const EMPTY_ADMIN_NOMINATIONS_SUMMARY = [] as Awaited<
-  ReturnType<typeof canhoesEventsRepo.getAdminNominationsSummary>
->;
-const EMPTY_ADMIN_VOTES = [] as Awaited<ReturnType<typeof canhoesEventsRepo.loadAllAdminVotes>>["votes"];
+const EMPTY_ADMIN_VOTES: AdminVoteAuditRowDto[] = [];
 
 type CategoryFormState = {
   description: string;
@@ -52,7 +50,7 @@ function buildFormFromCategory(category: AwardCategoryDto): CategoryFormState {
     name: category.name,
     sortOrder: String(category.sortOrder),
     voteQuestion: category.voteQuestion ?? "",
-    voteRules: "",
+    voteRules: category.voteRules ?? "",
   };
 }
 
@@ -159,32 +157,31 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
 
   const categoriesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetCategories(eventId!),
-    queryKey: ["canhoes", "admin", "categories", eventId],
+    queryFn: () => adminRepo.getCategories(eventId!),
+    queryKey: ["admin", "categories", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
 
   const nominationsSummaryQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getAdminNominationsSummary(eventId!),
-    queryKey: ["canhoes", "admin", "nominations-summary", eventId],
+    queryFn: () => adminRepo.getNominationsPaged(eventId!, 0, 1000), // Get all for summary
+    queryKey: ["admin", "nominations", "summary", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
 
   const votesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.loadAllAdminVotes(eventId!),
-    queryKey: ["canhoes", "admin", "votes", eventId],
+    queryFn: () => adminRepo.getVotesPaged(eventId!, 0, 1000),
+    queryKey: ["admin", "votes", "summary", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
-    select: (page) => page.votes,
+    select: (data) => data.votes,
   });
 
   const categories = categoriesQuery.data ?? EMPTY_AWARD_CATEGORIES;
-  const nominationsSummary =
-    nominationsSummaryQuery.data ?? EMPTY_ADMIN_NOMINATIONS_SUMMARY;
+  const nominations = nominationsSummaryQuery.data?.nominations ?? [];
   const votes = votesQuery.data ?? EMPTY_ADMIN_VOTES;
 
   const sortedCategories = useMemo(
@@ -198,7 +195,7 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
   );
 
   const categoryUsageById = useMemo(() => {
-    const nomineeCounts = nominationsSummary.reduce<Record<string, number>>(
+    const nomineeCounts = nominations.reduce<Record<string, number>>(
       (acc, nominee) => {
         if (!nominee.categoryId) return acc;
         acc[nominee.categoryId] = (acc[nominee.categoryId] ?? 0) + 1;
@@ -222,27 +219,14 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
         ),
       ])
     ) as Record<string, CategoryUsage>;
-  }, [nominationsSummary, sortedCategories, votes]);
+  }, [nominations, sortedCategories, votes]);
 
   const createCategory = useAdminMutation({
     mutationFn: (payload: CreateAwardCategoryRequest) =>
-      canhoesEventsRepo.adminCreateCategory(eventId!, payload),
-    onSuccess: async (createdCategory) => {
-      queryClient.setQueryData<AwardCategoryDto[]>(
-        ["canhoes", "admin", "categories", eventId],
-        (current) => (current ? [...current, createdCategory] : [createdCategory])
-      );
+      adminRepo.createCategory(eventId!, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "categories", eventId] });
       setSheetState(null);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "nominations-summary", eventId],
-          exact: true,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "votes", eventId],
-          exact: true,
-        }),
-      ]);
       await onUpdate();
     },
     successMessage: "Categoria criada.",
@@ -255,26 +239,10 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
     }: {
       categoryId: string;
       payload: UpdateAwardCategoryRequest;
-    }) => canhoesEventsRepo.adminUpdateCategory(eventId!, categoryId, payload),
-    onSuccess: async (updatedCategory) => {
-      queryClient.setQueryData<AwardCategoryDto[]>(
-        ["canhoes", "admin", "categories", eventId],
-        (current) =>
-          current?.map((category) =>
-            category.id === updatedCategory.id ? updatedCategory : category
-          ) ?? [updatedCategory]
-      );
+    }) => adminRepo.updateCategory(eventId!, categoryId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "categories", eventId] });
       setSheetState(null);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "nominations-summary", eventId],
-          exact: true,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "votes", eventId],
-          exact: true,
-        }),
-      ]);
       await onUpdate();
     },
     successMessage: "Categoria atualizada.",
@@ -282,24 +250,11 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
 
   const deleteCategory = useAdminMutation({
     mutationFn: (categoryId: string) =>
-      canhoesEventsRepo.adminDeleteCategory(eventId!, categoryId),
-    onSuccess: async (_data, categoryId) => {
-      queryClient.setQueryData<AwardCategoryDto[]>(
-        ["canhoes", "admin", "categories", eventId],
-        (current) => current?.filter((category) => category.id !== categoryId) ?? []
-      );
+      adminRepo.deleteCategory(eventId!, categoryId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "categories", eventId] });
       setDeleteTarget(null);
       setSheetState(null);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "nominations-summary", eventId],
-          exact: true,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["canhoes", "admin", "votes", eventId],
-          exact: true,
-        }),
-      ]);
       await onUpdate();
     },
     successMessage: "Categoria apagada.",
@@ -373,7 +328,6 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
       handleSave,
       setDeleteTarget,
       handleDelete,
-
     },
   };
 }

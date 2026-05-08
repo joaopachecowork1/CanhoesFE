@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import type { AdminNomineeDto, AwardCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { cn } from "@/lib/utils";
 import { formatDateTimeUtc } from "./dateUtils";
 import { AdminStateMessage } from "./AdminStateMessage";
@@ -102,7 +102,7 @@ export function AdminNominationsSection({
 
   const categoriesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.adminGetCategories(queryEventId),
+    queryFn: () => adminRepo.getCategories(queryEventId),
     queryKey: ["canhoes", "admin", "categories", queryEventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
@@ -110,7 +110,7 @@ export function AdminNominationsSection({
 
   const nominationsQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.loadAdminNominationsPage(queryEventId, 0, 50, "pending"),
+    queryFn: () => adminRepo.getNominationsPaged(queryEventId, 0, 50, "pending"),
     queryKey: ["canhoes", "admin", "nominations", queryEventId, 0, 50, "pending"],
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -194,7 +194,7 @@ export function AdminNominationsSection({
 
   const approveNomination = useMutation({
     mutationFn: (nomineeId: string) =>
-      canhoesEventsRepo.adminApproveNomination(queryEventId, nomineeId),
+      adminRepo.approveNomination(queryEventId, nomineeId),
     onSuccess: async (_data, nomineeId) => {
       updateCachedNomination(nomineeId, (nomination) => ({ ...nomination, status: "approved" }));
       toast.success("Nomeacao aprovada.");
@@ -210,7 +210,7 @@ export function AdminNominationsSection({
 
   const rejectNomination = useMutation({
     mutationFn: (nomineeId: string) =>
-      canhoesEventsRepo.adminRejectNomination(queryEventId, nomineeId),
+      adminRepo.rejectNomination(queryEventId, nomineeId),
     onSuccess: async (_data, nomineeId) => {
       setRejectingNominationId(null);
       removeNominationFromCache(nomineeId);
@@ -228,7 +228,7 @@ export function AdminNominationsSection({
 
   const setCategory = useMutation({
     mutationFn: ({ nomineeId, categoryId }: { nomineeId: string; categoryId: string }) =>
-      canhoesEventsRepo.adminSetNominationCategory(queryEventId, nomineeId, {
+      adminRepo.setNominationCategory(queryEventId, nomineeId, {
         categoryId: categoryId === "none" ? null : categoryId,
       }),
     onSuccess: async (_data, variables) => {

@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useCategorySelection } from "./useCategorySelection";
-import { CompactSegmentTabs } from "./CompactSegmentTabs";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { CompactSegmentTabs } from "@/components/modules/canhoes/shared/CompactSegmentTabs";
+import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { CanhoesFeatureCard, CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
@@ -24,9 +24,9 @@ function OfficialVotingLoadingState() {
     <div className="space-y-4">
       <Skeleton className="h-24 rounded-[var(--radius-lg-token)]" />
       <Skeleton className="h-10 rounded-full" />
-      <div className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(212,184,150,0.12)] bg-[rgba(22,28,15,0.88)] p-3">
+      <div className="space-y-3 rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.12)] bg-[rgba(22,28,15,0.88)] p-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.1)] p-3">
+          <div key={index} className="space-y-2 rounded-[var(--radius-md-token)] border border-[rgba(255,255,255,0.1)] p-3">
             <Skeleton className="h-4 w-3/5 rounded" />
             <Skeleton className="h-3 w-2/5 rounded" />
           </div>
@@ -46,7 +46,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
   const votingBoardQuery = useQuery({
     queryKey: ["official-voting", activeEventId],
     enabled: Boolean(eventId),
-    queryFn: () => canhoesEventsRepo.getOfficialVotingBoard(activeEventId),
+    queryFn: () => awardsRepo.getVotingBoard(activeEventId),
     initialData,
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 3,
@@ -78,7 +78,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
 
   const castOfficialVoteMutation = useMutation({
     mutationFn: (votePayload: CastOfficialVoteRequest) =>
-      canhoesEventsRepo.castOfficialVote(activeEventId, votePayload),
+      awardsRepo.castOfficialVote(activeEventId, votePayload),
     onMutate: async (votePayload) => {
       if (!eventId) return { previousBoardData: null };
 
@@ -91,7 +91,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
           ...oldData,
           categories: oldData.categories.map((category) =>
             category.id === votePayload.categoryId
-              ? { ...category, myNomineeId: votePayload.nomineeId }
+              ? { ...category, myNomineeId: votePayload.selectionId }
               : category
           ),
         };
@@ -104,7 +104,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
         queryClient.setQueryData(["official-voting", activeEventId], mutationContext.previousBoardData);
       }
       logFrontendError("CanhoesOfficialVoting.castVote", error, { eventId });
-      toast.error(getErrorMessage(error, "Nao foi possivel registar o voto. Tenta novamente."));
+      toast.error(getErrorMessage(error, "Não foi possível registar o voto. Tenta novamente."));
     },
     onSuccess: async () => {
       if (!eventId) return;
@@ -118,7 +118,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
         <CanhoesModuleHeader
           icon={Vote}
           title="Boletim oficial"
-          description="Participacao oficial com uma escolha validada por categoria."
+          description="Participação oficial com uma escolha validada por categoria."
         />
         <OfficialVotingLoadingState />
       </div>
@@ -129,7 +129,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
     return (
       <ErrorAlert
         title="Erro ao carregar boletim oficial"
-        description={getErrorMessage(votingBoardQuery.error, "Nao foi possivel abrir o boletim oficial.")}
+        description={getErrorMessage(votingBoardQuery.error, "Não foi possível abrir o boletim oficial.")}
         actionLabel="Tentar novamente"
         tone="official"
         onAction={() => void votingBoardQuery.refetch()}
@@ -149,7 +149,7 @@ export function CanhoesOfficialVotingModule({ initialData }: { initialData?: Off
       <CanhoesModuleHeader
         icon={Vote}
         title="Boletim oficial"
-        description="Area oficial de voto, separada das sondagens do mural."
+        description="Área oficial de voto, separada das sondagens do mural."
         badgeLabel={`${votedCategoriesCount}/${totalCategoriesCount}`}
       />
 
@@ -239,7 +239,7 @@ function OfficialVotingCategoryCard({
           className="max-h-[52svh]"
           renderItem={(nominee) => {
             const isNomineeSelected = category.myNomineeId === nominee.id;
-            const isVotePending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.nomineeId === nominee.id;
+            const isVotePending = isBusy && pendingPayload?.categoryId === category.id && pendingPayload.selectionId === nominee.id;
             const nomineeVoteStatistics = nomineeVoteMap.find((voteEntry) => voteEntry.id === nominee.id);
             let statusIcon = null;
 
@@ -253,7 +253,7 @@ function OfficialVotingCategoryCard({
               <button
                 type="button"
                 disabled={!canVote || isBusy}
-                onClick={() => onVote({ categoryId: category.id, nomineeId: nominee.id })}
+                onClick={() => onVote({ categoryId: category.id, selectionId: nominee.id })}
                 className={cn(
                   "canhoes-list-item w-full text-left px-3 py-2 flex items-center justify-between gap-3 border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)] shadow-none",
                   isNomineeSelected && "border-[rgba(95,123,56,0.28)] bg-[rgba(95,123,56,0.08)]"

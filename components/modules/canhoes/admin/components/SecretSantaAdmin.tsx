@@ -1,194 +1,151 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Gift, RefreshCw, Shuffle } from "lucide-react";
-import { toast } from "sonner";
-
-import { adminCopy } from "@/lib/canhoesCopy";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { Gift, Lock, RefreshCw, Shuffle, Users } from "lucide-react";
+import { useAdminMutation } from "../hooks/useAdminMutation";
 import type { EventAdminSecretSantaStateDto } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-
+import { adminRepo } from "@/lib/repositories/adminRepo";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
+import {
+  ADMIN_CONTENT_CARD_CLASS,
+  ADMIN_OUTLINE_BUTTON_CLASS,
+  AdminDetailPanel,
+} from "./adminContentUi";
 
 type SecretSantaAdminProps = {
-  activeEventName: string | null;
-  eventId: string | null;
-  loading: boolean;
-  onUpdate: () => Promise<void>;
-  state: EventAdminSecretSantaStateDto | null;
+  eventId: string;
+  state: EventAdminSecretSantaStateDto;
+  onRefresh: () => Promise<void>;
 };
 
-function buildDefaultEventCode(eventId: string | null) {
-  if (eventId) return eventId;
-  return `canhoes${new Date().getFullYear()}`;
-}
-
 export function SecretSantaAdmin({
-  activeEventName,
   eventId,
-  loading,
-  onUpdate,
   state,
+  onRefresh,
 }: Readonly<SecretSantaAdminProps>) {
-  const [eventCode, setEventCode] = useState(() => buildDefaultEventCode(eventId));
-  const [busy, setBusy] = useState<"draw" | "refresh" | null>(null);
-  const drawButtonLabel =
-    busy === "draw"
-      ? adminCopy.secretSanta.drawing
-      : state?.hasDraw
-        ? adminCopy.secretSanta.redraw
-        : adminCopy.secretSanta.draw;
-
-  useEffect(() => {
-    setEventCode(state?.eventCode || buildDefaultEventCode(eventId));
-  }, [eventId, state?.eventCode]);
+  const drawMutation = useAdminMutation({
+    mutationFn: (payload?: unknown) => adminRepo.drawSecretSanta(eventId, payload),
+    onSuccess: onRefresh,
+    successMessage: "Sorteio realizado com sucesso.",
+  });
 
   const handleDraw = async () => {
-    if (!eventId) return;
-
-    const hadDrawBefore = Boolean(state?.hasDraw);
-    setBusy("draw");
-    try {
-      await canhoesEventsRepo.adminDrawSecretSanta(eventId, {
-        eventCode: eventCode.trim() || null,
-      });
-      await onUpdate();
-      toast.success(hadDrawBefore ? "Sorteio atualizado" : "Sorteio criado");
-    } catch (error) {
-      logFrontendError("Admin.SecretSanta.draw", error, { eventId });
-      toast.error(getErrorMessage(error, "Nao foi possivel gerar o sorteio."));
-    } finally {
-      setBusy(null);
+    if (state.hasDraw && !confirm("O sorteio já foi realizado. Desejas repetir? Isso apagará as atribuições atuais.")) {
+      return;
     }
+    drawMutation.mutate({});
   };
 
-  const handleRefresh = async () => {
-    setBusy("refresh");
-    try {
-      await onUpdate();
-    } catch (error) {
-      logFrontendError("Admin.SecretSanta.refresh", error, { eventId });
-      toast.error(getErrorMessage(error, "Nao foi possivel atualizar o estado do sorteio."));
-    } finally {
-      setBusy(null);
-    }
-  };
+  const isLocked = state.isLocked;
+  const canDraw = state.memberCount >= 2 && !isLocked;
 
   return (
     <div className="space-y-4">
-      <Card className="canhoes-paper-panel canhoes-admin-shell-panel border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
-        <CardHeader className="space-y-2">
-          <div className="flex items-center gap-2 text-[var(--neon-green)]">
-            <Gift className="h-4 w-4" />
-            <span className="label">{adminCopy.secretSanta.kicker}</span>
-          </div>
-          <CardTitle>{adminCopy.secretSanta.title}</CardTitle>
-          <p className="body-small text-[var(--ink-muted)]">{adminCopy.secretSanta.description}</p>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-            <Input
-              value={eventCode}
-              onChange={(event) => setEventCode(event.target.value)}
-              placeholder={buildDefaultEventCode(eventId)}
-              disabled={!eventId || busy === "draw"}
-            />
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void handleRefresh()}
-              disabled={!eventId || busy === "refresh" || loading}
-              className={`gap-2 ${ADMIN_OUTLINE_BUTTON_CLASS}`}
-            >
-              <RefreshCw className={busy === "refresh" ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-              {adminCopy.secretSanta.refresh}
-            </Button>
-
-            <Button
-              type="button"
-              onClick={() => void handleDraw()}
-              disabled={!eventId || busy === "draw" || loading}
-              className="gap-2"
-            >
-              <Shuffle className="h-4 w-4" />
-              {drawButtonLabel}
-            </Button>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <StatusMetric
-              label={adminCopy.secretSanta.editionLabel}
-              value={activeEventName ?? adminCopy.controlStrip.activeEventFallback}
-              hint={adminCopy.secretSanta.editionHint}
-            />
-            <StatusMetric
-              label={adminCopy.secretSanta.drawLabel}
-              value={
-                state?.hasDraw
-                  ? adminCopy.secretSanta.drawReady
-                  : adminCopy.secretSanta.drawMissing
-              }
-              hint={state?.eventCode ?? buildDefaultEventCode(eventId)}
-            />
-            <StatusMetric
-              label={adminCopy.secretSanta.assignmentsLabel}
-              value={String(state?.assignmentCount ?? 0)}
-              hint={`${state?.memberCount ?? 0} ${adminCopy.secretSanta.membersHintSuffix}`}
-            />
-            <StatusMetric
-              label={adminCopy.secretSanta.statusLabel}
-              value={
-                state?.isLocked
-                  ? adminCopy.secretSanta.statusLocked
-                  : adminCopy.secretSanta.statusOpen
-              }
-              hint={
-                state?.createdAtUtc
-                  ? `Criado a ${new Date(state.createdAtUtc).toLocaleString("pt-PT")}`
-                  : adminCopy.secretSanta.noDrawHint
-              }
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Badge variant={state?.hasDraw ? "secondary" : "outline"}>
-              {state?.hasDraw
-                ? adminCopy.secretSanta.available
-                : adminCopy.secretSanta.unavailable}
-            </Badge>
-            {state?.assignmentCount ? (
-              <Badge variant="outline">
-                {state.assignmentCount} {adminCopy.secretSanta.generatedSuffix}
+      <Card className={ADMIN_CONTENT_CARD_CLASS}>
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="editorial-kicker">Logística</p>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-4 w-4" />
+                Amigo Secreto
+              </CardTitle>
+            </div>
+            {isLocked ? (
+              <Badge variant="outline" className="gap-1.5 border-[rgba(255,255,255,0.1)] py-1">
+                <Lock className="h-3 w-3" />
+                Sorteio trancado
               </Badge>
             ) : null}
           </div>
+          <p className="text-sm text-[var(--ink-muted)]">
+            Gere as atribuições aleatórias para o Amigo Secreto deste evento.
+          </p>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <AdminDetailPanel className="space-y-2">
+              <div className="flex items-center gap-2 text-[var(--ink-secondary)]">
+                <Users className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Membros</span>
+              </div>
+              <p className="text-2xl font-bold text-[var(--ink-primary)]">{state.memberCount}</p>
+              <p className="text-xs text-[var(--ink-muted)]">Participantes elegíveis no evento.</p>
+            </AdminDetailPanel>
+
+            <AdminDetailPanel className="space-y-2">
+              <div className="flex items-center gap-2 text-[var(--ink-secondary)]">
+                <Shuffle className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Atribuições</span>
+              </div>
+              <p className="text-2xl font-bold text-[var(--ink-primary)]">{state.assignmentCount}</p>
+              <p className="text-xs text-[var(--ink-muted)]">
+                {state.hasDraw ? "Sorteio já realizado." : "Aguardando sorteio inicial."}
+              </p>
+            </AdminDetailPanel>
+          </div>
+
+          <div className="space-y-4">
+            {isLocked ? (
+              <AdminDetailPanel className="border-amber-500/20 bg-amber-500/5">
+                Este sorteio está trancado porque já existem participações ativas ou a fase atual não permite alterações.
+              </AdminDetailPanel>
+            ) : null}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                type="button"
+                onClick={handleDraw}
+                disabled={!canDraw || drawMutation.isPending}
+                className="min-h-12 flex-1 gap-2"
+              >
+                {drawMutation.isPending ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Shuffle className="h-4 w-4" />
+                )}
+                {state.hasDraw ? "Repetir sorteio" : "Realizar sorteio"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void onRefresh()}
+                disabled={drawMutation.isPending}
+                className={`${ADMIN_OUTLINE_BUTTON_CLASS} min-h-12 gap-2`}
+              >
+                <RefreshCw className={cn("h-4 w-4", drawMutation.isPending && "animate-spin")} />
+                Sincronizar estado
+              </Button>
+            </div>
+
+            {!canDraw && !isLocked ? (
+              <p className="text-center text-xs text-[var(--neon-amber)]">
+                São necessários pelo menos 2 membros para realizar o sorteio.
+              </p>
+            ) : null}
+          </div>
+
+          {state.hasDraw ? (
+            <div className="rounded-[var(--radius-lg-token)] border border-[rgba(var(--neon-green-rgb),0.15)] bg-[rgba(var(--neon-green-rgb),0.02)] p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-[var(--neon-green)] p-1.5">
+                  <Lock className="h-3 w-3 text-black" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-[var(--neon-green)]">Sorteio válido</p>
+                  <p className="text-xs text-[var(--ink-muted)]">
+                    As atribuições foram geradas e estão disponíveis para consulta individual pelos membros na seção do Amigo Secreto.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function StatusMetric({
-  hint,
-  label,
-  value,
-}: Readonly<{
-  hint: string;
-  label: string;
-  value: string;
-}>) {
-  return (
-    <div className="rounded-[var(--radius-md-token)] border border-[var(--border-subtle)] bg-[var(--bg-paper-soft)] px-3 py-3 text-[var(--ink-primary)]">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-[var(--ink-primary)]">{value}</p>
-      <p className="mt-1 text-xs text-[var(--ink-muted)]">{hint}</p>
     </div>
   );
 }

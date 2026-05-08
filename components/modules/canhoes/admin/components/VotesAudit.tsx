@@ -1,146 +1,130 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
+import { History, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { adminRepo } from "@/lib/repositories/adminRepo";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
-import { logFrontendError } from "@/lib/errors";
-import { adminCopy } from "@/lib/canhoesCopy";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-
 import { AdminStateMessage } from "./AdminStateMessage";
+import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
+import { formatDateTimeUtc } from "./dateUtils";
 
-type VoteAuditRow = {
-  categoryId: string;
-  categoryName: string;
-  nomineeId?: string;
-  optionId?: string;
-  optionLabel?: string;
-  userId?: string;
-  voterUserId?: string;
-  userName?: string;
-  voterName?: string;
-  updatedAtUtc?: string;
-  voteId?: string;
-};
-
-type Props = {
+type VotesAuditProps = {
   eventId: string | null;
-  loading: boolean;
 };
 
-function VotesAuditShell({ children }: Readonly<{ children: ReactNode }>) {
-  return (
-    <article className="canhoes-paper-panel canhoes-admin-shell-panel relative overflow-hidden rounded-[var(--radius-md-token)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] px-4 py-3.5 text-[var(--ink-primary)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
-      <CardHeader className="space-y-1">
-        <p className="editorial-kicker">{adminCopy.audit.kicker}</p>
-        <CardTitle>{adminCopy.audit.title}</CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </article>
-  );
-}
+const VOTE_ROW_CLASS =
+  "flex w-full flex-col gap-1 border-b border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-3 last:border-0";
 
-function VotesAuditState({ message }: Readonly<{ message: string }>) {
-  return <div className="body-small text-[var(--ink-muted)]">{message}</div>;
-}
-
-function VotesAuditRowItem({ vote }: Readonly<{ vote: VoteAuditRow }>) {
-  return (
-    <article className="grid gap-1 border-b border-[rgba(212,184,150,0.14)] px-3 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3">
-      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{vote.categoryName}</p>
-      <div className="space-y-0.5 text-xs text-[var(--ink-muted)] sm:text-sm"><p className="truncate">Votou: {vote.userName}</p></div>
-      <p className="text-[11px] text-[var(--ink-muted)] sm:text-right">{vote.updatedAtUtc ? new Date(vote.updatedAtUtc).toLocaleString("pt-PT") : ""}</p>
-    </article>
-  );
-}
-
-export function VotesAudit({ eventId, loading }: Readonly<Props>) {
-  const [search, setSearch] = useState("");
+export function VotesAudit({ eventId }: Readonly<VotesAuditProps>) {
+  const [filter, setFilter] = useState("");
 
   const votesQuery = useQuery({
     enabled: Boolean(eventId),
-    queryFn: async () => {
-      const page = await canhoesEventsRepo.loadAllAdminVotes(eventId!);
-      return page.votes;
-    },
-    queryKey: ["canhoes", "admin", "votes", eventId],
+    queryFn: () => adminRepo.getVotesPaged(eventId!, 0, 1000),
+    queryKey: ["canhoes", "admin", "votes-audit", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
 
-  const votes = useMemo(() => votesQuery.data ?? [], [votesQuery.data]);
+  const allVotes = votesQuery.data?.votes ?? [];
 
   const filteredVotes = useMemo(() => {
-    if (!search.trim()) return votes;
+    const term = filter.trim().toLowerCase();
+    if (!term) return allVotes;
 
-    const normalizedTerm = search.toLowerCase();
-    return votes.filter(
+    return allVotes.filter(
       (vote) =>
-        vote.categoryName.toLowerCase().includes(normalizedTerm) ||
-        vote.userName?.toLowerCase().includes(normalizedTerm) ||
-        vote.nomineeId?.toLowerCase().includes(normalizedTerm)
+        vote.userName.toLowerCase().includes(term) ||
+        vote.categoryName.toLowerCase().includes(term) ||
+        vote.nomineeName.toLowerCase().includes(term)
     );
-  }, [votes, search]);
+  }, [allVotes, filter]);
 
   if (!eventId) {
-    return <AdminStateMessage>Falta uma edicao ativa para consultar votos.</AdminStateMessage>;
+    return <AdminStateMessage>Falta uma edicao ativa para consultar auditoria.</AdminStateMessage>;
   }
 
-  if (loading || votesQuery.isLoading) {
-    return (
-      <VotesAuditShell>
-        <VotesAuditState message={adminCopy.audit.loading} />
-      </VotesAuditShell>
-    );
+  if (votesQuery.isLoading) {
+    return <AdminStateMessage>A carregar auditoria de votos...</AdminStateMessage>;
   }
 
   if (votesQuery.error) {
-    logFrontendError("VotesAudit.query", votesQuery.error, { eventId });
     return (
-      <AdminStateMessage tone="error" action={<Button onClick={() => void votesQuery.refetch()}>Tentar novamente</Button>}>
+      <AdminStateMessage tone="error">
         Nao foi possivel carregar a auditoria de votos.
       </AdminStateMessage>
     );
   }
 
-  if (votes.length === 0) {
-    return (
-      <VotesAuditShell>
-        <VotesAuditState message={adminCopy.audit.empty} />
-      </VotesAuditShell>
-    );
-  }
-
   return (
-    <VotesAuditShell>
-      <div className="space-y-4">
-        <Input
-          placeholder={adminCopy.audit.search}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+    <div className="space-y-4">
+      <Card className={ADMIN_CONTENT_CARD_CLASS}>
+        <CardHeader className="space-y-3">
+          <div className="space-y-1">
+            <p className="editorial-kicker">Auditoria</p>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Historico de votos
+            </CardTitle>
+            <p className="text-sm text-[var(--ink-muted)]">
+              Lista crua de todos os votos submetidos para garantir transparência operacional.
+            </p>
+          </div>
 
-        <div className="body-small text-[var(--ink-muted)]">
-          {filteredVotes.length} de {votes.length} votos
-        </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]" />
+            <Input
+              placeholder="Filtrar por membro, categoria ou opcao..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </CardHeader>
 
-        <Separator className="bg-[rgba(84,64,40,0.12)]" />
-
-        <div className="max-h-[58svh] rounded-[var(--radius-md-token)] border border-[rgba(212,184,150,0.14)] bg-[rgba(16,23,11,0.94)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
-          <VirtualizedList
-            className="px-0 py-0"
-            estimateSize={() => 52}
-            getKey={(vote) => `${vote.categoryId}-${vote.userId ?? vote.voterUserId}-${vote.nomineeId ?? ""}-${vote.updatedAtUtc ?? ""}`}
-            items={filteredVotes}
-            renderItem={(vote) => <VotesAuditRowItem vote={vote} />}
-          />
-        </div>
-      </div>
-    </VotesAuditShell>
+        <CardContent className="p-0">
+          {filteredVotes.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-[var(--ink-muted)]">
+                Nenhum voto corresponde ao filtro aplicado.
+              </p>
+            </div>
+          ) : (
+            <VirtualizedList
+              items={filteredVotes}
+              getKey={(vote) => `${vote.userId}-${vote.categoryId}`}
+              estimateSize={() => 82}
+              className="max-h-[60svh]"
+              renderItem={(vote) => (
+                <div className={VOTE_ROW_CLASS}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">
+                      {vote.userName}
+                    </p>
+                    <span className="shrink-0 text-[10px] tabular-nums text-[var(--ink-muted)]">
+                      {formatDateTimeUtc(vote.updatedAtUtc)}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
+                      {vote.categoryName}
+                    </Badge>
+                    <span className="text-xs text-[var(--ink-muted)]">escolheu</span>
+                    <span className="text-xs font-medium text-[var(--ink-primary)]">
+                      {vote.nomineeName}
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

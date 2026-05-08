@@ -98,13 +98,13 @@ export function CanhoesFloatingActionMenu({
               className="pointer-events-auto flex w-full max-w-[22rem] flex-col items-end gap-3 touch-pan-y"
             >
               <div className="flex w-full justify-center px-8 pb-1 sm:hidden">
-                <span className="h-1.5 w-12 rounded-full bg-[rgba(245,237,224,0.28)]" />
+                <span className="h-1.5 w-12 rounded-full bg-[rgba(255,255,255,0.28)]" />
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="inline-flex min-h-10 items-center rounded-full border border-[rgba(177,140,255,0.18)] bg-[linear-gradient(180deg,rgba(18,22,11,0.9),rgba(11,14,8,0.94))] px-4 text-[var(--bg-paper)] shadow-[var(--shadow-panel),var(--glow-purple-sm)]">
+                <div className="inline-flex min-h-10 items-center rounded-full border border-[rgba(177,140,255,0.18)] bg-[linear-gradient(180deg,rgba(18,22,11,0.9),rgba(11,14,8,0.94))] px-4 text-[var(--color-text-primary)] shadow-[var(--shadow-panel),var(--glow-purple-sm)]">
                                     <div className="min-w-0">
-                                        <p className="label text-[rgba(245,237,224,0.7)]">
+                                        <p className="label text-[rgba(255,255,255,0.7)]">
                                             {adminCopy.shell.more.kicker}
                                         </p>
                                         <p className="text-sm font-semibold">{adminCopy.shell.more.title}</p>
@@ -114,7 +114,7 @@ export function CanhoesFloatingActionMenu({
                                     type="button"
                                     size="icon"
                                     variant="ghost"
-                                    className="h-12 w-12 shrink-0 rounded-full border border-[rgba(212,184,150,0.12)] bg-[rgba(28,34,18,0.88)] text-[var(--bg-paper)] shadow-[var(--shadow-panel)] hover:bg-[rgba(38,48,24,0.96)]"
+                                    className="h-12 w-12 shrink-0 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(28,34,18,0.88)] text-[var(--color-text-primary)] shadow-[var(--shadow-panel)] hover:bg-[rgba(38,48,24,0.96)]"
                                     onClick={() => onOpenChange(false)}
                                     aria-label="Fechar menu"
                                 >
@@ -175,7 +175,7 @@ export function CanhoesFloatingActionMenu({
                                         ))}
                                     </div>
                                 ) : (
-                        <div className="w-full rounded-[1.4rem] border border-[rgba(212,184,150,0.16)] bg-[rgba(12,16,8,0.8)] px-4 py-3 text-sm text-[rgba(245,237,224,0.9)] shadow-[var(--shadow-panel)]">
+                        <div className="w-full rounded-[1.4rem] border border-[rgba(255,255,255,0.16)] bg-[rgba(12,16,8,0.8)] px-4 py-3 text-sm text-[rgba(255,255,255,0.9)] shadow-[var(--shadow-panel)]">
                     {adminCopy.shell.more.empty}
                   </div>
                 )}
@@ -210,8 +210,8 @@ function FloatingMenuLink({
             className={cn(
                 "canhoes-tap flex w-full items-center gap-3 rounded-[1.45rem] border px-3.5 py-3 text-left shadow-[var(--shadow-panel)] transition-[transform,border-color,background-color,box-shadow] hover:[box-shadow:var(--shadow-panel),var(--glow-purple-sm)] active:scale-[0.99]",
                 isActive
-                    ? "border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(30,24,44,0.98),rgba(16,12,26,0.98))] text-[var(--bg-paper)]"
-                    : "border-[rgba(212,184,150,0.14)] bg-[rgba(12,16,8,0.72)] text-[var(--bg-paper)]"
+                    ? "border-[rgba(177,140,255,0.3)] bg-[linear-gradient(180deg,rgba(30,24,44,0.98),rgba(16,12,26,0.98))] text-[var(--color-text-primary)]"
+                    : "border-[rgba(255,255,255,0.14)] bg-[rgba(12,16,8,0.72)] text-[var(--color-text-primary)]"
             )}
         >
             <span
@@ -230,13 +230,13 @@ function FloatingMenuLink({
                     {item.label}
                 </span>
                 {item.description ? (
-            <span className="mt-1 block text-[13px] leading-5 text-[rgba(245,237,224,0.88)]">
+            <span className="mt-1 block text-[13px] leading-5 text-[rgba(255,255,255,0.88)]">
               {item.description}
             </span>
         ) : null}
             </span>
 
-            <ArrowRight className="h-4 w-4 shrink-0 text-[rgba(245,237,224,0.84)]" />
+            <ArrowRight className="h-4 w-4 shrink-0 text-[rgba(255,255,255,0.84)]" />
         </button>
     );
 }
@@ -272,10 +272,10 @@ function AdminShortcutCard({
                     <Sparkles className="h-3.5 w-3.5" />
                     {adminCopy.shell.more.admin}
                 </span>
-                <span className="block text-[13px] font-semibold text-[var(--bg-paper)]">
+                <span className="block text-[13px] font-semibold text-[var(--color-text-primary)]">
                     {adminCopy.shell.more.adminTitle}
                 </span>
-        <span className="block text-[13px] leading-5 text-[rgba(245,237,224,0.88)]">
+        <span className="block text-[13px] leading-5 text-[rgba(255,255,255,0.88)]">
           {adminCopy.shell.more.adminDescription}
         </span>
             </span>

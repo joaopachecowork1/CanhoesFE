@@ -16,13 +16,13 @@ import { MetricCard } from "./HomeCards";
 import type { MetricItem } from "./HomeCards";
 
 const HERO_CARD_CLASS =
-  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(212,184,150,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)]";
+  "relative overflow-hidden rounded-[var(--radius-xl-token)] border border-[rgba(255,255,255,0.12)] bg-[radial-gradient(circle_at_top_right,rgba(95,123,56,0.18),transparent_40%),linear-gradient(180deg,rgba(24,31,15,0.98),rgba(12,16,9,1))] text-[var(--text-primary)] shadow-[var(--shadow-elevation-lg)]";
 
 export const CanhoesEventHomeLoadingState = memo(function CanhoesEventHomeLoadingState() {
   return (
     <Card className={HERO_CARD_CLASS}>
       <CardContent className="flex min-h-[16rem] items-center justify-center">
-        <div className="flex flex-col items-center gap-4 text-[rgba(245,237,224,0.9)]">
+        <div className="flex flex-col items-center gap-4 text-[rgba(255,255,255,0.9)]">
           <Loader2 className="h-6 w-6 animate-spin text-[var(--moss)] opacity-80" />
           <span className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.25em] text-[var(--moss-light)]">
             {homeCopyText.loading}
@@ -37,7 +37,7 @@ export const CanhoesEventHomeErrorState = memo(function CanhoesEventHomeErrorSta
   return (
     <Card className={HERO_CARD_CLASS}>
       <CardContent className="flex min-h-[12rem] items-center justify-center">
-        <p className="text-sm text-[rgba(245,237,224,0.7)]">{errorMessage ?? "Erro ao carregar o evento"}</p>
+        <p className="text-sm text-[rgba(255,255,255,0.7)]">{errorMessage ?? "Erro ao carregar o evento"}</p>
       </CardContent>
     </Card>
   );
@@ -106,10 +106,10 @@ const HomeHeroSection = memo(function HomeHeroSection({
         </div>
 
         <div className="space-y-3 max-w-2xl">
-          <h2 className="font-[var(--font-mono)] text-[11px] font-bold uppercase tracking-[0.2em] text-[rgba(245,237,224,0.6)]">
+          <h2 className="font-[var(--font-mono)] text-[11px] font-bold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.6)]">
             Resumo da Fase
           </h2>
-          <p className="body-base text-lg font-medium leading-relaxed text-[rgba(245,237,224,0.95)] selection:bg-[var(--moss)]">
+          <p className="body-base text-lg font-medium leading-relaxed text-[rgba(255,255,255,0.95)] selection:bg-[var(--moss)]">
             {phaseSummary}
           </p>
         </div>
@@ -133,12 +133,12 @@ const HomeHeroSection = memo(function HomeHeroSection({
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-5 border-t border-white/10 pt-6 text-[11px] font-bold uppercase tracking-[0.15em] text-[rgba(245,237,224,0.5)]">
-          <span className="inline-flex items-center gap-2.5 transition-colors hover:text-[rgba(245,237,224,0.8)]">
+        <div className="flex flex-wrap items-center gap-5 border-t border-white/10 pt-6 text-[11px] font-bold uppercase tracking-[0.15em] text-[rgba(255,255,255,0.5)]">
+          <span className="inline-flex items-center gap-2.5 transition-colors hover:text-[rgba(255,255,255,0.8)]">
             <Clock3 className="h-3.5 w-3.5 text-[var(--sand)]" />
             {phaseDeadline ? `Fecha a ${phaseDeadline}` : "Sem data de fecho"}
           </span>
-          <span className="inline-flex items-center gap-2.5 transition-colors hover:text-[rgba(245,237,224,0.8)]">
+          <span className="inline-flex items-center gap-2.5 transition-colors hover:text-[rgba(255,255,255,0.8)]">
             <MessageSquare className="h-3.5 w-3.5 text-[var(--moss)]" />
             {overview.permissions.canManage ? homeCopyText.manageLabel : homeCopyText.memberLabel}
           </span>

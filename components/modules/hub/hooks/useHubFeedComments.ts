@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 
 const FEED_POSTS_QUERY_KEY = "hub-posts";
 
@@ -55,13 +55,13 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
 
       setLoadingCommentsMap((previousLoadingState) => ({ ...previousLoadingState, [postId]: true }));
       try {
-        const fetchedComments = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
+        const fetchedComments = await feedRepo.getComments(eventId, postId);
         setCommentsMap((previousCommentsMap) => ({
           ...previousCommentsMap,
           [postId]: (fetchedComments ?? []).filter(Boolean),
         }));
       } catch (error) {
-        const errorMessage = getErrorMessage(error, "Nao foi possivel carregar os comentarios deste post.");
+        const errorMessage = getErrorMessage(error, "Não foi possível carregar os comentários deste post.");
         logFrontendError("HubFeed.fetchComments", error, { postId });
         toast.error(errorMessage);
       } finally {
@@ -96,7 +96,7 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
       if (!commentDraftText) return;
 
       try {
-        const newlyCreatedComment = await canhoesEventsRepo.createFeedPostComment(eventId, postId, { text: commentDraftText });
+        const newlyCreatedComment = await feedRepo.createComment(eventId, postId, { text: commentDraftText });
 
         setCommentDraftsMap((previousDraftsMap) => ({ ...previousDraftsMap, [postId]: "" }));
         setOpenComments((previousOpenState) => ({ ...previousOpenState, [postId]: true }));
@@ -114,9 +114,9 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
               : post
           )
         );
-        toast.success("Comentario publicado");
+        toast.success("Comentário publicado");
       } catch (error) {
-        const errorMessage = getErrorMessage(error, "Nao foi possivel publicar o comentario.");
+        const errorMessage = getErrorMessage(error, "Não foi possível publicar o comentário.");
         logFrontendError("HubFeed.addComment", error, { postId });
         toast.error(errorMessage);
       }
@@ -154,13 +154,13 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
       }));
 
       try {
-        await canhoesEventsRepo.toggleFeedCommentReaction(eventId, postId, commentId, emoji);
+        await feedRepo.toggleCommentReaction(eventId, postId, commentId, emoji);
       } catch (error) {
-        const errorMessage = getErrorMessage(error, "Nao foi possivel atualizar a reacao do comentario.");
+        const errorMessage = getErrorMessage(error, "Não foi possível atualizar a reação do comentário.");
         logFrontendError("HubFeed.toggleCommentReaction", error, { commentId, emoji, postId });
         toast.error(errorMessage);
         try {
-          const refreshedComments = await canhoesEventsRepo.getFeedPostComments(eventId, postId);
+          const refreshedComments = await feedRepo.getComments(eventId, postId);
           setCommentsMap((previousCommentsMap) => ({
             ...previousCommentsMap,
             [postId]: (refreshedComments ?? []).filter(Boolean),
@@ -193,12 +193,12 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
           post.id === postId
             ? { ...post, commentCount: Math.max(0, (post.commentCount ?? 0) - 1) }
             : post
-        )
+          )
       );
 
       try {
-        await canhoesEventsRepo.deleteFeedPostComment(eventId, postId, commentId);
-        toast.success("Comentario removido");
+        await feedRepo.deleteComment(eventId, postId, commentId);
+        toast.success("Comentário removido");
       } catch (error) {
         setCommentsMap((previousCommentsMap) => ({
           ...previousCommentsMap,
@@ -211,7 +211,7 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<Omit<UseHu
               : post
           )
         );
-        const errorMessage = getErrorMessage(error, "Nao foi possivel remover o comentario.");
+        const errorMessage = getErrorMessage(error, "Não foi possível remover o comentário.");
         logFrontendError("HubFeed.deleteComment", error, { commentId, postId });
         toast.error(errorMessage);
       }

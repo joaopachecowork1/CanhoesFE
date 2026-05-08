@@ -33,9 +33,9 @@ export function CanhoesBottomTabs({
     ariaLabel: "Criar post",
     ariaPressed: isComposeOpen,
     buttonClassName: cn(
-      "border-[rgba(212,184,150,0.12)] bg-[rgba(244,234,216,0.04)] text-[var(--bg-paper)]",
+      "border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] text-[var(--color-text-primary)]",
       isComposeOpen &&
-        "border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.16)] text-[var(--bg-paper)]"
+        "border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.16)] text-[var(--color-text-primary)]"
     ),
     icon: Plus,
     iconClassName: cn("h-5 w-5", isComposeOpen && "text-[var(--moss)]"),
@@ -59,7 +59,7 @@ export function CanhoesBottomTabs({
         <Dock
           items={items}
           className="w-full"
-          dockClassName="rounded-[1.25rem] border border-[rgba(212,184,150,0.12)] bg-[rgba(12,17,9,0.96)] p-1.5 shadow-[var(--shadow-elevation-md)]"
+          dockClassName="rounded-[1.25rem] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,17,9,0.96)] p-1.5 shadow-[var(--shadow-elevation-md)]"
         />
       </div>
     </nav>
@@ -73,14 +73,13 @@ function toDockItem(entry: CanhoesBottomTabEntry): DockItem {
   return {
     ariaLabel: entry.item.label,
     buttonClassName: cn(
-      isMoreItem && "text-[var(--bg-paper)]",
-      isActive && "bg-[rgba(95,123,56,0.14)] text-[var(--bg-paper)]"
+      isMoreItem && !isActive && "text-[var(--color-text-primary)]"
     ),
     icon: entry.item.icon,
     iconClassName: cn(
       "h-[18px] w-[18px]",
-      isMoreItem && !isActive && "text-[var(--bg-paper)]",
-      isActive && "text-[var(--moss)]"
+      isMoreItem && !isActive && "text-[var(--color-text-primary)]",
+      isActive && "text-[var(--neon-amber)]"
     ),
     isActive,
     label: entry.item.label,

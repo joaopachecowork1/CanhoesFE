@@ -40,9 +40,9 @@ export function ErrorAlert({
         "surface-panel relative overflow-hidden border text-[rgba(255,236,231,0.94)]",
         tone === "danger" && "border-[rgba(224,90,58,0.24)]",
         tone === "official" &&
-          "border-[rgba(0,255,136,0.18)] text-[rgba(245,237,224,0.94)]",
+          "border-[rgba(0,255,136,0.18)] text-[rgba(255,255,255,0.94)]",
         tone === "social" &&
-          "border-[rgba(177,140,255,0.22)] text-[rgba(245,237,224,0.94)]",
+          "border-[rgba(177,140,255,0.22)] text-[rgba(255,255,255,0.94)]",
         className
       )}
     >
@@ -54,7 +54,7 @@ export function ErrorAlert({
       />
       <AlertTitle
         className={cn(
-          tone === "danger" ? "text-[rgba(255,236,231,0.98)]" : "text-[var(--bg-paper)]"
+          tone === "danger" ? "text-[rgba(255,236,231,0.98)]" : "text-[var(--color-text-primary)]"
         )}
       >
         {title}
@@ -62,7 +62,7 @@ export function ErrorAlert({
       <AlertDescription
         className={cn(
           "space-y-3",
-          tone === "danger" ? "text-[rgba(255,236,231,0.82)]" : "text-[rgba(245,237,224,0.76)]"
+          tone === "danger" ? "text-[rgba(255,236,231,0.82)]" : "text-[rgba(255,255,255,0.76)]"
         )}
       >
         <p>{description}</p>
@@ -82,7 +82,7 @@ export function ErrorAlert({
                 tone === "danger" &&
                   "border-[rgba(255,236,231,0.18)] text-[rgba(255,236,231,0.92)] hover:bg-[rgba(44,24,16,0.96)]",
                 tone !== "danger" &&
-                  "border-[rgba(245,237,224,0.12)] text-[var(--bg-paper)] hover:bg-[rgba(245,237,224,0.08)]"
+                  "border-[rgba(255,255,255,0.12)] text-[var(--color-text-primary)] hover:bg-[rgba(255,255,255,0.08)]"
               )}
             >
               {actionLabel}

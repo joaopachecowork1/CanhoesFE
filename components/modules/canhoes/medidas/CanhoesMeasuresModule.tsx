@@ -11,7 +11,7 @@ import {
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { awardsRepo } from "@/lib/repositories/awardsRepo";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,12 +51,12 @@ export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasu
     setErrorMessage(null);
 
     try {
-      const nextMeasures = await canhoesEventsRepo.getMeasures(currentEventId);
+      const nextMeasures = await awardsRepo.getMeasures(currentEventId);
       setMeasures(nextMeasures);
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel carregar as medidas desta edicao."
+        "Não foi possível carregar as medidas desta edição."
       );
       logFrontendError("CanhoesMeasures.loadMeasures", error, { eventId: currentEventId });
       setErrorMessage(message);
@@ -99,13 +99,13 @@ export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasu
 
     setIsSubmitting(true);
     try {
-      await canhoesEventsRepo.createMeasureProposal(eventId, { text: proposalText.trim() });
+      await awardsRepo.createMeasureProposal(eventId, { text: proposalText.trim() });
       setProposalText("");
       toast.success("Medida proposta");
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Nao foi possivel submeter a medida."
+        "Não foi possível submeter a medida."
       );
       logFrontendError("CanhoesMeasures.handleProposalSubmit", error);
       toast.error(message);
@@ -184,7 +184,7 @@ export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasu
           {isLoading && filteredMeasures.length === 0 ? <MeasuresLoadingState /> : null}
 
           {!isLoading && !errorMessage && filteredMeasures.length === 0 ? (
-            <EmptyState icon={Inbox} title="Sem medidas" description="Ainda nao ha medidas nesta edicao." />
+            <EmptyState icon={Inbox} title="Sem medidas" description="Ainda não há medidas nesta edição." />
           ) : null}
 
           {filteredMeasures.length > 0 ? (

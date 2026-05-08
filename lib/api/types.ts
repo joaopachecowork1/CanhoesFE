@@ -7,15 +7,15 @@ export type EventSummaryDto = {
 export type EventPhaseDto = {
   id: string;
   type: string;
-  startDate: string;
-  endDate: string;
+  startDateUtc: string;
+  endDateUtc: string;
   isActive: boolean;
 };
 
 export type EventPermissionsDto = {
   isAdmin: boolean;
   isMember: boolean;
-  canPost: boolean;
+  canAccess: boolean;
   canSubmitProposal: boolean;
   canVote: boolean;
   canManage: boolean;
@@ -29,20 +29,7 @@ export type EventCountsDto = {
   wishlistItemCount: number;
 };
 
-export type EventModulesDto = {
-  feed: boolean;
-  secretSanta: boolean;
-  wishlist: boolean;
-  categories: boolean;
-  voting: boolean;
-  gala: boolean;
-  stickers: boolean;
-  measures: boolean;
-  nominees: boolean;
-  admin: boolean;
-};
-
-export type AdminModuleKey = keyof Pick<EventModulesDto, "feed" | "secretSanta" | "wishlist" | "categories" | "voting" | "gala" | "stickers" | "measures" | "nominees">;
+export type EventModulesDto = Record<string, boolean>;
 
 export type EventOverviewDto = {
   event: EventSummaryDto;
@@ -67,18 +54,16 @@ export type EventUserDto = {
 
 export type PublicUserDto = {
   id: string;
-  name: string;
-  displayName: string;
-  email?: string;
-  avatarUrl: string | null;
-  isAdmin?: boolean;
+  email: string;
+  displayName: string | null;
+  isAdmin: boolean;
 };
 
 export type EventVotingOverviewDto = {
   eventId: string;
   phaseId: string | null;
   canVote: boolean;
-  endsAt: string | null;
+  endsAtUtc: string | null;
   categoryCount: number;
   submittedVoteCount: number;
   remainingVoteCount: number;
@@ -87,14 +72,12 @@ export type EventVotingOverviewDto = {
 export type EventWishlistItemDto = {
   id: string;
   userId: string;
+  eventId: string;
   title: string;
   url: string | null;
-  link?: string | null;
   notes: string | null;
   imageUrl: string | null;
-  createdAtUtc: string;
   updatedAtUtc: string;
-  updatedAt?: string;
 };
 
 export type EventSecretSantaOverviewDto = {
@@ -122,15 +105,11 @@ export type EventFeedPollDto = {
 
 export type EventCategoryDto = {
   id: string;
-  eventId?: string;
-  title?: string;
+  eventId: string;
   name: string;
+  kind: string;
+  isActive: boolean;
   description: string | null;
-  isActive?: boolean;
-  kind?: string;
-  sortOrder?: number;
-  voteQuestion?: string | null;
-  voteRules?: string | null;
 };
 
 export type EventFeedPostFullDto = {
@@ -154,9 +133,8 @@ export type EventFeedPostFullDto = {
 };
 
 export type CreateEventFeedPostRequest = {
-  content?: string;
-  text?: string;
-  mediaUrl?: string | null;
+  content: string;
+  imageUrl?: string | null;
   mediaUrls?: string[] | null;
   pollQuestion?: string | null;
   pollOptions?: string[] | null;
@@ -203,28 +181,17 @@ export type NomineeDto = {
   id: string;
   categoryId: string | null;
   title: string;
-  label?: string;
-  kind?: string;
   imageUrl: string | null;
   status: ProposalStatus;
   createdAtUtc: string;
-  voteCount?: number;
-};
-
-export type NomineeSummaryDto = {
-  id: string;
-  categoryId: string | null;
-  title: string;
-  status: ProposalStatus;
 };
 
 export type MyNominationStatusDto = {
-  categoryId?: string;
-  hasNominated?: boolean;
-  hasNomination?: boolean;
-  status?: ProposalStatus | null;
-  nomineeId?: string | null;
-  nomineeTitle?: string | null;
+  hasNomination: boolean;
+  categoryId: string | null;
+  status: ProposalStatus | null;
+  nomineeId: string | null;
+  nomineeTitle: string | null;
 };
 
 export type AdminNomineeDto = {
@@ -236,7 +203,6 @@ export type AdminNomineeDto = {
   createdAtUtc: string;
   submittedByUserId: string;
   submittedByName: string;
-  submittedByMe?: boolean;
 };
 
 export type AdminMemberDto = {
@@ -258,17 +224,7 @@ export type AdminListCountsDto = {
   officialResultsCategoriesCount: number;
 };
 
-export type EventAdminModuleVisibilityDto = {
-  feed: boolean;
-  secretSanta: boolean;
-  wishlist: boolean;
-  categories: boolean;
-  voting: boolean;
-  gala: boolean;
-  stickers: boolean;
-  measures: boolean;
-  nominees: boolean;
-};
+export type EventAdminModuleVisibilityDto = Record<string, boolean>;
 
 export type EventAdminStateDto = {
   eventId: string;
@@ -292,79 +248,60 @@ export type EventAdminSecretSantaStateDto = {
   assignmentCount: number;
 };
 
-export type CanhoesStateDto = {
-  phase: string;
-  nominationsVisible: boolean;
-  resultsVisible: boolean;
-};
-
-export type EventContextDto = {
-  event: EventSummaryDto;
-  users: EventUserDto[];
-  phases: EventPhaseDto[];
-  activePhase: EventPhaseDto | null;
-};
-
-export type EventFeedPostDto = {
+export type EventVoteOptionDto = {
   id: string;
-  eventId: string;
-  userId: string;
-  userName: string;
-  content: string;
+  label: string;
   imageUrl: string | null;
-  mediaUrls: string[];
-  createdAt: string;
 };
 
-export type EventProposalDto = {
+export type EventVotingCategoryDto = {
   id: string;
-  eventId: string;
-  userId: string;
-  name: string;
+  title: string;
+  kind: string;
   description: string | null;
-  status: ProposalStatus;
-  createdAt: string;
+  voteQuestion: string | null;
+  options: EventVoteOptionDto[];
+  myOptionId: string | null;
 };
 
 export type EventVotingBoardDto = {
   eventId: string;
   phaseId: string | null;
   canVote: boolean;
-  categories: Array<{
-    id: string;
-    eventId: string;
-    title: string;
-    kind: string;
-    description: string | null;
-    voteQuestion: string | null;
-    options: Array<{ id: string; categoryId: string; label: string }>;
-    myOptionId: string | null;
-  }>;
+  categories: EventVotingCategoryDto[];
+};
+
+export type AdminModuleKey = 
+  | "feed"
+  | "nominees"
+  | "categories"
+  | "secretSanta"
+  | "wishlist"
+  | "voting"
+  | "stickers"
+  | "measures"
+  | "gala";
+
+export type OfficialVotingCategoryDto = {
+  id: string;
+  eventId: string;
+  title: string;
+  kind: string;
+  description: string | null;
+  voteQuestion: string | null;
+  nominees: Array<{ id: string; categoryId: string; label: string; voteCount?: number }>;
+  myNomineeId: string | null;
+  totalVotes?: number;
 };
 
 export type OfficialVotingBoardDto = {
   eventId: string;
   phaseId: string | null;
   canVote: boolean;
-  endsAt: string | null;
   categories: OfficialVotingCategoryDto[];
 };
 
-export type OfficialVotingCategoryDto = {
-  id: string;
-  title: string;
-  description: string | null;
-  kind: string;
-  nominees: Array<{
-    id: string;
-    label: string;
-    voteCount?: number;
-  }>;
-  myNomineeId: string | null;
-  totalVotes?: number;
-};
-
-export type CanhoesCategoryResultDto = {
+export type PublicCategoryResultDto = {
   categoryId: string;
   categoryName: string;
   totalVotes: number;
@@ -378,27 +315,27 @@ export type CanhoesCategoryResultDto = {
 
 export type CastOfficialVoteRequest = {
   categoryId: string;
-  nomineeId: string;
+  selectionId: string;
 };
 
 export type AwardCategoryDto = {
   id: string;
   name: string;
-  description?: string | null;
+  sortOrder: number;
+  isActive: boolean;
   kind: string;
-  voteQuestion?: string | null;
-  voteRules?: string | null;
-  isActive?: boolean;
-  sortOrder?: number;
+  description: string | null;
+  voteQuestion: string | null;
+  voteRules: string | null;
 };
 
 export type CreateAwardCategoryRequest = {
   name: string;
-  description?: string | null;
+  sortOrder: number | null;
   kind: string;
-  voteQuestion?: string | null;
-  voteRules?: string | null;
-  sortOrder?: number | null;
+  description: string | null;
+  voteQuestion: string | null;
+  voteRules: string | null;
 };
 
 export type UpdateAwardCategoryRequest = Partial<CreateAwardCategoryRequest> & { isActive?: boolean };
@@ -408,33 +345,12 @@ export type AdminCategoryResultDto = {
   categoryName: string;
   totalVotes: number;
   participationRate: number;
-  nominees: AdminCategoryNomineeResult[];
-};
-
-export type AdminCategoryNomineeResult = {
-  nomineeId: string;
-  nomineeTitle?: string;
-  title: string;
-  imageUrl: string | null;
-  voteCount: number;
-  voterUserIds: string[];
-};
-
-export type AdminOfficialResultsDto = {
-  eventId: string;
-  generatedAt: string;
-  totalMembers: number;
-  categories: Array<{
-    categoryId: string;
-    categoryName: string;
-    totalVotes: number;
-    participationRate: number;
-    nominees: Array<{
-      nomineeId: string;
-      nomineeTitle: string;
-      voteCount: number;
-      voterUserIds: string[];
-    }>;
+  nominees: Array<{
+    nomineeId: string;
+    title: string;
+    imageUrl: string | null;
+    voteCount: number;
+    voterUserIds: string[];
   }>;
 };
 
@@ -444,7 +360,7 @@ export type EventAdminBootstrapDto = {
   counts: AdminListCountsDto;
 };
 
-export type PagedResultDto<T> = {
+export type PagedResult<T> = {
   items: T[];
   total: number;
   skip: number;
@@ -452,7 +368,17 @@ export type PagedResultDto<T> = {
   hasMore: boolean;
 };
 
-export type AdminVotesPagedResponseDto = {
+export type AdminVoteAuditRowDto = {
+  categoryId: string;
+  categoryName: string;
+  nomineeId: string;
+  nomineeName: string;
+  userId: string;
+  userName: string;
+  updatedAtUtc: string;
+};
+
+export type AdminVotesPagedDto = {
   total: number;
   votes: AdminVoteAuditRowDto[];
   skip: number;
@@ -460,7 +386,7 @@ export type AdminVotesPagedResponseDto = {
   hasMore: boolean;
 };
 
-export type AdminNomineesPagedResponseDto = {
+export type AdminNomineesPagedDto = {
   total: number;
   nominations: AdminNomineeDto[];
   skip: number;
@@ -468,47 +394,13 @@ export type AdminNomineesPagedResponseDto = {
   hasMore: boolean;
 };
 
-export type AdminNomineeSummaryDto = {
-  id: string;
-  categoryId: string | null;
-  title: string;
-  status: ProposalStatus;
-  submittedByUserId: string;
-  submittedByName: string;
-};
-
 export type HubCommentDto = {
   id: string;
   postId: string;
   userId: string;
   userName: string;
-  authorName?: string;
-  content: string;
-  text?: string;
-  createdAt: string;
-  createdAtUtc?: string;
-  reactionCounts?: Record<string, number>;
-  myReactions?: string[];
-};
-
-export type AdminVoteAuditRowDto = {
-  voteId: string;
-  categoryId: string;
-  categoryName: string;
-  optionId: string;
-  optionLabel: string;
-  nomineeId?: string;
-  voterUserId: string;
-  voterName: string;
-  userName?: string;
-  userId?: string;
-  updatedAtUtc?: string;
-  votedAt: string;
-};
-
-export type HubPollDto = {
-  question: string;
-  options: Array<{ id: string; text: string; voteCount: number }>;
-  myOptionId: string | null;
-  totalVotes: number;
+  text: string;
+  createdAtUtc: string;
+  reactionCounts: Record<string, number>;
+  myReactions: string[];
 };

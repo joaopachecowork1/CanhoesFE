@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import type { EventFeedPostFullDto } from "@/lib/api/types";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 
 import type { PostComposerSubmitData } from "./components/PostComposer";
 
@@ -39,7 +40,7 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
 
   return useCallback(async (data: PostComposerSubmitData) => {
     if (!eventId) {
-      toast.error("Nao ha evento ativo para publicar no mural.");
+      toast.error("Não há evento ativo para publicar no mural.");
       return;
     }
 
@@ -47,11 +48,10 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
     if (!trimmedText) return;
 
     try {
-      const { canhoesEventsRepo } = await import("@/lib/repositories/canhoesEventsRepo");
       let mediaUrls: string[] = [];
 
       if (data.files.length > 0) {
-        mediaUrls = await canhoesEventsRepo.uploadFeedImages(eventId, data.files);
+        mediaUrls = await feedRepo.uploadFeedImages(eventId, data.files);
       }
 
       const pollQuestion = data.pollOn ? data.pollQuestion.trim() : "";
@@ -59,7 +59,7 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
         ? data.pollOptions.map((option) => option.trim()).filter(Boolean)
         : [];
 
-      const createdPost = await canhoesEventsRepo.createFeedPost(eventId, {
+      const createdPost = await feedRepo.createPost(eventId, {
         content: trimmedText,
         mediaUrls,
         pollQuestion: data.pollOn && pollQuestion ? pollQuestion : null,
@@ -74,7 +74,7 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
 
       toast.success("Post publicado");
     } catch (error) {
-      const message = getErrorMessage(error, "Nao foi possivel publicar no mural.");
+      const message = getErrorMessage(error, "Não foi possível publicar no mural.");
       logFrontendError("HubFeedModule.createPost", error);
       toast.error(message);
       throw error;

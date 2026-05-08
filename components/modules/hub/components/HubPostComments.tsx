@@ -16,12 +16,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ReactionBar } from "@/components/ui/reaction-bar";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { Textarea } from "@/components/ui/textarea";
 import type { HubCommentDto } from "@/lib/api/types";
 import { feedCopy } from "@/lib/canhoesCopy";
-import { HUB_EMOJI_STRINGS } from "@/lib/reactions";
 
 import { formatDateTime, initials } from "./hubUtils";
 
@@ -39,11 +37,6 @@ type HubPostCommentsProps = {
   onAddComment: (postId: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
-  onToggleCommentReaction: (
-    postId: string,
-    commentId: string,
-    emoji: string
-  ) => void;
 };
 
 export function HubPostComments({
@@ -60,7 +53,6 @@ export function HubPostComments({
   onAddComment,
   onDeleteComment,
   onCommentDraftChange,
-  onToggleCommentReaction,
 }: Readonly<HubPostCommentsProps>) {
   const [commentPendingDelete, setCommentPendingDelete] = useState<HubCommentDto | null>(null);
 
@@ -90,7 +82,7 @@ export function HubPostComments({
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 rounded-full px-3 text-[var(--bg-paper)]"
+            className="h-8 rounded-full px-3 text-[var(--color-text-primary)]"
             onClick={() => onToggleComments(postId)}
             aria-label="Fechar comentários"
           >
@@ -122,7 +114,7 @@ export function HubPostComments({
                         <AvatarImage src={currentUserImage} alt={comment.userName} />
                       ) : null}
                       <AvatarFallback className="bg-[var(--bg-surface)] text-[10px] font-semibold text-[var(--text-muted)]">
-                        {initials(comment.userName ?? comment.authorName)}
+                        {initials(comment.userName)}
                       </AvatarFallback>
                     </Avatar>
 
@@ -148,15 +140,6 @@ export function HubPostComments({
                         {comment.text}
                       </p>
 
-                      <ReactionBar
-                        emojis={HUB_EMOJI_STRINGS}
-                        reactionCounts={comment.reactionCounts ?? {}}
-                        myReactions={comment.myReactions ?? []}
-                        onToggle={(emoji) =>
-                          onToggleCommentReaction(postId, comment.id, emoji)
-                        }
-                        className="mt-2"
-                      />
 
                       {isOwnComment && (
                         <div className="mt-1 flex justify-end">

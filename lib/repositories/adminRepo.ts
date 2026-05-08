@@ -1,0 +1,115 @@
+import { canhoesFetch } from "@/lib/api/canhoesClient";
+import type * as T from "@/lib/api/types";
+
+export const adminRepo = {
+  getBootstrap: (eventId: string, includeLists = false) =>
+    canhoesFetch<T.EventAdminBootstrapDto>(`/v1/events/${eventId}/admin/bootstrap?includeLists=${includeLists}`),
+    
+  updatePhase: (eventId: string, payload: { phaseType: string }) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/phase`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+    
+  activateEvent: (eventId: string) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/activate`, { method: "PUT" }),
+    
+  updateAdminState: (eventId: string, payload: unknown) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/state`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+    
+  updateModules: (eventId: string, payload: Record<string, boolean>) =>
+    canhoesFetch(`/v1/events/${eventId}/modules`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+    
+  getMembersPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResult<T.AdminMemberDto>>(`/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`),
+    
+  getNominationsPaged: (eventId: string, skip = 0, take = 50, status?: string) =>
+    canhoesFetch<T.AdminNomineesPagedDto>(
+      `/v1/events/${eventId}/admin/nominations/paged?skip=${skip}&take=${take}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+    ),
+    
+  approveNomination: (eventId: string, nomineeId: string) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/approve`, { method: "POST" }),
+    
+  rejectNomination: (eventId: string, nomineeId: string) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/reject`, { method: "POST" }),
+    
+  setNominationCategory: (eventId: string, nomineeId: string, payload: { categoryId: string | null }) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/nominations/${nomineeId}/set-category`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+    
+  getCategories: (eventId: string) =>
+    canhoesFetch<T.AwardCategoryDto[]>(`/v1/events/${eventId}/admin/categories`),
+    
+  createCategory: (eventId: string, payload: T.CreateAwardCategoryRequest) =>
+    canhoesFetch<T.AwardCategoryDto>(`/v1/events/${eventId}/admin/categories`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+    
+  updateCategory: (eventId: string, categoryId: string, payload: T.UpdateAwardCategoryRequest) =>
+    canhoesFetch<T.AwardCategoryDto>(`/v1/events/${eventId}/admin/categories/${categoryId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+    
+  deleteCategory: (eventId: string, categoryId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/categories/${categoryId}`, { method: "DELETE" }),
+    
+  getCategoryProposals: (eventId: string, status = "pending", skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResult<T.CategoryProposalDto>>(
+      `/v1/events/${eventId}/admin/category-proposals?status=${encodeURIComponent(status)}&skip=${skip}&take=${take}`
+    ),
+    
+  updateCategoryProposal: (eventId: string, proposalId: string, payload: { name: string; description: string | null; status?: string }) =>
+    canhoesFetch<T.CategoryProposalDto>(`/v1/events/${eventId}/admin/category-proposals/${proposalId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+    
+  deleteCategoryProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/category-proposals/${proposalId}`, { method: "DELETE" }),
+    
+  getMeasureProposals: (eventId: string, status = "pending", skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResult<T.MeasureProposalDto>>(
+      `/v1/events/${eventId}/admin/measure-proposals?status=${encodeURIComponent(status)}&skip=${skip}&take=${take}`
+    ),
+    
+  updateMeasureProposal: (eventId: string, proposalId: string, payload: { text?: string; status?: string }) =>
+    canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+    
+  deleteMeasureProposal: (eventId: string, proposalId: string) =>
+    canhoesFetch<void>(`/v1/events/${eventId}/admin/measure-proposals/${proposalId}`, { method: "DELETE" }),
+    
+  getVotesPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.AdminVotesPagedDto>(`/v1/events/${eventId}/admin/votes/paged?skip=${skip}&take=${take}`),
+    
+  getOfficialResultsPaged: (eventId: string, skip = 0, take = 50) =>
+    canhoesFetch<T.PagedResult<T.AdminCategoryResultDto>>(`/v1/events/${eventId}/admin/official-results/paged?skip=${skip}&take=${take}`),
+    
+  getSecretSantaState: (eventId: string) =>
+    canhoesFetch<T.EventAdminSecretSantaStateDto>(`/v1/events/${eventId}/admin/secret-santa/state`),
+    
+  drawSecretSanta: (eventId: string, payload?: unknown) =>
+    canhoesFetch(`/v1/events/${eventId}/admin/secret-santa/draw`, {
+      method: "POST",
+      body: JSON.stringify(payload ?? {}),
+    }),
+    
+  pinFeedPost: (eventId: string, postId: string) =>
+    canhoesFetch<{ pinned: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, { method: "POST" }),
+    
+  deleteFeedPost: (eventId: string, postId: string) =>
+    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}`, { method: "DELETE" }),
+};

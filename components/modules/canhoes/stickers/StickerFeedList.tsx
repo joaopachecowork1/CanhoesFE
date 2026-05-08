@@ -43,7 +43,7 @@ function StickerFeedCard({ sticker }: { sticker: NomineeDto }) {
 
       {sticker.imageUrl ? (
         <div className="relative w-full bg-[var(--bg-paper-soft)] border-y border-[var(--border-paper-soft)]">
-          <div className="absolute inset-0 animate-pulse bg-[rgba(212,184,150,0.08)]" />
+          <div className="absolute inset-0 animate-pulse bg-[rgba(255,255,255,0.08)]" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={absMediaUrl(sticker.imageUrl)}

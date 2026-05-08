@@ -39,8 +39,8 @@ export function AssignedWishlistPanel({
                   {wishlistItem.notes ? (
                     <p className="body-small line-clamp-2 text-[var(--color-text-muted)]">{wishlistItem.notes}</p>
                   ) : null}
-                  {wishlistItem.link ? (
-                    <a href={wishlistItem.link} target="_blank" rel="noreferrer" className="canhoes-link inline-flex items-center gap-1 text-sm">
+                  {wishlistItem.url ? (
+                    <a href={wishlistItem.url} target="_blank" rel="noreferrer" className="canhoes-link inline-flex items-center gap-1 text-sm">
                       <LinkIcon className="h-3.5 w-3.5" />
                       Ver produto
                     </a>

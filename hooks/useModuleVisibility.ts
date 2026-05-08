@@ -1,173 +1,43 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { toast } from "sonner";
+import type { AdminModuleKey } from "@/lib/api/types";
 
-import type {
-  EventAdminModuleVisibilityDto,
-  EventAdminStateDto,
-} from "@/lib/api/types";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import {
-  CANHOES_MEMBER_MODULES,
-  buildModuleVisibilityState,
-} from "@/lib/modules";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
-
-type UseModuleVisibilityOptions = {
-  eventId: string | null;
-  onUpdate: () => Promise<void>;
-  state: EventAdminStateDto | null;
+export type ModuleVisibilityItem = {
+  key: AdminModuleKey;
+  label: string;
+  isEnabled: boolean;
 };
 
-export type ModuleVisibilityActionState = {
-  key: string | null;
-  label: string | null;
-};
-
-export type ModuleVisibilityItem = (typeof CANHOES_MEMBER_MODULES)[number] & {
-  checked: boolean;
-  effective: boolean;
-};
-
-export function useModuleVisibility({
-  eventId,
-  onUpdate,
-  state,
-}: Readonly<UseModuleVisibilityOptions>) {
-  const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [actionLabel, setActionLabel] = useState<string | null>(null);
-  const [optimisticOverrides, setOptimisticOverrides] = useState<
-    Partial<EventAdminModuleVisibilityDto>
-  >({});
-
-  const moduleItems = useMemo(
-    () =>
-      CANHOES_MEMBER_MODULES.map((moduleDefinition) => {
-        const key = moduleDefinition.key;
-        const serverChecked = state?.moduleVisibility[key] ?? false;
-        const checked = key in optimisticOverrides ? optimisticOverrides[key]! : serverChecked;
-        return {
-          ...moduleDefinition,
-          checked,
-          effective: state?.effectiveModules[key] ?? false,
-        };
-      }),
-    [state, optimisticOverrides]
-  );
-
-  const visibleCount = useMemo(
-    () => moduleItems.filter((item) => item.checked).length,
-    [moduleItems]
-  );
-
-  const clearModuleOverrides = useCallback(
-    (visibility: EventAdminModuleVisibilityDto) => {
-      setOptimisticOverrides((prev) => {
-        const next = { ...prev };
-        for (const key of Object.keys(visibility)) {
-          delete next[key as keyof EventAdminModuleVisibilityDto];
-        }
-        return next;
-      });
-    },
-    []
-  );
-
-  const persistState = useCallback(
-    async (
-      busyStateKey: string,
-      patch: {
-        moduleVisibility?: EventAdminModuleVisibilityDto;
-        nominationsVisible?: boolean;
-        resultsVisible?: boolean;
-      },
-      successMessage = "Visibilidade dos modulos atualizada"
-    ) => {
-      if (!eventId || !state) return false;
-
-      const optimisticModuleVisibility = patch.moduleVisibility ?? null;
-      setSavingKey(busyStateKey);
-      setActionLabel(successMessage);
-      try {
-        await canhoesEventsRepo.updateAdminState(eventId, patch);
-        if (optimisticModuleVisibility) clearModuleOverrides(optimisticModuleVisibility);
-        await onUpdate();
-        toast.success(successMessage);
-        return true;
-      } catch (err) {
-        logFrontendError("Admin.useModuleVisibility", err, {
-          endpoint: `admin/state (${busyStateKey})`,
-        });
-        if (optimisticModuleVisibility) clearModuleOverrides(optimisticModuleVisibility);
-        toast.error(
-          getErrorMessage(err, "Nao foi possivel guardar a configuracao dos modulos.")
-        );
-        return false;
-      } finally {
-        setSavingKey(null);
-        setActionLabel(null);
-      }
-    },
-    [clearModuleOverrides, eventId, onUpdate, state]
-  );
+export function useModuleVisibility(eventId: string) {
+  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const toggleModule = useCallback(
-    async (key: keyof EventAdminModuleVisibilityDto, checked: boolean) => {
-      if (!state) return false;
-
-      setOptimisticOverrides((prev) => ({ ...prev, [key]: checked }));
-
-      return persistState(
-        key,
-        {
-          moduleVisibility: {
-            ...state.moduleVisibility,
-            [key]: checked,
-          },
-        },
-        checked ? "Modulo aberto para membros" : "Modulo ocultado para membros"
-      );
+    async (moduleKey: string, currentValue: boolean) => {
+      setIsUpdating(true);
+      try {
+        const patch = { [moduleKey]: !currentValue };
+        await adminRepo.updateModules(eventId, patch);
+        
+        await queryClient.invalidateQueries({ queryKey: ["adminBootstrap", eventId] });
+        
+        toast.success(`Módulo ${moduleKey} ${!currentValue ? "ativado" : "desativado"}.`);
+      } catch (error) {
+        toast.error("Erro ao atualizar visibilidade do módulo.");
+        console.error(error);
+      } finally {
+        setIsUpdating(false);
+      }
     },
-    [persistState, state]
-  );
-
-  const setAllModules = useCallback(
-    async (checked: boolean) => {
-      const allOverrides = buildModuleVisibilityState(checked);
-      setOptimisticOverrides(allOverrides);
-
-      return persistState(
-        checked ? "all-enabled" : "all-disabled",
-        { moduleVisibility: allOverrides },
-        checked
-          ? "Todos os modulos ficaram disponiveis"
-          : "Todos os modulos ficaram ocultos"
-      );
-    },
-    [persistState]
+    [eventId, queryClient]
   );
 
   return {
-    allDisabled: moduleItems.every((item) => !item.checked),
-    allEnabled: moduleItems.every((item) => item.checked),
-    moduleItems,
-    actionLabel,
-    savingKey,
-    setAllModules,
-    setNominationsVisible: (checked: boolean) =>
-      persistState(
-        "nominations",
-        { nominationsVisible: checked },
-        checked ? "Nomeacoes abertas para membros" : "Nomeacoes ocultadas"
-      ),
-    setResultsVisible: (checked: boolean) =>
-      persistState(
-        "results",
-        { resultsVisible: checked },
-        checked ? "Resultados abertos para membros" : "Resultados ocultados"
-      ),
     toggleModule,
-    visibleCount,
+    isUpdating,
   };
 }

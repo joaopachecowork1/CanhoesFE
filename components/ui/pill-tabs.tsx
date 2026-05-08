@@ -1,0 +1,145 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+export type PillTabItem = {
+  badge?: string | number;
+  href?: string;
+  icon?: LucideIcon;
+  id: string;
+  label: string;
+};
+
+type PillTabsProps = {
+  activeId: string;
+  className?: string;
+  items: ReadonlyArray<PillTabItem>;
+  onSelect?: (id: string) => void;
+  size?: "sm" | "md";
+};
+
+const CONTAINER_CLASS =
+  "overflow-hidden rounded-xl border border-white/6 bg-white/[0.03] px-1.5 py-1.5";
+
+const SCROLL_CLASS =
+  "-mx-1 overflow-x-auto px-1 scrollbar-none snap-x snap-mandatory";
+
+const ITEM_BASE_CLASS =
+  "canhoes-tap inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-2 font-semibold transition-all duration-200 ease-out active:scale-[0.97] snap-start";
+
+const ITEM_ACTIVE_CLASS =
+  "border-white/10 bg-white/[0.08] text-[var(--color-text-primary)] shadow-sm";
+
+const ITEM_IDLE_CLASS =
+  "border-transparent bg-transparent text-[var(--color-text-muted)] hover:bg-white/[0.04] hover:text-[var(--color-text-primary)]";
+
+const BADGE_ACTIVE_CLASS =
+  "bg-[var(--moss)] text-white";
+
+const BADGE_IDLE_CLASS =
+  "border border-[rgba(95,123,56,0.24)] bg-[rgba(95,123,56,0.12)] text-[var(--color-text-muted)]";
+
+/**
+ * Unified pill-style tab component.
+ * Supports both button clicks (onSelect) and link navigation (item.href).
+ * Used across Admin, Content Tabs, and Segment Tabs.
+ */
+export function PillTabs({
+  activeId,
+  className,
+  items,
+  onSelect,
+  size = "sm",
+}: Readonly<PillTabsProps>) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+
+    const activeElement = scroller.querySelector<HTMLElement>('[data-active="true"]');
+    if (!activeElement) return;
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    activeElement.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [activeId]);
+
+  const itemSizeClass = size === "sm" ? "min-h-10 text-xs" : "min-h-11 text-[13px]";
+
+  return (
+    <div className={cn(CONTAINER_CLASS, className)}>
+      <div ref={scrollRef} className={SCROLL_CLASS}>
+        <div className="flex min-w-max gap-1.5">
+          {items.map((item) => {
+            const isActive = item.id === activeId;
+            const Icon = item.icon;
+
+            const content = (
+              <>
+                {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
+                <span className="truncate">{item.label}</span>
+                {item.badge != null ? (
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none transition-colors",
+                      isActive ? BADGE_ACTIVE_CLASS : BADGE_IDLE_CLASS
+                    )}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </>
+            );
+
+            const sharedProps = {
+              "data-active": isActive ? "true" : undefined,
+              className: cn(
+                ITEM_BASE_CLASS,
+                itemSizeClass,
+                isActive ? ITEM_ACTIVE_CLASS : ITEM_IDLE_CLASS
+              ),
+            } as const;
+
+            if (item.href) {
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => onSelect?.(item.id)}
+                  data-active={sharedProps["data-active"]}
+                  className={sharedProps.className}
+                >
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelect?.(item.id)}
+                aria-pressed={isActive}
+                {...sharedProps}
+              >
+                {content}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

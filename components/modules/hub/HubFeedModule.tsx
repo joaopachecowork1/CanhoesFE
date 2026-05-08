@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
 
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
-import { useHubFeed } from "@/hooks/useHubFeed";
+import { useHubFeed } from "@/components/modules/hub/hooks/useHubFeed";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
@@ -27,10 +27,6 @@ type FeedPageData = {
 
 type FeedInfiniteData = { pages: FeedPageData[]; pageParams: unknown[] };
 
-const loadParticles = () =>
-  import("@/components/animations/Particles").then((module) => ({
-    default: module.Particles,
-  }));
 
 const loadPostComposer = () =>
   import("./components/PostComposer").then((module) => ({
@@ -41,11 +37,6 @@ const loadFeedInsightsPanel = () =>
   import("./components/FeedInsightsPanel").then((module) => ({
     default: module.FeedInsightsPanel,
   }));
-
-const LazyParticles = dynamic(loadParticles, {
-  loading: () => null,
-  ssr: false,
-});
 
 const LazyPostComposer = dynamic(loadPostComposer, {
   loading: () => <ComposerFallback />,
@@ -90,17 +81,13 @@ function HubFeedModuleView({
     comments,
     openComments,
     commentDrafts,
-    showParticles,
-    setShowParticles,
     toggleReaction,
-    toggleReactionPending,
     toggleDownvote,
     votePoll,
     toggleComments,
     addComment,
     deleteComment,
     setCommentDraft,
-    toggleCommentReaction,
     adminPin,
     adminDelete,
     refresh,
@@ -113,7 +100,6 @@ function HubFeedModuleView({
   } = state;
 
   const handleRetry = useCallback(() => void refresh(), [refresh]);
-  const handleClearParticles = useCallback(() => setShowParticles(null), [setShowParticles]);
   const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
   const handleLoadMore = state.loadMore;
 
@@ -131,7 +117,6 @@ function HubFeedModuleView({
       comments={comments}
       openComments={openComments}
       commentDrafts={commentDrafts}
-      isPendingReaction={toggleReactionPending}
       onSortChange={handleSortChange}
       onLoadMore={handleLoadMore}
       onToggleReaction={toggleReaction}
@@ -141,7 +126,6 @@ function HubFeedModuleView({
       onAddComment={addComment}
       onDeleteComment={deleteComment}
       onCommentDraftChange={setCommentDraft}
-      onToggleCommentReaction={toggleCommentReaction}
       onAdminPin={adminPin}
       onAdminDelete={adminDelete}
       sentinelRef={sentinelRef}
@@ -159,7 +143,6 @@ function HubFeedModuleView({
         </div>
       </SectionBoundary>
       <SectionBoundary title="Erro nos indicadores do mural" description="Os indicadores laterais falharam ao renderizar, mas o mural social continua disponivel."><LazyFeedInsightsPanel posts={posts} /></SectionBoundary>
-      {showParticles ? <LazyParticles count={24} onComplete={handleClearParticles} className="pointer-events-none fixed inset-0 z-50" /> : null}
     </div>
   );
 }
@@ -167,14 +150,14 @@ function HubFeedModuleView({
 function useHubFeedModuleState(initialData?: FeedInfiniteData) {
   const { data: session, status } = useSession();
   const { user } = useAuth();
+  const currentUserId = user?.id ?? null;
   const isAdmin = useIsAdmin();
   const { event: activeEvent } = useEventOverview();
   const eventId = activeEvent?.id ?? null;
-  const feed = useHubFeed(eventId, initialData);
+  const feed = useHubFeed(eventId, currentUserId, initialData);
   const sentinelRef = useFeedInfiniteScroll({ enabled: feed.hasMore, isFetchingNextPage: feed.isFetchingNextPage, onLoadMore: feed.loadMore });
   const currentUserName = session?.user?.name?.trim() || session?.user?.email?.trim() || "Tu";
   const handleCreatePost = useCreateFeedPost({ eventId });
-  const currentUserId = user?.id ?? null;
   const currentUserImage = session?.user?.image ?? null;
 
   useEffect(() => {

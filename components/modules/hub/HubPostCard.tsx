@@ -6,15 +6,12 @@ import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
 import { BlurFade } from "@/components/animations/BlurFade";
-import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { parsePostText } from "@/lib/postUtils";
 
-import { HubPostActions } from "./components/HubPostActions";
 import { PostHeader } from "./components/PostHeader";
 import { ImageLightbox } from "./components/ImageLightbox";
-import { EmojiBurstContainer, useEmojiBurst } from "./components/EmojiBurst";
 import { HEART_REACTION } from "@/lib/reactions";
 
 const LazyHubPostComments = dynamic(
@@ -51,7 +48,6 @@ interface HubPostCardProps {
   currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
-  isPendingReaction?: boolean;
   onToggleReaction: (postId: string, emoji: string) => void;
   onToggleDownvote: (postId: string) => void;
   onToggleComments: (postId: string) => void;
@@ -59,11 +55,6 @@ interface HubPostCardProps {
   onAddComment: (postId: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
-  onToggleCommentReaction: (
-    postId: string,
-    commentId: string,
-    emoji: string
-  ) => void;
   onAdminPin: (postId: string) => void;
   onAdminDelete: (postId: string) => void;
 }
@@ -78,7 +69,6 @@ function HubPostCardComponent({
   currentUserId,
   currentUserName,
   currentUserImage,
-  isPendingReaction,
   onToggleReaction,
   onToggleDownvote,
   onToggleComments,
@@ -86,13 +76,11 @@ function HubPostCardComponent({
   onAddComment,
   onDeleteComment,
   onCommentDraftChange,
-  onToggleCommentReaction,
   onAdminPin,
   onAdminDelete,
 }: Readonly<HubPostCardProps>) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const { bursts, trigger: triggerBurst, clear: clearBursts } = useEmojiBurst();
   const commentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,7 +100,6 @@ function HubPostCardComponent({
       ),
     [post.mediaUrls, post.mediaUrl]
   );
-  const reactionCounts = post.reactionCounts || {};
 
   const hasMedia = resolvedMediaUrls.length > 0;
   const parsedText = useMemo(() => (post.text?.trim() ? parsePostText(post.text) : null), [post.text]);
@@ -124,17 +111,6 @@ function HubPostCardComponent({
     setLightboxOpen(true);
   };
 
-  const handleReaction = useCallback(
-    (postId: string, emoji: string, e?: React.MouseEvent) => {
-      onToggleReaction(postId, emoji);
-      if (e) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        triggerBurst(emoji, rect.left + rect.width / 2, rect.top);
-      }
-    },
-    [onToggleReaction, triggerBurst]
-  );
-
   const handleUpvote = useCallback(() => {
     onToggleReaction(post.id, HEART_REACTION);
   }, [post.id, onToggleReaction]);
@@ -145,20 +121,20 @@ function HubPostCardComponent({
 
   return (
     <BlurFade delay={index * 50}>
-      <article className="reddit-post canhoes-paper-panel overflow-hidden rounded-[var(--radius-md-token)] border-[var(--border-paper)] text-[var(--ink-primary)]">
-
+      <article className="canhoes-paper-panel overflow-hidden rounded-[var(--radius-md-token)] border-[var(--border-paper)]">
 
         <div className="flex flex-col sm:flex-row">
-          <div className="reddit-vote-sidebar flex flex-row items-center justify-between gap-2 border-b border-[var(--border-paper-soft)] bg-[var(--bg-paper-soft)]/50 backdrop-blur-sm px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
-            <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5 min-h-[44px] min-w-[44px] flex items-center justify-center">
+          {/* ── Sidebar: upvote / score / downvote / comments ── */}
+          <div className="flex flex-row items-center justify-between gap-2 border-b border-[var(--border-paper-soft)] bg-white/[0.02] px-3 py-2 sm:min-w-[56px] sm:flex-col sm:justify-start sm:gap-0.5 sm:border-b-0 sm:border-r sm:px-2 sm:py-3">
+            <div className="flex items-center gap-1.5 sm:flex-col sm:gap-0.5 min-h-[44px] min-w-[44px] items-center justify-center">
               <button
                 type="button"
                 onClick={handleUpvote}
                 className={cn(
-                  "canhoes-tap rounded p-1 transition-colors min-h-11 min-w-11",
+                  "canhoes-tap min-h-11 min-w-11 rounded border p-1 transition-colors",
                   post.likedByMe
-                    ? "text-[var(--moss)]"
-                    : "text-[var(--ink-muted)] hover:text-[var(--moss)]"
+                    ? "border-[rgba(79,99,54,0.4)] bg-[rgba(79,99,54,0.18)] text-[var(--moss)] shadow-[0_0_0_1px_rgba(79,99,54,0.25)]"
+                    : "border-transparent text-[var(--ink-muted)] hover:border-[rgba(79,99,54,0.2)] hover:bg-[rgba(79,99,54,0.08)] hover:text-[var(--moss)]"
                 )}
                 aria-label={post.likedByMe ? "Remover upvote" : "Upvote"}
               >
@@ -167,12 +143,12 @@ function HubPostCardComponent({
 
               <span
                 className={cn(
-                  "reddit-score min-w-[2.25rem] text-center font-mono text-xs font-bold tabular-nums sm:min-w-0",
+                  "min-w-[2.25rem] text-center font-mono text-xs font-bold tabular-nums sm:min-w-0",
                   post.likedByMe
                     ? "text-[var(--moss)]"
                     : post.downvotedByMe
                       ? "text-[var(--neon-red)]"
-                      : "text-[var(--ink-primary)]"
+                      : "text-zinc-300"
                 )}
               >
                 {displayScore}
@@ -182,10 +158,10 @@ function HubPostCardComponent({
                 type="button"
                 onClick={handleDownvote}
                 className={cn(
-                  "canhoes-tap rounded p-1 transition-colors min-h-11 min-w-11",
+                  "canhoes-tap min-h-11 min-w-11 rounded border p-1 transition-colors",
                   post.downvotedByMe
-                    ? "text-[var(--neon-red)]"
-                    : "text-[var(--ink-muted)] hover:text-[var(--neon-red)]"
+                    ? "border-[rgba(255,58,58,0.35)] bg-[rgba(255,58,58,0.14)] text-[var(--neon-red)] shadow-[0_0_0_1px_rgba(255,58,58,0.25)]"
+                    : "border-transparent text-[var(--ink-muted)] hover:border-[rgba(255,58,58,0.22)] hover:bg-[rgba(255,58,58,0.08)] hover:text-[var(--neon-red)]"
                 )}
                 aria-label={post.downvotedByMe ? "Remover downvote" : "Downvote"}
               >
@@ -204,6 +180,7 @@ function HubPostCardComponent({
             </button>
           </div>
 
+          {/* ── Main content ── */}
           <div className="min-w-0 flex-1">
             <div className="space-y-2 px-3 pt-3 sm:px-4 sm:pt-2.5">
               <PostHeader
@@ -218,15 +195,15 @@ function HubPostCardComponent({
               {parsedText ? (
                 parsedText.title ? (
                   <div className="space-y-1.5">
-                    <p className="post-title text-[var(--ink-primary)]">{parsedText.title}</p>
+                    <p className="post-title text-zinc-100">{parsedText.title}</p>
                     {parsedText.body ? (
-                      <p className="post-body whitespace-pre-wrap break-words">
+                      <p className="post-body whitespace-pre-wrap break-words text-zinc-300">
                         {parsedText.body}
                       </p>
                     ) : null}
                   </div>
                 ) : (
-                  <p className="body-base whitespace-pre-wrap break-words text-[var(--ink-primary)] leading-[1.6]">
+                  <p className="body-base whitespace-pre-wrap break-words text-zinc-200 leading-[1.6]">
                     {post.text}
                   </p>
                 )
@@ -252,21 +229,22 @@ function HubPostCardComponent({
               </div>
             ) : null}
 
-            <div className="px-3 pb-3 pt-2 sm:px-4 sm:pb-2.5">
-              <CanhoesDecorativeDivider tone="purple" className="mt-1" />
-              <div className="mt-2">
-                <HubPostActions
-                  postId={post.id}
-                  commentCount={commentCount}
-                  reactionCounts={reactionCounts}
-                  myReactions={post.myReactions ?? []}
-                  isPinned={post.isPinned}
-                  commentsExpanded={openComments}
-                  isPending={isPendingReaction}
-                  onToggleReaction={handleReaction}
-                  onToggleComments={onToggleComments}
-                />
-              </div>
+            {/* ── Comments section ── */}
+            <div className="px-3 pb-3 pt-1 sm:px-4 sm:pb-2.5">
+              {/* Comment toggle button */}
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                  openComments
+                    ? "bg-[rgba(79,99,54,0.12)] text-[var(--moss)]"
+                    : "text-[var(--ink-muted)] hover:bg-white/[0.04] hover:text-[var(--ink-primary)]"
+                )}
+                onClick={() => onToggleComments(post.id)}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                {openComments ? "Fechar comentários" : `Comentários (${commentCount})`}
+              </button>
 
               <AnimatePresence initial={false}>
                 {openComments ? (
@@ -293,7 +271,6 @@ function HubPostCardComponent({
                       onAddComment={onAddComment}
                       onDeleteComment={onDeleteComment}
                       onCommentDraftChange={onCommentDraftChange}
-                      onToggleCommentReaction={onToggleCommentReaction}
                     />
                   </motion.div>
                 ) : null}
@@ -311,8 +288,6 @@ function HubPostCardComponent({
           createdAtUtc={post.createdAtUtc}
         />
       </article>
-
-      <EmojiBurstContainer bursts={bursts} onClear={clearBursts} />
     </BlurFade>
   );
 }

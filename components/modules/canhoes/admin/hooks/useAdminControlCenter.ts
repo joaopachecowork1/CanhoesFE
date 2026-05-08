@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type {
+  AdminModuleKey,
   EventAdminStateDto,
-  EventPhaseDto,
 } from "@/lib/api/types";
-import { canhoesEventsRepo } from "@/lib/repositories/canhoesEventsRepo";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 import { useModuleVisibility, type ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 
@@ -13,7 +13,7 @@ export type SettingsFeedbackState = {
   tone: "default" | "error" | "success";
 };
 
-export const PHASE_LABELS: Record<EventPhaseDto["type"], string> = {
+export const PHASE_LABELS: Record<string, string> = {
   PROPOSALS: "Nomeações",
   VOTING: "Votação",
   RESULTS: "Resultados",
@@ -29,41 +29,22 @@ export function useAdminControlCenter(
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [feedback, setFeedback] = useState<SettingsFeedbackState | null>(null);
 
+  // We need to pass the eventId here, but the hook signature might have changed in my previous edit
   const {
-    allDisabled,
-    allEnabled,
-    moduleItems,
-    savingKey: visibilitySavingKey,
-    setAllModules,
-    setNominationsVisible,
-    setResultsVisible,
     toggleModule,
-    visibleCount,
-  } = useModuleVisibility({ eventId, onUpdate: onRefresh, state });
+    isUpdating,
+  } = useModuleVisibility(eventId!);
 
-  const runVisibilityAction = async (
-    messages: { saving: string; success: string; error: string },
-    action: () => Promise<boolean>
-  ) => {
-    setFeedback({ message: messages.saving, tone: "default" });
-    const ok = await action();
-    setFeedback({
-      message: ok ? messages.success : messages.error,
-      tone: ok ? "success" : "error",
-    });
-    return ok;
-  };
-  
-  const handleUpdatePhase = async (phaseType: EventPhaseDto["type"]) => {
+  const handleUpdatePhase = async (phaseType: string) => {
     if (!eventId || phaseType === state?.activePhase?.type) return;
 
     setFeedback({ message: "A guardar fase...", tone: "default" });
     try {
-      await canhoesEventsRepo.updateAdminPhase(eventId, { phaseType });
+      await adminRepo.updatePhase(eventId, { phaseType });
       await onRefresh();
       toast.success("Fase do evento atualizada");
       setFeedback({
-        message: `Fase atualizada para ${PHASE_LABELS[phaseType]}.`,
+        message: `Fase atualizada para ${PHASE_LABELS[phaseType] || phaseType}.`,
         tone: "success",
       });
     } catch (error) {
@@ -78,7 +59,7 @@ export function useAdminControlCenter(
 
     setFeedback({ message: "A mudar evento ativo...", tone: "default" });
     try {
-      await canhoesEventsRepo.adminActivateEvent(eventIdToActivate);
+      await adminRepo.activateEvent(eventIdToActivate);
       await onRefresh();
       toast.success("Evento ativo atualizado");
       const nextEventName =
@@ -94,61 +75,68 @@ export function useAdminControlCenter(
     }
   };
 
-  const handleModuleToggle = (item: ModuleVisibilityItem, checked: boolean) => {
-    const labelLower = item.label.toLowerCase();
-    runVisibilityAction(
-      {
-        saving: `A guardar ${labelLower}...`,
-        success: `${item.label} atualizado.`,
-        error: `Falha ao guardar ${labelLower}.`,
-      },
-      () => toggleModule(item.key, checked)
-    );
+  const handleModuleToggle = async (item: ModuleVisibilityItem, checked: boolean) => {
+    await toggleModule(item.key, !checked); // toggleModule in useModuleVisibility takes (key, currentValue)
+    await onRefresh();
   };
 
-  const handleNominationsVisibility = (checked: boolean) => {
-    runVisibilityAction(
-      {
-        saving: "A guardar exposição de nomeações...",
-        success: checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.",
-        error: "Falha ao guardar a exposição de nomeações.",
-      },
-      () => setNominationsVisible(checked)
-    );
+  const handleNominationsVisibility = async (checked: boolean) => {
+    if (!eventId) return;
+    try {
+      await adminRepo.updateAdminState(eventId, { nominationsVisible: checked });
+      await onRefresh();
+      toast.success(checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.");
+    } catch (error) {
+      toast.error("Erro ao atualizar visibilidade das nomeações.");
+    }
   };
 
-  const handleResultsVisibility = (checked: boolean) => {
-    runVisibilityAction(
-      {
-        saving: "A guardar exposição de resultados...",
-        success: checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.",
-        error: "Falha ao guardar a exposição de resultados.",
-      },
-      () => setResultsVisible(checked)
-    );
+  const handleResultsVisibility = async (checked: boolean) => {
+    if (!eventId) return;
+    try {
+      await adminRepo.updateAdminState(eventId, { resultsVisible: checked });
+      await onRefresh();
+      toast.success(checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.");
+    } catch (error) {
+      toast.error("Erro ao atualizar visibilidade dos resultados.");
+    }
   };
 
-  const handleSetAllModules = (visible: boolean) => {
-    runVisibilityAction(
-      {
-        saving: visible ? "A ativar todos os módulos..." : "A desativar todos os módulos...",
-        success: visible ? "Todos os módulos ficaram ativos." : "Todos os módulos ficaram ocultos.",
-        error: visible ? "Falha ao ativar todos os módulos." : "Falha ao desativar todos os módulos.",
-      },
-      () => setAllModules(visible)
-    );
+  const handleSetAllModules = async (enabled: boolean) => {
+    if (!eventId) return;
+    try {
+      const keys = Object.keys(state?.moduleVisibility ?? {});
+      const patch = Object.fromEntries(keys.map((k) => [k, enabled]));
+      await adminRepo.updateModules(eventId, patch);
+      await onRefresh();
+      toast.success(enabled ? "Todos os módulos ativados." : "Todos os módulos desativados.");
+    } catch (error) {
+      toast.error("Erro ao atualizar visibilidade dos módulos.");
+    }
   };
-  
+
+  const moduleItems: ModuleVisibilityItem[] = Object.entries(state?.moduleVisibility ?? {}).map(
+    ([key, isEnabled]) => ({
+      key: key as AdminModuleKey,
+      label: key,
+      isEnabled: isEnabled as boolean,
+    })
+  );
+
+  const visibleCount = moduleItems.filter((m) => m.isEnabled).length;
+  const allEnabled = moduleItems.length > 0 && visibleCount === moduleItems.length;
+  const allDisabled = moduleItems.length > 0 && visibleCount === 0;
 
   return {
     state: {
       advancedOpen,
       feedback,
-      allDisabled,
-      allEnabled,
+      isUpdating,
       moduleItems,
-      visibilitySavingKey,
       visibleCount,
+      allEnabled,
+      allDisabled,
+      visibilitySavingKey: isUpdating ? "ALL" : null, // placeholder
     },
     actions: {
       setAdvancedOpen,

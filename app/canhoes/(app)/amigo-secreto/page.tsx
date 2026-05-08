@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { EventModuleGate } from "@/components/modules/canhoes/EventModuleGate";
+import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 const CanhoesSecretSantaModule = dynamic(
