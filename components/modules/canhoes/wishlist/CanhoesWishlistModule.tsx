@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Gift, Inbox, Link as LinkIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,11 +77,27 @@ export function CanhoesWishlistModule() {
   const { user } = useAuth();
   const { event } = useEventOverview();
   const eventId = event?.id ?? null;
+  const queryClient = useQueryClient();
 
-  const [memberList, setMemberList] = useState<PublicUserDto[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<EventWishlistItemDto[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: memberList = [], isLoading: isMembersLoading, error: membersError } = useQuery({
+    queryKey: ["wishlistMembers", eventId],
+    queryFn: () => eventRepo.getMembers(eventId!).then(r => Array.isArray(r) ? r : []),
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: wishlistItems = [], isLoading: isWishlistLoading, error: wishlistError } = useQuery({
+    queryKey: ["wishlistItems", eventId],
+    queryFn: () => eventRepo.getWishlist(eventId!, 0, 1000).then(r => r.items),
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const isLoading = isMembersLoading || isWishlistLoading;
+  const errorMessage = (membersError || wishlistError)
+    ? getErrorMessage(membersError || wishlistError, "Não foi possível carregar a wishlist desta edição.")
+    : null;
+
   const [isSaving, setIsSaving] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -111,45 +128,6 @@ export function CanhoesWishlistModule() {
   const selectedMember = memberList.find((member) => member.id === selectedMemberId) ?? null;
   const selectedMemberItems = selectedMember ? wishlistByUser.get(selectedMember.id) ?? [] : [];
 
-  const loadWishlist = useCallback(async (currentEventId: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const [nextMembers, nextWishlistPage] = await Promise.all([
-        eventRepo.getMembers(currentEventId),
-        eventRepo.getWishlist(currentEventId, 0, 1000), // Get all items
-      ]);
-
-      setMemberList(Array.isArray(nextMembers) ? nextMembers : []);
-      setWishlistItems(nextWishlistPage.items);
-    } catch (error) {
-      const message = getErrorMessage(
-        error,
-        "Não foi possível carregar a wishlist desta edição."
-      );
-      logFrontendError("CanhoesWishlist.loadWishlist", error, { eventId: currentEventId });
-      setErrorMessage(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    setMemberList([]);
-    setWishlistItems([]);
-    setErrorMessage(null);
-    setSelectedMemberId(null);
-    setFormState({ title: "", url: "", notes: "", selectedFile: null });
-
-    if (!eventId) {
-      setIsLoading(false);
-      return;
-    }
-
-    void loadWishlist(eventId);
-  }, [eventId, loadWishlist]);
-
   const handleCreate = async () => {
     if (!canSubmit || !eventId) return;
 
@@ -166,7 +144,7 @@ export function CanhoesWishlistModule() {
       }
 
       setFormState({ title: "", url: "", notes: "", selectedFile: null });
-      await loadWishlist(eventId);
+      await queryClient.invalidateQueries({ queryKey: ["wishlistItems", eventId] });
       toast.success("Item adicionado");
     } catch (error) {
       const message = getErrorMessage(
@@ -186,8 +164,8 @@ export function CanhoesWishlistModule() {
 
     try {
       await eventRepo.deleteWishlistItem(eventId, wishlistItemId);
-      setWishlistItems((currentItems) =>
-        currentItems.filter((wishlistItem) => wishlistItem.id !== wishlistItemId)
+      queryClient.setQueryData<EventWishlistItemDto[]>(["wishlistItems", eventId], (prev) =>
+        (prev ?? []).filter((item) => item.id !== wishlistItemId)
       );
       toast.success("Item removido");
     } catch (error) {
@@ -305,7 +283,7 @@ export function CanhoesWishlistModule() {
           title="Erro ao carregar wishlist"
           description={errorMessage}
           actionLabel="Tentar novamente"
-          onAction={() => void (eventId ? loadWishlist(eventId) : Promise.resolve())}
+          onAction={() => void (eventId ? queryClient.invalidateQueries({ queryKey: ["wishlistItems", eventId] }) : Promise.resolve())}
         />
       ) : null}
 

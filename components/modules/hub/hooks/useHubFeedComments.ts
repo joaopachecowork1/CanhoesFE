@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -37,6 +37,8 @@ function updateInfiniteFeedPosts(
 export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeedCommentsArgs>) {
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [commentDraftsMap, setCommentDraftsMap] = useState<Record<string, string>>({});
+  const commentDraftsRef = useRef(commentDraftsMap);
+  commentDraftsRef.current = commentDraftsMap;
 
   useEffect(() => {
     setOpenComments({});
@@ -50,7 +52,7 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeed
   const addComment = useCallback(
     async (postId: string) => {
       if (!eventId) return;
-      const text = (commentDraftsMap[postId] ?? "").trim();
+      const text = (commentDraftsRef.current[postId] ?? "").trim();
       if (!text) return;
 
       try {
@@ -78,7 +80,7 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeed
         toast.error(msg);
       }
     },
-    [commentDraftsMap, eventId, queryClient]
+    [eventId, queryClient]
   );
 
   const toggleCommentReaction = useCallback(

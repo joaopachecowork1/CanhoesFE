@@ -17,7 +17,7 @@ export function shouldRedirectUnauthenticated(token: unknown) {
 }
 
 export default withAuth(
-  function middleware(_req) {
+  function middleware() {
     return NextResponse.next();
   },
   {

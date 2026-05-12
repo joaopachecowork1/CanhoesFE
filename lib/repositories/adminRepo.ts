@@ -107,9 +107,4 @@ export const adminRepo = {
       body: JSON.stringify(payload ?? {}),
     }),
     
-  pinFeedPost: (eventId: string, postId: string) =>
-    canhoesFetch<{ pinned: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, { method: "POST" }),
-    
-  deleteFeedPost: (eventId: string, postId: string) =>
-    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}`, { method: "DELETE" }),
 };

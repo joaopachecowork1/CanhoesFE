@@ -2,12 +2,14 @@
 
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { EventActiveContextDto } from "@/lib/api/types";
 import { eventRepo } from "@/lib/repositories/eventRepo";
 
-export function useEventOverview() {
+export function useEventOverview(initialContext?: EventActiveContextDto | null) {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["eventOverview"],
     queryFn: () => eventRepo.getActiveContext(),
+    initialData: initialContext ?? undefined,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     retry: 1,

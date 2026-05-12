@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { Medal, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   CanhoesMediaThumb,
@@ -9,7 +9,7 @@ import {
 } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { getErrorMessage, logFrontendError } from "@/lib/errors";
+import { getErrorMessage } from "@/lib/errors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { cn } from "@/lib/utils";
@@ -95,40 +95,14 @@ export function CanhoesGalaModule() {
   const { event } = useEventOverview();
   const eventId = event?.id ?? null;
 
-  const [resultsByCategory, setResultsByCategory] = useState<PublicCategoryResultDto[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: resultsByCategory = [], isLoading, error, refetch } = useQuery({
+    queryKey: ["galaResults", eventId],
+    queryFn: () => awardsRepo.getResults(eventId!),
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 2,
+  });
 
-  const loadResults = useCallback(async (currentEventId: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const nextResults = await awardsRepo.getResults(currentEventId);
-      setResultsByCategory(nextResults);
-    } catch (error) {
-      const message = getErrorMessage(
-        error,
-        "Não foi possível carregar os resultados da gala."
-      );
-      logFrontendError("CanhoesGala.loadResults", error, { eventId: currentEventId });
-      setErrorMessage(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    setResultsByCategory([]);
-    setErrorMessage(null);
-
-    if (!eventId) {
-      setIsLoading(false);
-      return;
-    }
-
-    void loadResults(eventId);
-  }, [eventId, loadResults]);
+  const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar os resultados da gala.") : null;
 
   const totalVotes = resultsByCategory.reduce(
     (voteCount, categoryResult) => voteCount + (categoryResult.totalVotes ?? 0),
@@ -151,7 +125,7 @@ export function CanhoesGalaModule() {
           title="Erro ao carregar resultados"
           description={errorMessage}
           actionLabel="Tentar novamente"
-          onAction={() => void (eventId ? loadResults(eventId) : Promise.resolve())}
+          onAction={() => void refetch()}
         />
       ) : null}
 

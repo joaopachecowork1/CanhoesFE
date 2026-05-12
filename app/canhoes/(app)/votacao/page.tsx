@@ -35,5 +35,5 @@ export default async function VotingPage() {
     ? mapEventVotingBoardToOfficialVotingBoard(initialBoard)
     : undefined;
 
-  return <CanhoesOfficialVotingModule initialData={initialData} />;
+  return <CanhoesOfficialVotingModule initialData={initialData} initialContext={activeContext ?? undefined} />;
 }

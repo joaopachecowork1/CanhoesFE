@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Flame, Gavel, Inbox } from "lucide-react";
 import { toast } from "sonner";
 
-import type { GalaMeasureDto } from "@/lib/api/types";
+import type { EventActiveContextDto, GalaMeasureDto } from "@/lib/api/types";
 import {
   CanhoesModuleHeader,
   formatEventPhaseLabel,
@@ -35,55 +36,24 @@ function MeasuresLoadingState() {
   );
 }
 
-export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasureDto[] }) {
-  const { overview, event } = useEventOverview();
+export function CanhoesMeasuresModule({ initialData, initialContext }: { initialData?: GalaMeasureDto[]; initialContext?: EventActiveContextDto | null }) {
+  const { overview, event } = useEventOverview(initialContext);
   const eventId = event?.id ?? null;
+  const queryClient = useQueryClient();
 
-  const [measures, setMeasures] = useState<GalaMeasureDto[]>(initialData ?? []);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: measures = [], isLoading, error } = useQuery({
+    queryKey: ["measures", eventId],
+    queryFn: () => awardsRepo.getMeasures(eventId!),
+    enabled: !!eventId,
+    initialData: initialData && initialData.length > 0 ? initialData : undefined,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar as medidas desta edição.") : null;
+
   const [proposalText, setProposalText] = useState("");
   const [search, setSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const loadData = useCallback(async (currentEventId: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const nextMeasures = await awardsRepo.getMeasures(currentEventId);
-      setMeasures(nextMeasures);
-    } catch (error) {
-      const message = getErrorMessage(
-        error,
-        "Não foi possível carregar as medidas desta edição."
-      );
-      logFrontendError("CanhoesMeasures.loadMeasures", error, { eventId: currentEventId });
-      setErrorMessage(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (initialData && initialData.length > 0) {
-      setMeasures(initialData);
-      setIsLoading(false);
-      return;
-    }
-
-    setMeasures([]);
-    setErrorMessage(null);
-    setSearch("");
-    setProposalText("");
-
-    if (!eventId) {
-      setIsLoading(false);
-      return;
-    }
-
-    void loadData(eventId);
-  }, [eventId, loadData, initialData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -177,7 +147,7 @@ export function CanhoesMeasuresModule({ initialData }: { initialData?: GalaMeasu
               title="Erro ao carregar medidas"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void (eventId ? loadData(eventId) : Promise.resolve())}
+              onAction={() => void queryClient.invalidateQueries({ queryKey: ["measures", eventId] })}
             />
           ) : null}
 

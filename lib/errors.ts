@@ -1,5 +1,3 @@
-"use client";
-
 import { ApiError } from "@/lib/api/canhoesClient";
 
 import { logger } from "./logger";

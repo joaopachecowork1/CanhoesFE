@@ -199,7 +199,7 @@ export function AdminNominationsSection({
       updateCachedNomination(nomineeId, (nomination) => ({ ...nomination, status: "approved" }));
       toast.success("Nomeacao aprovada.");
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", queryEventId] }),
         queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
       ]);
     },
@@ -217,7 +217,7 @@ export function AdminNominationsSection({
       setSelectedNominationId((current) => (current === nomineeId ? null : current));
       toast.success("Nomeacao rejeitada.");
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", queryEventId] }),
         queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
       ]);
     },
@@ -238,7 +238,7 @@ export function AdminNominationsSection({
       }));
       toast.success("Categoria atualizada.");
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations-summary", "pending", queryEventId] }),
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", queryEventId] }),
         queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", queryEventId] }),
       ]);
     },

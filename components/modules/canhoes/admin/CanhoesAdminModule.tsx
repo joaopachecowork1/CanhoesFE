@@ -19,6 +19,7 @@ import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { type AdminSectionId, getAdminSectionItem } from "./adminSections";
 import { AdminStateMessage } from "./components/AdminStateMessage";
 import { ADMIN_OUTLINE_BUTTON_CLASS } from "./components/adminContentUi";
+import type { EventActiveContextDto } from "@/lib/api/types";
 
 // OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
 const AdminContentSection = lazy(() =>
@@ -46,6 +47,7 @@ function getAdminErrorMessage(error: unknown) {
 type CanhoesAdminModuleProps = {
     section: AdminSectionId;
     initialEventId?: string | null;
+    initialContext?: EventActiveContextDto | null;
 };
 
 // OPTIMIZATION: Moved outside component to avoid recreation on every render
@@ -254,8 +256,9 @@ const AdminMobileSummary = memo(function AdminMobileSummary({
 export default function CanhoesAdminModule({
     section,
     initialEventId,
+    initialContext,
 }: Readonly<CanhoesAdminModuleProps>) {
-    const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
+    const { event: activeEvent, refresh: refreshOverview } = useEventOverview(initialContext);
     const queryClient = useQueryClient();
     const resolvedEventId = activeEvent?.id ?? initialEventId ?? null;
     const {
@@ -290,9 +293,9 @@ export default function CanhoesAdminModule({
             queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "categories", "pending", resolvedEventId] }),
             queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "measures", "pending", resolvedEventId] }),
             queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", resolvedEventId] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "categories", resolvedEventId] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "votes", "summary", resolvedEventId] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "members", resolvedEventId, 0, 50] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "categories", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "votes", "audit", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "members", resolvedEventId, 0, 50] }),
             queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", resolvedEventId] }),
             refreshOverview(),
         ]);

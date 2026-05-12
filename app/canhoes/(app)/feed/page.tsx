@@ -36,7 +36,7 @@ export default async function CanhoesFeedPage() {
   return (
     <div className="zone-feed">
       <EventModuleGate moduleKey="feed">
-        <HubFeedModule showComposer={false} initialData={initialData} />
+        <HubFeedModule showComposer={false} initialData={initialData} initialContext={activeContext ?? undefined} />
       </EventModuleGate>
     </div>
   );

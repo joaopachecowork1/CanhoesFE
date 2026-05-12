@@ -17,7 +17,7 @@ export default async function MeasuresPage() {
 
   return (
     <EventModuleGate moduleKey="measures">
-      <CanhoesMeasuresModule initialData={initialData ?? undefined} />
+      <CanhoesMeasuresModule initialData={initialData ?? undefined} initialContext={activeContext ?? undefined} />
     </EventModuleGate>
   );
 }

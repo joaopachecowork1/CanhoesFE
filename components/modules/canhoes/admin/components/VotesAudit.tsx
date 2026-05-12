@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { History, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
+import type { AdminVoteAuditRowDto } from "@/lib/api/types";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,7 @@ type VotesAuditProps = {
 
 const VOTE_ROW_CLASS =
   "flex w-full flex-col gap-1 border-b border-[var(--border-subtle)] bg-[var(--bg-paper)] px-4 py-3 last:border-0";
+const EMPTY_ADMIN_VOTES: AdminVoteAuditRowDto[] = [];
 
 export function VotesAudit({ eventId }: Readonly<VotesAuditProps>) {
   const [filter, setFilter] = useState("");
@@ -31,19 +33,17 @@ export function VotesAudit({ eventId }: Readonly<VotesAuditProps>) {
     staleTime: 1000 * 60 * 2,
   });
 
-  const allVotes = votesQuery.data?.votes ?? [];
-
   const filteredVotes = useMemo(() => {
+    const votes = votesQuery.data?.votes ?? EMPTY_ADMIN_VOTES;
     const term = filter.trim().toLowerCase();
-    if (!term) return allVotes;
-
-    return allVotes.filter(
+    if (!term) return votes;
+    return votes.filter(
       (vote) =>
         vote.userName.toLowerCase().includes(term) ||
         vote.categoryName.toLowerCase().includes(term) ||
         vote.nomineeName.toLowerCase().includes(term)
     );
-  }, [allVotes, filter]);
+  }, [votesQuery.data?.votes, filter]);
 
   if (!eventId) {
     return <AdminStateMessage>Falta uma edicao ativa para consultar auditoria.</AdminStateMessage>;

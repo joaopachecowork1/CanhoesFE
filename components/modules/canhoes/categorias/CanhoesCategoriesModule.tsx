@@ -1,11 +1,11 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Flame, Inbox, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
-import type { AwardCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
@@ -46,47 +46,21 @@ function CategoriesLoadingState() {
 
 export function CanhoesCategoriesModule() {
     const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
-    const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
+
+    const { data: categoryList = [], isLoading, error } = useQuery({
+        queryKey: ["categories", event?.id],
+        queryFn: () => awardsRepo.getCategories(event!.id).then(r => r.items),
+        enabled: !!event?.id,
+        staleTime: 1000 * 60 * 2,
+    });
+
+    const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar as categorias desta edição.") : null;
+
     const [search, setSearch] = useState("");
     const [categoryName, setCategoryName] = useState("");
     const [categoryDescription, setCategoryDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const loadCategories = useCallback(async (currentEventId: string) => {
-        setIsLoading(true);
-        setErrorMessage(null);
-
-        try {
-            const result = await awardsRepo.getCategories(currentEventId);
-            setCategoryList(result.items);
-        } catch (error) {
-            const message = getErrorMessage(
-                error,
-                "Não foi possível carregar as categorias desta edição."
-            );
-            logFrontendError("CanhoesCategories.loadCategories", error, { eventId: currentEventId });
-            setErrorMessage(message);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        setCategoryList([]);
-        setErrorMessage(null);
-        setSearch("");
-        setCategoryName("");
-        setCategoryDescription("");
-
-        if (!event) {
-            setIsLoading(false);
-            return;
-        }
-
-        void loadCategories(event.id);
-    }, [event, loadCategories]);
 
     const canSubmitProposal =
         categoryName.trim().length >= 3 && Boolean(overview?.permissions.canSubmitProposal);
@@ -118,7 +92,7 @@ export function CanhoesCategoriesModule() {
 
             setCategoryName("");
             setCategoryDescription("");
-            await loadCategories(event.id);
+            await queryClient.invalidateQueries({ queryKey: ["categories", event.id] });
             toast.success("Proposta enviada");
         } catch (error) {
             const message = getErrorMessage(
@@ -217,7 +191,7 @@ export function CanhoesCategoriesModule() {
                             description={errorMessage}
                             actionLabel="Tentar novamente"
                             tone="official"
-                            onAction={() => void (event ? loadCategories(event.id) : Promise.resolve())}
+                            onAction={() => void (event ? queryClient.invalidateQueries({ queryKey: ["categories", event.id] }) : Promise.resolve())}
                         />
                     ) : null}
 

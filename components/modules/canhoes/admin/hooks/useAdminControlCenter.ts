@@ -86,7 +86,7 @@ export function useAdminControlCenter(
       await adminRepo.updateAdminState(eventId, { nominationsVisible: checked });
       await onRefresh();
       toast.success(checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao atualizar visibilidade das nomeações.");
     }
   };
@@ -97,7 +97,7 @@ export function useAdminControlCenter(
       await adminRepo.updateAdminState(eventId, { resultsVisible: checked });
       await onRefresh();
       toast.success(checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao atualizar visibilidade dos resultados.");
     }
   };
@@ -110,7 +110,7 @@ export function useAdminControlCenter(
       await adminRepo.updateModules(eventId, patch);
       await onRefresh();
       toast.success(enabled ? "Todos os módulos ativados." : "Todos os módulos desativados.");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao atualizar visibilidade dos módulos.");
     }
   };

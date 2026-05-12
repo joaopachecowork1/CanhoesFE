@@ -5,7 +5,7 @@ import { CheckCircle2, Clock, Lock, Trophy } from "lucide-react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { AwardCategoryDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
+import type { AwardCategoryDto, EventActiveContextDto, MyNominationStatusDto, NomineeDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
@@ -44,9 +44,9 @@ function NominationsLoadingState() {
   );
 }
 
-export function CanhoesNominationsModule({ initialCategories }: { initialCategories?: AwardCategoryDto[] }) {
+export function CanhoesNominationsModule({ initialCategories, initialContext }: { initialCategories?: AwardCategoryDto[]; initialContext?: EventActiveContextDto | null }) {
   const queryClient = useQueryClient();
-  const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
+  const { event, overview, isLoading: isOverviewLoading } = useEventOverview(initialContext);
 
   const eventId = event?.id ?? null;
   const queryEventId = eventId ?? "";
@@ -266,7 +266,7 @@ function CategoryNominationCard({
       if (file) {
         try {
           await awardsRepo.uploadNomineeImage(eventId, createdNominee.id, file);
-        } catch (uploadError) {
+        } catch (_uploadError) {
           toast.error("Nomeação criada, mas falhou o upload da imagem.");
         }
       }

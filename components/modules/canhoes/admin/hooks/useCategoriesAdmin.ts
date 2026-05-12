@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
+  AdminNomineeDto,
   AdminVoteAuditRowDto,
   AwardCategoryDto,
   CreateAwardCategoryRequest,
@@ -12,6 +13,7 @@ import { useAdminMutation } from "./useAdminMutation";
 
 const EMPTY_AWARD_CATEGORIES: AwardCategoryDto[] = [];
 const EMPTY_ADMIN_VOTES: AdminVoteAuditRowDto[] = [];
+const EMPTY_NOMINATIONS: AdminNomineeDto[] = [];
 
 type CategoryFormState = {
   description: string;
@@ -158,7 +160,7 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
   const categoriesQuery = useQuery({
     enabled: Boolean(eventId),
     queryFn: () => adminRepo.getCategories(eventId!),
-    queryKey: ["admin", "categories", eventId],
+    queryKey: ["canhoes", "admin", "categories", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
@@ -166,7 +168,7 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
   const nominationsSummaryQuery = useQuery({
     enabled: Boolean(eventId),
     queryFn: () => adminRepo.getNominationsPaged(eventId!, 0, 1000), // Get all for summary
-    queryKey: ["admin", "nominations", "summary", eventId],
+    queryKey: ["canhoes", "admin", "nominations", "summary", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
   });
@@ -174,14 +176,14 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
   const votesQuery = useQuery({
     enabled: Boolean(eventId),
     queryFn: () => adminRepo.getVotesPaged(eventId!, 0, 1000),
-    queryKey: ["admin", "votes", "summary", eventId],
+    queryKey: ["canhoes", "admin", "votes", "audit", eventId],
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
     select: (data) => data.votes,
   });
 
   const categories = categoriesQuery.data ?? EMPTY_AWARD_CATEGORIES;
-  const nominations = nominationsSummaryQuery.data?.nominations ?? [];
+  const nominations = nominationsSummaryQuery.data?.nominations ?? EMPTY_NOMINATIONS;
   const votes = votesQuery.data ?? EMPTY_ADMIN_VOTES;
 
   const sortedCategories = useMemo(
@@ -195,7 +197,9 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
   );
 
   const categoryUsageById = useMemo(() => {
-    const nomineeCounts = nominations.reduce<Record<string, number>>(
+    const noms = nominations;
+    const vts = votes;
+    const nomineeCounts = noms.reduce<Record<string, number>>(
       (acc, nominee) => {
         if (!nominee.categoryId) return acc;
         acc[nominee.categoryId] = (acc[nominee.categoryId] ?? 0) + 1;
@@ -204,7 +208,7 @@ export function useCategoriesAdmin(eventId: string | null, onUpdate: () => Promi
       {}
     );
 
-    const voteCounts = votes.reduce<Record<string, number>>((acc, vote) => {
+    const voteCounts = vts.reduce<Record<string, number>>((acc, vote) => {
       acc[vote.categoryId] = (acc[vote.categoryId] ?? 0) + 1;
       return acc;
     }, {});

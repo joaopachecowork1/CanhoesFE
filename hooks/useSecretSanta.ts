@@ -25,7 +25,7 @@ export function useSecretSanta(eventId?: string) {
       adminRepo.drawSecretSanta(eventId!, payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["secretSantaOverview", eventId] });
-      void queryClient.invalidateQueries({ queryKey: ["eventOverview", eventId] });
+      void queryClient.invalidateQueries({ queryKey: ["eventOverview"] });
     }
   });
 

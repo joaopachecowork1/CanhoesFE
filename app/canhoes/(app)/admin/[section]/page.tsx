@@ -48,7 +48,7 @@ export default async function AdminSectionPage({
     <AdminGate>
       <div className="zone-admin space-y-2">
         <AdminRouteTabs activeId={section} />
-        <CanhoesAdminModule section={section} initialEventId={initialEventId} />
+        <CanhoesAdminModule section={section} initialEventId={initialEventId} initialContext={activeContext ?? undefined} />
       </div>
     </AdminGate>
   );

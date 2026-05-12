@@ -11,5 +11,5 @@ export default async function NominationsPage() {
     : null;
   const initialCategories = categoriesPage?.items ?? undefined;
 
-  return <CanhoesNominationsModule initialCategories={initialCategories} />;
+  return <CanhoesNominationsModule initialCategories={initialCategories} initialContext={activeContext ?? undefined} />;
 }

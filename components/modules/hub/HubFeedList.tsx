@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { ScrollText } from "lucide-react";
 
 import { SectionBoundary } from "@/components/ui/section-boundary";
@@ -40,7 +41,61 @@ type HubFeedListProps = {
   sentinelRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
-export function HubFeedList({
+const POST_KEY = (post: EventFeedPostFullDto) => post.id;
+const POST_SIZE = () => 220;
+
+const HubFeedListItem = memo(function HubFeedListItem({
+  post, index, eventId, isAdmin, openComments, commentDraft,
+  currentUserId, currentUserName, currentUserImage,
+  onToggleReaction, onToggleDownvote, onToggleComments, onVotePoll,
+  onAddComment, onDeleteComment, onCommentDraftChange, onAdminPin, onAdminDelete,
+}: {
+  post: EventFeedPostFullDto; index: number; eventId: string; isAdmin: boolean;
+  openComments: boolean; commentDraft: string;
+  currentUserId: string | null; currentUserName: string; currentUserImage: string | null;
+  onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
+  onToggleDownvote: (postId: string) => void;
+  onToggleComments: (postId: string) => void;
+  onVotePoll: (postId: string, optionId: string) => void;
+  onAddComment: (postId: string) => void;
+  onDeleteComment: (postId: string, commentId: string) => void;
+  onCommentDraftChange: (postId: string, text: string) => void;
+  onAdminPin: (postId: string) => void;
+  onAdminDelete: (postId: string) => void;
+}) {
+  return (
+    <div className="mb-3">
+      <SectionBoundary
+        key={post.id}
+        title="Erro no post"
+        description="Ocorreu um erro ao renderizar este post."
+      >
+        <HubPostCard
+          post={post}
+          index={index}
+          eventId={eventId}
+          isAdmin={isAdmin}
+          openComments={openComments}
+          commentDraft={commentDraft}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          currentUserImage={currentUserImage}
+          onToggleReaction={onToggleReaction}
+          onToggleDownvote={onToggleDownvote}
+          onToggleComments={onToggleComments}
+          onVotePoll={onVotePoll}
+          onAddComment={onAddComment}
+          onDeleteComment={onDeleteComment}
+          onCommentDraftChange={onCommentDraftChange}
+          onAdminPin={onAdminPin}
+          onAdminDelete={onAdminDelete}
+        />
+      </SectionBoundary>
+    </div>
+  );
+});
+
+export const HubFeedList = memo(function HubFeedList({
   posts,
   sort,
   allPostsCount,
@@ -80,38 +135,30 @@ export function HubFeedList({
             <VirtualizedList
               items={posts}
               overscan={4}
-              getKey={(post) => post.id}
-              estimateSize={() => 220}
+              getKey={POST_KEY}
+              estimateSize={POST_SIZE}
               useWindowScroll={true}
               renderItem={(post, index) => (
-                <div className="mb-3">
-                  <SectionBoundary
-                    key={post.id}
-                    title="Erro no post"
-                    description="Ocorreu um erro ao renderizar este post."
-                  >
-                    <HubPostCard
-                      post={post}
-                      index={index}
-                      eventId={eventId}
-                      isAdmin={isAdmin}
-                      openComments={openComments[post.id] ?? false}
-                      commentDraft={commentDrafts[post.id] ?? ""}
-                      currentUserId={currentUserId}
-                      currentUserName={currentUserName}
-                      currentUserImage={currentUserImage}
-                      onToggleReaction={onToggleReaction}
-                      onToggleDownvote={onToggleDownvote}
-                      onToggleComments={onToggleComments}
-                      onVotePoll={onVotePoll}
-                      onAddComment={onAddComment}
-                      onDeleteComment={onDeleteComment}
-                      onCommentDraftChange={onCommentDraftChange}
-                      onAdminPin={onAdminPin}
-                      onAdminDelete={onAdminDelete}
-                    />
-                  </SectionBoundary>
-                </div>
+                <HubFeedListItem
+                  post={post}
+                  index={index}
+                  eventId={eventId}
+                  isAdmin={isAdmin}
+                  openComments={openComments[post.id] ?? false}
+                  commentDraft={commentDrafts[post.id] ?? ""}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  currentUserImage={currentUserImage}
+                  onToggleReaction={onToggleReaction}
+                  onToggleDownvote={onToggleDownvote}
+                  onToggleComments={onToggleComments}
+                  onVotePoll={onVotePoll}
+                  onAddComment={onAddComment}
+                  onDeleteComment={onDeleteComment}
+                  onCommentDraftChange={onCommentDraftChange}
+                  onAdminPin={onAdminPin}
+                  onAdminDelete={onAdminDelete}
+                />
               )}
             />
         ) : (
@@ -133,4 +180,4 @@ export function HubFeedList({
         />
     </div>
   );
-}
+});

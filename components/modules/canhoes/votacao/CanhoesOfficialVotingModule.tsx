@@ -5,7 +5,7 @@ import { CheckCircle2, Flame, Loader2, Vote } from "lucide-react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { CastOfficialVoteRequest, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
+import type { CastOfficialVoteRequest, EventActiveContextDto, OfficialVotingBoardDto, OfficialVotingCategoryDto } from "@/lib/api/types";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useCategorySelection } from "./useCategorySelection";
 import { CompactSegmentTabs } from "@/components/modules/canhoes/shared/CompactSegmentTabs";
@@ -36,9 +36,9 @@ function OfficialVotingLoadingState() {
   );
 }
 
-export function CanhoesOfficialVotingModule({ initialData }: { initialData?: OfficialVotingBoardDto }) {
+export function CanhoesOfficialVotingModule({ initialData, initialContext }: { initialData?: OfficialVotingBoardDto; initialContext?: EventActiveContextDto | null }) {
   const queryClient = useQueryClient();
-  const { event } = useEventOverview();
+  const { event } = useEventOverview(initialContext);
 
   const eventId = event?.id ?? null;
   const activeEventId = eventId ?? "";

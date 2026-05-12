@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cigarette } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,10 +16,7 @@ import { useEventOverview } from "@/hooks/useEventOverview";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
-import type {
-  AwardCategoryDto,
-  NomineeDto,
-} from "@/lib/api/types";
+
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,11 +78,26 @@ function StickerSubmitLoadingState() {
 export function CanhoesStickerSubmitModule() {
   const { overview, event } = useEventOverview();
   const eventId = event?.id ?? null;
+  const queryClient = useQueryClient();
 
-  const [categoryList, setCategoryList] = useState<AwardCategoryDto[]>([]);
-  const [nomineeList, setNomineeList] = useState<NomineeDto[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: categoryList = [], isLoading: isCategoriesLoading, error: categoriesError } = useQuery({
+    queryKey: ["stickerCategories", eventId],
+    queryFn: () => awardsRepo.getCategories(eventId!).then(r => r.items),
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: nomineeList = [], isLoading: isNomineesLoading, error: nomineesError } = useQuery({
+    queryKey: ["approvedNominees", eventId],
+    queryFn: () => awardsRepo.getApprovedNominees(eventId!),
+    enabled: !!eventId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const isLoading = isCategoriesLoading || isNomineesLoading;
+  const error = categoriesError || nomineesError;
+  const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar os stickers desta edição.") : null;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -97,65 +110,10 @@ export function CanhoesStickerSubmitModule() {
       setSelectedFilePreviewUrl("");
       return;
     }
-
     const previewUrl = URL.createObjectURL(selectedFile);
     setSelectedFilePreviewUrl(previewUrl);
-
-    return () => {
-      URL.revokeObjectURL(previewUrl);
-    };
+    return () => { URL.revokeObjectURL(previewUrl); };
   }, [selectedFile]);
-
-  const loadStickerData = useCallback(async (currentEventId: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const [categoriesResult, nextNominees] = await Promise.all([
-        awardsRepo.getCategories(currentEventId),
-        awardsRepo.getApprovedNominees(currentEventId),
-      ]);
-
-      const nextCategories = categoriesResult.items;
-
-      setCategoryList(nextCategories);
-      setNomineeList(nextNominees);
-
-      const defaultStickerCategory = nextCategories.find((category) =>
-        category.name.toLowerCase().includes("sticker")
-      );
-
-      setSelectedCategoryId(
-        (currentCategoryId) => currentCategoryId || defaultStickerCategory?.id || ""
-      );
-    } catch (error) {
-      const message = getErrorMessage(
-        error,
-        "Não foi possível carregar os stickers desta edição."
-      );
-      logFrontendError("CanhoesStickerSubmit.loadStickerData", error, { eventId: currentEventId });
-      setErrorMessage(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    setCategoryList([]);
-    setNomineeList([]);
-    setErrorMessage(null);
-    setIsLoading(Boolean(eventId));
-    setSelectedCategoryId("");
-    setStickerTitle("");
-    setSelectedFile(null);
-
-    if (!eventId) {
-      setIsLoading(false);
-      return;
-    }
-
-    void loadStickerData(eventId);
-  }, [eventId, loadStickerData]);
 
   const phaseType = overview?.activePhase?.type;
   const nominationPhase = phaseType === "PROPOSALS";
@@ -206,7 +164,10 @@ export function CanhoesStickerSubmitModule() {
 
       setStickerTitle("");
       setSelectedFile(null);
-      await loadStickerData(eventId);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["stickerCategories", eventId] }),
+        queryClient.invalidateQueries({ queryKey: ["approvedNominees", eventId] }),
+      ]);
       toast.success("Sticker submetido");
     } catch (error) {
       const message = getErrorMessage(
@@ -251,7 +212,7 @@ export function CanhoesStickerSubmitModule() {
               title="Erro ao carregar stickers"
               description={errorMessage}
               actionLabel="Tentar novamente"
-              onAction={() => void (eventId ? loadStickerData(eventId) : Promise.resolve())}
+              onAction={() => void (eventId ? queryClient.invalidateQueries({ queryKey: ["stickerCategories", eventId] }) : Promise.resolve())}
             />
           ) : null}
 
