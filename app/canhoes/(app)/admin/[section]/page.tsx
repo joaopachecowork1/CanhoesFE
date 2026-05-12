@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import dynamic from "next/dynamic";
 
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { EventActiveContextDto } from "@/lib/api/types";
 import CanhoesAdminModule from "@/components/modules/canhoes/admin/CanhoesAdminModule";
 import { isAdminSectionId } from "@/components/modules/canhoes/admin/adminSections";
 import { AdminRouteTabs } from "@/components/modules/canhoes/admin/components/AdminRouteTabs";
@@ -39,11 +41,14 @@ export default async function AdminSectionPage({
     notFound();
   }
 
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const initialEventId = activeContext?.event?.id ?? null;
+
   return (
     <AdminGate>
       <div className="zone-admin space-y-2">
         <AdminRouteTabs activeId={section} />
-        <CanhoesAdminModule section={section} />
+        <CanhoesAdminModule section={section} initialEventId={initialEventId} />
       </div>
     </AdminGate>
   );

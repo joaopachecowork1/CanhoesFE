@@ -78,7 +78,6 @@ function HubFeedModuleView({
     setSort,
     hasMore,
     isFetchingNextPage,
-    comments,
     openComments,
     commentDrafts,
     toggleReaction,
@@ -108,13 +107,13 @@ function HubFeedModuleView({
       posts={posts}
       sort={sort}
       allPostsCount={allPostsCount}
+      eventId={state.eventId ?? ""}
       isAdmin={isAdmin}
       hasMore={hasMore}
       isFetchingNextPage={isFetchingNextPage}
       currentUserId={currentUserId}
       currentUserImage={currentUserImage}
       currentUserName={currentUserName}
-      comments={comments}
       openComments={openComments}
       commentDrafts={commentDrafts}
       onSortChange={handleSortChange}
@@ -166,6 +165,7 @@ function useHubFeedModuleState(initialData?: FeedInfiniteData) {
 
   return {
     ...feed,
+    eventId,
     currentUserId,
     currentUserImage,
     currentUserName,

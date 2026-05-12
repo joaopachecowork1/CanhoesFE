@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type TouchEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -69,12 +69,7 @@ export function ImageLightbox({
   const currentImageUrl = safeImages[currentIndex] ?? safeImages[0];
 
   const lightboxContent = (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--bg-overlay)] backdrop-blur-[10px]"
+    <div className="animate-fade-in fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--bg-overlay)] backdrop-blur-[10px]"
       onKeyDown={handleKeyDown}
       ref={overlayRef}
       role="dialog"
@@ -144,12 +139,15 @@ export function ImageLightbox({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={currentImageUrl}
           alt={authorName ? `Imagem de ${authorName}` : "Imagem do post"}
           className="max-h-[90vh] max-w-[90vw] object-contain"
           draggable={false}
+          width={1200}
+          height={900}
+          style={{ width: "auto", height: "auto" }}
+          unoptimized
         />
       </div>
 
@@ -184,11 +182,8 @@ export function ImageLightbox({
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 
-  return createPortal(
-    <AnimatePresence>{lightboxContent}</AnimatePresence>,
-    document.body
-  );
+  return createPortal(lightboxContent, document.body);
 }

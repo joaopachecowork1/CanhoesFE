@@ -21,8 +21,9 @@ const RETRY_CONFIG = {
   retryableStatusCodes: [429, 500, 502, 503, 504],
 };
 
-// Request timeout (snappy by default)
-const REQUEST_TIMEOUT_MS = 6000;
+// Request timeout — increased to 8s so the proxy's 10s backend timeout
+// can return a proper 504 error before the client-side timeout fires.
+const REQUEST_TIMEOUT_MS = 8000;
 
 // Track requests per endpoint for rate limiting
 // Use bounded maps with periodic cleanup to prevent memory leaks in long sessions

@@ -6,10 +6,16 @@ import { logger } from "@/lib/logger";
 
 /**
  * Hook to manage event-specific subscriptions on top of a global SignalR connection.
- * It joins the event group on mount and leaves on unmount.
+ * Triggers connection on first use and joins the event group on mount / leaves on unmount.
  */
 export function useSignalR(eventId: string | null) {
-  const { connection, isConnected } = useSignalRContext();
+  const { connection, isConnected, connect } = useSignalRContext();
+
+  useEffect(() => {
+    if (eventId) {
+      connect();
+    }
+  }, [eventId, connect]);
 
   useEffect(() => {
     if (!connection || !isConnected || !eventId) return;

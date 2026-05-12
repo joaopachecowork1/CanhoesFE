@@ -1,7 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { useCallback, useRef, type CSSProperties } from "react";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -19,7 +18,6 @@ import {
 import { useDismissOnEscape } from "./useDismissOnEscape";
 
 const DRAG_DISMISS_THRESHOLD = 110;
-const DRAG_DISMISS_VELOCITY = 700;
 
 type CanhoesFloatingActionMenuProps = {
     isOpen: boolean;
@@ -57,45 +55,53 @@ export function CanhoesFloatingActionMenu({
 
     useDismissOnEscape(isOpen, () => onOpenChange(false));
 
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > DRAG_DISMISS_THRESHOLD || info.velocity.y > DRAG_DISMISS_VELOCITY) {
-      onOpenChange(false);
-    }
-  };
+  const panelRef = useRef<HTMLElement>(null);
+  const dragStartY = useRef(0);
+  const dragOffsetY = useRef(0);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    dragStartY.current = e.clientY;
+    dragOffsetY.current = 0;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const onMove = (ev: PointerEvent) => {
+      const dy = ev.clientY - dragStartY.current;
+      dragOffsetY.current = dy;
+      if (dy > 0) {
+        panel.style.transform = `translateY(${Math.min(dy, DRAG_DISMISS_THRESHOLD)}px)`;
+        panel.style.opacity = `${1 - dy / DRAG_DISMISS_THRESHOLD}`;
+      }
+    };
+    const onUp = (ev: PointerEvent) => {
+      const dy = ev.clientY - dragStartY.current;
+      panel.style.transform = '';
+      panel.style.opacity = '';
+      if (dy > DRAG_DISMISS_THRESHOLD || Math.abs(ev.clientY - dragStartY.current) > DRAG_DISMISS_THRESHOLD) {
+        onOpenChange(false);
+      }
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    };
+    document.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('pointerup', onUp);
+  }, [onOpenChange]);
 
   return (
-    <AnimatePresence>
-            {isOpen ? (
-                <div className="fixed inset-0 z-50">
-          <motion.button
+    <>
+      {isOpen ? (
+        <div className="animate-fade-in fixed inset-0 z-50">
+          <button
             type="button"
             aria-label="Fechar menu"
             className="absolute inset-0 bg-[rgba(5,8,4,0.54)] backdrop-blur-[2px]"
             onClick={() => onOpenChange(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.24, ease: "easeOut" }}
-                    />
+          />
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-end px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] pt-24 sm:px-6 sm:pb-8">
-            <motion.section
-              initial={{ opacity: 0, x: 8, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 8, y: 16, scale: 0.98 }}
-              drag="y"
-              dragDirectionLock
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.18 }}
-              onDragEnd={handleDragEnd}
-              transition={{
-                duration: 0.28,
-                type: "spring",
-                stiffness: 340,
-                damping: 28,
-                delay: 0.04,
-              }}
-              className="pointer-events-auto flex w-full max-w-[22rem] flex-col items-end gap-3 touch-pan-y"
+            <section
+              ref={panelRef}
+              onPointerDown={handlePointerDown}
+              className="animate-slide-up pointer-events-auto flex w-full max-w-[22rem] flex-col items-end gap-3 touch-pan-y"
             >
               <div className="flex w-full justify-center px-8 pb-1 sm:hidden">
                 <span className="h-1.5 w-12 rounded-full bg-[rgba(255,255,255,0.28)]" />
@@ -118,52 +124,33 @@ export function CanhoesFloatingActionMenu({
                                     onClick={() => onOpenChange(false)}
                                     aria-label="Fechar menu"
                                 >
-                                    <motion.span
-                                        animate={{ rotate: 45 }}
-                                        transition={{
-                                            duration: 0.3,
-                                            ease: "easeInOut",
-                                            type: "spring",
-                                            stiffness: 300,
-                                            damping: 20,
-                                        }}
-                                        className="inline-flex"
-                                    >
+                                    <span className="inline-flex transition-transform duration-300 ease-in-out rotate-45">
                                         <X className="h-4 w-4" />
-                                    </motion.span>
+                                    </span>
                                 </Button>
                             </div>
 
               <div className="scrollbar-none overscroll-y-contain flex max-h-[min(30rem,calc(100svh-12.5rem-env(safe-area-inset-bottom,0px)))] w-full flex-col gap-2 overflow-y-auto pr-1">
                                 {adminShortcut ? (
-                                    <motion.div
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.3, delay: 0.04 }}
+                                    <div
+                                        style={{ animationDelay: "0.04s" }}
+                                        className="animate-stagger-in"
                                     >
                                         <AdminShortcutCard
                                             isActive={Boolean(pathname?.startsWith(adminShortcut.href))}
                                             item={adminShortcut}
                                             onClick={() => onNavigate(adminShortcut.href)}
                                         />
-                                    </motion.div>
+                                    </div>
                                 ) : null}
 
                                 {shortcuts.length > 0 ? (
                                     <div className="flex w-full flex-col gap-2">
                                         {shortcuts.map((item, index) => (
-                                            <motion.div
+                                            <div
                                                 key={item.id}
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: 20 }}
-                                                transition={{
-                                                    type: "spring",
-                                                    stiffness: 400,
-                                                    damping: 30,
-                                                    delay: index * 0.05,
-                                                }}
+                                                style={{ animationDelay: `${index * 0.05}s` }}
+                                                className="animate-stagger-in"
                                             >
                                                 <FloatingMenuLink
                                                     item={item}
@@ -171,7 +158,7 @@ export function CanhoesFloatingActionMenu({
                                                     onClick={() => onNavigate(item.href)}
                                                     style={{ transitionDelay: `${index * 28}ms` }}
                                                 />
-                                            </motion.div>
+                                            </div>
                                         ))}
                                     </div>
                                 ) : (
@@ -180,11 +167,11 @@ export function CanhoesFloatingActionMenu({
                   </div>
                 )}
                             </div>
-                        </motion.section>
+                        </section>
                     </div>
                 </div>
             ) : null}
-        </AnimatePresence>
+        </>
     );
 }
 

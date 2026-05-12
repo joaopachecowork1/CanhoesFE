@@ -165,7 +165,8 @@ async function forwardToBackend(request: NextRequest, proxyPath: string, method:
   const body = hasRequestBody(method) ? await request.arrayBuffer() : undefined;
 
   const controller = new AbortController();
-  const timerId = setTimeout(() => controller.abort(), 6_000);
+  // Keep this above client timeout (8s) so we return 504 before the browser aborts
+  const timerId = setTimeout(() => controller.abort(), 10_000);
 
   try {
     const response = await fetch(backendUrl, {

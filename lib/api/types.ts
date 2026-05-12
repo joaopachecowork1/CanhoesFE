@@ -1,3 +1,9 @@
+export type CanhoesStateDto = {
+  phase: string;
+  nominationsVisible: boolean;
+  resultsVisible: boolean;
+};
+
 export type EventSummaryDto = {
   id: string;
   name: string;
@@ -15,7 +21,7 @@ export type EventPhaseDto = {
 export type EventPermissionsDto = {
   isAdmin: boolean;
   isMember: boolean;
-  canAccess: boolean;
+  canPost: boolean;
   canSubmitProposal: boolean;
   canVote: boolean;
   canManage: boolean;
@@ -143,6 +149,34 @@ export type CreateEventFeedPostRequest = {
 export type EventActiveContextDto = {
   event: EventSummaryDto;
   overview: EventOverviewDto;
+};
+
+export type EventContextDto = {
+  event: EventSummaryDto;
+  users: EventUserDto[];
+  phases: EventPhaseDto[];
+  activePhase: EventPhaseDto | null;
+};
+
+export type EventFeedPostDto = {
+  id: string;
+  eventId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  imageUrl: string | null;
+  mediaUrls: string[];
+  createdAt: string;
+};
+
+export type EventProposalDto = {
+  id: string;
+  eventId: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  status: string;
+  createdAt: string;
 };
 
 export type EventHomeSnapshotDto = {
@@ -392,6 +426,24 @@ export type AdminNomineesPagedDto = {
   skip: number;
   take: number;
   hasMore: boolean;
+};
+
+export type AdminOfficialResultsDto = {
+  eventId: string;
+  generatedAt: string;
+  totalMembers: number;
+  categories: Array<{
+    categoryId: string;
+    categoryName: string;
+    totalVotes: number;
+    participationRate: number;
+    nominees: Array<{
+      nomineeId: string;
+      nomineeTitle: string;
+      voteCount: number;
+      voterUserIds: string[];
+    }>;
+  }>;
 };
 
 export type HubCommentDto = {

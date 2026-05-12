@@ -1,13 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
 
 import { SectionBoundary } from "@/components/ui/section-boundary";
 import { EmptyState } from "@/components/ui/empty-state";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { feedCopy } from "@/lib/canhoesCopy";
-import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
 import type { FeedSortOrder } from "@/components/modules/hub/hooks/useHubFeed";
 
 import { FeedLoadMore } from "./FeedLoadMore";
@@ -18,13 +17,13 @@ type HubFeedListProps = {
   posts: EventFeedPostFullDto[];
   sort: FeedSortOrder;
   allPostsCount: number;
+  eventId: string;
   isAdmin: boolean;
   hasMore: boolean;
   isFetchingNextPage: boolean;
   currentUserId: string | null;
   currentUserImage: string | null;
   currentUserName: string;
-  comments: Record<string, HubCommentDto[]>;
   openComments: Record<string, boolean>;
   commentDrafts: Record<string, string>;
   onSortChange: (sort: FeedSortOrder) => void;
@@ -45,13 +44,13 @@ export function HubFeedList({
   posts,
   sort,
   allPostsCount,
+  eventId,
   isAdmin,
   hasMore,
   isFetchingNextPage,
   currentUserId,
   currentUserImage,
   currentUserName,
-  comments,
   openComments,
   commentDrafts,
   onSortChange,
@@ -68,14 +67,7 @@ export function HubFeedList({
   sentinelRef,
 }: Readonly<HubFeedListProps>) {
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={sort}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="space-y-3"
-      >
+    <div key={sort} className="animate-fade-in space-y-3">
         {posts.length > 0 ? (
           <FeedSortBar
             allPostsCount={allPostsCount}
@@ -101,10 +93,10 @@ export function HubFeedList({
                     <HubPostCard
                       post={post}
                       index={index}
+                      eventId={eventId}
                       isAdmin={isAdmin}
                       openComments={openComments[post.id] ?? false}
                       commentDraft={commentDrafts[post.id] ?? ""}
-                      comments={comments[post.id] ?? []}
                       currentUserId={currentUserId}
                       currentUserName={currentUserName}
                       currentUserImage={currentUserImage}
@@ -139,7 +131,6 @@ export function HubFeedList({
           onLoadMore={onLoadMore}
           sentinelRef={sentinelRef}
         />
-      </motion.div>
-    </AnimatePresence>
+    </div>
   );
 }

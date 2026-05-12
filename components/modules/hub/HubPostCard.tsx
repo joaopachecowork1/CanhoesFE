@@ -1,12 +1,11 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
 import { BlurFade } from "@/components/animations/BlurFade";
-import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { parsePostText } from "@/lib/postUtils";
 
@@ -41,10 +40,10 @@ const LazyPollBox = dynamic(
 interface HubPostCardProps {
   post: EventFeedPostFullDto;
   index: number;
+  eventId: string;
   isAdmin: boolean;
   openComments: boolean;
   commentDraft: string;
-  comments?: HubCommentDto[];
   currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
@@ -62,10 +61,10 @@ interface HubPostCardProps {
 function HubPostCardComponent({
   post,
   index,
+  eventId,
   isAdmin,
   openComments,
   commentDraft,
-  comments = [],
   currentUserId,
   currentUserName,
   currentUserImage,
@@ -246,35 +245,30 @@ function HubPostCardComponent({
                 {openComments ? "Fechar comentários" : `Comentários (${commentCount})`}
               </button>
 
-              <AnimatePresence initial={false}>
-                {openComments ? (
-                  <motion.div
-                    ref={commentsRef}
-                    key={`${post.id}-comments`}
-                    initial={{ opacity: 0, height: 0, y: -6 }}
-                    animate={{ opacity: 1, height: "auto", y: 0 }}
-                    exit={{ opacity: 0, height: 0, y: -6 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    className="mt-2 overflow-hidden"
-                  >
-                    <LazyHubPostComments
-                      postId={post.id}
-                      postAuthorName={post.authorName}
-                      comments={comments}
-                      commentCount={commentCount}
-                      openComments={openComments}
-                      commentDraft={commentDraft}
-                      currentUserId={currentUserId}
-                      currentUserName={currentUserName}
-                      currentUserImage={currentUserImage}
-                      onToggleComments={onToggleComments}
-                      onAddComment={onAddComment}
-                      onDeleteComment={onDeleteComment}
-                      onCommentDraftChange={onCommentDraftChange}
-                    />
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+              <div
+                ref={commentsRef}
+                className={`mt-2 grid transition-all duration-200 ease-out ${
+                  openComments ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <LazyHubPostComments
+                    postId={post.id}
+                    postAuthorName={post.authorName}
+                    eventId={eventId}
+                    commentCount={commentCount}
+                    openComments={openComments}
+                    commentDraft={commentDraft}
+                    currentUserId={currentUserId}
+                    currentUserName={currentUserName}
+                    currentUserImage={currentUserImage}
+                    onToggleComments={onToggleComments}
+                    onAddComment={onAddComment}
+                    onDeleteComment={onDeleteComment}
+                    onCommentDraftChange={onCommentDraftChange}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

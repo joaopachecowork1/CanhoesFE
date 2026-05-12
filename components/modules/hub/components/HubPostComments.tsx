@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { MessageSquare, Trash2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,13 +21,15 @@ import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { Textarea } from "@/components/ui/textarea";
 import type { HubCommentDto } from "@/lib/api/types";
 import { feedCopy } from "@/lib/canhoesCopy";
+import { COMMENTS_QUERY_KEY } from "../hooks/useHubFeedComments";
+import { feedRepo } from "@/lib/repositories/feedRepo";
 
 import { formatDateTime, initials } from "./hubUtils";
 
 type HubPostCommentsProps = {
   postId: string;
   postAuthorName: string;
-  comments: HubCommentDto[];
+  eventId: string;
   commentCount: number;
   openComments: boolean;
   commentDraft: string;
@@ -42,7 +45,7 @@ type HubPostCommentsProps = {
 export function HubPostComments({
   postId,
   postAuthorName,
-  comments,
+  eventId,
   commentCount,
   openComments,
   commentDraft,
@@ -55,6 +58,16 @@ export function HubPostComments({
   onCommentDraftChange,
 }: Readonly<HubPostCommentsProps>) {
   const [commentPendingDelete, setCommentPendingDelete] = useState<HubCommentDto | null>(null);
+
+  const { data: fetchedComments } = useQuery({
+    queryKey: [COMMENTS_QUERY_KEY, postId],
+    queryFn: () => feedRepo.getComments(eventId, postId),
+    enabled: openComments,
+    staleTime: 30_000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const comments = (fetchedComments ?? []).filter(Boolean);
 
   const sortedComments =
     comments.length < 2

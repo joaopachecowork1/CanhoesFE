@@ -101,7 +101,7 @@ function handleWrite<T>(path: string, options?: { body?: string | null }): T {
   if (path === `v1/events/${MOCK_EVENT_SUMMARY.id}/nominations`) {
     const body = parseBody<{ categoryId?: string | null; title?: string }>(options);
     const alreadyNominated = MOCK_MY_NOMINATION_STATUS.find(
-      (status) => status.categoryId === body.categoryId && status.hasNominated
+      (status) => status.categoryId === body.categoryId && status.hasNomination
     );
 
     if (alreadyNominated) {

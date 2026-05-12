@@ -5,7 +5,7 @@ import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/errors";
 import { feedRepo } from "@/lib/repositories/feedRepo";
 
-import { useHubFeedComments } from "./useHubFeedComments";
+import { COMMENTS_QUERY_KEY, useHubFeedComments } from "./useHubFeedComments";
 import { useHubFeedPostActions } from "./useHubFeedPostActions";
 import { useSignalR } from "@/hooks/useSignalR";
 
@@ -120,7 +120,7 @@ export function useHubFeed(eventId: string | null, currentUserId: string | null,
   const sortedDisplayedPosts = useMemo(() => sortPosts(allSanitizedPosts, sortOrder), [allSanitizedPosts, sortOrder]);
   const totalPostsInView = sortedDisplayedPosts.length;
 
-  const { comments, openComments, commentDrafts, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft } =
+  const { openComments, commentDrafts, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft } =
     useHubFeedComments({ eventId, queryClient });
 
   const {
@@ -198,7 +198,7 @@ export function useHubFeed(eventId: string | null, currentUserId: string | null,
     });
 
     connection.on("CommentCreated", ({ postId, comment }: { postId: string; comment: HubCommentDto }) => {
-      queryClient.invalidateQueries({ queryKey: ["hub-comments", postId] });
+      queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY, postId] });
       
       const isMe = comment.userId && currentUserId && comment.userId.toLowerCase() === currentUserId.toLowerCase();
       if (isMe) return;
@@ -242,7 +242,6 @@ export function useHubFeed(eventId: string | null, currentUserId: string | null,
     hasMore: hasMorePosts,
     loadMore: loadMorePosts,
     isFetchingNextPage,
-    comments,
     openComments,
     commentDrafts,
     showParticles,

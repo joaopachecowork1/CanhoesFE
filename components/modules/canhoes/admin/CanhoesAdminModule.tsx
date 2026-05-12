@@ -45,6 +45,7 @@ function getAdminErrorMessage(error: unknown) {
 
 type CanhoesAdminModuleProps = {
     section: AdminSectionId;
+    initialEventId?: string | null;
 };
 
 // OPTIMIZATION: Moved outside component to avoid recreation on every render
@@ -252,28 +253,30 @@ const AdminMobileSummary = memo(function AdminMobileSummary({
 
 export default function CanhoesAdminModule({
     section,
+    initialEventId,
 }: Readonly<CanhoesAdminModuleProps>) {
     const { event: activeEvent, refresh: refreshOverview } = useEventOverview();
     const queryClient = useQueryClient();
+    const resolvedEventId = activeEvent?.id ?? initialEventId ?? null;
     const {
         error,
         events,
         loading: bootstrapLoading,
         state: eventState,
         summary,
-    } = useAdminBootstrap(activeEvent?.id ?? null);
+    } = useAdminBootstrap(resolvedEventId);
 
     const {
         categoryProposals,
         measureProposals,
         loading: proposalsLoading,
-    } = usePendingProposals(activeEvent?.id ?? null);
+    } = usePendingProposals(resolvedEventId);
 
     const { data: pendingNominationCount = 0, isLoading: pendingNominationCountLoading } =
         useQuery({
-            enabled: Boolean(activeEvent?.id),
-            queryFn: () => adminRepo.getNominationsPaged(activeEvent!.id, 0, 1000, "pending"),
-            queryKey: ["canhoes", "admin", "nominations", "summary", "pending", activeEvent?.id],
+            enabled: Boolean(resolvedEventId),
+            queryFn: () => adminRepo.getNominationsPaged(resolvedEventId!, 0, 1000, "pending"),
+            queryKey: ["canhoes", "admin", "nominations", "summary", "pending", resolvedEventId],
             refetchOnWindowFocus: false,
             select: (data) => data.total,
             staleTime: 1000 * 60 * 2,
@@ -284,16 +287,16 @@ export default function CanhoesAdminModule({
 
     const handleRefresh = useCallback(async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "categories", "pending", activeEvent?.id] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "measures", "pending", activeEvent?.id] }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", activeEvent?.id] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "categories", activeEvent?.id] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "votes", "summary", activeEvent?.id] }),
-            queryClient.invalidateQueries({ queryKey: ["admin", "members", activeEvent?.id, 0, 50] }),
-            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", activeEvent?.id] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "categories", "pending", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "measures", "pending", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "categories", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "votes", "summary", resolvedEventId] }),
+            queryClient.invalidateQueries({ queryKey: ["admin", "members", resolvedEventId, 0, 50] }),
+            queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "secret-santa-state", resolvedEventId] }),
             refreshOverview(),
         ]);
-    }, [activeEvent?.id, queryClient, refreshOverview]);
+    }, [resolvedEventId, queryClient, refreshOverview]);
 
     const dashboardError = getAdminErrorMessage(error);
     const sectionContent = buildSectionContent({

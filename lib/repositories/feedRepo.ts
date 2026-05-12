@@ -38,13 +38,22 @@ export const feedRepo = {
     canhoesFetch<{ downvoted: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/downvote`, { method: "POST" }),
     
   togglePostReaction: (eventId: string, postId: string, emoji: string) =>
-    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}/reactions/${encodeURIComponent(emoji)}`, { method: "POST" }),
+    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}/reactions`, {
+      method: "POST",
+      body: JSON.stringify({ emoji }),
+    }),
     
   toggleCommentReaction: (eventId: string, postId: string, commentId: string, emoji: string) =>
-    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}/comments/${commentId}/reactions/${encodeURIComponent(emoji)}`, { method: "POST" }),
+    canhoesFetch(`/v1/events/${eventId}/feed/posts/${postId}/comments/${commentId}/reactions`, {
+      method: "POST",
+      body: JSON.stringify({ emoji }),
+    }),
     
   votePoll: (eventId: string, postId: string, optionId: string) =>
-    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}/poll/${optionId}`, { method: "POST" }),
+    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}/poll/vote`, {
+      method: "POST",
+      body: JSON.stringify({ optionId }),
+    }),
     
   uploadFeedImages: (eventId: string, files: File[]) =>
     canhoesFetch<string[]>(`/v1/events/${eventId}/feed/uploads`, {

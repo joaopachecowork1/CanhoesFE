@@ -1,12 +1,12 @@
 "use client";
 
-import { Heart, MoreHorizontal } from "lucide-react";
+import Image from "next/image";
+import { Heart, Inbox, MoreHorizontal } from "lucide-react";
 import { absMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import type { NomineeDto } from "@/lib/api/types";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Inbox } from "lucide-react";
 
 const ITEM_CLASS =
   "group relative overflow-hidden rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)] transition-all duration-300 ease-out hover:shadow-[var(--shadow-paper-soft)] mb-6";
@@ -44,16 +44,17 @@ function StickerFeedCard({ sticker }: { sticker: NomineeDto }) {
       {sticker.imageUrl ? (
         <div className="relative w-full bg-[var(--bg-paper-soft)] border-y border-[var(--border-paper-soft)]">
           <div className="absolute inset-0 animate-pulse bg-[rgba(255,255,255,0.08)]" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={absMediaUrl(sticker.imageUrl)}
             alt={sticker.title}
-            loading="lazy"
-            decoding="async"
             sizes="(max-width: 768px) 100vw, 600px"
             className="relative z-10 w-full object-cover max-h-[28rem] sm:max-h-[32rem]"
+            width={600}
+            height={450}
+            unoptimized
             onLoad={(e) => {
-              (e.currentTarget.previousElementSibling as HTMLElement).style.display = 'none';
+              const placeholder = e.currentTarget.previousElementSibling as HTMLElement | null;
+              if (placeholder) placeholder.style.display = 'none';
             }}
           />
         </div>
