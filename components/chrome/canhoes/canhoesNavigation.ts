@@ -167,57 +167,23 @@ const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
   ADMIN_NAV_ITEM,
 ];
 
+const PAGE_CONTEXT_MAP: Record<string, Pick<CanhoesPageContext, "title" | "tone" | "toneLabel">> = {
+  feed: { title: "Mural social", tone: "social", toneLabel: "Social" },
+  voting: { title: "Boletim oficial", tone: "official", toneLabel: "Oficial" },
+  nominees: { title: "Nomeacoes oficiais", tone: "official", toneLabel: "Oficial" },
+  categories: { title: "Categorias oficiais", tone: "official", toneLabel: "Oficial" },
+  admin: { title: "Admin operacional", tone: "admin", toneLabel: "Admin" },
+};
+
 function resolvePageContextFromItem(item: CanhoesNavItem): CanhoesPageContext {
-  switch (item.id) {
-    case "feed":
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: "Mural social",
-        tone: "social",
-        toneLabel: "Social",
-      };
-    case "voting":
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: "Boletim oficial",
-        tone: "official",
-        toneLabel: "Oficial",
-      };
-    case "nominees":
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: "Nomeacoes oficiais",
-        tone: "official",
-        toneLabel: "Oficial",
-      };
-    case "categories":
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: "Categorias oficiais",
-        tone: "official",
-        toneLabel: "Oficial",
-      };
-    case "admin":
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: "Admin operacional",
-        tone: "admin",
-        toneLabel: "Admin",
-      };
-    default:
-      return {
-        description: item.description,
-        shortLabel: item.label,
-        title: item.label,
-        tone: "event",
-        toneLabel: "Evento",
-      };
-  }
+  const overrides = PAGE_CONTEXT_MAP[item.id];
+  return {
+    description: item.description,
+    shortLabel: item.label,
+    title: overrides?.title ?? item.label,
+    tone: overrides?.tone ?? "event",
+    toneLabel: overrides?.toneLabel ?? "Evento",
+  };
 }
 
 export function getPageContext(pathname: string | null): CanhoesPageContext {

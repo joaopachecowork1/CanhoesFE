@@ -126,12 +126,12 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       | undefined;
 
     return {
-      id: backendUserQuery.data?.id || sessionUser?.id || "unknown",
-      email: backendUserQuery.data?.email || sessionUser?.email || "",
+      id: backendUserQuery.data?.id ?? sessionUser?.id ?? "unknown",
+      email: backendUserQuery.data?.email ?? sessionUser?.email ?? "",
       name:
-        backendUserQuery.data?.name ||
-        sessionUser?.name ||
-        sessionUser?.email?.split("@")[0] ||
+        backendUserQuery.data?.name ??
+        sessionUser?.name ??
+        sessionUser?.email?.split("@")[0] ??
         "",
       isAdmin: Boolean(backendUserQuery.data?.isAdmin ?? sessionUser?.isAdmin),
     };

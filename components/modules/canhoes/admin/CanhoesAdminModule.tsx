@@ -144,53 +144,45 @@ function buildSectionContent({
 }: Readonly<BuildSectionContentArgs>): Record<AdminSectionId, () => ReactNode> {
     return {
         dashboard: () => (
-            <Suspense fallback={LOADING_FALLBACK}>
-                <AdminOverviewSection
-                    activeEventName={activeEventName}
-                    eventId={eventId}
-                    loading={loading}
-                    pendingCategoryProposalsCount={categoryProposals.length}
-                    pendingMeasureProposalsCount={measureProposals.length}
-                    pendingNominationCount={pendingNominationCount}
-                    state={eventState as Parameters<typeof AdminOverviewSection>[0]["state"]}
-                />
-            </Suspense>
+            <AdminOverviewSection
+                activeEventName={activeEventName}
+                eventId={eventId}
+                loading={loading}
+                pendingCategoryProposalsCount={categoryProposals.length}
+                pendingMeasureProposalsCount={measureProposals.length}
+                pendingNominationCount={pendingNominationCount}
+                state={eventState as Parameters<typeof AdminOverviewSection>[0]["state"]}
+            />
         ),
         conteudo: () => (
-            <Suspense fallback={LOADING_FALLBACK}>
-                <AdminContentSection
-                    categoryProposals={categoryProposals}
-                    categoriesCount={categoriesCount}
-                    eventId={eventId}
-                    memberCount={summary.memberCount}
-                    officialResultsCount={summary.officialResultsCategoryCount}
-                    pendingNominationCount={pendingNominationCount}
-                    loading={loading}
-                    measureProposals={measureProposals}
-                    onUpdate={handleRefresh}
-                />
-            </Suspense>
+            <AdminContentSection
+                categoryProposals={categoryProposals}
+                categoriesCount={categoriesCount}
+                eventId={eventId}
+                memberCount={summary.memberCount}
+                officialResultsCount={summary.officialResultsCategoryCount}
+                pendingNominationCount={pendingNominationCount}
+                loading={loading}
+                measureProposals={measureProposals}
+                onUpdate={handleRefresh}
+            />
         ),
         membros: () => (
-            <Suspense fallback={LOADING_FALLBACK}>
-                <AdminMembersSection
-                    eventId={eventId}
-                    onUpdate={handleRefresh}
-                    loading={loading}
-                />
-            </Suspense>
+            <AdminMembersSection
+                eventId={eventId}
+                onUpdate={handleRefresh}
+                loading={loading}
+            />
         ),
         configuracoes: () => (
-            <Suspense fallback={LOADING_FALLBACK}>
-                <AdminControlCenter
-                    activeEventName={activeEventName}
-                    eventId={eventId}
-                    events={events}
-                    loading={loading}
-                    onRefresh={handleRefresh}
-                    state={eventState as Parameters<typeof AdminControlCenter>[0]["state"]}
-                />
-            </Suspense>
+            <AdminControlCenter
+                activeEventName={activeEventName}
+                eventId={eventId}
+                events={events}
+                loading={loading}
+                onRefresh={handleRefresh}
+                state={eventState as Parameters<typeof AdminControlCenter>[0]["state"]}
+            />
         ),
     };
 }
@@ -217,7 +209,7 @@ const AdminMobileSummary = memo(function AdminMobileSummary({
         visibleModuleCount: number;
     };
 }>) {
-    const showMobileSummary = Boolean(!loading && activeEvent && section !== "configuracoes");
+    const showMobileSummary = !loading && activeEvent && section !== "configuracoes";
 
     if (!showMobileSummary) {
         return null;
@@ -277,7 +269,7 @@ export default function CanhoesAdminModule({
 
     const { data: pendingNominationCount = 0, isLoading: pendingNominationCountLoading } =
         useQuery({
-            enabled: Boolean(resolvedEventId),
+            enabled: !!resolvedEventId,
             queryFn: () => adminRepo.getNominationsPaged(resolvedEventId!, 0, 1000, "pending"),
             queryKey: ["canhoes", "admin", "nominations", "summary", "pending", resolvedEventId],
             refetchOnWindowFocus: false,
@@ -385,7 +377,9 @@ export default function CanhoesAdminModule({
                 onRetry={() => void handleRefresh()}
                 resetKey={section}
             >
-                {sectionContent[section]()}
+                <Suspense fallback={LOADING_FALLBACK}>
+                    {sectionContent[section]()}
+                </Suspense>
             </SectionBoundary>
         </div>
     );

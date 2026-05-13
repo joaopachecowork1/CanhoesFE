@@ -24,7 +24,7 @@ export function AdminMembersSection({
   onUpdate,
 }: Readonly<AdminMembersSectionProps>) {
   const membersQuery = useQuery({
-    enabled: Boolean(eventId),
+    enabled: !!eventId,
     queryFn: () => adminRepo.getMembersPaged(eventId!, 0, 50),
     queryKey: ["canhoes", "admin", "members", eventId, 0, 50],
     refetchOnWindowFocus: false,
@@ -33,7 +33,7 @@ export function AdminMembersSection({
   });
 
   const secretSantaQuery = useQuery({
-    enabled: Boolean(eventId),
+    enabled: !!eventId,
     queryFn: () => adminRepo.getSecretSantaState(eventId!),
     queryKey: ["canhoes", "admin", "secret-santa-state", eventId],
     refetchOnWindowFocus: false,

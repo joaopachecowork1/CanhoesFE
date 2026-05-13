@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 /**
  * Server-side fetch client for Canhoes API.
@@ -31,7 +32,7 @@ export async function canhoesServerFetch<T>(path: string): Promise<T | null> {
 
     return await res.json();
   } catch (error) {
-    console.error(`Error fetching ${path} on server:`, error);
+    logger.error(`Error fetching ${path} on server:`, error);
     return null;
   }
 }

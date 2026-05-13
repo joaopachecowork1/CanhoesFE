@@ -23,7 +23,7 @@ export function selectModuleItems(
   order: readonly AdminModuleKey[],
   itemsByKey: Partial<Record<AdminModuleKey, ModuleVisibilityItem>>
 ) {
-  return order.map((key) => itemsByKey[key]).filter((item): item is ModuleVisibilityItem => Boolean(item));
+  return order.map((key) => itemsByKey[key]).filter(Boolean) as ModuleVisibilityItem[];
 }
 
 

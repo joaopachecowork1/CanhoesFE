@@ -234,7 +234,7 @@ setInterval(() => {
 }, PENDING_MAX_AGE_MS);
 
 function getDeduplicationKey(path: string, init?: CanhoesRequestInit): string | null {
-  const method = (init?.method || "GET").toUpperCase();
+  const method = (init?.method ?? "GET").toUpperCase();
   if (method !== "GET") return null;
   if (init?.canhoes?.skipDeduplication) return null;
 
@@ -316,7 +316,7 @@ export async function canhoesFetch<T>(
 
   const proxyUrl = `/api/proxy/${normalized}`;
 
-  const headers = new Headers(init?.headers || {});
+  const headers = new Headers(init?.headers ?? {});
   if (!headers.has("Content-Type") && !(init?.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }

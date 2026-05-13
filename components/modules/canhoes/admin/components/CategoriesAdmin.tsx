@@ -98,7 +98,7 @@ function CategoryListItem({
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{category.name}</p>
             <Badge variant="secondary">{CATEGORY_KIND_LABELS[category.kind]}</Badge>
-            <Badge variant={category.isActive ? "default" : "outline"}>{category.isActive ? "Ativa" : "Inativa"}</Badge>
+            {category.isActive ? <Badge variant="default">Ativa</Badge> : <Badge variant="outline">Inativa</Badge>}
           </div>
 
           {category.description ? (

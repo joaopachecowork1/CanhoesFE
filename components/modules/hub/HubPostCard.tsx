@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 
@@ -88,20 +88,10 @@ function HubPostCardComponent({
     }
   }, [openComments]);
 
-  const resolvedMediaUrls = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          [...(post.mediaUrls ?? []), post.mediaUrl].filter(
-            (value): value is string => Boolean(value)
-          )
-        )
-      ),
-    [post.mediaUrls, post.mediaUrl]
-  );
+  const resolvedMediaUrls = [...new Set([...(post.mediaUrls ?? []), post.mediaUrl].filter(Boolean))] as string[];
 
   const hasMedia = resolvedMediaUrls.length > 0;
-  const parsedText = useMemo(() => (post.text?.trim() ? parsePostText(post.text) : null), [post.text]);
+  const parsedText = post.text?.trim() ? parsePostText(post.text) : null;
   const displayScore = (post.likeCount ?? 0) - (post.downvoteCount ?? 0);
   const commentCount = post.commentCount ?? 0;
 

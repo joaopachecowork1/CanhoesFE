@@ -46,14 +46,14 @@ export function CanhoesChrome({
   const pathname = usePathname();
   const router = useRouter();
   const { isLogged, logout, user } = useAuth();
-  const isLocalMode = IS_LOCAL_MODE;
+  
   const eventOverview = useEventOverview();
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
-  const canCompose = Boolean(eventOverview.overview?.modules.feed);
+  const canCompose = !!eventOverview.overview?.modules.feed;
   const { navigateToAdmin: handleNavigateAdmin } = useAdminNavigation({
     canAccessAdmin: isAdmin,
     adminLoading,
-    overviewReady: Boolean(eventOverview.overview),
+    overviewReady: !!eventOverview.overview,
     router,
   });
   
@@ -122,7 +122,7 @@ export function CanhoesChrome({
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
-    isLocalMode,
+    isLocalMode: IS_LOCAL_MODE,
     isMenuOpen,
     onNavigateAdmin: handleNavigateAdmin,
     onOpenMenu: () => handleMenuOpenChange(true),
@@ -267,7 +267,7 @@ export function CanhoesChrome({
           isOpen={isMenuOpen}
           onOpenChange={handleMenuOpenChange}
           isAdmin={isAdmin}
-          isLocalMode={isLocalMode}
+           isLocalMode={IS_LOCAL_MODE}
           overview={eventOverview.overview}
           primaryIds={menuPrimaryIds}
           onNavigate={(href) => {

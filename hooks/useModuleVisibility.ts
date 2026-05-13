@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 import type { AdminModuleKey } from "@/lib/api/types";
 
 export type ModuleVisibilityItem = {
@@ -28,7 +29,7 @@ export function useModuleVisibility(eventId: string) {
         toast.success(`Módulo ${moduleKey} ${!currentValue ? "ativado" : "desativado"}.`);
       } catch (error) {
         toast.error("Erro ao atualizar visibilidade do módulo.");
-        console.error(error);
+        logger.error("Erro ao atualizar visibilidade do módulo.", error);
       } finally {
         setIsUpdating(false);
       }
