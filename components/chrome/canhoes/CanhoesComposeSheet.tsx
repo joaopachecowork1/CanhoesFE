@@ -137,6 +137,12 @@ export function CanhoesComposeSheet({
     const trimmedText = text.trim();
     if (!trimmedText) return;
 
+    const validPollOptions = pollOptions.map((option) => option.trim()).filter(Boolean);
+    if (isPollEnabled && (!pollQuestion.trim() || validPollOptions.length < 2)) {
+      toast.error("Preenche a pergunta e pelo menos duas opções da sondagem.");
+      return;
+    }
+
     if (!eventId) {
       toast.error("Não há evento ativo para publicar no mural.");
       return;
@@ -194,28 +200,27 @@ export function CanhoesComposeSheet({
     }
   };
 
+  const completedPollOptions = pollOptions.filter((option) => option.trim()).length;
+  const isPollComplete =
+    !isPollEnabled || (pollQuestion.trim().length > 0 && completedPollOptions >= 2);
+  const canSubmit = text.trim().length > 0 && isPollComplete && !isSubmitting;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="relative overflow-hidden border-t border-white/10 bg-[rgba(10,14,8,0.75)] backdrop-blur-3xl pb-safe sm:max-w-2xl sm:mx-auto sm:mb-8 sm:rounded-[2rem] sm:border sm:border-white/10 sm:shadow-[0_0_80px_-20px_rgba(79,99,54,0.3)]"
+        className="flex max-h-[92svh] flex-col gap-0 overflow-hidden border-t border-white/10 bg-[rgba(10,14,8,0.98)] p-0 pb-safe sm:mx-auto sm:mb-4 sm:max-h-[calc(100svh-2rem)] sm:max-w-2xl sm:rounded-[1.5rem] sm:border sm:border-white/10"
       >
-        {/* React Bits inspired animated background glow */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]">
-          <div className="absolute -top-[20%] left-[20%] h-[300px] w-[300px] animate-pulse rounded-full bg-[var(--moss)]/15 blur-[100px]" style={{ animationDuration: '5s' }} />
-          <div className="absolute -bottom-[20%] -right-[10%] h-[250px] w-[250px] animate-pulse rounded-full bg-[var(--accent-purple)]/15 blur-[80px]" style={{ animationDuration: '7s', animationDelay: '1s' }} />
-        </div>
-
-        <div className="flex justify-center pt-2 sm:hidden">
+        <div className="flex shrink-0 justify-center pt-2 sm:hidden">
           <span className="h-1.5 w-14 rounded-full bg-white/20" />
         </div>
-        <SheetHeader className="relative z-10 pb-3 sm:pt-4">
+        <SheetHeader className="shrink-0 border-b border-white/10 px-4 pb-3 pt-3 sm:pt-4">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-moss)] text-[var(--ink-primary)]">
               <Leaf className="h-4 w-4" />
             </span>
 
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1 pr-9">
               <SheetTitle>{composeCopy.sheetTitle}</SheetTitle>
               <SheetDescription className="body-small text-[var(--ink-secondary)]">
                 {composeCopy.sheetDescription}
@@ -225,49 +230,51 @@ export function CanhoesComposeSheet({
         </SheetHeader>
 
         {isAuthenticated ? (
-          <div className="space-y-4 px-4 pb-4">
-            <Textarea
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              placeholder={composeCopy.textPlaceholder}
-              className="relative z-10 min-h-[120px] resize-none border-white/10 bg-white/[0.02] text-base shadow-inner transition-all focus-visible:border-[var(--moss)] focus-visible:bg-white/[0.04] focus-visible:shadow-[0_0_0_1px_var(--moss)] sm:min-h-[140px] sm:text-sm"
-              autoFocus
-            />
-
-            <ComposeMediaGrid
-              files={files}
-              maxFiles={MAX_MEDIA_FILES}
-              previewUrls={previewUrls}
-              onMove={handleMoveFile}
-              onRemove={removeFile}
-            />
-
-            {isSubmitting && files.length > 0 ? (
-              <ComposeUploadProgress
-                label={uploadLabel || composeCopy.uploadingFallback}
-                progress={uploadProgress}
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-3">
+              <Textarea
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                placeholder={composeCopy.textPlaceholder}
+                className="min-h-24 resize-none border-white/10 bg-white/[0.03] text-base sm:min-h-28 sm:text-sm"
               />
-            ) : null}
 
-            {isPollEnabled ? (
-              <ComposePollEditor
-                disabled={isSubmitting}
-                maxOptions={MAX_POLL_OPTIONS}
-                onAddOption={addPollOption}
-                onOptionChange={handlePollOptionChange}
-                onQuestionChange={setPollQuestion}
-                onRemoveOption={removePollOption}
-                options={pollOptions}
-                question={pollQuestion}
+              <ComposeMediaGrid
+                files={files}
+                maxFiles={MAX_MEDIA_FILES}
+                previewUrls={previewUrls}
+                onMove={handleMoveFile}
+                onRemove={removeFile}
               />
-            ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {isSubmitting && files.length > 0 ? (
+                <ComposeUploadProgress
+                  label={uploadLabel || composeCopy.uploadingFallback}
+                  progress={uploadProgress}
+                />
+              ) : null}
+
+              {isPollEnabled ? (
+                <ComposePollEditor
+                  disabled={isSubmitting}
+                  maxOptions={MAX_POLL_OPTIONS}
+                  onAddOption={addPollOption}
+                  onOptionChange={handlePollOptionChange}
+                  onQuestionChange={setPollQuestion}
+                  onRemoveOption={removePollOption}
+                  options={pollOptions}
+                  question={pollQuestion}
+                />
+              ) : null}
+            </div>
+
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/10 bg-[rgba(10,14,8,0.98)] px-4 py-3">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   title={composeCopy.mediaLabel}
+                  aria-label={composeCopy.mediaLabel}
                   disabled={isSubmitting || files.length >= MAX_MEDIA_FILES}
                   className={cn(
                     "canhoes-tap relative flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
@@ -288,6 +295,7 @@ export function CanhoesComposeSheet({
                   type="button"
                   onClick={() => setIsPollEnabled((currentValue) => !currentValue)}
                   title={composeCopy.pollLabel}
+                  aria-label={composeCopy.pollLabel}
                   disabled={isSubmitting}
                   className={cn(
                     "canhoes-tap flex h-11 w-11 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-50",
@@ -302,8 +310,8 @@ export function CanhoesComposeSheet({
 
               <Button
                 onClick={() => void handleCreatePost()}
-                disabled={isSubmitting || !text.trim()}
-                className="relative z-10 min-w-[120px] transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_-5px_var(--moss)] active:scale-95"
+                disabled={!canSubmit}
+                className="min-w-[132px]"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -315,7 +323,7 @@ export function CanhoesComposeSheet({
             </div>
           </div>
         ) : (
-          <div className="space-y-3 px-4 pb-4">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
             <p className="body-small text-[var(--ink-secondary)]">
               {composeCopy.authPrompt}
             </p>

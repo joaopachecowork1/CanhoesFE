@@ -31,7 +31,7 @@ export function ComposePollEditor({
   const composeCopy = feedCopy.composer;
 
   return (
-    <div className="space-y-3 rounded-2xl border border-[var(--color-beige-dark)]/25 bg-[var(--color-bg-surface-alt)] p-3">
+    <section className="space-y-2.5 rounded-xl border border-white/10 bg-white/[0.03] p-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
         <BarChart3 className="h-4 w-4 text-[var(--color-fire)]" />
         {composeCopy.pollLabel}
@@ -41,18 +41,19 @@ export function ComposePollEditor({
         value={question}
         onChange={(event) => onQuestionChange(event.target.value)}
         placeholder={composeCopy.pollQuestionPlaceholder}
-        className="min-h-16 resize-none"
+        className="min-h-14 resize-none"
         disabled={disabled}
       />
 
       <div className="space-y-2">
         {options.map((pollOption, index) => (
-          <div key={`poll-${index}-${pollOption.length}`} className="flex gap-2">
+          <div key={`poll-${index}`} className="flex gap-2">
             <Input
               value={pollOption}
               onChange={(event) => onOptionChange(index, event.target.value)}
               placeholder={`${composeCopy.pollOptionPlaceholder} ${index + 1}`}
               disabled={disabled}
+              className="min-w-0 flex-1"
             />
 
             {options.length > 2 ? (
@@ -81,6 +82,6 @@ export function ComposePollEditor({
           </button>
         ) : null}
       </div>
-    </div>
+    </section>
   );
 }
