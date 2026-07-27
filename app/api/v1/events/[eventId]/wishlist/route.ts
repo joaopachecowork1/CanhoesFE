@@ -4,12 +4,13 @@ import { authOptions } from "@/auth";
 import { getWishlistItems, createWishlistItem } from "@/lib/services/memberService";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateWishlistItemSchema } from "@/lib/zod/wishlist";
+import { PagedParamsSchema } from "@/lib/zod/common";
 import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ eventId: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -24,8 +25,14 @@ export async function GET(
     return apiError("MODULE_DISABLED", "Wishlist module not available.", 403);
   }
 
-  const items = await getWishlistItems(eventId, userId);
-  return apiResponse(items);
+  const parsedQuery = PagedParamsSchema.safeParse({
+    skip: req.nextUrl.searchParams.get("skip") ?? undefined,
+    take: req.nextUrl.searchParams.get("take") ?? undefined,
+  });
+  if (!parsedQuery.success) return badRequest("Invalid pagination parameters.");
+
+  const result = await getWishlistItems(eventId, parsedQuery.data.skip, parsedQuery.data.take);
+  return apiResponse(result);
 }
 
 export async function POST(

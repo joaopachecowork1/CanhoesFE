@@ -9,7 +9,6 @@ type AuthHandler = (
 type SessionContext = {
   userId: string;
   isAdmin: boolean;
-  idToken?: string;
 };
 
 export function withAuth(handler: AuthHandler) {

@@ -47,7 +47,8 @@ export default function CanhoesLoginPage() {
 
   useEffect(() => {
     if (!loading && isLogged) {
-      router.replace("/canhoes");
+      const requested = new URLSearchParams(window.location.search).get("callbackUrl");
+      router.replace(requested?.startsWith("/canhoes") ? requested : "/canhoes");
     }
   }, [isLogged, loading, router]);
 

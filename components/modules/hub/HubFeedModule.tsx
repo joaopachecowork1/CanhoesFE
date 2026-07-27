@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useCallback } from "react";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
 
@@ -149,7 +149,7 @@ function HubFeedModuleView({
 }
 
 function useHubFeedModuleState(initialData?: FeedInfiniteData, initialContext?: import("@/lib/api/types").EventActiveContextDto | null) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { user } = useAuth();
   const currentUserId = user?.id ?? null;
   const isAdmin = useIsAdmin();
@@ -160,10 +160,6 @@ function useHubFeedModuleState(initialData?: FeedInfiniteData, initialContext?: 
   const currentUserName = session?.user?.name?.trim() || session?.user?.email?.trim() || "Tu";
   const handleCreatePost = useCreateFeedPost({ eventId });
   const currentUserImage = session?.user?.image ?? null;
-
-  useEffect(() => {
-    if (status === "authenticated" && !session?.idToken) void signOut({ redirect: false }).then(() => signIn("google"));
-  }, [session?.idToken, status]);
 
   return {
     ...feed,

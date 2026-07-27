@@ -6,6 +6,7 @@ import type {
   MyNominationStatusDto,
   NomineeDto,
   EventWishlistItemDto,
+  PagedResult,
 } from "@/lib/api/types";
 
 type CanhoesCategoryResultDto = {
@@ -292,14 +293,20 @@ export async function updateWishlistImage(
 
 export async function getWishlistItems(
   eventId: string,
-  userId: string
-): Promise<EventWishlistItemDto[]> {
-  const items = await prisma.wishlistItem.findMany({
-    where: { eventId, userId },
-    orderBy: { createdAtUtc: "desc" },
-  });
+  skip = 0,
+  take = 50
+): Promise<PagedResult<EventWishlistItemDto>> {
+  const [items, total] = await Promise.all([
+    prisma.wishlistItem.findMany({
+      where: { eventId },
+      orderBy: { createdAtUtc: "desc" },
+      skip,
+      take,
+    }),
+    prisma.wishlistItem.count({ where: { eventId } }),
+  ]);
 
-  return items.map((item) => ({
+  const mappedItems = items.map((item) => ({
     id: item.id,
     userId: item.userId,
     eventId: item.eventId,
@@ -309,6 +316,14 @@ export async function getWishlistItems(
     imageUrl: item.imageUrl,
     updatedAtUtc: item.updatedAtUtc.toISOString(),
   }));
+
+  return {
+    items: mappedItems,
+    total,
+    skip,
+    take,
+    hasMore: skip + take < total,
+  };
 }
 
 export async function createWishlistItem(

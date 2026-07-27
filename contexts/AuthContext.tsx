@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useRef, useState } from "react";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -66,9 +66,18 @@ async function resolveAuthErrorMessage(response: Response) {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function currentCallbackUrl() {
+  if (typeof window === "undefined") return "/canhoes";
+  const requested = new URLSearchParams(window.location.search).get("callbackUrl");
+  return requested?.startsWith("/canhoes") ? requested : "/canhoes";
+}
+
 export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
-  const { data: session, status } = useSession();
+  const { data: session, status, update: updateSession } = useSession();
   const isLoggedIn = status === "authenticated";
+  const autoLoginAttempted = useRef(false);
+  const [autoLoginPending, setAutoLoginPending] = useState(false);
+  const [autoLoginFailed, setAutoLoginFailed] = useState(false);
 
   const isDevAuthBypass = session?.authMode === "development";
   const providersQuery = useQuery({
@@ -79,8 +88,33 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   });
   const isDevLoginAvailable = Boolean(providersQuery.data?.development);
 
+  useEffect(() => {
+    if (
+      status !== "unauthenticated"
+      || !isDevLoginAvailable
+      || autoLoginAttempted.current
+    ) {
+      return;
+    }
+
+    autoLoginAttempted.current = true;
+    setAutoLoginPending(true);
+    setAutoLoginFailed(false);
+
+    void signIn("development", {
+      callbackUrl: currentCallbackUrl(),
+      redirect: false,
+    })
+      .then(async (result) => {
+        if (!result?.ok) throw new Error(result?.error ?? "Development login failed.");
+        await updateSession();
+      })
+      .catch(() => setAutoLoginFailed(true))
+      .finally(() => setAutoLoginPending(false));
+  }, [isDevLoginAvailable, status, updateSession]);
+
   const backendUserQuery = useQuery<AuthUser | null>({
-    queryKey: ["auth", "me", session?.idToken],
+    queryKey: ["auth", "me", session?.user?.id],
     enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 15,
@@ -146,11 +180,11 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   }, [backendUserQuery.error]);
 
   const loginGoogle = useCallback(() => {
-    void signIn("google", { callbackUrl: "/canhoes" });
+    void signIn("google", { callbackUrl: currentCallbackUrl() });
   }, []);
 
   const loginDevelopment = useCallback(() => {
-    void signIn("development", { callbackUrl: "/canhoes" });
+    void signIn("development", { callbackUrl: currentCallbackUrl() });
   }, []);
 
   const logout = useCallback(() => {
@@ -161,7 +195,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     await backendUserQuery.refetch();
   }, [backendUserQuery]);
 
-  const isLoading = status === "loading";
+  const isLoading = status === "loading"
+    || providersQuery.isLoading
+    || autoLoginPending
+    || (status === "unauthenticated" && isDevLoginAvailable && !autoLoginFailed);
   const isProfileLoading = backendUserQuery.isLoading;
 
   const value = useMemo<AuthContextType>(

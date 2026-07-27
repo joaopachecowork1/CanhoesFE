@@ -44,7 +44,7 @@ export function CanhoesChrome({
 }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isLogged, logout, user } = useAuth();
+  const { isLogged, isDevAuthBypass, logout, user } = useAuth();
   
   const eventOverview = useEventOverview();
   const { isAdmin, isLoading: adminLoading } = useAdminStatus();
@@ -186,7 +186,7 @@ export function CanhoesChrome({
               </div>
 
               <div className="flex items-center gap-1.5">
-                {isLogged ? (
+                {isLogged && !isDevAuthBypass ? (
                   <Button
                     variant="ghost"
                     size="icon"

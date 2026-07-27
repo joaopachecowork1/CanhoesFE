@@ -49,3 +49,18 @@ export async function resolveUser(
     isAdmin: user.isAdmin,
   };
 }
+
+export async function resolveDevelopmentAdmin(
+  externalId: string,
+  email: string,
+  displayName: string
+): Promise<ResolvedUser> {
+  const user = await resolveUser(externalId, email, displayName);
+  if (user.isAdmin) return user;
+
+  return prisma.user.update({
+    where: { id: user.id },
+    data: { isAdmin: true },
+    select: { id: true, email: true, displayName: true, isAdmin: true },
+  });
+}

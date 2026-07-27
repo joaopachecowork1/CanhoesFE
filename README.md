@@ -23,7 +23,7 @@ npm run dev
 
 A aplicação fica disponível em `http://localhost:3000/canhoes`.
 
-O login Google requer `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`. Para desenvolvimento sem Google, definir `DEV_AUTH_BYPASS_ENABLED=true`; isto ativa um provider Credentials real do NextAuth, resolve o utilizador na base de dados e é recusado em produção. O utilizador local é configurado por `DEV_AUTH_EMAIL` e `DEV_AUTH_NAME`.
+O login Google requer `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`, com o redirect URI `http://localhost:3000/api/auth/callback/google` registado na Google. Em desenvolvimento, `DEV_AUTH_BYPASS_ENABLED=true` cria automaticamente uma sessão local persistente e garante que o utilizador configurado por `DEV_AUTH_EMAIL` e `DEV_AUTH_NAME` é admin na base de dados. Este modo é sempre recusado em produção.
 
 ## Base de dados
 

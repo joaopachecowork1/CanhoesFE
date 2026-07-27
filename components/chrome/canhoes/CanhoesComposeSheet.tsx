@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { BarChart3, ImagePlus, Leaf, Loader2, Send } from "lucide-react";
 
@@ -11,6 +11,7 @@ import { feedRepo } from "@/lib/repositories/feedRepo";
 import { cn } from "@/lib/utils";
 import { MAX_MEDIA_FILES, MAX_POLL_OPTIONS, useComposer } from "@/components/modules/hub/hooks/useComposer";
 import { useEventOverview } from "@/hooks/useEventOverview";
+import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -36,6 +37,7 @@ export function CanhoesComposeSheet({
   onDone?: () => void;
 }>) {
   const { status } = useSession();
+  const { loginGoogle, loginDevelopment, isDevLoginAvailable } = useAuth();
   const isAuthenticated = status === "authenticated";
   const { event: activeEvent } = useEventOverview();
   const eventId = activeEvent?.id ?? null;
@@ -317,7 +319,10 @@ export function CanhoesComposeSheet({
             <p className="body-small text-[var(--ink-secondary)]">
               {composeCopy.authPrompt}
             </p>
-            <Button onClick={() => signIn("google")} className="w-full">
+            <Button
+              onClick={isDevLoginAvailable ? loginDevelopment : loginGoogle}
+              className="w-full"
+            >
               {composeCopy.signIn}
             </Button>
           </div>

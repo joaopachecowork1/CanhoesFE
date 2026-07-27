@@ -1,7 +1,11 @@
 import { withAuth } from "next-auth/middleware";
+import { isDevelopmentAuthEnabled } from "@/lib/auth/developmentAuth";
 
-export function shouldRedirectUnauthenticated(token: unknown) {
-  return !token;
+export function shouldRedirectUnauthenticated(
+  token: unknown,
+  developmentAuthEnabled = isDevelopmentAuthEnabled()
+) {
+  return !token && !developmentAuthEnabled;
 }
 
 export default withAuth(
