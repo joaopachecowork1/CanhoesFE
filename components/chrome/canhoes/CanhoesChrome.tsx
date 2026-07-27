@@ -52,21 +52,15 @@ export function CanhoesChrome({
   const { navigateToAdmin: handleNavigateAdmin } = useAdminNavigation({
     canAccessAdmin: isAdmin,
     adminLoading,
-    overviewReady: !!eventOverview.overview,
     router,
   });
   
 
   const [isComposeSheetOpen, setIsComposeSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hasOpenedComposeSheet, setHasOpenedComposeSheet] = useState(false);
   const [hasOpenedMenu, setHasOpenedMenu] = useState(false);
 
   const handleComposeSheetChange = useCallback((open: boolean) => {
-    if (open) {
-      setHasOpenedComposeSheet(true);
-    }
-
     setIsComposeSheetOpen(open);
   }, []);
 
@@ -92,7 +86,6 @@ export function CanhoesChrome({
   useEffect(() => {
     const handleOpenCompose = () => {
       if (!canCompose) return;
-      setHasOpenedComposeSheet(true);
       setIsComposeSheetOpen(true);
     };
 
@@ -121,7 +114,7 @@ export function CanhoesChrome({
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
-    isLocalMode: false,
+    isLocalMode: isDevAuthBypass,
     isMenuOpen,
     onNavigateAdmin: handleNavigateAdmin,
     onOpenMenu: () => handleMenuOpenChange(true),
@@ -266,7 +259,7 @@ export function CanhoesChrome({
           isOpen={isMenuOpen}
           onOpenChange={handleMenuOpenChange}
           isAdmin={isAdmin}
-           isLocalMode={false}
+          isLocalMode={isDevAuthBypass}
           overview={eventOverview.overview}
           primaryIds={menuPrimaryIds}
           onNavigate={(href) => {
@@ -276,7 +269,7 @@ export function CanhoesChrome({
         />
       ) : null}
 
-      {isComposeSheetOpen || hasOpenedComposeSheet ? (
+      {isComposeSheetOpen ? (
         <LazyCanhoesComposeSheet
           open={isComposeSheetOpen}
           onOpenChange={handleComposeSheetChange}

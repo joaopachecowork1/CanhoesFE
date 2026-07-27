@@ -89,7 +89,7 @@ export function CanhoesFloatingActionMenu({
   return (
     <>
       {isOpen ? (
-        <div className="animate-fade-in fixed inset-0 z-50">
+        <div className="animate-fade-in fixed inset-0 z-[80]">
           <button
             type="button"
             aria-label="Fechar menu"

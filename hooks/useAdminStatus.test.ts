@@ -3,15 +3,12 @@ import { describe, expect, it } from "vitest";
 import { resolveAdminStatus } from "@/lib/auth/adminStatus";
 
 describe("resolveAdminStatus", () => {
-  it("prefers backend profile admin without waiting for event overview", () => {
+  it("accepts a database-backed admin profile without further waiting", () => {
     const result = resolveAdminStatus({
       authLoading: false,
-      eventOverviewError: null,
-      eventOverviewLoading: true,
       isLogged: true,
-      overviewIsAdmin: false,
       profileError: null,
-      profileLoading: false,
+      profileLoading: true,
       userIsAdmin: true,
     });
 
@@ -23,10 +20,7 @@ describe("resolveAdminStatus", () => {
   it("keeps loading while admin confirmation is still unresolved", () => {
     const result = resolveAdminStatus({
       authLoading: false,
-      eventOverviewError: null,
-      eventOverviewLoading: true,
       isLogged: true,
-      overviewIsAdmin: false,
       profileError: null,
       profileLoading: true,
       userIsAdmin: false,
@@ -40,10 +34,7 @@ describe("resolveAdminStatus", () => {
     const error = new Error("backend down");
     const result = resolveAdminStatus({
       authLoading: false,
-      eventOverviewError: null,
-      eventOverviewLoading: false,
       isLogged: true,
-      overviewIsAdmin: false,
       profileError: error,
       profileLoading: false,
       userIsAdmin: false,
@@ -52,5 +43,18 @@ describe("resolveAdminStatus", () => {
     expect(result.isAdmin).toBe(false);
     expect(result.isLoading).toBe(false);
     expect(result.error).toBe(error);
+  });
+
+  it("never grants admin access to a signed-out profile", () => {
+    const result = resolveAdminStatus({
+      authLoading: false,
+      isLogged: false,
+      profileError: null,
+      profileLoading: false,
+      userIsAdmin: true,
+    });
+
+    expect(result.isAdmin).toBe(false);
+    expect(result.source).toBeNull();
   });
 });

@@ -14,7 +14,7 @@ import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 import { ComposeMediaGrid } from "./compose/ComposeMediaGrid";
@@ -61,21 +61,18 @@ export function CanhoesComposeSheet({
       reset: resetBase,
     },
     refs: { fileInputRef },
-  } = useComposer({
-    onReset: () => {
+  } = useComposer();
+
+  useEffect(() => {
+    if (!open) {
+      resetBase();
       setUploadProgress(0);
       setUploadLabel("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    },
-  });
-
-  useEffect(() => {
-    if (!open) {
-      resetBase();
     }
-  }, [open, resetBase]);
+  }, [fileInputRef, open, resetBase]);
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList) return;
@@ -199,7 +196,10 @@ export function CanhoesComposeSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="relative overflow-hidden border-t border-white/10 bg-[rgba(10,14,8,0.75)] backdrop-blur-3xl pb-safe sm:max-w-2xl sm:mx-auto sm:mb-8 sm:rounded-[2rem] sm:border sm:border-white/10 sm:shadow-[0_0_80px_-20px_rgba(79,99,54,0.3)]">
+      <SheetContent
+        side="bottom"
+        className="relative overflow-hidden border-t border-white/10 bg-[rgba(10,14,8,0.75)] backdrop-blur-3xl pb-safe sm:max-w-2xl sm:mx-auto sm:mb-8 sm:rounded-[2rem] sm:border sm:border-white/10 sm:shadow-[0_0_80px_-20px_rgba(79,99,54,0.3)]"
+      >
         {/* React Bits inspired animated background glow */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]">
           <div className="absolute -top-[20%] left-[20%] h-[300px] w-[300px] animate-pulse rounded-full bg-[var(--moss)]/15 blur-[100px]" style={{ animationDuration: '5s' }} />
@@ -217,9 +217,9 @@ export function CanhoesComposeSheet({
 
             <div className="space-y-1">
               <SheetTitle>{composeCopy.sheetTitle}</SheetTitle>
-              <p className="body-small text-[var(--ink-secondary)]">
+              <SheetDescription className="body-small text-[var(--ink-secondary)]">
                 {composeCopy.sheetDescription}
-              </p>
+              </SheetDescription>
             </div>
           </div>
         </SheetHeader>

@@ -15,12 +15,7 @@ export interface ComposerState {
   isSubmitting: boolean;
 }
 
-export interface UseComposerOptions {
-  /** Called when the sheet/modal closes to clean up side effects */
-  onReset?: () => void;
-}
-
-export function useComposer({ onReset }: UseComposerOptions = {}) {
+export function useComposer() {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +27,7 @@ export function useComposer({ onReset }: UseComposerOptions = {}) {
 
   useEffect(() => {
     if (files.length === 0) {
-      setPreviewUrls([]);
+      setPreviewUrls((currentUrls) => (currentUrls.length === 0 ? currentUrls : []));
       return;
     }
 
@@ -50,8 +45,7 @@ export function useComposer({ onReset }: UseComposerOptions = {}) {
     setIsPollEnabled(false);
     setPollQuestion("");
     setPollOptions(["", ""]);
-    onReset?.();
-  }, [onReset]);
+  }, []);
 
   const handleFiles = useCallback((fileList: FileList | null) => {
     if (!fileList) return;
