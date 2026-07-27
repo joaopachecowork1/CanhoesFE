@@ -55,6 +55,7 @@ interface HubPostCardProps {
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
   onAdminPin: (postId: string) => void;
+  onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
 }
 
@@ -76,6 +77,7 @@ function HubPostCardComponent({
   onDeleteComment,
   onCommentDraftChange,
   onAdminPin,
+  onAdminMovePinned,
   onAdminDelete,
 }: Readonly<HubPostCardProps>) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -178,6 +180,8 @@ function HubPostCardComponent({
                 isPinned={post.isPinned}
                 isAdmin={isAdmin}
                 onAdminPin={() => onAdminPin(post.id)}
+                onAdminMoveUp={() => onAdminMovePinned(post.id, "up")}
+                onAdminMoveDown={() => onAdminMovePinned(post.id, "down")}
                 onAdminDelete={() => onAdminDelete(post.id)}
               />
 

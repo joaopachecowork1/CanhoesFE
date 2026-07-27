@@ -219,9 +219,10 @@ model HubPost {
   authorUserId  String   @map("AuthorUserId") @db.Uuid
   text          String   @map("Text") @db.VarChar(4000)
   mediaUrl      String?  @map("MediaUrl") @db.VarChar(1024)
-  mediaUrlsJson Json     @default("[]") @map("MediaUrlsJson")
-  isPinned      Boolean  @map("IsPinned")
-  createdAtUtc  DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+    mediaUrlsJson Json     @default("[]") @map("MediaUrlsJson")
+    isPinned      Boolean  @map("IsPinned")
+    pinnedOrder   Int?     @map("PinnedOrder")
+    createdAtUtc  DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
   comments      HubPostComment[]
   downvotes     HubPostDownvote[]
   likes         HubPostLike[]
@@ -231,7 +232,8 @@ model HubPost {
 
   @@index([authorUserId], map: "IX_HubPosts_AuthorUserId")
   @@index([createdAtUtc], map: "IX_HubPosts_CreatedAtUtc")
-  @@index([eventId, isPinned, createdAtUtc], map: "IX_HubPosts_EventId_IsPinned_CreatedAtUtc")
+    @@index([eventId, isPinned, createdAtUtc], map: "IX_HubPosts_EventId_IsPinned_CreatedAtUtc")
+    @@index([eventId, isPinned, pinnedOrder], map: "IX_HubPosts_EventId_IsPinned_PinnedOrder")
   @@index([isPinned], map: "IX_HubPosts_IsPinned")
   @@map("HubPosts")
 }

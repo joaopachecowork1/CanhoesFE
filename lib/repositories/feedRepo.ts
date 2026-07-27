@@ -55,15 +55,23 @@ export const feedRepo = {
       body: JSON.stringify({ optionId }),
     }),
     
-  uploadFeedImages: (eventId: string, files: File[]) =>
-    canhoesFetch<string[]>(`/v1/events/${eventId}/feed/uploads`, {
+  uploadFeedImages: async (eventId: string, files: File[]) => {
+    const response = await canhoesFetch<{ files: Array<{ url: string }> }>(`/v1/events/${eventId}/feed/uploads`, {
       method: "POST",
       body: toFormData(files),
       canhoes: { skipDeduplication: true },
-    }),
+    });
+    return response.files.map((file) => file.url);
+  },
 
   adminPinPost: (eventId: string, postId: string) =>
-    canhoesFetch<{ pinned: boolean }>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, { method: "POST" }),
+    canhoesFetch<{ pinned: boolean; pinnedOrder: number | null }>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, { method: "POST" }),
+
+  adminMovePinnedPost: (eventId: string, postId: string, direction: "up" | "down") =>
+    canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}/pin`, {
+      method: "PATCH",
+      body: JSON.stringify({ direction }),
+    }),
     
   adminDeletePost: (eventId: string, postId: string) =>
     canhoesFetch<void>(`/v1/events/${eventId}/feed/posts/${postId}`, { method: "DELETE" }),

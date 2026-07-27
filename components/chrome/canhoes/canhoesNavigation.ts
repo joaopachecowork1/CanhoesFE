@@ -4,7 +4,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Flame,
   Gift,
-  House,
   Medal,
   Menu,
   Ruler,
@@ -43,9 +42,9 @@ export type CanhoesPageContext = {
 
 export const HOME_NAV_ITEM: CanhoesNavItem = {
   href: "/canhoes",
-  icon: House,
+  icon: ScrollText,
   id: "home",
-  label: "Evento",
+  label: "Mural",
 };
 
 const MODULE_ITEM_ID_BY_KEY: Record<CanhoesMemberModuleKey, string> = {
@@ -167,6 +166,7 @@ const STATIC_PAGE_TITLES: readonly Pick<CanhoesNavItem, "href" | "label">[] = [
 ];
 
 const PAGE_CONTEXT_MAP: Record<string, Pick<CanhoesPageContext, "title" | "tone" | "toneLabel">> = {
+  home: { title: "Mural social", tone: "social", toneLabel: "Social" },
   feed: { title: "Mural social", tone: "social", toneLabel: "Social" },
   voting: { title: "Boletim oficial", tone: "official", toneLabel: "Oficial" },
   nominees: { title: "Nomeacoes oficiais", tone: "official", toneLabel: "Oficial" },
@@ -188,15 +188,17 @@ function resolvePageContextFromItem(item: CanhoesNavItem): CanhoesPageContext {
 export function getPageContext(pathname: string | null): CanhoesPageContext {
   if (!pathname) {
     return {
-      description: "Resumo da fase e acesso rapido as areas abertas desta edicao.",
+      description: "Publicações, fotografias e sondagens do grupo.",
       shortLabel: HOME_NAV_ITEM.label,
-      title: "Evento",
-      tone: "event",
-      toneLabel: "Evento",
+      title: "Mural social",
+      tone: "social",
+      toneLabel: "Social",
     };
   }
 
-  const matchedStaticPage = STATIC_PAGE_TITLES.find(({ href }) => pathname.startsWith(href));
+  const matchedStaticPage = [...STATIC_PAGE_TITLES]
+    .sort((left, right) => right.href.length - left.href.length)
+    .find(({ href }) => pathname === href || pathname.startsWith(`${href}/`));
   if (matchedStaticPage) {
     const navItem = [HOME_NAV_ITEM, ...ORDERED_MEMBER_NAV_ITEMS, ADMIN_NAV_ITEM].find(
       (item) => item.href === matchedStaticPage.href
@@ -207,11 +209,11 @@ export function getPageContext(pathname: string | null): CanhoesPageContext {
   }
 
   return {
-    description: "Resumo da fase e acesso rapido as areas abertas desta edicao.",
+    description: "Publicações, fotografias e sondagens do grupo.",
     shortLabel: HOME_NAV_ITEM.label,
-    title: "Evento",
-    tone: "event",
-    toneLabel: "Evento",
+    title: "Mural social",
+    tone: "social",
+    toneLabel: "Social",
   };
 }
 
@@ -250,7 +252,7 @@ export function getPromotedNavItems({
   isLocalMode?: boolean;
   overview?: EventOverviewDto | null;
 }>) {
-  return ORDERED_MEMBER_NAV_ITEMS.filter((item) =>
+  return ORDERED_MEMBER_NAV_ITEMS.filter((item) => item.id !== MODULE_ITEM_ID_BY_KEY.feed).filter((item) =>
     isNavItemAvailable({
       itemId: item.id,
       isAdmin,
@@ -276,6 +278,7 @@ export function getVisibleMoreNavItems({
   overview?: EventOverviewDto | null;
 }>) {
   return ORDERED_MEMBER_NAV_ITEMS.filter((item) => {
+    if (item.id === MODULE_ITEM_ID_BY_KEY.feed) return false;
     if (excludedIds.includes(item.id)) return false;
 
     return isNavItemAvailable({

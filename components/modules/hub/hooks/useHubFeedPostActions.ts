@@ -90,7 +90,21 @@ function applyPollVote(post: EventFeedPostFullDto, optionId: string) {
 
   const currentPoll = post.poll;
   const previousOptionId = currentPoll.myOptionId ?? null;
-  if (previousOptionId === optionId) return post;
+  if (previousOptionId === optionId) {
+    return {
+      ...post,
+      poll: {
+        ...currentPoll,
+        myOptionId: null,
+        totalVotes: Math.max(0, currentPoll.totalVotes - 1),
+        options: currentPoll.options.map((option) =>
+          option.id === optionId
+            ? { ...option, voteCount: Math.max(0, option.voteCount - 1) }
+            : option
+        ),
+      },
+    };
+  }
 
   const options = currentPoll.options.map((option) => {
     if (option.id === optionId) {
@@ -126,6 +140,7 @@ function sortPinnedPosts(old: FeedInfiniteData | undefined) {
       ...page,
       posts: [...page.posts].sort((left, right) =>
         Number(Boolean(right.isPinned)) - Number(Boolean(left.isPinned)) ||
+        (left.pinnedOrder ?? Number.MAX_SAFE_INTEGER) - (right.pinnedOrder ?? Number.MAX_SAFE_INTEGER) ||
         String(right.createdAtUtc).localeCompare(String(left.createdAtUtc))
       ),
     })),
@@ -306,7 +321,9 @@ export function useHubFeedPostActions({
       const result = await feedRepo.adminPinPost(eventId, postId);
       queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (old) => {
         const updated = updateInfiniteFeedPosts(old, (post) =>
-          post.id === postId ? { ...post, isPinned: result.pinned } : post
+          post.id === postId
+            ? { ...post, isPinned: result.pinned, pinnedOrder: result.pinnedOrder }
+            : post
         );
 
         return sortPinnedPosts(updated);
@@ -314,6 +331,19 @@ export function useHubFeedPostActions({
     } catch (error) {
       const message = getErrorMessage(error, "Não foi possível atualizar o destaque do post.");
       logFrontendError("HubFeed.adminPin", error, { postId });
+      toast.error(message);
+    }
+  }, [queryClient, eventId]);
+
+  const adminMovePinned = useCallback(async (postId: string, direction: "up" | "down") => {
+    if (!eventId) return;
+
+    try {
+      await feedRepo.adminMovePinnedPost(eventId, postId, direction);
+      await queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
+    } catch (error) {
+      const message = getErrorMessage(error, "Não foi possível reordenar o post fixado.");
+      logFrontendError("HubFeed.adminMovePinned", error, { direction, postId });
       toast.error(message);
     }
   }, [queryClient, eventId]);
@@ -349,6 +379,7 @@ export function useHubFeedPostActions({
     toggleDownvote,
     votePoll,
     adminPin,
+    adminMovePinned,
     adminDelete,
   };
 }

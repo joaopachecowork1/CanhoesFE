@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { deleteUpload } from "@/lib/storage/localStorage";
 import type {
   EventFeedPostFullDto,
   EventFeedPollDto,
@@ -14,6 +15,7 @@ type PostRow = {
   mediaUrl: string | null;
   mediaUrlsJson: unknown;
   isPinned: boolean;
+  pinnedOrder: number | null;
   createdAtUtc: Date;
 };
 
@@ -94,6 +96,7 @@ async function enrichPost(post: PostRow, userId: string): Promise<EventFeedPostF
     mediaUrl: post.mediaUrl,
     mediaUrls: Array.isArray(post.mediaUrlsJson) ? post.mediaUrlsJson as string[] : [],
     isPinned: post.isPinned,
+    pinnedOrder: post.pinnedOrder,
     createdAtUtc: post.createdAtUtc.toISOString(),
     likeCount,
     commentCount,
@@ -117,12 +120,12 @@ export async function getFeedPosts(
     prisma.hubPost.count({ where }),
     prisma.hubPost.findMany({
       where,
-      orderBy: [{ isPinned: "desc" }, { createdAtUtc: "desc" }],
+      orderBy: [{ isPinned: "desc" }, { pinnedOrder: "asc" }, { createdAtUtc: "desc" }],
       skip,
       take,
       select: {
         id: true, eventId: true, authorUserId: true, text: true,
-        mediaUrl: true, mediaUrlsJson: true, isPinned: true, createdAtUtc: true,
+        mediaUrl: true, mediaUrlsJson: true, isPinned: true, pinnedOrder: true, createdAtUtc: true,
       },
     }),
   ]);
@@ -184,6 +187,7 @@ export async function getFeedPosts(
       mediaUrl: post.mediaUrl,
       mediaUrls: Array.isArray(post.mediaUrlsJson) ? post.mediaUrlsJson as string[] : [],
       isPinned: post.isPinned,
+      pinnedOrder: post.pinnedOrder,
       createdAtUtc: post.createdAtUtc.toISOString(),
       likeCount: reactionCounts.heart ?? 0,
       commentCount: commentCountMap.get(post.id) ?? 0,
@@ -218,8 +222,8 @@ export async function createFeedPost(
         text: data.text.trim(),
         mediaUrl: data.mediaUrl ?? null,
         mediaUrlsJson: data.mediaUrls ?? [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Json field
-      } as any,
+        isPinned: false,
+      },
     });
 
     if (data.pollQuestion) {
@@ -447,17 +451,60 @@ export async function votePoll(
 export async function togglePin(
   eventId: string,
   postId: string
-): Promise<boolean> {
-  const post = await prisma.hubPost.findFirst({
-    where: { id: postId, eventId },
-  });
-  if (!post) return false;
+): Promise<{ pinned: boolean; pinnedOrder: number | null } | null> {
+  return prisma.$transaction(async (tx) => {
+    const post = await tx.hubPost.findFirst({
+      where: { id: postId, eventId },
+      select: { isPinned: true },
+    });
+    if (!post) return null;
 
-  await prisma.hubPost.update({
-    where: { id: postId },
-    data: { isPinned: !post.isPinned },
+    const pinned = !post.isPinned;
+    const lastPinned = pinned
+      ? await tx.hubPost.findFirst({
+          where: { eventId, isPinned: true },
+          orderBy: { pinnedOrder: "desc" },
+          select: { pinnedOrder: true },
+        })
+      : null;
+    const pinnedOrder = pinned ? (lastPinned?.pinnedOrder ?? -1) + 1 : null;
+
+    await tx.hubPost.update({
+      where: { id: postId },
+      data: { isPinned: pinned, pinnedOrder },
+    });
+
+    return { pinned, pinnedOrder };
   });
-  return true;
+}
+
+export async function movePinnedPost(
+  eventId: string,
+  postId: string,
+  direction: "up" | "down"
+): Promise<boolean> {
+  return prisma.$transaction(async (tx) => {
+    const pinnedPosts = await tx.hubPost.findMany({
+      where: { eventId, isPinned: true },
+      orderBy: [{ pinnedOrder: "asc" }, { createdAtUtc: "asc" }],
+      select: { id: true },
+    });
+    const index = pinnedPosts.findIndex((post) => post.id === postId);
+    if (index < 0) return false;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= pinnedPosts.length) return true;
+
+    await Promise.all(
+      pinnedPosts.map((post, position) => {
+        let pinnedOrder = position;
+        if (position === index) pinnedOrder = targetIndex;
+        if (position === targetIndex) pinnedOrder = index;
+        return tx.hubPost.update({ where: { id: post.id }, data: { pinnedOrder } });
+      })
+    );
+    return true;
+  });
 }
 
 export async function deleteFeedPost(
@@ -466,9 +513,11 @@ export async function deleteFeedPost(
 ): Promise<boolean> {
   const post = await prisma.hubPost.findFirst({
     where: { id: postId, eventId },
+    include: { media: { select: { url: true } } },
   });
   if (!post) return false;
 
   await prisma.hubPost.delete({ where: { id: postId } });
+  await Promise.all(post.media.map((media) => deleteUpload(media.url)));
   return true;
 }

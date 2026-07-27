@@ -2,7 +2,6 @@
 
 import { useCallback } from "react";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 import { ScrollText } from "lucide-react";
 
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
@@ -12,11 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { feedCopy } from "@/lib/canhoesCopy";
 import { useIsAdmin } from "@/lib/auth/useIsAdmin";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { SectionBoundary } from "@/components/ui/section-boundary";
-import { CanhoesDecorativeDivider } from "@/components/ui/canhoes-bits";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { HubFeedList } from "./HubFeedList";
-import { useCreateFeedPost } from "./useCreateFeedPost";
 import { useFeedInfiniteScroll } from "./useFeedInfiniteScroll";
 import type { EventFeedPostFullDto } from "@/lib/api/types";
 
@@ -27,34 +23,10 @@ type FeedPageData = {
 
 type FeedInfiniteData = { pages: FeedPageData[]; pageParams: unknown[] };
 
-
-const loadPostComposer = () =>
-  import("./components/PostComposer").then((module) => ({
-    default: module.PostComposer,
-  }));
-
-const loadFeedInsightsPanel = () =>
-  import("./components/FeedInsightsPanel").then((module) => ({
-    default: module.FeedInsightsPanel,
-  }));
-
-const LazyPostComposer = dynamic(loadPostComposer, {
-  loading: () => <ComposerFallback />,
-  ssr: false,
-});
-
-const LazyFeedInsightsPanel = dynamic(loadFeedInsightsPanel, {
-  loading: () => <FeedInsightsFallback />,
-  ssr: false,
-});
-
-
 export function HubFeedModule({
-  showComposer = true,
   initialData,
   initialContext,
 }: Readonly<{
-  showComposer?: boolean;
   initialData?: FeedInfiniteData;
   initialContext?: import("@/lib/api/types").EventActiveContextDto | null;
 }>) {
@@ -62,14 +34,12 @@ export function HubFeedModule({
 
   if (state.loading && !initialData) return <FeedSkeleton count={3} />;
 
-  return <HubFeedModuleView showComposer={showComposer} state={state} />;
+  return <HubFeedModuleView state={state} />;
 }
 
 function HubFeedModuleView({
-  showComposer,
   state,
 }: Readonly<{
-  showComposer: boolean;
   state: ReturnType<typeof useHubFeedModuleState>;
 }>) {
   const {
@@ -90,6 +60,7 @@ function HubFeedModuleView({
     deleteComment,
     setCommentDraft,
     adminPin,
+    adminMovePinned,
     adminDelete,
     refresh,
     currentUserId,
@@ -97,7 +68,6 @@ function HubFeedModuleView({
     currentUserName,
     isAdmin,
     sentinelRef,
-    handleCreatePost,
   } = state;
 
   const handleRetry = useCallback(() => void refresh(), [refresh]);
@@ -128,22 +98,17 @@ function HubFeedModuleView({
       onDeleteComment={deleteComment}
       onCommentDraftChange={setCommentDraft}
       onAdminPin={adminPin}
+      onAdminMovePinned={adminMovePinned}
       onAdminDelete={adminDelete}
       sentinelRef={sentinelRef}
     />
   );
 
-    return (
-    <div className="zone-feed space-y-4 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5 xl:space-y-0 max-w-full px-4 sm:px-0">
-      <SectionBoundary title="Erro no mural social" description="O mural social falhou ao renderizar, mas os indicadores laterais continuam disponiveis." onRetry={handleRetry}>
-        <div className="space-y-3">
-          {!showComposer ? <CanhoesModuleHeader icon={ScrollText} title={feedCopy.hero.title} description={feedCopy.hero.description} /> : null}
-          {showComposer ? <LazyPostComposer onSubmit={handleCreatePost} /> : null}
-          {errorMessage ? <ErrorAlert title="Erro ao carregar o mural" description={errorMessage} actionLabel="Tentar novamente" tone="social" onAction={handleRetry} /> : null}
-          {feedList}
-        </div>
-      </SectionBoundary>
-      <SectionBoundary title="Erro nos indicadores do mural" description="Os indicadores laterais falharam ao renderizar, mas o mural social continua disponivel."><LazyFeedInsightsPanel posts={posts} /></SectionBoundary>
+  return (
+    <div className="zone-feed mx-auto w-full max-w-3xl space-y-3 px-3 sm:px-0">
+      <CanhoesModuleHeader icon={ScrollText} title={feedCopy.hero.title} description={feedCopy.hero.description} />
+      {errorMessage ? <ErrorAlert title="Erro ao carregar o mural" description={errorMessage} actionLabel="Tentar novamente" tone="social" onAction={handleRetry} /> : null}
+      {feedList}
     </div>
   );
 }
@@ -158,7 +123,6 @@ function useHubFeedModuleState(initialData?: FeedInfiniteData, initialContext?: 
   const feed = useHubFeed(eventId, currentUserId, initialData);
   const sentinelRef = useFeedInfiniteScroll({ enabled: feed.hasMore, isFetchingNextPage: feed.isFetchingNextPage, onLoadMore: feed.loadMore });
   const currentUserName = session?.user?.name?.trim() || session?.user?.email?.trim() || "Tu";
-  const handleCreatePost = useCreateFeedPost({ eventId });
   const currentUserImage = session?.user?.image ?? null;
 
   return {
@@ -167,48 +131,8 @@ function useHubFeedModuleState(initialData?: FeedInfiniteData, initialContext?: 
     currentUserId,
     currentUserImage,
     currentUserName,
-    handleCreatePost,
     isAdmin,
     loadMore: feed.loadMore,
     sentinelRef,
   };
-}
-
-function ComposerFallback() {
-  return (
-    <div className="canhoes-paper-panel space-y-4 rounded-[var(--radius-lg-token)] px-4 py-4 sm:px-5 sm:py-5">
-      <div className="space-y-2">
-        <div className="skeleton-shimmer h-3 w-24 rounded" />
-        <div className="skeleton-shimmer h-8 w-48 rounded" />
-      </div>
-      <CanhoesDecorativeDivider tone="purple" />
-      <div className="skeleton-shimmer h-32 rounded-[var(--radius-md-token)]" />
-      <div className="flex gap-2">
-        <div className="skeleton-shimmer h-10 w-24 rounded-full" />
-        <div className="skeleton-shimmer h-10 w-24 rounded-full" />
-      </div>
-    </div>
-  );
-}
-
-function FeedInsightsFallback() {
-  return (
-    <aside className="space-y-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="canhoes-paper-panel rounded-[var(--radius-lg-token)] border px-4 py-4 shadow-[var(--shadow-paper)] sm:px-5"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-2">
-              <div className="skeleton-shimmer h-3 w-20 rounded" />
-              <div className="skeleton-shimmer h-8 w-14 rounded" />
-            </div>
-            <div className="skeleton-shimmer h-11 w-11 rounded-full" />
-          </div>
-          <div className="skeleton-shimmer mt-3 h-3 w-4/5 rounded" />
-        </div>
-      ))}
-    </aside>
-  );
 }

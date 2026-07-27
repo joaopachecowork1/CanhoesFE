@@ -6,10 +6,6 @@ export const eventRepo = {
   
   getEventOverview: (eventId: string) => canhoesFetch<T.EventOverviewDto>(`/v1/events/${eventId}/overview`),
   
-  getActiveHomeSnapshot: () => canhoesFetch<T.EventHomeSnapshotDto>("/v1/events/active/home-snapshot"),
-  
-  getHomeSnapshot: (eventId: string) => canhoesFetch<T.EventHomeSnapshotDto>(`/v1/events/${eventId}/home-snapshot`),
-  
   getMembers: (eventId: string) => canhoesFetch<T.PublicUserDto[]>(`/v1/events/${eventId}/members`),
   
   getWishlist: (eventId: string, skip = 0, take = 50) => 

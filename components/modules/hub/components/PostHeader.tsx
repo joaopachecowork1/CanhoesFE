@@ -1,6 +1,6 @@
 "use client";
 
-import { Pin, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pin, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ export function PostHeader({
   isPinned,
   isAdmin,
   onAdminPin,
+  onAdminMoveUp,
+  onAdminMoveDown,
   onAdminDelete,
 }: Readonly<{
   authorName: string;
@@ -36,6 +38,8 @@ export function PostHeader({
   isPinned?: boolean;
   isAdmin?: boolean;
   onAdminPin?: () => void;
+  onAdminMoveUp?: () => void;
+  onAdminMoveDown?: () => void;
   onAdminDelete?: () => void;
 }>) {
   const accent = accentForName(authorName);
@@ -67,6 +71,28 @@ export function PostHeader({
 
       {isAdmin ? (
         <div className="flex items-center gap-1">
+          {isPinned ? (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                onClick={onAdminMoveUp}
+                aria-label="Subir post fixado"
+              >
+                <ArrowUp className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 rounded-full p-0 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                onClick={onAdminMoveDown}
+                aria-label="Descer post fixado"
+              >
+                <ArrowDown className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          ) : null}
           <Button
             variant="ghost"
             size="sm"

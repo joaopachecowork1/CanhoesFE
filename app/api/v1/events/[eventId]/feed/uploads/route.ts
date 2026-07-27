@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+import { getRequestUser } from "@/lib/auth/serverAuth";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { prisma } from "@/lib/prisma";
 import { saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
@@ -11,14 +10,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ eventId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const user = await getRequestUser();
+  if (!user) {
     return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
   }
 
   const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
+  const { id: userId, isAdmin } = user;
 
   const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
   if (!isEnabled) {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { type InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { EventFeedPostFullDto } from "@/lib/api/types";
@@ -110,6 +110,7 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
     toggleDownvote,
     votePoll,
     adminPin,
+    adminMovePinned,
     adminDelete,
   } = useHubFeedPostActions({ eventId, queryClient });
 
@@ -125,6 +126,12 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
   const refreshPosts = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
   }, [queryClient, eventId]);
+
+  useEffect(() => {
+    const handlePostCreated = () => void refreshPosts();
+    window.addEventListener("hub:postCreated", handlePostCreated);
+    return () => window.removeEventListener("hub:postCreated", handlePostCreated);
+  }, [refreshPosts]);
 
   return {
     posts: sortedDisplayedPosts,
@@ -149,6 +156,7 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
     deleteComment,
     toggleCommentReaction,
     adminPin,
+    adminMovePinned,
     adminDelete,
     setCommentDraft,
   };

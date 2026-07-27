@@ -37,6 +37,7 @@ type HubFeedListProps = {
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
   onAdminPin: (postId: string) => void;
+  onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
   sentinelRef: React.MutableRefObject<HTMLDivElement | null>;
 };
@@ -48,7 +49,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
   post, index, eventId, isAdmin, openComments, commentDraft,
   currentUserId, currentUserName, currentUserImage,
   onToggleReaction, onToggleDownvote, onToggleComments, onVotePoll,
-  onAddComment, onDeleteComment, onCommentDraftChange, onAdminPin, onAdminDelete,
+  onAddComment, onDeleteComment, onCommentDraftChange, onAdminPin, onAdminMovePinned, onAdminDelete,
 }: {
   post: EventFeedPostFullDto; index: number; eventId: string; isAdmin: boolean;
   openComments: boolean; commentDraft: string;
@@ -61,6 +62,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
   onAdminPin: (postId: string) => void;
+  onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
 }) {
   return (
@@ -88,6 +90,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
           onDeleteComment={onDeleteComment}
           onCommentDraftChange={onCommentDraftChange}
           onAdminPin={onAdminPin}
+          onAdminMovePinned={onAdminMovePinned}
           onAdminDelete={onAdminDelete}
         />
       </SectionBoundary>
@@ -118,6 +121,7 @@ export const HubFeedList = memo(function HubFeedList({
   onDeleteComment,
   onCommentDraftChange,
   onAdminPin,
+  onAdminMovePinned,
   onAdminDelete,
   sentinelRef,
 }: Readonly<HubFeedListProps>) {
@@ -157,6 +161,7 @@ export const HubFeedList = memo(function HubFeedList({
                   onDeleteComment={onDeleteComment}
                   onCommentDraftChange={onCommentDraftChange}
                   onAdminPin={onAdminPin}
+                  onAdminMovePinned={onAdminMovePinned}
                   onAdminDelete={onAdminDelete}
                 />
               )}

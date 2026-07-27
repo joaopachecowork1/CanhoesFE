@@ -127,6 +127,7 @@ export type EventFeedPostFullDto = {
   mediaUrl: string | null;
   mediaUrls: string[];
   isPinned: boolean;
+  pinnedOrder: number | null;
   createdAtUtc: string;
   likeCount: number;
   commentCount: number;
@@ -177,14 +178,6 @@ export type EventProposalDto = {
   description: string | null;
   status: string;
   createdAt: string;
-};
-
-export type EventHomeSnapshotDto = {
-  event: EventSummaryDto;
-  overview: EventOverviewDto;
-  voting: EventVotingOverviewDto;
-  secretSanta: EventSecretSantaOverviewDto;
-  recentPosts: EventFeedPostFullDto[];
 };
 
 export type ProposalStatus = "pending" | "approved" | "rejected";

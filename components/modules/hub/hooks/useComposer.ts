@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export const MAX_MEDIA_FILES = 10;
+export const MAX_MEDIA_FILES = 4;
 export const MAX_POLL_OPTIONS = 6;
 
 export interface ComposerState {
