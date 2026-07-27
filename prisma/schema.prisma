@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id(map: "PK_Users") @default(uuid()) @map("Id") @db.Uuid
+  externalId  String   @unique(map: "IX_Users_ExternalId") @map("ExternalId")
+  email       String   @unique(map: "IX_Users_Email") @map("Email")
+  displayName String?  @map("DisplayName")
+  isAdmin     Boolean  @map("IsAdmin")
+  createdAt   DateTime @map("CreatedAt") @default(now()) @db.Timestamptz(6)
+
+  @@index([isAdmin], map: "IX_Users_IsAdmin")
+  @@map("Users")
+}
+
+model Event {
+  id           String   @id(map: "PK_Events") @default(uuid()) @map("Id") @db.VarChar(64)
+  name         String   @map("Name") @db.VarChar(128)
+  isActive     Boolean  @map("IsActive")
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([isActive], map: "IX_Events_IsActive")
+  @@map("Events")
+}
+
+model EventMember {
+  id          String   @id(map: "PK_EventMembers") @default(uuid()) @map("Id") @db.VarChar(64)
+  eventId     String   @map("EventId") @db.VarChar(64)
+  userId      String   @map("UserId") @db.Uuid
+  role        String   @map("Role") @db.VarChar(16)
+  joinedAtUtc DateTime @map("JoinedAtUtc") @db.Timestamptz(6)
+
+  @@unique([eventId, userId], map: "IX_EventMembers_EventId_UserId")
+  @@index([eventId, role], map: "IX_EventMembers_EventId_Role")
+  @@map("EventMembers")
+}
+
+model EventPhase {
+  id           String   @id(map: "PK_EventPhases") @default(uuid()) @map("Id") @db.VarChar(64)
+  eventId      String   @map("EventId") @db.VarChar(64)
+  type         String   @map("Type") @db.VarChar(32)
+  startDateUtc DateTime @map("StartDateUtc") @db.Timestamptz(6)
+  endDateUtc   DateTime @map("EndDateUtc") @db.Timestamptz(6)
+  isActive     Boolean  @map("IsActive")
+
+  @@unique([eventId, type], map: "IX_EventPhases_EventId_Type")
+  @@index([eventId, isActive], map: "IX_EventPhases_EventId_IsActive")
+  @@index([eventId, startDateUtc], map: "IX_EventPhases_EventId_StartDateUtc")
+  @@map("EventPhases")
+}
+
+model AwardCategory {
+  id           String  @id(map: "PK_AwardCategories") @default(uuid()) @map("Id")
+  eventId      String  @map("EventId")
+  name         String  @map("Name")
+  description  String? @map("Description")
+  voteQuestion String? @map("VoteQuestion")
+  voteRules    Json?   @map("VoteRules")
+  sortOrder    Int     @map("SortOrder")
+  kind         Int     @map("Kind")
+  isActive     Boolean @map("IsActive")
+
+  @@index([eventId, isActive], map: "IX_AwardCategories_EventId_IsActive")
+  @@index([eventId, sortOrder], map: "IX_AwardCategories_EventId_SortOrder")
+  @@index([isActive], map: "IX_AwardCategories_IsActive")
+  @@map("AwardCategories")
+}
+
+model Nominee {
+  id                String   @id(map: "PK_Nominees") @default(uuid()) @map("Id")
+  eventId           String   @map("EventId")
+  categoryId        String?  @map("CategoryId")
+  title             String   @map("Title")
+  submissionKind    String   @map("SubmissionKind")
+  imageUrl          String?  @map("ImageUrl")
+  submittedByUserId String   @map("SubmittedByUserId") @db.Uuid
+  status            String   @map("Status")
+  createdAtUtc      DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([categoryId, status], map: "IX_Nominees_CategoryId_Status")
+  @@index([eventId, status], map: "IX_Nominees_EventId_Status")
+  @@index([eventId, status, categoryId], map: "IX_Nominees_EventId_Status_CategoryId")
+  @@index([submittedByUserId], map: "IX_Nominees_SubmittedByUserId")
+  @@map("Nominees")
+}
+
+model CategoryProposal {
+  id                String   @id(map: "PK_CategoryProposals") @default(uuid()) @map("Id")
+  eventId           String   @map("EventId")
+  name              String   @map("Name")
+  description       String?  @map("Description")
+  proposedByUserId  String   @map("ProposedByUserId") @db.Uuid
+  status            String   @map("Status")
+  createdAtUtc      DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([eventId, status, createdAtUtc], map: "IX_CategoryProposals_EventId_Status_CreatedAtUtc")
+  @@index([proposedByUserId], map: "IX_CategoryProposals_ProposedByUserId")
+  @@index([status], map: "IX_CategoryProposals_Status")
+  @@map("CategoryProposals")
+}
+
+model GalaMeasure {
+  id           String   @id(map: "PK_Measures") @default(uuid()) @map("Id")
+  eventId      String   @map("EventId")
+  text         String   @map("Text")
+  isActive     Boolean  @map("IsActive")
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([eventId, isActive], map: "IX_Measures_EventId_IsActive")
+  @@map("Measures")
+}
+
+model MeasureProposal {
+  id                String   @id(map: "PK_MeasureProposals") @default(uuid()) @map("Id")
+  eventId           String   @map("EventId")
+  text              String   @map("Text")
+  proposedByUserId  String   @map("ProposedByUserId") @db.Uuid
+  status            String   @map("Status")
+  createdAtUtc      DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([eventId, status, createdAtUtc], map: "IX_MeasureProposals_EventId_Status_CreatedAtUtc")
+  @@index([proposedByUserId], map: "IX_MeasureProposals_ProposedByUserId")
+  @@index([status], map: "IX_MeasureProposals_Status")
+  @@map("MeasureProposals")
+}
+
+model Vote {
+  id           String   @id(map: "PK_Votes") @default(uuid()) @map("Id")
+  categoryId   String   @map("CategoryId")
+  nomineeId    String   @map("NomineeId")
+  userId       String   @map("UserId") @db.Uuid
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  updatedAtUtc DateTime @map("UpdatedAtUtc") @default(now()) @updatedAt @db.Timestamptz(6)
+  eventId      String   @default("") @map("EventId")
+
+  @@unique([categoryId, userId], map: "IX_Votes_CategoryId_UserId")
+  @@index([eventId, userId], map: "IX_Votes_EventId_UserId")
+  @@index([nomineeId], map: "IX_Votes_NomineeId")
+  @@index([userId], map: "IX_Votes_UserId")
+  @@map("Votes")
+}
+
+model UserVote {
+  id            String   @id(map: "PK_UserVotes") @default(uuid()) @map("Id")
+  categoryId    String   @map("CategoryId")
+  voterUserId   String   @map("VoterUserId") @db.Uuid
+  targetUserId  String   @map("TargetUserId") @db.Uuid
+  updatedAtUtc  DateTime @map("UpdatedAtUtc") @default(now()) @updatedAt @db.Timestamptz(6)
+  eventId       String   @default("") @map("EventId")
+
+  @@unique([categoryId, voterUserId], map: "IX_UserVotes_CategoryId_VoterUserId")
+  @@index([eventId, categoryId, voterUserId], map: "IX_UserVotes_EventId_CategoryId_VoterUserId")
+  @@index([eventId, voterUserId], map: "IX_UserVotes_EventId_VoterUserId")
+  @@index([targetUserId], map: "IX_UserVotes_TargetUserId")
+  @@map("UserVotes")
+}
+
+model WishlistItem {
+  id            String   @id(map: "PK_WishlistItems") @default(uuid()) @map("Id")
+  eventId       String   @map("EventId")
+  userId        String   @map("UserId") @db.Uuid
+  title         String   @map("Title")
+  url           String?  @map("Url")
+  notes         String?  @map("Notes")
+  imageUrl      String?  @map("ImageUrl")
+  createdAtUtc  DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  updatedAtUtc  DateTime @map("UpdatedAtUtc") @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([eventId], map: "IX_WishlistItems_EventId")
+  @@index([userId], map: "IX_WishlistItems_UserId")
+  @@map("WishlistItems")
+}
+
+model SecretSantaDraw {
+  id              String   @id(map: "PK_SecretSantaDraws") @default(uuid()) @map("Id")
+  eventCode       String   @map("EventCode")
+  createdAtUtc    DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  createdByUserId String   @map("CreatedByUserId") @db.Uuid
+  isLocked        Boolean  @map("IsLocked")
+
+  @@index([eventCode], map: "IX_SecretSantaDraws_EventCode")
+  @@map("SecretSantaDraws")
+}
+
+model SecretSantaAssignment {
+  id               String @id(map: "PK_SecretSantaAssignments") @default(uuid()) @map("Id")
+  drawId           String @map("DrawId")
+  giverUserId      String @map("GiverUserId") @db.Uuid
+  receiverUserId   String @map("ReceiverUserId") @db.Uuid
+
+  @@index([drawId], map: "IX_SecretSantaAssignments_DrawId")
+  @@index([giverUserId], map: "IX_SecretSantaAssignments_GiverUserId")
+  @@index([receiverUserId], map: "IX_SecretSantaAssignments_ReceiverUserId")
+  @@map("SecretSantaAssignments")
+}
+
+model CanhoesEventState {
+  id                    Int     @id(map: "PK_CanhoesEventState") @default(autoincrement()) @map("Id")
+  eventId               String  @unique(map: "IX_CanhoesEventState_EventId") @map("EventId")
+  phase                 String  @map("Phase")
+  nominationsVisible    Boolean @map("NominationsVisible")
+  resultsVisible        Boolean @map("ResultsVisible")
+  moduleVisibilityJson  Json    @default("{}") @map("ModuleVisibilityJson")
+  hasSecretSantaDraw    Boolean @default(false) @map("HasSecretSantaDraw")
+  secretSantaEventCode  String? @map("SecretSantaEventCode")
+
+  @@map("CanhoesEventState")
+}
+
+model HubPost {
+  id            String   @id(map: "PK_HubPosts") @default(uuid()) @map("Id") @db.VarChar(64)
+  eventId       String   @map("EventId") @db.VarChar(64)
+  authorUserId  String   @map("AuthorUserId") @db.Uuid
+  text          String   @map("Text") @db.VarChar(4000)
+  mediaUrl      String?  @map("MediaUrl") @db.VarChar(1024)
+  mediaUrlsJson Json     @default("[]") @map("MediaUrlsJson")
+  isPinned      Boolean  @map("IsPinned")
+  createdAtUtc  DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  comments      HubPostComment[]
+  downvotes     HubPostDownvote[]
+  likes         HubPostLike[]
+  media         HubPostMedia[]
+  polls         HubPostPoll?
+  reactions     HubPostReaction[]
+
+  @@index([authorUserId], map: "IX_HubPosts_AuthorUserId")
+  @@index([createdAtUtc], map: "IX_HubPosts_CreatedAtUtc")
+  @@index([eventId, isPinned, createdAtUtc], map: "IX_HubPosts_EventId_IsPinned_CreatedAtUtc")
+  @@index([isPinned], map: "IX_HubPosts_IsPinned")
+  @@map("HubPosts")
+}
+
+model HubPostDownvote {
+  id           String   @id(map: "PK_HubPostDownvotes") @default(uuid()) @map("Id") @db.VarChar(64)
+  postId       String   @map("PostId") @db.VarChar(64)
+  userId       String   @map("UserId") @db.Uuid
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId], map: "IX_HubPostDownvotes_PostId_UserId")
+  @@index([postId], map: "IX_HubPostDownvotes_PostId")
+  @@index([userId], map: "IX_HubPostDownvotes_UserId")
+  @@map("HubPostDownvotes")
+}
+
+model HubPostComment {
+  id         String                   @id(map: "PK_HubPostComments") @default(uuid()) @map("Id") @db.VarChar(64)
+  postId     String                   @map("PostId") @db.VarChar(64)
+  userId     String                   @map("UserId") @db.Uuid
+  text       String                   @map("Text") @db.VarChar(2000)
+  createdAtUtc DateTime               @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  reactions  HubPostCommentReaction[]
+
+  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId], map: "IX_HubPostComments_PostId")
+  @@index([postId, createdAtUtc], map: "IX_HubPostComments_PostId_CreatedAtUtc")
+  @@index([userId], map: "IX_HubPostComments_UserId")
+  @@map("HubPostComments")
+}
+
+model HubPostReaction {
+  id           String   @id(map: "PK_HubPostReactions") @default(uuid()) @map("Id") @db.VarChar(64)
+  postId       String   @map("PostId") @db.VarChar(64)
+  userId       String   @map("UserId") @db.Uuid
+  emoji        String   @map("Emoji") @db.VarChar(16)
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId, emoji], map: "IX_HubPostReactions_PostId_UserId_Emoji")
+  @@index([postId], map: "IX_HubPostReactions_PostId")
+  @@index([userId], map: "IX_HubPostReactions_UserId")
+  @@map("HubPostReactions")
+}
+
+model HubPostCommentReaction {
+  id        String         @id(map: "PK_HubPostCommentReactions") @default(uuid()) @map("Id") @db.VarChar(64)
+  commentId String         @map("CommentId") @db.VarChar(64)
+  userId    String         @map("UserId") @db.Uuid
+  emoji     String         @map("Emoji") @db.VarChar(16)
+  createdAtUtc DateTime    @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  comment HubPostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, emoji], map: "IX_HubPostCommentReactions_CommentId_UserId_Emoji")
+  @@index([commentId], map: "IX_HubPostCommentReactions_CommentId")
+  @@index([userId], map: "IX_HubPostCommentReactions_UserId")
+  @@map("HubPostCommentReactions")
+}
+
+model HubPostPoll {
+  postId      String              @id(map: "PK_HubPostPolls") @map("PostId") @db.VarChar(64)
+  question    String              @map("Question") @db.VarChar(512)
+  createdAtUtc DateTime           @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  options     HubPostPollOption[]
+  votes       HubPostPollVote[]
+
+  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("HubPostPolls")
+}
+
+model HubPostPollOption {
+  id        String      @id(map: "PK_HubPostPollOptions") @default(uuid()) @map("Id")
+  postId    String      @map("PostId") @db.VarChar(64)
+  text      String      @map("Text") @db.VarChar(256)
+  sortOrder Int         @map("SortOrder")
+
+  poll HubPostPoll @relation(fields: [postId], references: [postId], onDelete: Cascade)
+
+  @@index([postId, sortOrder], map: "IX_HubPostPollOptions_PostId_SortOrder")
+  @@map("HubPostPollOptions")
+}
+
+model HubPostPollVote {
+  id           String      @id(map: "PK_HubPostPollVotes") @default(uuid()) @map("Id")
+  postId       String      @map("PostId") @db.VarChar(64)
+  userId       String      @map("UserId") @db.Uuid
+  optionId     String      @map("OptionId")
+  createdAtUtc DateTime    @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  poll HubPostPoll @relation(fields: [postId], references: [postId], onDelete: Cascade)
+
+  @@unique([postId, userId], map: "IX_HubPostPollVotes_PostId_UserId")
+  @@index([userId], map: "IX_HubPostPollVotes_UserId")
+  @@map("HubPostPollVotes")
+}
+
+model HubPostMedia {
+  id               String   @id(map: "PK_HubPostMedia") @default(uuid()) @map("Id") @db.VarChar(64)
+  postId           String?  @map("PostId") @db.VarChar(64)
+  url              String   @unique(map: "IX_HubPostMedia_Url") @map("Url") @db.VarChar(1024)
+  originalFileName String   @map("OriginalFileName") @db.VarChar(260)
+  fileSizeBytes    BigInt   @map("FileSizeBytes")
+  uploadedByUserId String?  @map("UploadedByUserId") @db.Uuid
+  contentType      String?  @map("ContentType") @db.VarChar(128)
+  uploadedAtUtc    DateTime @map("UploadedAtUtc") @db.Timestamptz(6)
+
+  post HubPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId], map: "IX_HubPostMedia_PostId")
+  @@index([uploadedAtUtc], map: "IX_HubPostMedia_UploadedAtUtc")
+  @@index([uploadedByUserId], map: "IX_HubPostMedia_UploadedByUserId")
+  @@map("HubPostMedia")
+}
+
+model HubPostLike {
+  id           String   @id(map: "PK_HubPostLikes") @default(uuid()) @map("Id") @db.VarChar(64)
+  postId       String   @map("PostId") @db.VarChar(64)
+  userId       String   @map("UserId") @db.Uuid
+  createdAtUtc DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId], map: "IX_HubPostLikes_PostId_UserId")
+  @@index([postId], map: "IX_HubPostLikes_PostId")
+  @@index([userId], map: "IX_HubPostLikes_UserId")
+  @@map("HubPostLikes")
+}

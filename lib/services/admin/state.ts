@@ -1,0 +1,189 @@
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import type {
+  EventAdminStateDto,
+  EventAdminModuleVisibilityDto,
+  EventSummaryDto,
+  AdminListCountsDto,
+  EventAdminBootstrapDto,
+} from "@/lib/api/types";
+import { toPhaseDto, toEventSummary, KindUserVote } from "./constants";
+
+export async function getAdminState(eventId: string): Promise<EventAdminStateDto> {
+  const [phases, state] = await Promise.all([
+    prisma.eventPhase.findMany({ where: { eventId }, orderBy: { startDateUtc: "asc" } }),
+    prisma.canhoesEventState.findUnique({ where: { eventId } }),
+  ]);
+
+  const activePhase = phases.find((p) => p.isActive) ?? null;
+  const visibility = (state?.moduleVisibilityJson ?? {}) as Record<string, boolean>;
+
+  const moduleVisibility: EventAdminModuleVisibilityDto = {
+    feed: visibility.feed ?? true,
+    secretSanta: visibility.secretSanta ?? true,
+    wishlist: visibility.wishlist ?? true,
+    categories: visibility.categories ?? true,
+    voting: visibility.voting ?? true,
+    gala: visibility.gala ?? true,
+    stickers: visibility.stickers ?? true,
+    measures: visibility.measures ?? true,
+    nominees: visibility.nominees ?? true,
+  };
+
+  const [memberCount, hubPostCount, pendingProposalsCount, wishlistCount, categoryCount] = await Promise.all([
+    prisma.eventMember.count({ where: { eventId } }),
+    prisma.hubPost.count({ where: { eventId } }),
+    prisma.categoryProposal.count({ where: { eventId, status: "pending" } }),
+    prisma.wishlistItem.count({ where: { eventId } }),
+    prisma.awardCategory.count({ where: { eventId } }),
+  ]);
+
+  return {
+    eventId,
+    activePhase: activePhase ? toPhaseDto(activePhase) : null,
+    phases: phases.map(toPhaseDto),
+    nominationsVisible: state?.nominationsVisible ?? true,
+    resultsVisible: state?.resultsVisible ?? false,
+    moduleVisibility,
+    effectiveModules: {
+      feed: true, secretSanta: true, wishlist: true, categories: true,
+      voting: true, gala: true, stickers: true, measures: true,
+      nominees: true, admin: true,
+    },
+    counts: {
+      memberCount,
+      feedPostCount: hubPostCount,
+      categoryCount,
+      pendingProposalCount: pendingProposalsCount,
+      wishlistItemCount: wishlistCount,
+    },
+  };
+}
+
+export async function updateAdminState(
+  eventId: string,
+  data: { nominationsVisible?: boolean; resultsVisible?: boolean; moduleVisibility?: EventAdminModuleVisibilityDto }
+): Promise<EventAdminStateDto> {
+  const updateData: Record<string, unknown> = {};
+  if (data.nominationsVisible !== undefined) updateData.nominationsVisible = data.nominationsVisible;
+  if (data.resultsVisible !== undefined) updateData.resultsVisible = data.resultsVisible;
+  if (data.moduleVisibility) updateData.moduleVisibilityJson = data.moduleVisibility;
+
+  await prisma.canhoesEventState.upsert({
+    where: { eventId },
+    create: {
+      eventId,
+      phase: "gala",
+      nominationsVisible: data.nominationsVisible ?? true,
+      resultsVisible: data.resultsVisible ?? false,
+      ...(data.moduleVisibility ? { moduleVisibilityJson: data.moduleVisibility } : {}),
+    } as Prisma.CanhoesEventStateCreateInput,
+    update: updateData,
+  });
+
+  return getAdminState(eventId);
+}
+
+export async function updateAdminPhase(eventId: string, phaseType: string): Promise<EventAdminStateDto> {
+  const phases = await prisma.eventPhase.findMany({ where: { eventId } });
+
+  await prisma.$transaction(
+    phases.map((p) =>
+      prisma.eventPhase.update({
+        where: { id: p.id },
+        data: { isActive: p.type === phaseType },
+      })
+    )
+  );
+
+  const legacyPhase = phaseType === "DRAW" ? "locked"
+    : phaseType === "PROPOSALS" ? "nominations"
+    : phaseType === "VOTING" ? "voting"
+    : "gala";
+
+  await prisma.canhoesEventState.upsert({
+    where: { eventId },
+    create: {
+      eventId,
+      phase: legacyPhase,
+      nominationsVisible: phaseType === "PROPOSALS",
+      resultsVisible: phaseType === "RESULTS",
+    },
+    update: {
+      phase: legacyPhase,
+      nominationsVisible: phaseType === "PROPOSALS",
+      resultsVisible: phaseType === "RESULTS",
+    },
+  });
+
+  return getAdminState(eventId);
+}
+
+export async function activateEvent(eventId: string): Promise<EventSummaryDto | null> {
+  const target = await prisma.event.findUnique({ where: { id: eventId } });
+  if (!target) return null;
+
+  await prisma.$transaction([
+    prisma.event.updateMany({ where: { isActive: true }, data: { isActive: false } }),
+    prisma.event.update({ where: { id: eventId }, data: { isActive: true } }),
+  ]);
+
+  return toEventSummary({ ...target, isActive: true });
+}
+
+export async function updateEventModules(
+  eventId: string,
+  modules: EventAdminModuleVisibilityDto
+): Promise<void> {
+  await prisma.canhoesEventState.upsert({
+    where: { eventId },
+    create: { eventId, phase: "gala", nominationsVisible: true, resultsVisible: false, moduleVisibilityJson: modules },
+    update: { moduleVisibilityJson: modules },
+  });
+}
+
+async function getAdminListCounts(eventId: string): Promise<AdminListCountsDto> {
+  const [nominees, proposalsTotal, pendingProposals, measuresTotal, pendingMeasures, members, voteCategories] = await Promise.all([
+    prisma.nominee.count({ where: { eventId } }),
+    prisma.categoryProposal.count({ where: { eventId } }),
+    prisma.categoryProposal.count({ where: { eventId, status: "pending" } }),
+    prisma.measureProposal.count({ where: { eventId } }),
+    prisma.measureProposal.count({ where: { eventId, status: "pending" } }),
+    prisma.eventMember.count({ where: { eventId } }),
+    prisma.awardCategory.count({ where: { eventId, kind: KindUserVote } }),
+  ]);
+
+  const categoryIds = (await prisma.awardCategory.findMany({ where: { eventId }, select: { id: true } })).map(
+    (c: { id: string }) => c.id
+  );
+  const votesTotal = categoryIds.length > 0
+    ? await prisma.vote.count({ where: { categoryId: { in: categoryIds } } })
+    : 0;
+
+  return {
+    nomineesTotal: nominees,
+    adminNomineesTotal: nominees,
+    votesTotal,
+    categoryProposalsTotal: proposalsTotal,
+    categoryProposalsPendingTotal: pendingProposals,
+    measureProposalsTotal: measuresTotal,
+    measureProposalsPendingTotal: pendingMeasures,
+    membersTotal: members,
+    officialResultsCategoriesCount: voteCategories,
+  };
+}
+
+export async function getAdminBootstrap(eventId: string): Promise<EventAdminBootstrapDto> {
+  const [events, state] = await Promise.all([
+    prisma.event.findMany({ orderBy: [{ isActive: "desc" }, { name: "asc" }] }),
+    getAdminState(eventId),
+  ]);
+
+  const counts = await getAdminListCounts(eventId);
+
+  return {
+    events: events.map(toEventSummary),
+    state,
+    counts,
+  };
+}

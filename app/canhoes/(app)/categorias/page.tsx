@@ -1,16 +1,22 @@
-import dynamic from "next/dynamic";
 import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { CanhoesCategoriesModule } from "@/components/modules/canhoes/categorias/CanhoesCategoriesModule";
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { EventActiveContextDto, AwardCategoryDto, PagedResult } from "@/lib/api/types";
 
-const CanhoesCategoriesModule = dynamic(
-  () => import("@/components/modules/canhoes/categorias/CanhoesCategoriesModule").then((m) => ({ default: m.CanhoesCategoriesModule })),
-  { loading: () => <FeedSkeleton /> }
-);
+export default async function CategoriasPage() {
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const initialCategories = activeContext
+    ? await canhoesServerFetch<PagedResult<AwardCategoryDto>>(
+        `events/${activeContext.event.id}/categories?skip=0&take=50`
+      )
+    : null;
 
-export default function CategoriasPage() {
   return (
     <EventModuleGate moduleKey="categories">
-      <CanhoesCategoriesModule />
+      <CanhoesCategoriesModule
+        initialContext={activeContext ?? undefined}
+        initialCategories={initialCategories?.items ?? undefined}
+      />
     </EventModuleGate>
   );
 }

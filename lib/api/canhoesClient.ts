@@ -11,7 +11,7 @@
  */
 
 export const CANHOES_API_URL =
-  process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:3000";
 
 // Retry configuration
 const RETRY_CONFIG = {
@@ -314,7 +314,7 @@ export async function canhoesFetch<T>(
     await new Promise((resolve) => setTimeout(resolve, waitTime));
   }
 
-  const proxyUrl = `/api/proxy/${normalized}`;
+  const proxyUrl = `/api/${normalized}`;
 
   const headers = new Headers(init?.headers ?? {});
   if (!headers.has("Content-Type") && !(init?.body instanceof FormData)) {

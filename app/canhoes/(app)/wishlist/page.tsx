@@ -1,16 +1,24 @@
-import dynamic from "next/dynamic";
 import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { CanhoesWishlistModule } from "@/components/modules/canhoes/wishlist/CanhoesWishlistModule";
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { EventActiveContextDto, PublicUserDto, EventWishlistItemDto, PagedResult } from "@/lib/api/types";
 
-const CanhoesWishlistModule = dynamic(
-  () => import("@/components/modules/canhoes/wishlist/CanhoesWishlistModule").then((m) => ({ default: m.CanhoesWishlistModule })),
-  { loading: () => <FeedSkeleton /> }
-);
+export default async function WishlistPage() {
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const [initialMembers, initialWishlistData] = activeContext
+    ? await Promise.all([
+        canhoesServerFetch<PublicUserDto[]>(`events/${activeContext.event.id}/members`),
+        canhoesServerFetch<PagedResult<EventWishlistItemDto>>(`events/${activeContext.event.id}/wishlist?skip=0&take=1000`),
+      ])
+    : [null, null];
 
-export default function WishlistPage() {
   return (
     <EventModuleGate moduleKey="wishlist">
-      <CanhoesWishlistModule />
+      <CanhoesWishlistModule
+        initialContext={activeContext ?? undefined}
+        initialMembers={initialMembers ?? undefined}
+        initialWishlistItems={initialWishlistData?.items ?? undefined}
+      />
     </EventModuleGate>
   );
 }

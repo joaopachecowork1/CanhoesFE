@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Gift, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 
+import type { EventActiveContextDto, EventSecretSantaOverviewDto, EventWishlistItemDto, PagedResult } from "@/lib/api/types";
 import { CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useEventOverview } from "@/hooks/useEventOverview";
@@ -24,12 +25,16 @@ function buildDefaultEventCode(eventId?: string | null) {
   return `canhoes${new Date().getFullYear()}`;
 }
 
-export function CanhoesSecretSantaModule() {
-  const { event, overview, refresh: refreshOverview, isLoading: isOverviewLoading } = useEventOverview();
+export function CanhoesSecretSantaModule({ initialContext, initialSecretSantaOverview, initialWishlistData }: {
+    initialContext?: EventActiveContextDto | null;
+    initialSecretSantaOverview?: EventSecretSantaOverviewDto | null;
+    initialWishlistData?: PagedResult<EventWishlistItemDto> | null;
+}) {
+  const { event, overview, refresh: refreshOverview, isLoading: isOverviewLoading } = useEventOverview(initialContext);
   const { isAdmin } = useAdminStatus();
   const eventId = event?.id;
 
-  const { data, isLoading, error, refetch, drawSecretSanta, isDrawing } = useSecretSanta(eventId);
+  const { data, isLoading, error, refetch, drawSecretSanta, isDrawing } = useSecretSanta(eventId, initialSecretSantaOverview, initialWishlistData);
 
   const [drawEventCode, setDrawEventCode] = useState("");
 

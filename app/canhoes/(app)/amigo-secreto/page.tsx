@@ -1,16 +1,24 @@
-import dynamic from "next/dynamic";
 import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
+import { CanhoesSecretSantaModule } from "@/components/modules/canhoes/CanhoesSecretSantaModule";
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { EventActiveContextDto, EventSecretSantaOverviewDto, EventWishlistItemDto, PagedResult } from "@/lib/api/types";
 
-const CanhoesSecretSantaModule = dynamic(
-  () => import("@/components/modules/canhoes/CanhoesSecretSantaModule").then((m) => ({ default: m.CanhoesSecretSantaModule })),
-  { loading: () => <FeedSkeleton /> }
-);
+export default async function AmigoSecretoPage() {
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const [initialOverview, initialWishlistData] = activeContext
+    ? await Promise.all([
+        canhoesServerFetch<EventSecretSantaOverviewDto>(`events/${activeContext.event.id}/secret-santa/overview`),
+        canhoesServerFetch<PagedResult<EventWishlistItemDto>>(`events/${activeContext.event.id}/wishlist?skip=0&take=1000`),
+      ])
+    : [null, null];
 
-export default function AmigoSecretoPage() {
   return (
     <EventModuleGate moduleKey="secretSanta">
-      <CanhoesSecretSantaModule />
+      <CanhoesSecretSantaModule
+        initialContext={activeContext ?? undefined}
+        initialSecretSantaOverview={initialOverview ?? undefined}
+        initialWishlistData={initialWishlistData ?? undefined}
+      />
     </EventModuleGate>
   );
 }

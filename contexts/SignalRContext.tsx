@@ -39,7 +39,7 @@ export function SignalRProvider({ children }: { children: React.ReactNode }) {
       try {
         const signalR = await import("@microsoft/signalr");
 
-        const hubUrl = `${process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:5000"}/hubs/event`;
+        const hubUrl = `${process.env.NEXT_PUBLIC_CANHOES_API_URL || "http://localhost:3000"}/hubs/event`;
 
         const newConnection = new signalR.HubConnectionBuilder()
           .withUrl(hubUrl, {

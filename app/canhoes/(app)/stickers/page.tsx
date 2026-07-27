@@ -1,16 +1,24 @@
-import dynamic from "next/dynamic";
-import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
+import { CanhoesStickerSubmitModule } from "@/components/modules/canhoes/stickers/CanhoesStickerSubmitModule";
+import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
+import type { EventActiveContextDto, AwardCategoryDto, NomineeDto, PagedResult } from "@/lib/api/types";
 
-const CanhoesStickerSubmitModule = dynamic(
-  () => import("@/components/modules/canhoes/stickers/CanhoesStickerSubmitModule").then((m) => ({ default: m.CanhoesStickerSubmitModule })),
-  { loading: () => <FeedSkeleton /> }
-);
+export default async function StickersPage() {
+  const activeContext = await canhoesServerFetch<EventActiveContextDto>("events/active/context");
+  const [initialCategories, initialNominees] = activeContext
+    ? await Promise.all([
+        canhoesServerFetch<PagedResult<AwardCategoryDto>>(`events/${activeContext.event.id}/categories?skip=0&take=50`),
+        canhoesServerFetch<NomineeDto[]>(`events/${activeContext.event.id}/nominations/approved`),
+      ])
+    : [null, null];
 
-export default function StickersPage() {
   return (
     <EventModuleGate moduleKey="stickers">
-      <CanhoesStickerSubmitModule />
+      <CanhoesStickerSubmitModule
+        initialContext={activeContext ?? undefined}
+        initialStickerCategories={initialCategories?.items ?? undefined}
+        initialApprovedNominees={initialNominees ?? undefined}
+      />
     </EventModuleGate>
   );
 }

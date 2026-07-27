@@ -25,6 +25,14 @@ type CategoryFormState = {
   voteRules: string;
 };
 
+function kindToLabel(kind: number): string {
+  return kind === 1 ? "UserVote" : "Sticker";
+}
+
+function kindLabelToNumber(label: string): number {
+  return label === "UserVote" ? 1 : 0;
+}
+
 type CategoryUsage = {
   canDelete: boolean;
   deleteReason: string | null;
@@ -48,7 +56,7 @@ function buildFormFromCategory(category: AwardCategoryDto): CategoryFormState {
   return {
     description: category.description ?? "",
     isActive: category.isActive ?? false,
-    kind: category.kind,
+    kind: kindToLabel(category.kind),
     name: category.name,
     sortOrder: String(category.sortOrder),
     voteQuestion: category.voteQuestion ?? "",
@@ -72,7 +80,7 @@ function buildCreatePayload(
   return {
     name: form.name.trim(),
     sortOrder: parseSortOrder(form.sortOrder),
-    kind: form.kind,
+    kind: kindLabelToNumber(form.kind),
     description: toOptionalString(form.description),
     voteQuestion:
       form.kind === "UserVote" ? toOptionalString(form.voteQuestion) : null,
@@ -88,7 +96,7 @@ function buildUpdatePayload(
     name: form.name.trim(),
     sortOrder: parseSortOrder(form.sortOrder),
     isActive: form.isActive,
-    kind: form.kind,
+    kind: kindLabelToNumber(form.kind),
     description: toOptionalString(form.description),
     voteQuestion:
       form.kind === "UserVote" ? toOptionalString(form.voteQuestion) : null,
@@ -125,7 +133,7 @@ function buildCategoryUsage(
     };
   }
 
-  if (category.kind === "UserVote") {
+  if (category.kind === 1) {
     return {
       canDelete: false,
       deleteReason:

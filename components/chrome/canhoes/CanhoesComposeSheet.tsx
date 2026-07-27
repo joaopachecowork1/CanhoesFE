@@ -170,7 +170,7 @@ export function CanhoesComposeSheet({
         : [];
 
       const createdPost = await feedRepo.createPost(eventId, {
-        content: trimmedText,
+        text: trimmedText,
         mediaUrls,
         pollOptions: isPollEnabled ? trimmedPollOptions : null,
         pollQuestion: isPollEnabled && trimmedPollQuestion ? trimmedPollQuestion : null,

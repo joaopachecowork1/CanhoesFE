@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cigarette } from "lucide-react";
 import { toast } from "sonner";
 
+import type { EventActiveContextDto, AwardCategoryDto, NomineeDto } from "@/lib/api/types";
 import {
   CanhoesFileTrigger,
   CanhoesMediaThumb,
@@ -75,8 +76,12 @@ function StickerSubmitLoadingState() {
   );
 }
 
-export function CanhoesStickerSubmitModule() {
-  const { overview, event } = useEventOverview();
+export function CanhoesStickerSubmitModule({ initialContext, initialStickerCategories, initialApprovedNominees }: {
+    initialContext?: EventActiveContextDto | null;
+    initialStickerCategories?: AwardCategoryDto[];
+    initialApprovedNominees?: NomineeDto[];
+}) {
+  const { overview, event } = useEventOverview(initialContext);
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
 
@@ -85,6 +90,7 @@ export function CanhoesStickerSubmitModule() {
     queryFn: () => awardsRepo.getCategories(eventId!).then(r => r.items),
     enabled: !!eventId,
     staleTime: 1000 * 60 * 2,
+    initialData: initialStickerCategories,
   });
 
   const { data: nomineeList = [], isLoading: isNomineesLoading, error: nomineesError } = useQuery({
@@ -92,6 +98,7 @@ export function CanhoesStickerSubmitModule() {
     queryFn: () => awardsRepo.getApprovedNominees(eventId!),
     enabled: !!eventId,
     staleTime: 1000 * 60 * 2,
+    initialData: initialApprovedNominees,
   });
 
   const isLoading = isCategoriesLoading || isNomineesLoading;

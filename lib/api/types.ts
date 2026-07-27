@@ -113,7 +113,7 @@ export type EventCategoryDto = {
   id: string;
   eventId: string;
   name: string;
-  kind: string;
+  kind: number;
   isActive: boolean;
   description: string | null;
 };
@@ -139,8 +139,8 @@ export type EventFeedPostFullDto = {
 };
 
 export type CreateEventFeedPostRequest = {
-  content: string;
-  imageUrl?: string | null;
+  text: string;
+  mediaUrl?: string | null;
   mediaUrls?: string[] | null;
   pollQuestion?: string | null;
   pollOptions?: string[] | null;
@@ -291,7 +291,7 @@ export type EventVoteOptionDto = {
 export type EventVotingCategoryDto = {
   id: string;
   title: string;
-  kind: string;
+  kind: number;
   description: string | null;
   voteQuestion: string | null;
   options: EventVoteOptionDto[];
@@ -305,22 +305,11 @@ export type EventVotingBoardDto = {
   categories: EventVotingCategoryDto[];
 };
 
-export type AdminModuleKey = 
-  | "feed"
-  | "nominees"
-  | "categories"
-  | "secretSanta"
-  | "wishlist"
-  | "voting"
-  | "stickers"
-  | "measures"
-  | "gala";
-
 export type OfficialVotingCategoryDto = {
   id: string;
   eventId: string;
   title: string;
-  kind: string;
+  kind: number;
   description: string | null;
   voteQuestion: string | null;
   nominees: Array<{ id: string; categoryId: string; label: string; voteCount?: number }>;
@@ -357,7 +346,7 @@ export type AwardCategoryDto = {
   name: string;
   sortOrder: number;
   isActive: boolean;
-  kind: string;
+  kind: number;
   description: string | null;
   voteQuestion: string | null;
   voteRules: string | null;
@@ -366,7 +355,7 @@ export type AwardCategoryDto = {
 export type CreateAwardCategoryRequest = {
   name: string;
   sortOrder: number | null;
-  kind: string;
+  kind: number;
   description: string | null;
   voteQuestion: string | null;
   voteRules: string | null;
@@ -428,6 +417,38 @@ export type AdminNomineesPagedDto = {
   hasMore: boolean;
 };
 
+export type AwardCategorySummaryDto = {
+  id: string;
+  name: string;
+  sortOrder: number;
+  isActive: boolean;
+  kind: number;
+};
+
+export type NomineeSummaryDto = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  status: ProposalStatus;
+};
+
+export type AdminNomineeSummaryDto = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  status: ProposalStatus;
+  submittedByUserId: string;
+  submittedByName: string;
+};
+
+export type AdminNomineeVoteTallyDto = {
+  nomineeId: string;
+  nomineeTitle: string;
+  imageUrl: string | null;
+  voteCount: number;
+  voterUserIds: string[];
+};
+
 export type AdminOfficialResultsDto = {
   eventId: string;
   generatedAt: string;
@@ -445,6 +466,17 @@ export type AdminOfficialResultsDto = {
     }>;
   }>;
 };
+
+export type AdminModuleKey = 
+  | "feed"
+  | "nominees"
+  | "categories"
+  | "secretSanta"
+  | "wishlist"
+  | "voting"
+  | "stickers"
+  | "measures"
+  | "gala";
 
 export type HubCommentDto = {
   id: string;

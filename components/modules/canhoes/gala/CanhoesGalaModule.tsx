@@ -13,7 +13,7 @@ import { getErrorMessage } from "@/lib/errors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { cn } from "@/lib/utils";
-import type { PublicCategoryResultDto } from "@/lib/api/types";
+import type { EventActiveContextDto, PublicCategoryResultDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,8 +91,11 @@ function NomineeRankCard({
   );
 }
 
-export function CanhoesGalaModule() {
-  const { event } = useEventOverview();
+export function CanhoesGalaModule({ initialContext, initialResults }: {
+    initialContext?: EventActiveContextDto | null;
+    initialResults?: PublicCategoryResultDto[];
+}) {
+  const { event } = useEventOverview(initialContext);
   const eventId = event?.id ?? null;
 
   const { data: resultsByCategory = [], isLoading, error, refetch } = useQuery({
@@ -100,6 +103,7 @@ export function CanhoesGalaModule() {
     queryFn: () => awardsRepo.getResults(eventId!),
     enabled: !!eventId,
     staleTime: 1000 * 60 * 2,
+    initialData: initialResults,
   });
 
   const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar os resultados da gala.") : null;

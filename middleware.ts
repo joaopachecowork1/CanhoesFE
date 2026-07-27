@@ -22,11 +22,16 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !shouldRedirectUnauthenticated(token),
+      authorized: ({ req, token }) => {
+        if (req.nextUrl.pathname === "/canhoes/login") {
+          return true;
+        }
+        return !shouldRedirectUnauthenticated(token);
+      },
     },
   }
 );
 
 export const config = {
-  matcher: ["/canhoes/admin/:path*"],
+  matcher: ["/canhoes/:path*"],
 };

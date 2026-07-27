@@ -53,7 +53,7 @@ type CategoriesAdminProps = {
 type CategoryFormState = {
   description: string;
   isActive: boolean;
-  kind: AwardCategoryDto["kind"];
+  kind: string;
   name: string;
   sortOrder: string;
   voteQuestion: string;
@@ -111,7 +111,7 @@ function CategoryListItem({
             <span>Ordem {category.sortOrder}</span>
             <span>{usage.nomineeCount} nomeações</span>
             <span>{usage.voteCount} votos</span>
-            {category.kind === "UserVote" && category.voteQuestion ? <span className="normal-case tracking-normal">{category.voteQuestion}</span> : null}
+            {category.kind === 1 && category.voteQuestion ? <span className="normal-case tracking-normal">{category.voteQuestion}</span> : null}
           </div>
         </div>
 
@@ -408,7 +408,7 @@ export function CategoriesAdmin({
   const activeCategoriesCount = sortedCategories.filter((category) => category.isActive).length;
   const inactiveCategoriesCount = sortedCategories.length - activeCategoriesCount;
   const userVoteCategoriesCount = sortedCategories.filter(
-    (category) => category.kind === "UserVote"
+    (category) => category.kind === 1
   ).length;
 
     const activeCategoryUsage =

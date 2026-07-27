@@ -1,33 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
-const backend =
-  process.env.CANHOES_API_URL ||
-  process.env.NEXT_PUBLIC_CANHOES_API_URL ||
-  "http://localhost:5000";
+export const dynamic = "force-dynamic";
+
+const C_SHARP_UPLOADS_DIR = "C:\\PessoalRepo\\CanhoesRepos\\CanhoesBE\\Canhoes.API\\wwwroot";
+
+const MIME_TYPES: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+};
+
+function getContentType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  return MIME_TYPES[ext] ?? "application/octet-stream";
+}
 
 export async function GET(
   _req: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
-  const { path } = await context.params;
-  if (!Array.isArray(path) || path.length === 0) {
+  const { path: segments } = await context.params;
+  if (!Array.isArray(segments) || segments.length === 0) {
     return NextResponse.json({ message: "Missing upload path" }, { status: 400 });
   }
 
-  const filePath = path.join("/");
-  const url = `${backend}/uploads/${filePath}`;
+  const relativePath = segments.join("\\");
+  const physicalPath = path.resolve(C_SHARP_UPLOADS_DIR, relativePath);
 
-  const res = await fetch(url, {
-    headers: {
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
+  if (!physicalPath.startsWith(C_SHARP_UPLOADS_DIR)) {
+    return NextResponse.json({ message: "Invalid path" }, { status: 400 });
+  }
 
-  const contentType = res.headers.get("content-type") || "image/jpeg";
-  const buffer = await res.arrayBuffer();
+  try {
+    const buffer = await fs.readFile(physicalPath);
+    const contentType = getContentType(physicalPath);
+    const maxAge = 86400;
 
-  return new NextResponse(buffer, {
-    status: res.status,
-    headers: { "content-type": contentType },
-  });
+    return new NextResponse(buffer, {
+      status: 200,
+      headers: {
+        "content-type": contentType,
+        "cache-control": `public, max-age=${maxAge}, immutable`,
+      },
+    });
+  } catch {
+    return NextResponse.json({ message: "File not found" }, { status: 404 });
+  }
 }

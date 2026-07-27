@@ -1,6 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-
 import { logger } from "@/lib/logger";
 
 export const authOptions: NextAuthOptions = {
@@ -11,7 +10,6 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid email profile",
-          // Use standard auth code flow. Google rejects hybrid flow without nonce.
           response_type: "code",
         },
       },
@@ -37,16 +35,22 @@ export const authOptions: NextAuthOptions = {
         token.isAdmin = Boolean((user as { isAdmin?: boolean }).isAdmin);
       }
 
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase());
+      if (token.email && adminEmails.includes(token.email.toLowerCase())) {
+        token.isAdmin = true;
+      }
+
       token.isAdmin = Boolean(token.isAdmin);
 
       return token;
     },
     async session({ session, token }) {
       session.user.isAdmin = Boolean(token.isAdmin);
+      session.user.id = token.sub ?? "";
       session.idToken = token.idToken;
 
       if (!session.idToken) {
-        logger.warn("[Auth Session Callback] ⚠️ NO ID TOKEN IN SESSION - Login will likely fail");
+        logger.warn("[Auth Session Callback] NO ID TOKEN IN SESSION");
       }
 
       return session;

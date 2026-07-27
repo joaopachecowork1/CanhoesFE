@@ -3,10 +3,10 @@ import { logger } from "@/lib/logger";
 
 /**
  * Server-side fetch client for Canhoes API.
- * Calls the backend directly (bypassing the Next.js proxy).
+ * Calls the local Next.js route handlers (self-referencing).
  */
 export async function canhoesServerFetch<T>(path: string): Promise<T | null> {
-  const baseUrl = process.env.CANHOES_API_URL || "http://localhost:5000";
+  const baseUrl = process.env.CANHOES_INTERNAL_URL || "http://localhost:3000";
   const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
   const url = `${baseUrl}/api/v1/${normalizedPath}`;
 

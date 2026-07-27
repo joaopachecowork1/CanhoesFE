@@ -60,7 +60,7 @@ export function useCreateFeedPost({ eventId }: Readonly<UseCreateFeedPostParams>
         : [];
 
       const createdPost = await feedRepo.createPost(eventId, {
-        content: trimmedText,
+        text: trimmedText,
         mediaUrls,
         pollQuestion: data.pollOn && pollQuestion ? pollQuestion : null,
         pollOptions: data.pollOn ? pollOptions : null,

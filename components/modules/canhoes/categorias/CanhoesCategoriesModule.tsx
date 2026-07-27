@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Flame, Inbox, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
+import type { EventActiveContextDto, AwardCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { useEventOverview } from "@/hooks/useEventOverview";
@@ -44,8 +45,11 @@ function CategoriesLoadingState() {
     );
 }
 
-export function CanhoesCategoriesModule() {
-    const { event, overview, isLoading: isOverviewLoading } = useEventOverview();
+export function CanhoesCategoriesModule({ initialContext, initialCategories }: {
+    initialContext?: EventActiveContextDto | null;
+    initialCategories?: AwardCategoryDto[];
+}) {
+    const { event, overview, isLoading: isOverviewLoading } = useEventOverview(initialContext);
     const queryClient = useQueryClient();
 
     const { data: categoryList = [], isLoading, error } = useQuery({
@@ -53,6 +57,7 @@ export function CanhoesCategoriesModule() {
         queryFn: () => awardsRepo.getCategories(event!.id).then(r => r.items),
         enabled: !!event?.id,
         staleTime: 1000 * 60 * 2,
+        initialData: initialCategories,
     });
 
     const errorMessage = error ? getErrorMessage(error, "Não foi possível carregar as categorias desta edição.") : null;

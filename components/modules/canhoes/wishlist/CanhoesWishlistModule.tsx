@@ -17,7 +17,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { eventRepo } from "@/lib/repositories/eventRepo";
-import type { PublicUserDto, EventWishlistItemDto } from "@/lib/api/types";
+import type { EventActiveContextDto, PublicUserDto, EventWishlistItemDto } from "@/lib/api/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,9 +73,13 @@ function groupWishlistItemsByUser(items: EventWishlistItemDto[]) {
   return wishlistByUser;
 }
 
-export function CanhoesWishlistModule() {
+export function CanhoesWishlistModule({ initialContext, initialMembers, initialWishlistItems: initialWishlist }: {
+    initialContext?: EventActiveContextDto | null;
+    initialMembers?: PublicUserDto[];
+    initialWishlistItems?: EventWishlistItemDto[];
+}) {
   const { user } = useAuth();
-  const { event } = useEventOverview();
+  const { event } = useEventOverview(initialContext);
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
 
@@ -84,6 +88,7 @@ export function CanhoesWishlistModule() {
     queryFn: () => eventRepo.getMembers(eventId!).then(r => Array.isArray(r) ? r : []),
     enabled: !!eventId,
     staleTime: 1000 * 60 * 2,
+    initialData: initialMembers,
   });
 
   const { data: wishlistItems = [], isLoading: isWishlistLoading, error: wishlistError } = useQuery({
@@ -91,6 +96,7 @@ export function CanhoesWishlistModule() {
     queryFn: () => eventRepo.getWishlist(eventId!, 0, 1000).then(r => r.items),
     enabled: !!eventId,
     staleTime: 1000 * 60 * 2,
+    initialData: initialWishlist,
   });
 
   const isLoading = isMembersLoading || isWishlistLoading;
