@@ -1,26 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { readUpload, UploadValidationError } from "@/lib/storage/localStorage";
 
 export const dynamic = "force-dynamic";
-
-const C_SHARP_UPLOADS_DIR = "C:\\PessoalRepo\\CanhoesRepos\\CanhoesBE\\Canhoes.API\\wwwroot";
-
-const MIME_TYPES: Record<string, string> = {
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".svg": "image/svg+xml",
-  ".mp4": "video/mp4",
-  ".pdf": "application/pdf",
-};
-
-function getContentType(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase();
-  return MIME_TYPES[ext] ?? "application/octet-stream";
-}
 
 export async function GET(
   _req: NextRequest,
@@ -31,16 +12,8 @@ export async function GET(
     return NextResponse.json({ message: "Missing upload path" }, { status: 400 });
   }
 
-  const relativePath = segments.join("\\");
-  const physicalPath = path.resolve(C_SHARP_UPLOADS_DIR, relativePath);
-
-  if (!physicalPath.startsWith(C_SHARP_UPLOADS_DIR)) {
-    return NextResponse.json({ message: "Invalid path" }, { status: 400 });
-  }
-
   try {
-    const buffer = await fs.readFile(physicalPath);
-    const contentType = getContentType(physicalPath);
+    const { buffer, contentType } = await readUpload(segments);
     const maxAge = 86400;
 
     return new NextResponse(buffer, {
@@ -50,7 +23,10 @@ export async function GET(
         "cache-control": `public, max-age=${maxAge}, immutable`,
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
     return NextResponse.json({ message: "File not found" }, { status: 404 });
   }
 }

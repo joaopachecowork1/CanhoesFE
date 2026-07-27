@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PagedResult, PublicUserDto } from "@/lib/api/types";
+import { assertAdminRoleChangeAllowed } from "./adminRolePolicy";
 
 export async function getAdminMembersPaged(
   eventId: string,
@@ -23,7 +24,7 @@ export async function getAdminMembersPaged(
   const items = members
     .map((m) => {
       const u = userMap.get(m.userId);
-      return u ? { id: u.id, email: u.email, displayName: u.displayName, isAdmin: m.role === "admin" } : null;
+      return u ? { id: u.id, email: u.email, displayName: u.displayName, isAdmin: u.isAdmin } : null;
     })
     .filter((x): x is PublicUserDto => x !== null)
     .sort((a, b) => {
@@ -37,4 +38,44 @@ export async function getAdminMembersPaged(
     total, skip, take,
     hasMore: skip + take < total,
   };
+}
+
+export async function setAdminRole(input: {
+  actorUserId: string;
+  eventId: string;
+  targetUserId: string;
+  isAdmin: boolean;
+  confirmSelfDemotion: boolean;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const membership = await tx.eventMember.findUnique({
+      where: { eventId_userId: { eventId: input.eventId, userId: input.targetUserId } },
+      select: { userId: true },
+    });
+    if (!membership) throw new Error("MEMBER_NOT_FOUND");
+
+    const target = await tx.user.findUnique({
+      where: { id: input.targetUserId },
+      select: { id: true, isAdmin: true },
+    });
+    if (!target) throw new Error("MEMBER_NOT_FOUND");
+
+    const adminCount = target.isAdmin && !input.isAdmin
+      ? await tx.user.count({ where: { isAdmin: true } })
+      : 0;
+    assertAdminRoleChangeAllowed({
+      actorUserId: input.actorUserId,
+      targetUserId: input.targetUserId,
+      targetIsAdmin: target.isAdmin,
+      nextIsAdmin: input.isAdmin,
+      adminCount,
+      confirmSelfDemotion: input.confirmSelfDemotion,
+    });
+
+    return tx.user.update({
+      where: { id: input.targetUserId },
+      data: { isAdmin: input.isAdmin },
+      select: { id: true, isAdmin: true },
+    });
+  }, { isolationLevel: "Serializable" });
 }

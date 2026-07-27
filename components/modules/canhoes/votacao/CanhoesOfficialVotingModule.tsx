@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { CheckCircle2, Flame, Loader2, Vote } from "lucide-react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,7 +17,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
-import { useSignalR } from "@/hooks/useSignalR";
 
 function OfficialVotingLoadingState() {
   return (
@@ -51,22 +50,9 @@ export function CanhoesOfficialVotingModule({ initialData, initialContext }: { i
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 3,
     refetchOnWindowFocus: false,
+    refetchInterval: () =>
+      typeof document !== "undefined" && document.visibilityState === "visible" ? 20_000 : false,
   });
-
-  const { connection } = useSignalR(eventId);
-
-  useEffect(() => {
-    if (!connection) return;
-
-    connection.on("VoteCast", () => {
-      // Someone voted, refresh the board to show updated counts (if public)
-      void queryClient.invalidateQueries({ queryKey: ["official-voting", activeEventId] });
-    });
-
-    return () => {
-      connection.off("VoteCast");
-    };
-  }, [connection, queryClient, activeEventId]);
 
   const officialVotingCategories = useMemo(
     () => votingBoardQuery.data?.categories ?? [],

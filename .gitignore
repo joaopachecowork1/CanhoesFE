@@ -108,6 +108,9 @@ canhoes-vault/
 *.tmp
 *.temp
 .cache/
+.data/
+backups/
+uploads/
 
 .aider*
 .openclaw/

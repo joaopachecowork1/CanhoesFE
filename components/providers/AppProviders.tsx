@@ -3,7 +3,6 @@
 import React from "react";
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { SignalRProvider } from "@/contexts/SignalRContext";
 import { DevAuthModeBanner } from "@/components/dev/DevAuthModeBanner";
 import { ThemeProvider } from "@/components/ui/themeprovider";
 import { Toaster } from "@/components/ui/sonner";
@@ -32,11 +31,9 @@ export default function AppProviders({ children }: Readonly<{ children: React.Re
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         <QueryClientProvider client={client}>
           <AuthProvider>
-            <SignalRProvider>
-              {children}
-              <Toaster />
-              <DevAuthModeBanner />
-            </SignalRProvider>
+            {children}
+            <Toaster />
+            <DevAuthModeBanner />
           </AuthProvider>
           {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>

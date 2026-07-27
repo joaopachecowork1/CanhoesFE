@@ -127,7 +127,74 @@ export async function getFeedPosts(
     }),
   ]);
 
-  const items = await Promise.all(rows.map((r) => enrichPost(r, userId)));
+  const postIds = rows.map((row) => row.id);
+  const authorIds = [...new Set(rows.map((row) => row.authorUserId))];
+  const [authors, comments, downvotes, reactions, polls] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { in: authorIds } },
+      select: { id: true, displayName: true },
+    }),
+    prisma.hubPostComment.groupBy({
+      by: ["postId"], where: { postId: { in: postIds } }, _count: { _all: true },
+    }),
+    prisma.hubPostDownvote.findMany({
+      where: { postId: { in: postIds } }, select: { postId: true, userId: true },
+    }),
+    prisma.hubPostReaction.findMany({
+      where: { postId: { in: postIds } }, select: { postId: true, userId: true, emoji: true },
+    }),
+    prisma.hubPostPoll.findMany({
+      where: { postId: { in: postIds } },
+      include: { options: { orderBy: { sortOrder: "asc" } }, votes: true },
+    }),
+  ]);
+
+  const authorMap = new Map(authors.map((author) => [author.id, author.displayName]));
+  const commentCountMap = new Map(comments.map((entry) => [entry.postId, entry._count._all]));
+  const pollMap = new Map(polls.map((poll) => [poll.postId, poll]));
+
+  const items = rows.map((post): EventFeedPostFullDto => {
+    const postDownvotes = downvotes.filter((entry) => entry.postId === post.id);
+    const postReactions = reactions.filter((entry) => entry.postId === post.id);
+    const reactionCounts: Record<string, number> = {};
+    const myReactions: string[] = [];
+    for (const reaction of postReactions) {
+      reactionCounts[reaction.emoji] = (reactionCounts[reaction.emoji] ?? 0) + 1;
+      if (reaction.userId === userId) myReactions.push(reaction.emoji);
+    }
+
+    const pollRow = pollMap.get(post.id);
+    const poll = pollRow ? {
+      question: pollRow.question,
+      totalVotes: pollRow.votes.length,
+      myOptionId: pollRow.votes.find((vote) => vote.userId === userId)?.optionId ?? null,
+      options: pollRow.options.map((option) => ({
+        id: option.id,
+        text: option.text,
+        voteCount: pollRow.votes.filter((vote) => vote.optionId === option.id).length,
+      })),
+    } : null;
+
+    return {
+      id: post.id,
+      eventId: post.eventId,
+      authorUserId: post.authorUserId,
+      authorName: authorMap.get(post.authorUserId) ?? "Unknown",
+      text: post.text,
+      mediaUrl: post.mediaUrl,
+      mediaUrls: Array.isArray(post.mediaUrlsJson) ? post.mediaUrlsJson as string[] : [],
+      isPinned: post.isPinned,
+      createdAtUtc: post.createdAtUtc.toISOString(),
+      likeCount: reactionCounts.heart ?? 0,
+      commentCount: commentCountMap.get(post.id) ?? 0,
+      downvoteCount: postDownvotes.length,
+      reactionCounts,
+      myReactions,
+      likedByMe: myReactions.includes("heart"),
+      downvotedByMe: postDownvotes.some((entry) => entry.userId === userId),
+      poll,
+    };
+  });
 
   return { items, total, skip, take, hasMore: skip + take < total };
 }
@@ -167,6 +234,14 @@ export async function createFeedPost(
             })),
           },
         },
+      });
+    }
+
+    const mediaUrls = data.mediaUrls ?? (data.mediaUrl ? [data.mediaUrl] : []);
+    if (mediaUrls.length > 0) {
+      await tx.hubPostMedia.updateMany({
+        where: { url: { in: mediaUrls }, uploadedByUserId: userId, postId: null },
+        data: { postId: p.id },
       });
     }
 

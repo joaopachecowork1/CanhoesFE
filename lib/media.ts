@@ -1,5 +1,3 @@
-import { CANHOES_API_URL } from "@/lib/api/canhoesClient";
-
 function normalizeMediaPath(path: string) {
   return path.trim().replaceAll("\\", "/");
 }
@@ -46,8 +44,8 @@ export function absMediaUrl(path: string | null | undefined) {
   }
 
   if (normalizedPath.startsWith("/")) {
-    return `${CANHOES_API_URL}${normalizedPath}`;
+    return normalizedPath;
   }
 
-  return `${CANHOES_API_URL}/${normalizedPath}`;
+  return `/${normalizedPath}`;
 }

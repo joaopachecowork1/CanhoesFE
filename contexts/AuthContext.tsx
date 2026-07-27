@@ -1,9 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useMemo, useCallback } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { DEV_AUTH_BYPASS_ENABLED, DEV_AUTH_USER_CONFIG } from "@/lib/auth/devAuth";
 
 export type AuthUser = {
   id: string;
@@ -19,7 +18,9 @@ type AuthContextType = {
   profileLoading: boolean;
   profileError: Error | null;
   isDevAuthBypass: boolean;
+  isDevLoginAvailable: boolean;
   loginGoogle: () => void;
+  loginDevelopment: () => void;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 };
@@ -69,22 +70,18 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
 
-  const devBypassUser = useMemo<AuthUser | null>(() => (
-    DEV_AUTH_BYPASS_ENABLED
-      ? {
-          id: DEV_AUTH_USER_CONFIG.id,
-          email: DEV_AUTH_USER_CONFIG.email,
-          name: DEV_AUTH_USER_CONFIG.name,
-          isAdmin: DEV_AUTH_USER_CONFIG.isAdmin,
-        }
-      : null
-  ), []);
-
-  const isDevAuthBypass = Boolean(devBypassUser);
+  const isDevAuthBypass = session?.authMode === "development";
+  const providersQuery = useQuery({
+    queryKey: ["auth", "providers"],
+    queryFn: getProviders,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const isDevLoginAvailable = Boolean(providersQuery.data?.development);
 
   const backendUserQuery = useQuery<AuthUser | null>({
     queryKey: ["auth", "me", session?.idToken],
-    enabled: isLoggedIn && !isDevAuthBypass,
+    enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
@@ -113,7 +110,6 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   });
 
   const user = useMemo<AuthUser | null>(() => {
-    if (devBypassUser) return devBypassUser;
     if (!isLoggedIn) return null;
 
     const sessionUser = session?.user as
@@ -135,7 +131,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         "",
       isAdmin: Boolean(backendUserQuery.data?.isAdmin ?? sessionUser?.isAdmin),
     };
-  }, [backendUserQuery.data, devBypassUser, session?.user, isLoggedIn]);
+  }, [backendUserQuery.data, session?.user, isLoggedIn]);
 
   const profileError = useMemo<Error | null>(() => {
     if (backendUserQuery.error instanceof Error) {
@@ -153,6 +149,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     void signIn("google", { callbackUrl: "/canhoes" });
   }, []);
 
+  const loginDevelopment = useCallback(() => {
+    void signIn("development", { callbackUrl: "/canhoes" });
+  }, []);
+
   const logout = useCallback(() => {
     void signOut({ callbackUrl: "/canhoes/login", redirect: true });
   }, []);
@@ -167,12 +167,14 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const value = useMemo<AuthContextType>(
     () => ({
       user,
-      isLogged: isLoggedIn || isDevAuthBypass,
-      loading: !isDevAuthBypass && isLoading,
-      profileLoading: !isDevAuthBypass && isLoggedIn && isProfileLoading,
+      isLogged: isLoggedIn,
+      loading: isLoading,
+      profileLoading: isLoggedIn && isProfileLoading,
       profileError,
       isDevAuthBypass,
+      isDevLoginAvailable,
       loginGoogle,
+      loginDevelopment,
       logout,
       refreshProfile,
     }),
@@ -180,10 +182,12 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       user,
       isLoggedIn,
       isDevAuthBypass,
+      isDevLoginAvailable,
       isLoading,
       isProfileLoading,
       profileError,
       loginGoogle,
+      loginDevelopment,
       logout,
       refreshProfile,
     ]

@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useAdminNavigation } from "@/hooks/useAdminNavigation";
-import { IS_LOCAL_MODE } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -122,7 +121,7 @@ export function CanhoesChrome({
     userLabel,
   } = useCanhoesShellNavigation({
     isAdmin,
-    isLocalMode: IS_LOCAL_MODE,
+    isLocalMode: false,
     isMenuOpen,
     onNavigateAdmin: handleNavigateAdmin,
     onOpenMenu: () => handleMenuOpenChange(true),
@@ -267,7 +266,7 @@ export function CanhoesChrome({
           isOpen={isMenuOpen}
           onOpenChange={handleMenuOpenChange}
           isAdmin={isAdmin}
-           isLocalMode={IS_LOCAL_MODE}
+           isLocalMode={false}
           overview={eventOverview.overview}
           primaryIds={menuPrimaryIds}
           onNavigate={(href) => {

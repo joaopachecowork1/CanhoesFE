@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { updateNomineeImage } from "@/lib/services/memberService";
+import { deleteUpload, saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,18 @@ export async function POST(
     return NextResponse.json({ code: "FILE_REQUIRED", message: "File is required." }, { status: 400 });
   }
 
-  const imageUrl = `/uploads/canhoes/nominees/${crypto.randomUUID()}-${file.name}`;
-
-  const nominee = await updateNomineeImage(eventId, nomineeId, userId, isAdmin, imageUrl);
-  if (!nominee) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Nominee not found." }, { status: 404 });
+  try {
+    const upload = await saveUpload(file, ["canhoes", "nominees"]);
+    const nominee = await updateNomineeImage(eventId, nomineeId, userId, isAdmin, upload.url);
+    if (!nominee) {
+      await deleteUpload(upload.url);
+      return NextResponse.json({ code: "NOT_FOUND", message: "Nominee not found." }, { status: 404 });
+    }
+    return NextResponse.json(nominee);
+  } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ code: "VALIDATION_ERROR", message: error.message }, { status: 400 });
+    }
+    throw error;
   }
-
-  return NextResponse.json(nominee);
 }

@@ -28,6 +28,16 @@ export const adminRepo = {
     
   getMembersPaged: (eventId: string, skip = 0, take = 50) =>
     canhoesFetch<T.PagedResult<T.AdminMemberDto>>(`/v1/events/${eventId}/admin/members/paged?skip=${skip}&take=${take}`),
+
+  setMemberAdmin: (
+    eventId: string,
+    userId: string,
+    payload: { isAdmin: boolean; confirmSelfDemotion?: boolean }
+  ) =>
+    canhoesFetch<{ user: { id: string; isAdmin: boolean } }>(
+      `/v1/events/${eventId}/admin/members/${userId}/role`,
+      { method: "PATCH", body: JSON.stringify(payload), canhoes: { throwOnUnauthorized: true } }
+    ),
     
   getNominationsPaged: (eventId: string, skip = 0, take = 50, status?: string) =>
     canhoesFetch<T.AdminNomineesPagedDto>(

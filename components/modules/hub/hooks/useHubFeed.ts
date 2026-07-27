@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { type InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { EventFeedPostFullDto, HubCommentDto } from "@/lib/api/types";
+import type { EventFeedPostFullDto } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/errors";
 import { feedRepo } from "@/lib/repositories/feedRepo";
 
-import { COMMENTS_QUERY_KEY, useHubFeedComments } from "./useHubFeedComments";
+import { useHubFeedComments } from "./useHubFeedComments";
 import { useHubFeedPostActions } from "./useHubFeedPostActions";
-import { useSignalR } from "@/hooks/useSignalR";
 
 export type FeedSortOrder = "hot" | "new" | "top";
 const PAGE_SIZE = 15;
@@ -61,28 +60,7 @@ function sanitizePosts(rawPosts: EventFeedPostFullDto[] | null | undefined) {
   );
 }
 
-function prependPostToFeed(
-  previousFeedData: FeedInfiniteData | undefined,
-  newlyCreatedPost: EventFeedPostFullDto
-): FeedInfiniteData | undefined {
-  if (!previousFeedData) return previousFeedData;
-
-  const [firstPage, ...remainingPages] = previousFeedData.pages;
-  if (!firstPage) return previousFeedData;
-
-  return {
-    ...previousFeedData,
-    pages: [
-      {
-        ...firstPage,
-        posts: [newlyCreatedPost, ...firstPage.posts.filter((post) => post.id !== newlyCreatedPost.id)],
-      },
-      ...remainingPages,
-    ],
-  };
-}
-
-export function useHubFeed(eventId: string | null, currentUserId: string | null, initialData?: FeedInfiniteData) {
+export function useHubFeed(eventId: string | null, _currentUserId: string | null, initialData?: FeedInfiniteData) {
   const queryClient = useQueryClient();
   const [sortOrder, setSortOrder] = useState<FeedSortOrder>("hot");
 
@@ -110,6 +88,8 @@ export function useHubFeed(eventId: string | null, currentUserId: string | null,
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    refetchInterval: () =>
+      typeof document !== "undefined" && document.visibilityState === "visible" ? 15_000 : false,
   });
 
   const allSanitizedPosts = useMemo(
@@ -145,92 +125,6 @@ export function useHubFeed(eventId: string | null, currentUserId: string | null,
   const refreshPosts = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
   }, [queryClient, eventId]);
-
-  const { connection } = useSignalR(eventId);
-
-  useEffect(() => {
-    if (!connection) return;
-
-    connection.on("PostCreated", (newlyCreatedPost: EventFeedPostFullDto) => {
-      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) =>
-        prependPostToFeed(previousData, newlyCreatedPost)
-      );
-    });
-
-    connection.on("PostLiked", ({ postId, liked: isLiked, userId }: { postId: string; liked: boolean; userId?: string }) => {
-      const isMe = userId && currentUserId && userId.toLowerCase() === currentUserId.toLowerCase();
-      if (isMe) return;
-
-      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
-        if (!previousData) return previousData;
-        return {
-          ...previousData,
-          pages: previousData.pages.map((page) => ({
-            ...page,
-            posts: page.posts.map((post) =>
-              post.id === postId
-                ? { ...post, likeCount: Math.max(0, (post.likeCount ?? 0) + (isLiked ? 1 : -1)) }
-                : post
-            ),
-          })),
-        };
-      });
-    });
-
-    connection.on("PostDownvoted", ({ postId, downvoted: isDownvoted, userId }: { postId: string; downvoted: boolean; userId?: string }) => {
-      const isMe = userId && currentUserId && userId.toLowerCase() === currentUserId.toLowerCase();
-      if (isMe) return;
-
-      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
-        if (!previousData) return previousData;
-        return {
-          ...previousData,
-          pages: previousData.pages.map((page) => ({
-            ...page,
-            posts: page.posts.map((post) =>
-              post.id === postId
-                ? { ...post, downvoteCount: Math.max(0, (post.downvoteCount ?? 0) + (isDownvoted ? 1 : -1)) }
-                : post
-            ),
-          })),
-        };
-      });
-    });
-
-    connection.on("CommentCreated", ({ postId, comment }: { postId: string; comment: HubCommentDto }) => {
-      queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY, postId] });
-      
-      const isMe = comment.userId && currentUserId && comment.userId.toLowerCase() === currentUserId.toLowerCase();
-      if (isMe) return;
-
-      queryClient.setQueryData<FeedInfiniteData>(["hub-posts", eventId], (previousData) => {
-        if (!previousData) return previousData;
-        return {
-          ...previousData,
-          pages: previousData.pages.map((page) => ({
-            ...page,
-            posts: page.posts.map((post) =>
-              post.id === postId
-                ? { ...post, commentCount: (post.commentCount ?? 0) + 1 }
-                : post
-            ),
-          })),
-        };
-      });
-    });
-
-    connection.on("PollVoted", () => {
-      queryClient.invalidateQueries({ queryKey: ["hub-posts", eventId] });
-    });
-
-    return () => {
-      connection.off("PostCreated");
-      connection.off("PostLiked");
-      connection.off("PostDownvoted");
-      connection.off("CommentCreated");
-      connection.off("PollVoted");
-    };
-  }, [connection, queryClient, eventId, currentUserId]);
 
   return {
     posts: sortedDisplayedPosts,

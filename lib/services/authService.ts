@@ -33,15 +33,12 @@ export async function resolveUser(
     };
   }
 
-  const userCount = await prisma.user.count();
-  const isAdmin = userCount === 0;
-
   const user = await prisma.user.create({
     data: {
       externalId,
       email,
       displayName: displayName ?? email,
-      isAdmin,
+      isAdmin: false,
     },
   });
 

@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "@/auth";
+import { requireUser, AuthorizationError } from "@/lib/auth/serverAuth";
 
 type AuthHandler = (
   req: NextRequest,
@@ -15,28 +14,20 @@ type SessionContext = {
 
 export function withAuth(handler: AuthHandler) {
   return async (req: NextRequest, ctx: { params: Promise<Record<string, string | string[]>> }) => {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { code: "UNAUTHORIZED", message: "Authentication required." },
-        { status: 401 }
-      );
+    try {
+      const user = await requireUser();
+      return handler(req, {
+        ...ctx,
+        session: { userId: user.id, isAdmin: user.isAdmin },
+      });
+    } catch (error) {
+      if (error instanceof AuthorizationError) {
+        return NextResponse.json(
+          { code: error.code, message: error.message },
+          { status: error.status }
+        );
+      }
+      throw error;
     }
-
-    const sessionContext: SessionContext = {
-      userId: (session.user as Record<string, unknown>).id as string || "",
-      isAdmin: Boolean((session.user as Record<string, unknown>).isAdmin),
-      idToken: (session as unknown as Record<string, unknown>).idToken as string | undefined,
-    };
-
-    if (!sessionContext.userId) {
-      return NextResponse.json(
-        { code: "UNAUTHORIZED", message: "User ID not found in session." },
-        { status: 401 }
-      );
-    }
-
-    return handler(req, { ...ctx, session: sessionContext });
   };
 }

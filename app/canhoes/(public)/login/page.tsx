@@ -29,7 +29,13 @@ const authErrorMessages: Record<string, string> = {
 
 export default function CanhoesLoginPage() {
   const router = useRouter();
-  const { isLogged, loading, loginGoogle, isDevAuthBypass } = useAuth();
+  const {
+    isLogged,
+    loading,
+    loginGoogle,
+    loginDevelopment,
+    isDevLoginAvailable,
+  } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -133,17 +139,17 @@ export default function CanhoesLoginPage() {
                 </div>
               ) : null}
 
-              {isDevAuthBypass ? (
+              {isDevLoginAvailable ? (
                 <div className="canhoes-bits-panel rounded-lg border border-[rgba(255,209,102,0.32)] bg-[rgba(62,38,12,0.72)] px-3 py-2 text-xs text-[rgba(255,236,188,0.92)]">
                   Modo desenvolvimento ativo. Bypass auth local ligado.
                 </div>
               ) : null}
 
-              {isDevAuthBypass ? (
+              {isDevLoginAvailable ? (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => router.push("/canhoes")}
+                  onClick={loginDevelopment}
                 >
                   Entrar em modo desenvolvimento
                 </Button>

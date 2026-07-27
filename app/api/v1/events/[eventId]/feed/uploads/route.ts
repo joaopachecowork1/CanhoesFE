@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { prisma } from "@/lib/prisma";
+import { saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +31,27 @@ export async function POST(
   if (files.length === 0) {
     return NextResponse.json({ code: "VALIDATION_ERROR", message: "No files provided." }, { status: 400 });
   }
-
-  const uploaded: { url: string; fileName: string; fileSize: number }[] = [];
-  for (const file of files) {
-    const url = `/uploads/feed/${eventId}/${Date.now()}_${file.name}`;
-    uploaded.push({ url, fileName: file.name, fileSize: file.size });
+  if (files.length > 4) {
+    return NextResponse.json({ code: "VALIDATION_ERROR", message: "A maximum of 4 images is allowed." }, { status: 400 });
   }
 
-  return NextResponse.json({ files: uploaded });
+  try {
+    const uploaded = await Promise.all(files.map((file) => saveUpload(file, ["feed", eventId])));
+    await prisma.hubPostMedia.createMany({
+      data: uploaded.map((item) => ({
+        url: item.url,
+        originalFileName: item.fileName,
+        fileSizeBytes: BigInt(item.fileSize),
+        uploadedByUserId: userId,
+        contentType: item.contentType,
+        uploadedAtUtc: new Date(),
+      })),
+    });
+    return NextResponse.json({ files: uploaded.map(({ contentType: _contentType, ...item }) => item) });
+  } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ code: "VALIDATION_ERROR", message: error.message }, { status: 400 });
+    }
+    throw error;
+  }
 }

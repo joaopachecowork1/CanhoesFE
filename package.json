@@ -1,5 +1,5 @@
 {
-  "name": "canhoesfe",
+  "name": "canhoes",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,11 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:up": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-up.ps1",
+    "db:down": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-down.ps1",
+    "db:migrate": "prisma migrate deploy",
+    "db:baseline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-baseline.ps1",
+    "db:seed": "prisma db seed",
+    "db:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-backup.ps1",
+    "db:restore": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-restore.ps1",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",
-    "@microsoft/signalr": "^10.0.0",
     "@prisma/client": "^6.19.3",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -51,5 +58,8 @@
     "tailwindcss": "^3",
     "typescript": "5.9.3",
     "vitest": "^4.1.2"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   }
 }

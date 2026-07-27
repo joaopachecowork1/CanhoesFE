@@ -1,13 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { logFrontendError } from "@/lib/errors";
 import { adminRepo } from "@/lib/repositories/adminRepo";
+import { useAuth } from "@/hooks/useAuth";
 
 import { AdminStateMessage } from "./AdminStateMessage";
 import { SecretSantaAdmin } from "./SecretSantaAdmin";
@@ -23,6 +26,8 @@ export function AdminMembersSection({
   loading,
   onUpdate,
 }: Readonly<AdminMembersSectionProps>) {
+  const queryClient = useQueryClient();
+  const { user, refreshProfile } = useAuth();
   const membersQuery = useQuery({
     enabled: !!eventId,
     queryFn: () => adminRepo.getMembersPaged(eventId!, 0, 50),
@@ -41,6 +46,27 @@ export function AdminMembersSection({
   });
 
   const members = membersQuery.data ?? [];
+  const roleMutation = useMutation({
+    mutationFn: async (member: { id: string; isAdmin: boolean }) => {
+      const isSelfDemotion = member.id === user?.id && member.isAdmin;
+      if (isSelfDemotion && !window.confirm("Ao remover o teu acesso admin sairás desta área. Continuar?")) {
+        return null;
+      }
+      return adminRepo.setMemberAdmin(eventId!, member.id, {
+        isAdmin: !member.isAdmin,
+        confirmSelfDemotion: isSelfDemotion,
+      });
+    },
+    onSuccess: async (result) => {
+      if (!result) return;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "members", eventId] }),
+        refreshProfile(),
+      ]);
+      toast.success("Permissões atualizadas.");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Não foi possível atualizar o admin."),
+  });
 
   if (!eventId) {
     return <AdminStateMessage>Falta uma edicao ativa para gerir amigos.</AdminStateMessage>;
@@ -99,7 +125,16 @@ export function AdminMembersSection({
                       <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{member.displayName || member.email}</p>
                       <p className="text-xs text-[var(--ink-muted)]">{member.email}</p>
                     </div>
-                    {member.isAdmin ? <Badge variant="outline" className="shrink-0">Admin</Badge> : null}
+                    <div className="flex shrink-0 items-center gap-2">
+                      {member.isAdmin ? <Badge variant="outline">Admin</Badge> : null}
+                      <Switch
+                        aria-label={`Admin: ${member.displayName || member.email}`}
+                        checked={member.isAdmin}
+                        disabled={roleMutation.isPending}
+                        onCheckedChange={() => roleMutation.mutate(member)}
+                        variant="admin"
+                      />
+                    </div>
                   </div>
                 )}
               />

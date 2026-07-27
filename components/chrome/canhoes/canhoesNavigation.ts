@@ -20,7 +20,6 @@ import {
   CANHOES_MEMBER_NAV_ORDER,
   type CanhoesMemberModuleKey,
 } from "@/lib/modules";
-import { IS_LOCAL_MODE } from "@/lib/mock";
 
 export type CanhoesNavItem = {
   description?: string;
@@ -219,7 +218,7 @@ export function getPageContext(pathname: string | null): CanhoesPageContext {
 function isNavItemAvailable({
   itemId,
   isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
+  isLocalMode = false,
   overview,
 }: Readonly<{
   itemId: string;
@@ -244,7 +243,7 @@ function isNavItemAvailable({
 
 export function getPromotedNavItems({
   isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
+  isLocalMode = false,
   overview,
 }: Readonly<{
   isAdmin: boolean;
@@ -268,7 +267,7 @@ export function getPageTitle(pathname: string | null) {
 export function getVisibleMoreNavItems({
   excludedIds = [],
   isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
+  isLocalMode = false,
   overview,
 }: Readonly<{
   excludedIds?: string[];
@@ -291,7 +290,7 @@ export function getVisibleMoreNavItems({
 export function getVisibleMoreAdminItem({
   excludedIds = [],
   isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
+  isLocalMode = false,
   overview,
 }: Readonly<{
   excludedIds?: string[];
@@ -316,7 +315,7 @@ export function getVisibleMoreAdminItem({
 
 export function isMoreSectionActive({
   isAdmin,
-  isLocalMode = IS_LOCAL_MODE,
+  isLocalMode = false,
   overview,
   pathname,
   promotedItems,
