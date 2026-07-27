@@ -37,7 +37,7 @@ const SELECT_ITEM_CLASS = ADMIN_SELECT_ITEM_CLASS;
 const OUTLINE_BUTTON_CLASS = ADMIN_OUTLINE_BUTTON_CLASS;
 
 const CONTROL_BLOCK_CLASS =
-  "rounded-xl border border-[var(--border-paper)] bg-[var(--bg-paper)] p-3 shadow-[var(--shadow-paper)] sm:rounded-[var(--radius-md-token)]";
+  "rounded-xl border border-[var(--border-paper)] bg-[var(--bg-paper)] p-3 shadow-[var(--shadow-paper)]";
 
 const CONTROL_ROW_CLASS =
   "flex items-center justify-between gap-3 rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] min-h-11 px-3 py-2 text-[var(--ink-primary)]";
@@ -98,7 +98,7 @@ function ControlBlock({
 }: Readonly<ControlBlockProps>) {
   return (
     <section className={CONTROL_BLOCK_CLASS}>
-      <div className="mb-2 flex items-start justify-between gap-3">
+      <div className="mb-2 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[var(--ink-primary)]">
             <span className="text-[var(--moss)]">{icon}</span>
@@ -108,7 +108,7 @@ function ControlBlock({
             <p className="mt-0.5 text-[11px] text-[var(--ink-secondary)]">{subtitle}</p>
           ) : null}
         </div>
-        {action}
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
 
       {children}
@@ -121,7 +121,7 @@ function VisibilityTile({ checked, id, label, onChange, pending }: Readonly<Visi
     <div className="rounded-[var(--radius-md-token)] border border-[var(--border-paper)] bg-[var(--bg-paper-soft)] px-3 py-2.5 shadow-none">
       <div className="flex items-start justify-between gap-2">
         <Label htmlFor={id} className="min-w-0 cursor-pointer text-[13px] font-medium text-[var(--ink-primary)]">{label}</Label>
-        <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} />
+        <Switch id={id} checked={checked} disabled={pending} onCheckedChange={onChange} variant="admin" />
       </div>
 
       <p className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-[var(--ink-secondary)]">{pending ? "A guardar" : checked ? "Ativo" : "Oculto"}</p>
@@ -215,7 +215,7 @@ export function AdminSettingsMainPanel({
   return (
     <Card className={ADMIN_CONTENT_CARD_CLASS}>
       <CardHeader className="space-y-1.5 pb-2">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <p className="editorial-kicker text-[var(--neon-green)]">Operacional</p>
@@ -229,7 +229,7 @@ export function AdminSettingsMainPanel({
             </CardTitle>
           </div>
 
-          <Button type="button" size="sm" variant="outline" className={`gap-1.5 px-3 ${OUTLINE_BUTTON_CLASS}`} onClick={onOpenAdvanced}>
+          <Button type="button" size="sm" variant="outline" className={`min-h-10 shrink-0 gap-1.5 px-3 ${OUTLINE_BUTTON_CLASS}`} onClick={onOpenAdvanced}>
             Avançado
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -290,7 +290,7 @@ export function AdminSettingsMainPanel({
           }
         >
           <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
               {quickModuleItems.map((item) => (
                 <VisibilityTile
                   key={item.key}
@@ -303,13 +303,13 @@ export function AdminSettingsMainPanel({
               ))}
             </div>
 
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-[minmax(0,1fr)_auto]">
               <QuickMetric label="Pendentes" value={String(pendingCount)} />
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                className={`min-h-[58px] ${OUTLINE_BUTTON_CLASS}`}
+                className={`min-h-11 min-[420px]:min-h-[58px] ${OUTLINE_BUTTON_CLASS}`}
                 onClick={onOpenAdvanced}
               >
                 Mais controlos
@@ -378,7 +378,7 @@ export function AdminSettingsAdvancedSheet({
             title="Módulos secundários"
             subtitle="Wishlist · Votação · Stickers · Medidas · Gala"
             action={
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+              <div className="grid w-full grid-cols-2 gap-2 min-[420px]:w-auto">
                 <Button type="button" size="sm" variant="outline" className={OUTLINE_BUTTON_CLASS} disabled={allEnabled || allModulesSaving} onClick={() => onSetAllModules(true)}>
                   Todos on
                 </Button>

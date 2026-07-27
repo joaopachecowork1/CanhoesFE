@@ -34,6 +34,7 @@ export function AdminRouteTabs({
       activeId={activeId}
       onSelect={onSelect as ((id: string) => void) | undefined}
       size="sm"
+      stretch
       className="canhoes-bits-panel canhoes-bits-panel--admin canhoes-admin-shell-panel"
     />
   );

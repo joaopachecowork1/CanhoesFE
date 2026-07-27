@@ -282,6 +282,7 @@ export default function CanhoesAdminModule({
 
     const handleRefresh = useCallback(async () => {
         await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["adminBootstrap", resolvedEventId] }),
             queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "categories", "pending", resolvedEventId] }),
             queryClient.invalidateQueries({ queryKey: ["admin", "proposals", "measures", "pending", resolvedEventId] }),
             queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "nominations", "summary", "pending", resolvedEventId] }),

@@ -28,12 +28,12 @@ export function useAdminControlCenter(
 ) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [feedback, setFeedback] = useState<SettingsFeedbackState | null>(null);
+  const [secondarySavingKey, setSecondarySavingKey] = useState<string | null>(null);
 
-  // We need to pass the eventId here, but the hook signature might have changed in my previous edit
   const {
     toggleModule,
-    isUpdating,
-  } = useModuleVisibility(eventId!);
+    updatingKey,
+  } = useModuleVisibility(eventId);
 
   const handleUpdatePhase = async (phaseType: string) => {
     if (!eventId || phaseType === state?.activePhase?.type) return;
@@ -76,42 +76,54 @@ export function useAdminControlCenter(
   };
 
   const handleModuleToggle = async (item: ModuleVisibilityItem, checked: boolean) => {
-    await toggleModule(item.key, !checked); // toggleModule in useModuleVisibility takes (key, currentValue)
-    await onRefresh();
+    const updated = await toggleModule(item.key, checked);
+    if (updated) await onRefresh();
   };
 
   const handleNominationsVisibility = async (checked: boolean) => {
     if (!eventId) return;
+    setSecondarySavingKey("nominations");
     try {
       await adminRepo.updateAdminState(eventId, { nominationsVisible: checked });
       await onRefresh();
       toast.success(checked ? "Nomeações abertas ao grupo." : "Nomeações ocultadas do grupo.");
-    } catch (_error) {
+    } catch (error) {
+      logFrontendError("AdminControlCenter.nominationsVisibility", error, { checked });
       toast.error("Erro ao atualizar visibilidade das nomeações.");
+    } finally {
+      setSecondarySavingKey(null);
     }
   };
 
   const handleResultsVisibility = async (checked: boolean) => {
     if (!eventId) return;
+    setSecondarySavingKey("results");
     try {
       await adminRepo.updateAdminState(eventId, { resultsVisible: checked });
       await onRefresh();
       toast.success(checked ? "Resultados abertos ao grupo." : "Resultados ocultados do grupo.");
-    } catch (_error) {
+    } catch (error) {
+      logFrontendError("AdminControlCenter.resultsVisibility", error, { checked });
       toast.error("Erro ao atualizar visibilidade dos resultados.");
+    } finally {
+      setSecondarySavingKey(null);
     }
   };
 
   const handleSetAllModules = async (enabled: boolean) => {
     if (!eventId) return;
+    setSecondarySavingKey(enabled ? "all-enabled" : "all-disabled");
     try {
       const keys = Object.keys(state?.moduleVisibility ?? {});
       const patch = Object.fromEntries(keys.map((k) => [k, enabled]));
       await adminRepo.updateModules(eventId, patch);
       await onRefresh();
       toast.success(enabled ? "Todos os módulos ativados." : "Todos os módulos desativados.");
-    } catch (_error) {
+    } catch (error) {
+      logFrontendError("AdminControlCenter.allModulesVisibility", error, { enabled });
       toast.error("Erro ao atualizar visibilidade dos módulos.");
+    } finally {
+      setSecondarySavingKey(null);
     }
   };
 
@@ -131,12 +143,11 @@ export function useAdminControlCenter(
     state: {
       advancedOpen,
       feedback,
-      isUpdating,
       moduleItems,
       visibleCount,
       allEnabled,
       allDisabled,
-      visibilitySavingKey: isUpdating ? "ALL" : null, // placeholder
+      visibilitySavingKey: updatingKey ?? secondarySavingKey,
     },
     actions: {
       setAdvancedOpen,

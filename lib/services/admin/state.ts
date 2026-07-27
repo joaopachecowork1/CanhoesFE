@@ -133,12 +133,19 @@ export async function activateEvent(eventId: string): Promise<EventSummaryDto | 
 
 export async function updateEventModules(
   eventId: string,
-  modules: EventAdminModuleVisibilityDto
+  modules: Partial<EventAdminModuleVisibilityDto>
 ): Promise<void> {
+  const currentState = await prisma.canhoesEventState.findUnique({
+    where: { eventId },
+    select: { moduleVisibilityJson: true },
+  });
+  const currentModules = (currentState?.moduleVisibilityJson ?? {}) as Record<string, boolean>;
+  const nextModules = { ...currentModules, ...modules };
+
   await prisma.canhoesEventState.upsert({
     where: { eventId },
-    create: { eventId, phase: "gala", nominationsVisible: true, resultsVisible: false, moduleVisibilityJson: modules },
-    update: { moduleVisibilityJson: modules },
+    create: { eventId, phase: "gala", nominationsVisible: true, resultsVisible: false, moduleVisibilityJson: nextModules },
+    update: { moduleVisibilityJson: nextModules },
   });
 }
 

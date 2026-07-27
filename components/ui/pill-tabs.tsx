@@ -20,6 +20,7 @@ type PillTabsProps = {
   items: ReadonlyArray<PillTabItem>;
   onSelect?: (id: string) => void;
   size?: "sm" | "md";
+  stretch?: boolean;
 };
 
 const CONTAINER_CLASS =
@@ -54,6 +55,7 @@ export function PillTabs({
   items,
   onSelect,
   size = "sm",
+  stretch = false,
 }: Readonly<PillTabsProps>) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -79,15 +81,18 @@ export function PillTabs({
 
   return (
     <div className={cn(CONTAINER_CLASS, className)}>
-      <div ref={scrollRef} className={SCROLL_CLASS}>
-        <div className="flex min-w-max gap-1.5">
+      <div ref={scrollRef} className={cn(SCROLL_CLASS, stretch && "mx-0 overflow-hidden px-0 snap-none")}>
+        <div
+          className={cn(stretch ? "grid min-w-0 gap-1" : "flex min-w-max gap-1.5")}
+          style={stretch ? { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` } : undefined}
+        >
           {items.map((item) => {
             const isActive = item.id === activeId;
             const Icon = item.icon;
 
             const content = (
               <>
-                {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
+                {Icon ? <Icon className={cn("h-4 w-4 shrink-0", stretch && "max-[419px]:hidden")} /> : null}
                 <span className="truncate">{item.label}</span>
                 {item.badge != null ? (
                   <span
@@ -107,6 +112,7 @@ export function PillTabs({
               className: cn(
                 ITEM_BASE_CLASS,
                 itemSizeClass,
+                stretch && "w-full justify-center px-2",
                 isActive ? ITEM_ACTIVE_CLASS : ITEM_IDLE_CLASS
               ),
             } as const;

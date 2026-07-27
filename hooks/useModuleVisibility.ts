@@ -13,32 +13,35 @@ export type ModuleVisibilityItem = {
   isEnabled: boolean;
 };
 
-export function useModuleVisibility(eventId: string) {
+export function useModuleVisibility(eventId: string | null) {
   const queryClient = useQueryClient();
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [updatingKey, setUpdatingKey] = useState<AdminModuleKey | null>(null);
 
   const toggleModule = useCallback(
-    async (moduleKey: string, currentValue: boolean) => {
-      setIsUpdating(true);
+    async (moduleKey: AdminModuleKey, enabled: boolean) => {
+      if (!eventId || updatingKey) return false;
+
+      setUpdatingKey(moduleKey);
       try {
-        const patch = { [moduleKey]: !currentValue };
+        const patch = { [moduleKey]: enabled };
         await adminRepo.updateModules(eventId, patch);
-        
         await queryClient.invalidateQueries({ queryKey: ["adminBootstrap", eventId] });
-        
-        toast.success(`Módulo ${moduleKey} ${!currentValue ? "ativado" : "desativado"}.`);
+
+        toast.success(`Módulo ${moduleKey} ${enabled ? "ativado" : "ocultado"}.`);
+        return true;
       } catch (error) {
         toast.error("Erro ao atualizar visibilidade do módulo.");
         logger.error("Erro ao atualizar visibilidade do módulo.", error);
+        return false;
       } finally {
-        setIsUpdating(false);
+        setUpdatingKey(null);
       }
     },
-    [eventId, queryClient]
+    [eventId, queryClient, updatingKey]
   );
 
   return {
     toggleModule,
-    isUpdating,
+    updatingKey,
   };
 }

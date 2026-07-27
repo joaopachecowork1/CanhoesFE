@@ -23,7 +23,8 @@ export const adminRepo = {
   updateModules: (eventId: string, payload: Record<string, boolean>) =>
     canhoesFetch(`/v1/events/${eventId}/modules`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ modules: payload }),
+      canhoes: { throwOnUnauthorized: true },
     }),
     
   getMembersPaged: (eventId: string, skip = 0, take = 50) =>
