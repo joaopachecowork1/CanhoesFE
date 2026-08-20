@@ -6,7 +6,6 @@ import type {
   GalaMeasureDto,
 } from "@/lib/api/types";
 import { createCategory } from "./categories";
-import { KindSticker } from "./constants";
 
 export async function getCategoryProposals(
   eventId: string,
@@ -31,6 +30,7 @@ export async function getCategoryProposals(
     items: items.map((p) => ({
       id: p.id,
       name: p.name,
+      kind: p.kind,
       description: p.description,
       status: p.status as "pending" | "approved" | "rejected",
       createdAtUtc: p.createdAtUtc.toISOString(),
@@ -56,7 +56,7 @@ export async function updateCategoryProposal(
   if (data.status === "approved") {
     await createCategory(eventId, {
       name: data.name ?? proposal.name,
-      kind: KindSticker,
+      kind: proposal.kind,
       description: data.description ?? proposal.description,
     });
   }
@@ -69,6 +69,7 @@ export async function updateCategoryProposal(
   return {
     id: updated.id,
     name: updated.name,
+    kind: updated.kind,
     description: updated.description,
     status: updated.status as "pending" | "approved" | "rejected",
     createdAtUtc: updated.createdAtUtc.toISOString(),

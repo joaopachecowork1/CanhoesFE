@@ -9,7 +9,10 @@ import { CanhoesBrandMark } from "@/components/chrome/canhoes/CanhoesBrandMark";
 import { CanhoesHeroEmblem } from "@/components/chrome/canhoes/CanhoesHeroEmblem";
 import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/canhoes-bits";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { signIn } from "next-auth/react";
 
 const LeafRain = dynamic(() => import("@/components/animations/LeafRain"), {
   ssr: false, // Particles don't need SSR
@@ -39,6 +42,8 @@ export default function CanhoesLoginPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const timeoutId = globalThis.setTimeout(() => setIsVisible(true), 100);
@@ -64,6 +69,27 @@ export default function CanhoesLoginPage() {
   const handleLogin = () => {
     setIsSigningIn(true);
     loginGoogle();
+  };
+
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    
+    setIsSigningIn(true);
+    const callbackUrl = new URLSearchParams(window.location.search).get("callbackUrl") || "/canhoes";
+    
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setAuthError("Credenciais inválidas");
+      setIsSigningIn(false);
+    } else if (result?.ok) {
+      router.push(callbackUrl);
+    }
   };
 
   return (
@@ -156,8 +182,54 @@ export default function CanhoesLoginPage() {
                 </Button>
               ) : null}
 
+              <form onSubmit={handleCredentialsLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="teu.email@exemplo.com"
+                    required
+                    disabled={isSigningIn}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Palavra-passe</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={isSigningIn}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSigningIn || !email || !password}
+                >
+                  {isSigningIn ? "A entrar..." : "Entrar com Email"}
+                </Button>
+              </form>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-[var(--border-subtle)]" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[var(--bg-paper)] px-2 text-[var(--ink-muted)]">
+                    Ou
+                  </span>
+                </div>
+              </div>
+
               <Button
-                className="w-full"
+                variant="outline"
+                className="w-full text-white/80"
                 onClick={handleLogin}
                 disabled={isSigningIn || (loading && isLogged)}
               >

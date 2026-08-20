@@ -8,7 +8,7 @@ import type { AdminCategoryResultDto } from "@/lib/api/types";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { useIsAdmin } from "@/lib/domains/auth/services/useIsAdmin";
 import { cn } from "@/lib/utils";
-import { AdminStateMessage } from "@/lib/domains/admin/components/AdminStateMessage";
+import { AdminStateMessage } from "@/lib/domains/admin/components/layout/AdminStateMessage";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { VirtualizedList } from "@/components/ui/virtualized-list";

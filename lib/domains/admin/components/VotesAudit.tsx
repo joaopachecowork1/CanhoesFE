@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
-import { AdminStateMessage } from "./AdminStateMessage";
+import { AdminStateMessage } from "./layout/AdminStateMessage";
 import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
 import { formatDateTimeUtc } from "./dateUtils";
 

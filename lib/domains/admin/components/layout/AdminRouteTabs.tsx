@@ -2,8 +2,8 @@
 
 import { PillTabs, type PillTabItem } from "@/components/ui/pill-tabs";
 
-import type { AdminSectionId, AdminSectionItem } from "./adminSections";
-import { getAdminSectionMeta } from "./adminSections";
+import type { AdminSectionId, AdminSectionItem } from "../adminSections";
+import { getAdminSectionMeta } from "../adminSections";
 
 type AdminRouteTabItem = Pick<AdminSectionItem, "count" | "icon" | "id" | "label">;
 

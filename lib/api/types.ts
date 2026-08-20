@@ -185,6 +185,7 @@ export type ProposalStatus = "pending" | "approved" | "rejected";
 export type CategoryProposalDto = {
   id: string;
   name: string;
+  kind: number;
   description: string | null;
   status: ProposalStatus;
   createdAtUtc: string;

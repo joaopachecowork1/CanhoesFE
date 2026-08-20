@@ -4,12 +4,12 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState, type ReactNode } from "react";
 import { FilePenLine, Gavel, ScrollText, Trash2 } from "lucide-react";
 
-import { AdminReviewCard } from "@/lib/domains/admin/components/AdminReviewCard";
-import { AdminSectionSummary } from "@/lib/domains/admin/components/AdminSectionSummary";
-import { AdminStateMessage } from "@/lib/domains/admin/components/AdminStateMessage";
-import { AdminStatusFilters } from "@/lib/domains/admin/components/AdminStatusFilters";
-import { ProposalShell } from "@/lib/domains/admin/components/ProposalShell";
-import { AdminDrawer } from "@/lib/domains/admin/components/AdminDrawer";
+import { AdminReviewCard } from "@/lib/domains/admin/components/layout/AdminReviewCard";
+import { AdminSectionSummary } from "@/lib/domains/admin/components/layout/AdminSectionSummary";
+import { AdminStateMessage } from "@/lib/domains/admin/components/layout/AdminStateMessage";
+import { AdminStatusFilters } from "@/lib/domains/admin/components/layout/AdminStatusFilters";
+import { ProposalShell } from "@/lib/domains/admin/components/categories/ProposalShell";
+import { AdminDrawer } from "@/lib/domains/admin/components/layout/AdminDrawer";
 import { statusBadgeVariant } from "@/lib/domains/admin/components/moderationUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import type {
   MeasureProposalDto,
 } from "@/lib/api/types";
 
-import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "./proposalConstants";
+import { PROPOSAL_STATUS_LABELS, PROPOSAL_STATUS_OPTIONS } from "../proposalConstants";
 import type {
   PendingProposalCard,
   PendingProposalPanel,
@@ -30,7 +30,7 @@ import type {
   ProposalStatus,
   ProposalType,
   DeleteConfirmationRequest,
-} from "./proposalTypes";
+} from "../proposalTypes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,8 +41,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
-import { usePendingProposals } from "./hooks/usePendingProposals";
+import { ADMIN_OUTLINE_BUTTON_CLASS } from "../adminContentUi";
+import { usePendingProposals } from "../hooks/usePendingProposals";
+
 
 
 type PendingProposalsProps = {

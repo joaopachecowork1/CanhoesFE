@@ -25,9 +25,9 @@ import {
   ADMIN_SELECT_CONTENT_CLASS,
   ADMIN_SELECT_ITEM_CLASS,
   ADMIN_SELECT_TRIGGER_CLASS,
-} from "./adminContentUi";
-import { AdminDrawer } from "./AdminDrawer";
-import type { SettingsFeedbackState } from "./hooks/useAdminControlCenter";
+} from "../adminContentUi";
+import { AdminDrawer } from "../layout/AdminDrawer";
+import type { SettingsFeedbackState } from "../hooks/useAdminControlCenter";
 
 type FeedbackTone = "default" | "error" | "success";
 

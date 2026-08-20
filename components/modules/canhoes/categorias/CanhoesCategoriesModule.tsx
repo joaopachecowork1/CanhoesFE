@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -65,6 +66,7 @@ export function CanhoesCategoriesModule({ initialContext, initialCategories }: {
     const [search, setSearch] = useState("");
     const [categoryName, setCategoryName] = useState("");
     const [categoryDescription, setCategoryDescription] = useState("");
+    const [categoryKind, setCategoryKind] = useState("0");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const canSubmitProposal =
@@ -93,10 +95,12 @@ export function CanhoesCategoriesModule({ initialContext, initialCategories }: {
             await awardsRepo.createCategoryProposal(event.id, {
                 description: categoryDescription.trim() || null,
                 name: categoryName.trim(),
+                kind: parseInt(categoryKind, 10),
             });
 
             setCategoryName("");
             setCategoryDescription("");
+            setCategoryKind("0");
             await queryClient.invalidateQueries({ queryKey: ["categories", event.id] });
             toast.success("Proposta enviada");
         } catch (error) {
@@ -153,6 +157,19 @@ export function CanhoesCategoriesModule({ initialContext, initialCategories }: {
                         </div>
 
                         <div className="space-y-2">
+                            <label htmlFor="category-kind-input" className="canhoes-field-label">Formato</label>
+                            <Select value={categoryKind} onValueChange={setCategoryKind}>
+                                <SelectTrigger id="category-kind-input">
+                                    <SelectValue placeholder="Selecione o formato" />
+                                </SelectTrigger>
+                                <SelectContent className="z-[100]">
+                                    <SelectItem value="0">Opções/Candidatos</SelectItem>
+                                    <SelectItem value="1">Stickers (Aberto)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
                             <label htmlFor="category-desc-input" className="canhoes-field-label">Descrição</label>
                             <Textarea
                                 id="category-desc-input"

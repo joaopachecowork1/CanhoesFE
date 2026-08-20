@@ -12,8 +12,9 @@ import { logFrontendError } from "@/lib/errors";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { useAuth } from "@/hooks/useAuth";
 
-import { AdminStateMessage } from "./AdminStateMessage";
+import { AdminStateMessage } from "../layout/AdminStateMessage";
 import { SecretSantaAdmin } from "./SecretSantaAdmin";
+import { AdminInviteUser } from "./AdminInviteUser";
 
 type AdminMembersSectionProps = {
   eventId: string | null;
@@ -103,6 +104,8 @@ export function AdminMembersSection({
           onRefresh={onUpdate}
         />
       )}
+
+      <AdminInviteUser />
 
       <Card className="border border-white/[0.08] bg-white/[0.03] shadow-[0_12px_30px_rgba(0,0,0,0.2)] text-[var(--color-text-primary)] text-[var(--color-text-primary)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
         <CardHeader className="space-y-1">

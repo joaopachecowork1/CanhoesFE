@@ -8,12 +8,12 @@ import type {
 
 import type { ModuleVisibilityItem } from "@/hooks/useModuleVisibility";
 
-import { AdminStateMessage } from "./AdminStateMessage";
 import {
   ADVANCED_ADMIN_MODULE_ORDER,
   QUICK_ADMIN_MODULE_ORDER,
-} from "./adminContentSections";
-import { useAdminControlCenter, PHASE_LABELS } from "./hooks/useAdminControlCenter";
+} from "../adminContentSections";
+import { AdminStateMessage } from "../layout/AdminStateMessage";
+import { useAdminControlCenter, PHASE_LABELS } from "../hooks/useAdminControlCenter";
 import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { AdminSettingsMainPanel, AdminSettingsAdvancedSheet } from "./AdminControlCenterPanels";
 

@@ -10,8 +10,8 @@ import type { AdminNomineeDto, AwardCategoryDto } from "@/lib/api/types";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { cn } from "@/lib/utils";
-import { formatDateTimeUtc } from "./dateUtils";
-import { AdminStateMessage } from "./AdminStateMessage";
+import { formatDateTimeUtc } from "../dateUtils";
+import { AdminStateMessage } from "../layout/AdminStateMessage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,8 +41,8 @@ import {
   ADMIN_SELECT_TRIGGER_CLASS,
   AdminDetailPanel,
   AdminSelectableButton,
-} from "./adminContentUi";
-import { AdminDrawer } from "./AdminDrawer";
+} from "../adminContentUi";
+import { AdminDrawer } from "../layout/AdminDrawer";
 
 type NominationStatus = "pending" | "approved" | "rejected";
 type NominationListFilter = "all" | NominationStatus;

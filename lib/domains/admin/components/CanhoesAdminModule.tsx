@@ -17,22 +17,22 @@ import { adminRepo } from "@/lib/repositories/adminRepo";
 import { getPhaseLabel } from "@/lib/canhoesEvent";
 
 import { type AdminSectionId, getAdminSectionItem } from "./adminSections";
-import { AdminStateMessage } from "./AdminStateMessage";
+import { AdminStateMessage } from "./layout/AdminStateMessage";
 import { ADMIN_OUTLINE_BUTTON_CLASS } from "./adminContentUi";
 import type { EventActiveContextDto } from "@/lib/api/types";
 
 // OPTIMIZATION: Lazy load admin sections to reduce initial bundle size
 const AdminContentSection = lazy(() =>
-  import("./AdminContentSection").then((m) => ({ default: m.AdminContentSection }))
+  import("./layout/AdminContentSection").then((m) => ({ default: m.AdminContentSection }))
 );
 const AdminMembersSection = lazy(() =>
-  import("./AdminMembersSection").then((m) => ({ default: m.AdminMembersSection }))
+  import("./users/AdminMembersSection").then((m) => ({ default: m.AdminMembersSection }))
 );
 const AdminOverviewSection = lazy(() =>
-  import("./AdminOverviewSection").then((m) => ({ default: m.AdminOverviewSection }))
+  import("./overview/AdminOverviewSection").then((m) => ({ default: m.AdminOverviewSection }))
 );
 const AdminControlCenter = lazy(() =>
-  import("./AdminControlCenter").then((m) => ({ default: m.AdminControlCenter }))
+  import("./overview/AdminControlCenter").then((m) => ({ default: m.AdminControlCenter }))
 );
 
 function getAdminErrorMessage(error: unknown) {

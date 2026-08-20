@@ -8,15 +8,29 @@ datasource db {
 }
 
 model User {
-  id          String   @id(map: "PK_Users") @default(uuid()) @map("Id") @db.Uuid
-  externalId  String   @unique(map: "IX_Users_ExternalId") @map("ExternalId")
-  email       String   @unique(map: "IX_Users_Email") @map("Email")
-  displayName String?  @map("DisplayName")
-  isAdmin     Boolean  @map("IsAdmin")
-  createdAt   DateTime @map("CreatedAt") @default(now()) @db.Timestamptz(6)
+  id           String   @id(map: "PK_Users") @default(uuid()) @map("Id") @db.Uuid
+  externalId   String   @unique(map: "IX_Users_ExternalId") @map("ExternalId")
+  email        String   @unique(map: "IX_Users_Email") @map("Email")
+  displayName  String?  @map("DisplayName")
+  passwordHash String?  @map("PasswordHash")
+  isAdmin      Boolean  @map("IsAdmin")
+  createdAt    DateTime @map("CreatedAt") @default(now()) @db.Timestamptz(6)
 
   @@index([isAdmin], map: "IX_Users_IsAdmin")
   @@map("Users")
+}
+
+model UserInvitation {
+  id              String    @id(map: "PK_UserInvitations") @default(uuid()) @map("Id")
+  email           String    @unique(map: "IX_UserInvitations_Email") @map("Email")
+  token           String    @unique(map: "IX_UserInvitations_Token") @map("Token")
+  invitedByUserId String    @map("InvitedByUserId") @db.Uuid
+  expiresAtUtc    DateTime  @map("ExpiresAtUtc") @db.Timestamptz(6)
+  usedAtUtc       DateTime? @map("UsedAtUtc") @db.Timestamptz(6)
+  createdAtUtc    DateTime  @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+
+  @@index([token], map: "IX_UserInvitations_TokenIdx")
+  @@map("UserInvitations")
 }
 
 model Event {
@@ -95,6 +109,7 @@ model CategoryProposal {
   eventId           String   @map("EventId")
   name              String   @map("Name")
   description       String?  @map("Description")
+  kind              Int      @default(0) @map("Kind")
   proposedByUserId  String   @map("ProposedByUserId") @db.Uuid
   status            String   @map("Status")
   createdAtUtc      DateTime @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)

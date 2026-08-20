@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ADMIN_CONTENT_CARD_CLASS } from "./adminContentUi";
+import { ADMIN_CONTENT_CARD_CLASS } from "../adminContentUi";
 
 export function ProposalShell({
   children,

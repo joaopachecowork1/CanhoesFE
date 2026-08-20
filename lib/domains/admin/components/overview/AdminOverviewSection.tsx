@@ -12,8 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { AdminDashboard } from "./AdminDashboard";
-import { AdminSectionPanel } from "./adminContentUi";
-import { AdminStateMessage } from "./AdminStateMessage";
+import { AdminSectionPanel } from "../adminContentUi";
+import { AdminStateMessage } from "../layout/AdminStateMessage";
 
 function AdminOverviewLoadingState() {
   return (

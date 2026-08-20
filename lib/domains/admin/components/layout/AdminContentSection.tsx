@@ -12,13 +12,13 @@ import {
   getDefaultAdminContentSection,
   isAdminContentSectionId,
   type AdminContentSectionId,
-} from "./adminContentSections";
+} from "../adminContentSections";
 import { AdminContentTabs } from "./AdminContentTabs";
-import { AdminNominationsSection } from "./AdminNominationsSection";
-import { AdminOfficialResultsSection } from "./AdminOfficialResultsSection";
-import { CategoriesAdmin } from "./CategoriesAdmin";
-import { PendingProposals } from "./PendingProposals";
-import { VotesAudit } from "./VotesAudit";
+import { AdminNominationsSection } from "../nominations/AdminNominationsSection";
+import { AdminOfficialResultsSection } from "../AdminOfficialResultsSection";
+import { CategoriesAdmin } from "../categories/CategoriesAdmin";
+import { PendingProposals } from "../categories/PendingProposals";
+import { VotesAudit } from "../VotesAudit";
 
 type AdminContentSectionProps = {
   categoryProposals: CategoryProposalDto[];

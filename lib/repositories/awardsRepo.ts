@@ -39,7 +39,7 @@ export const awardsRepo = {
   getResults: (eventId: string) =>
     canhoesFetch<T.PublicCategoryResultDto[]>(`/v1/events/${eventId}/results`),
     
-  createCategoryProposal: (eventId: string, payload: { name: string; description: string | null }) =>
+  createCategoryProposal: (eventId: string, payload: { name: string; description: string | null; kind?: number }) =>
     canhoesFetch<T.CategoryProposalDto>(`/v1/events/${eventId}/proposals`, {
       method: "POST",
       body: JSON.stringify(payload),

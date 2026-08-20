@@ -5,7 +5,7 @@ import { PillTabs, type PillTabItem } from "@/components/ui/pill-tabs";
 import type {
   AdminContentSectionId,
   AdminContentSectionItem,
-} from "./adminContentSections";
+} from "../adminContentSections";
 
 type AdminContentTabsProps = {
   activeId: AdminContentSectionId;

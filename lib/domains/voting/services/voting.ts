@@ -230,6 +230,7 @@ export async function getProposals(
       userId: p.proposedByUserId,
       name: p.name,
       description: p.description,
+      kind: p.kind,
       status: p.status,
       createdAt: p.createdAtUtc.toISOString(),
     })),
@@ -244,7 +245,8 @@ export async function createProposal(
   eventId: string,
   userId: string,
   name: string,
-  description?: string | null
+  description?: string | null,
+  kind?: number
 ): Promise<EventProposalDto> {
   const proposal = await prisma.categoryProposal.create({
     data: {
@@ -252,6 +254,7 @@ export async function createProposal(
       proposedByUserId: userId,
       name: name.trim(),
       description: description?.trim() ?? null,
+      kind: kind ?? 0,
       status: "pending",
     },
   });

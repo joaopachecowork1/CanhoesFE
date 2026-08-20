@@ -32,18 +32,15 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 
-import { useCategoriesAdmin } from "./hooks/useCategoriesAdmin";
-import { AdminSectionSummary } from "./AdminSectionSummary";
-import { AdminStateMessage } from "./AdminStateMessage";
+import { useCategoriesAdmin } from "../hooks/useCategoriesAdmin";
+import { AdminSectionSummary } from "../layout/AdminSectionSummary";
+import { AdminStateMessage } from "../layout/AdminStateMessage";
 import {
   ADMIN_CONTENT_CARD_CLASS,
   ADMIN_OUTLINE_BUTTON_CLASS,
-  ADMIN_SELECT_CONTENT_CLASS,
-  ADMIN_SELECT_ITEM_CLASS,
-  ADMIN_SELECT_TRIGGER_CLASS,
   AdminDetailPanel,
-} from "./adminContentUi";
-import { AdminDrawer } from "./AdminDrawer";
+} from "../adminContentUi";
+import { AdminDrawer } from "../layout/AdminDrawer";
 
 type CategoriesAdminProps = {
   eventId: string | null;
@@ -108,7 +105,7 @@ function CategoryListItem({
           )}
 
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.08em] text-[var(--ink-muted)]">
-            <span>Ordem {category.sortOrder}</span>
+            {/* Removed Ordem display */}
             <span>{usage.nomineeCount} nomeações</span>
             <span>{usage.voteCount} votos</span>
             {category.kind === 1 && category.voteQuestion ? <span className="normal-case tracking-normal">{category.voteQuestion}</span> : null}
@@ -192,7 +189,7 @@ function CategoryEditorSheet({
   const title = isCreateMode ? "Nova categoria" : form.name || "Editar categoria";
   const description = isCreateMode
     ? "Cria a categoria oficial sem sair do contexto mobile."
-    : "Atualiza nome, ordem, tipo e estado da categoria selecionada.";
+    : "Atualiza nome, tipo e estado da categoria selecionada.";
 
   return (
     <AdminDrawer
@@ -214,11 +211,11 @@ function CategoryEditorSheet({
                 </Badge>
               </div>
               {categoryUsage.deleteReason ? (
-                <p className="text-xs leading-5 text-[var(--ink-muted)]">
+                <p className="text-xs leading-5 text-gray-400">
                   {categoryUsage.deleteReason}
                 </p>
               ) : (
-                <p className="text-xs leading-5 text-[var(--ink-muted)]">
+                <p className="text-xs leading-5 text-gray-400">
                   Sem dependências conhecidas. O backend confirma o apagamento final.
                 </p>
               )}
@@ -226,7 +223,7 @@ function CategoryEditorSheet({
           ) : null}
 
           <div className="space-y-2 pt-1">
-            <Label htmlFor="category-name">Nome</Label>
+            <Label htmlFor="category-name" className="text-gray-300">Nome</Label>
             <Input
               id="category-name"
               value={form.name}
@@ -237,7 +234,7 @@ function CategoryEditorSheet({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category-description">Descricao</Label>
+            <Label htmlFor="category-description" className="text-gray-300">Descricao</Label>
             <Textarea
               id="category-description"
               value={form.description}
@@ -248,45 +245,27 @@ function CategoryEditorSheet({
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="category-sort-order">Ordem</Label>
-              <Input
-                id="category-sort-order"
-                type="number"
-                inputMode="numeric"
-                value={form.sortOrder}
-                onChange={(event) => onChange({ sortOrder: event.target.value })}
-                disabled={isBusy}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tipo</Label>
+          <div className="space-y-2">
+              <Label className="text-gray-300">Tipo</Label>
               <Select
                 value={form.kind}
                 onValueChange={(value: string) => onChange({ kind: value })}
                 disabled={isBusy}
               >
-                <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}>
+                <SelectTrigger>
                   <SelectValue placeholder="Selecionar tipo" />
                 </SelectTrigger>
-                <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
-                  <SelectItem value="Sticker" className={ADMIN_SELECT_ITEM_CLASS}>
-                    Sticker
-                  </SelectItem>
-                  <SelectItem value="UserVote" className={ADMIN_SELECT_ITEM_CLASS}>
-                    Voto oficial
-                  </SelectItem>
+                <SelectContent className="z-[100]">
+                  <SelectItem value="Sticker">Sticker</SelectItem>
+                  <SelectItem value="UserVote">Voto oficial</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
           {form.kind === "UserVote" ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="category-vote-question">Pergunta de voto</Label>
+                <Label htmlFor="category-vote-question" className="text-gray-300">Pergunta de voto</Label>
                 <Input
                   id="category-vote-question"
                   value={form.voteQuestion}
@@ -297,7 +276,7 @@ function CategoryEditorSheet({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category-vote-rules">Regras</Label>
+                <Label htmlFor="category-vote-rules" className="text-gray-300">Regras</Label>
                 <Textarea
                   id="category-vote-rules"
                   value={form.voteRules}
@@ -313,8 +292,8 @@ function CategoryEditorSheet({
           {!isCreateMode ? (
             <AdminDetailPanel className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-[var(--ink-primary)]">Categoria ativa</p>
-                <p className="text-xs text-[var(--ink-muted)]">
+                <p className="text-sm font-semibold text-gray-200">Categoria ativa</p>
+                <p className="text-xs text-gray-400">
                   Desativa a categoria sem a apagar da auditoria.
                 </p>
               </div>
@@ -327,13 +306,13 @@ function CategoryEditorSheet({
             </AdminDetailPanel>
           ) : null}
 
-          <div className="flex flex-col gap-3 border-t border-[var(--border-subtle)] pt-4">
+          <div className="flex flex-col gap-3 border-t border-gray-700 pt-4">
             {!isCreateMode ? (
               categoryUsage.canDelete ? (
                 <Button
                   type="button"
                   variant="outline"
-                  className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full gap-2 border-[rgba(255,96,96,0.22)] text-[var(--danger)] sm:w-auto`}
+                  className="w-full gap-2 border-red-800/40 text-red-400 hover:bg-red-900/20 sm:w-auto"
                   onClick={onDelete}
                   disabled={isBusy}
                 >
@@ -341,7 +320,7 @@ function CategoryEditorSheet({
                   Apagar categoria
                 </Button>
               ) : (
-                <p className="text-xs leading-5 text-[var(--ink-muted)]">
+                <p className="text-xs leading-5 text-gray-400">
                   Apagamento indisponível nesta categoria.
                 </p>
               )
@@ -353,7 +332,7 @@ function CategoryEditorSheet({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isBusy}
-                className={`${ADMIN_OUTLINE_BUTTON_CLASS} w-full sm:w-auto`}
+                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 sm:w-auto"
               >
                 Cancelar
               </Button>

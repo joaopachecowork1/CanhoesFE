@@ -58,6 +58,6 @@ export async function POST(
     return NextResponse.json({ code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." }, { status: 400 });
   }
 
-  const proposal = await createProposal(eventId, userId, parsed.data.name, parsed.data.description);
+  const proposal = await createProposal(eventId, userId, parsed.data.name, parsed.data.description, parsed.data.kind);
   return NextResponse.json(proposal);
 }

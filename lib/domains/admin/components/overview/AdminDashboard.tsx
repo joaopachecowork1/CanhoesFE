@@ -6,11 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import type { AdminNomineeDto } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { getNomineeStatusBadgeVariant } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { AdminStateMessage } from "@/lib/domains/admin/components/AdminStateMessage";
+import { AdminStateMessage } from "@/lib/domains/admin/components/layout/AdminStateMessage";
 import { adminCopy } from "@/lib/canhoesCopy";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 
-import { AdminCollapsibleSection } from "./AdminCollapsibleSection";
+import { AdminCollapsibleSection } from "../layout/AdminCollapsibleSection";
 
 type AdminDashboardProps = {
   eventId: string | null;

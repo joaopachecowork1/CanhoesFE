@@ -5,7 +5,7 @@ import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto } from "@/lib/api/types";
 import CanhoesAdminModule from "@/lib/domains/admin/components/CanhoesAdminModule";
 import { isAdminSectionId } from "@/lib/domains/admin/components/adminSections";
-import { AdminRouteTabs } from "@/lib/domains/admin/components/AdminRouteTabs";
+import { AdminRouteTabs } from "@/lib/domains/admin/components/layout/AdminRouteTabs";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 const AdminGate = dynamic(

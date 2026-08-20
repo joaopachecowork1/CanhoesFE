@@ -4,7 +4,7 @@
  * relacionadas ao quadro de votação, registro de votos e fechamento de votação.
  */
 
-import { prisma } from "@/lib/database/prisma"; // ajuste o caminho caso necessário
+
 
 /**
  * Obtém o quadro de votação (voting board) para um usuário em um evento.
@@ -12,24 +12,8 @@ import { prisma } from "@/lib/database/prisma"; // ajuste o caminho caso necess�
  * @param userId - ID do usuário.
  * @returns Um objeto contendo o board ou `null` se não existir.
  */
-export async function getVotingBoard(eventId: string, userId: string): Promise<unknown> {
-  return fetchVotingBoard(eventId, userId);
-}
-  // Exemplo simplificado – adapte ao seu modelo Prisma real
-  return prisma.votingBoard.findFirst({
-    where: { eventId, participants: { some: { userId } } },
-    include: { proposals: true, votes: true },
-  });
-}
-
-/**
- * Internal helper to fetch the voting board from Prisma.
- */
-async function fetchVotingBoard(eventId: string, userId: string) {
-  return prisma.votingBoard.findFirst({
-    where: { eventId, participants: { some: { userId } } },
-    include: { proposals: true, votes: true },
-  });
+export async function getVotingBoard(_eventId: string, _userId: string) {
+  throw new Error("Not implemented in schema yet");
 }
 
 /**
@@ -39,21 +23,16 @@ async function fetchVotingBoard(eventId: string, userId: string) {
  * @param userId - ID do usuário que vota.
  * @param choice - Valor da escolha (ex.: "yes", "no").
  */
-export async function castVote(eventId: string, proposalId: string, userId: string, choice: string): Promise<void> {
-  await prisma.vote.create({
-    data: { eventId, proposalId, userId, choice },
-  });
+export async function castVote(_eventId: string, _proposalId: string, _userId: string, _choice: string) {
+  throw new Error("Not implemented in schema yet");
 }
 
 /**
  * Fecha a votação de um evento, impedindo novos votos.
  * @param eventId - ID do evento.
  */
-export async function closeVoting(eventId: string): Promise<void> {
-  await prisma.event.update({
-    where: { id: eventId },
-    data: { votingClosed: true },
-  });
+export async function closeVoting(_eventId: string) {
+  throw new Error("Not implemented in schema yet");
 }
 
 export const votingRepo = { getVotingBoard, castVote, closeVoting };

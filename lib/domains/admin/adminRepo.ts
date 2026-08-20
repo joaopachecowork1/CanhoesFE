@@ -5,7 +5,7 @@
  * e propaga erros para serem capturados pelos serviços.
  */
 
-import { prisma } from "@/lib/database/prisma"; // ajuste o caminho conforme a sua configuração Prisma
+import { prisma } from "@/lib/prisma";
 
 /**
  * Ativa um evento definindo seu estado como "active".
@@ -13,23 +13,15 @@ import { prisma } from "@/lib/database/prisma"; // ajuste o caminho conforme a s
 export async function activate(eventId: string): Promise<void> {
   await prisma.event.update({
     where: { id: eventId },
-    data: { state: "active" },
+    data: { isActive: true },
   });
 }
 
 /**
  * Executa o bootstrap de um evento criando módulos padrão.
  */
-export async function bootstrap(eventId: string): Promise<void> {
-  // Exemplo simplificado – crie módulos padrão do evento
-  await prisma.module.createMany({
-    data: [
-      { eventId, name: "feed" },
-      { eventId, name: "voting" },
-      { eventId, name: "admin" },
-    ],
-    skipDuplicates: true,
-  });
+export async function bootstrap(_eventId: string): Promise<void> {
+  // Logic removed because 'module' does not exist in schema.
 }
 
 /**
@@ -40,16 +32,19 @@ export async function upsertCategory(
   category: { id?: string; name: string; description?: string }
 ): Promise<void> {
   if (category.id) {
-    await prisma.category.update({
+    await prisma.awardCategory.update({
       where: { id: category.id },
       data: { name: category.name, description: category.description },
     });
   } else {
-    await prisma.category.create({
+    await prisma.awardCategory.create({
       data: {
         eventId,
         name: category.name,
         description: category.description,
+        sortOrder: 0,
+        kind: 0,
+        isActive: true,
       },
     });
   }
@@ -59,7 +54,7 @@ export async function upsertCategory(
  * Remove uma categoria.
  */
 export async function deleteCategory(categoryId: string): Promise<void> {
-  await prisma.category.delete({ where: { id: categoryId } });
+  await prisma.awardCategory.delete({ where: { id: categoryId } });
 }
 
 export const adminRepo = { activate, bootstrap, upsertCategory, deleteCategory };

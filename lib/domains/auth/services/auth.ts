@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { isDevelopmentAuthEnabled } from "@/lib/domains/auth/services/developmentAuth";
 import { isDatabaseUserId } from "@/lib/domains/auth/services/userIdentity";
@@ -21,6 +22,39 @@ export const authOptions: NextAuthOptions = {
           response_type: "code",
         },
       },
+    }),
+    CredentialsProvider({
+      id: "credentials",
+      name: "Email and Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+        
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email.toLowerCase() }
+        });
+        
+        if (!user || !user.passwordHash) {
+          return null; // User not found or has no password set
+        }
+        
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+        
+        if (!isPasswordValid) {
+          return null;
+        }
+        
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.displayName ?? user.email,
+        };
+      }
     }),
     ...(developmentLoginEnabled
       ? [
@@ -58,6 +92,10 @@ export const authOptions: NextAuthOptions = {
       if (user?.id && account?.provider === "development") {
         token.dbUserId = user.id;
       }
+      
+      if (user?.id && account?.provider === "credentials") {
+        token.dbUserId = user.id;
+      }
 
       if (account?.provider === "google") {
         token.dbUserId = undefined;
@@ -65,6 +103,7 @@ export const authOptions: NextAuthOptions = {
 
       if (account?.provider === "development") token.authMode = "development";
       if (account?.provider === "google") token.authMode = "google";
+      if (account?.provider === "credentials") token.authMode = "credentials";
 
       let dbUser: ResolvedUser | null = isDatabaseUserId(token.dbUserId)
         ? await prisma.user.findUnique({
@@ -87,7 +126,10 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user.isAdmin = Boolean(token.isAdmin);
       session.user.id = String(token.dbUserId ?? token.sub ?? "");
-      session.authMode = token.authMode === "development" ? "development" : "google";
+      
+      if (token.authMode === "development") session.authMode = "development";
+      else if (token.authMode === "credentials") session.authMode = "credentials";
+      else session.authMode = "google";
 
       return session;
     },

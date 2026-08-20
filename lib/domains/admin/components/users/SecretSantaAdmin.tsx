@@ -1,7 +1,7 @@
 "use client";
 
 import { Gift, Lock, RefreshCw, Shuffle, Users } from "lucide-react";
-import { useAdminMutation } from "./hooks/useAdminMutation";
+import { useAdminMutation } from "../hooks/useAdminMutation";
 import type { EventAdminSecretSantaStateDto } from "@/lib/api/types";
 import { adminRepo } from "@/lib/repositories/adminRepo";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ import {
   ADMIN_CONTENT_CARD_CLASS,
   ADMIN_OUTLINE_BUTTON_CLASS,
   AdminDetailPanel,
-} from "./adminContentUi";
+} from "../adminContentUi";
 
 type SecretSantaAdminProps = {
   eventId: string;

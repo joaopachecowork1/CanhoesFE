@@ -3,7 +3,7 @@ import "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
-    authMode?: "google" | "development";
+    authMode?: "google" | "development" | "credentials";
     user: {
       id: string;
       isAdmin?: boolean;
@@ -15,7 +15,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     dbUserId?: string;
     externalId?: string;
-    authMode?: "google" | "development";
+    authMode?: "google" | "development" | "credentials";
     isAdmin?: boolean;
   }
 }
