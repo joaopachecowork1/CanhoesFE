@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -102,6 +103,15 @@ module.exports = {
           "0%, 100%": { boxShadow: "0 0 12px rgba(234,179,8,0.25)" },
           "50%":       { boxShadow: "0 0 28px rgba(234,179,8,0.45), 0 0 8px oklch(0.72 0.19 152 / 30%)" },
         },
+        "leaf-fall": {
+          "0%": { opacity: "0", transform: "translateY(-20px) translateX(0px) rotate(0deg)" },
+          "10%": { opacity: "0.8" },
+          "25%": { transform: "translateY(25vh) translateX(15px) rotate(90deg)" },
+          "50%": { transform: "translateY(50vh) translateX(-10px) rotate(180deg)" },
+          "75%": { transform: "translateY(75vh) translateX(20px) rotate(270deg)" },
+          "90%": { opacity: "0.4" },
+          "100%": { opacity: "0", transform: "translateY(105vh) translateX(0px) rotate(360deg)" },
+        },
       },
       animation: {
         "fade-in":         "fade-in 0.18s ease-out",
@@ -114,6 +124,7 @@ module.exports = {
         "stagger-in":      "stagger-in 0.25s ease-out both",
         "canhoes-float":   "canhoes-float 3s ease-in-out infinite",
         "canhoes-pulse":   "canhoes-pulse 2.6s ease-in-out infinite",
+        "leaf-fall":       "leaf-fall 10s linear infinite",
       },
     },
   },

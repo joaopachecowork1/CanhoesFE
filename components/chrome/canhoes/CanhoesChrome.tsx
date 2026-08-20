@@ -13,6 +13,7 @@ import { useAdminNavigation } from "@/hooks/useAdminNavigation";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageShell } from "@/components/ui/page-shell";
 
 import { CanhoesBottomTabs } from "./CanhoesBottomTabs";
 import { CanhoesBrandMark } from "./CanhoesBrandMark";
@@ -137,7 +138,7 @@ export function CanhoesChrome({
         className="bg-circuit relative isolate flex h-[100svh] min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
       >
       <header className="sticky top-0 z-40 border-b border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
-        <div className="page-shell-wide pb-2 pt-[env(safe-area-inset-top,0px)]">
+        <PageShell wide className="pb-2 pt-[env(safe-area-inset-top,0px)]">
                   <div
                     className="rounded-[var(--radius-lg-token)] border border-[rgba(255,255,255,0.12)] bg-[rgba(18,24,12,0.94)] px-3 py-3 text-[var(--text-primary)] shadow-[var(--shadow-elevation-sm)] sm:px-4 sm:py-3.5"
                   >
@@ -179,7 +180,7 @@ export function CanhoesChrome({
               </div>
 
               <div className="flex items-center gap-1.5">
-                {isLogged && !isDevAuthBypass ? (
+                {isLogged ? (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -222,8 +223,8 @@ export function CanhoesChrome({
                 overview={eventOverview.overview}
               />
             </div>
-        </div>
-                    </div>
+          </div>
+        </PageShell>
       </header>
 
       <div className="relative z-30 flex items-center gap-0 px-4" aria-hidden="true">
@@ -233,17 +234,17 @@ export function CanhoesChrome({
       </div>
 
       <main className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
-        <div className={cn(isEventHomePath ? "page-shell-wide" : "page-shell", "w-full")}>
+        <PageShell wide={isEventHomePath}>
           <div
                       key={pathname}
                       className={cn(
                         "animate-fade-in mx-auto w-full",
-                        isEventHomePath ? "max-w-[var(--page-max-width)]" : "max-w-[var(--page-content-width)]"
+                        isEventHomePath ? "" : "max-w-[60rem]"
                       )}
                     >
                       {children}
                     </div>
-        </div>
+        </PageShell>
       </main>
 
       <CanhoesBottomTabs

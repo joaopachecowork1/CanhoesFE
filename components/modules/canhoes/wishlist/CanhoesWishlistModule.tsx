@@ -10,7 +10,7 @@ import {
   CanhoesMediaThumb,
   CanhoesModuleHeader,
 } from "@/components/modules/canhoes/CanhoesModuleParts";
-import { CompactSegmentTabs } from "@/components/modules/canhoes/shared/CompactSegmentTabs";
+import { CompactSegmentTabs } from "@/lib/domains/event/components/CompactSegmentTabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,6 +21,7 @@ import type { EventActiveContextDto, PublicUserDto, EventWishlistItemDto } from 
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDeleteAction } from "@/components/ui/confirm-delete";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -358,15 +359,21 @@ function WishlistMemberPanel({
                   </p>
 
                   {isCurrentUser ? (
-                    <button
-                      type="button"
-                      onClick={() => void onDelete(wishlistItem.id)}
-                      disabled={deletingItemId === wishlistItem.id}
-                      className="canhoes-tap rounded-full border border-transparent p-2 text-[var(--color-text-muted)] hover:border-[var(--color-danger)]/30 hover:text-[var(--color-danger)] disabled:opacity-50"
-                      aria-label="Apagar item"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <ConfirmDeleteAction
+                      onConfirm={() => void onDelete(wishlistItem.id)}
+                      title="Remover da Wishlist?"
+                      description="Vais remover este item da tua wishlist. Esta ação não pode ser desfeita."
+                      trigger={
+                        <button
+                          type="button"
+                          disabled={deletingItemId === wishlistItem.id}
+                          className="canhoes-tap rounded-full border border-transparent p-2 text-[var(--color-text-muted)] hover:border-[var(--color-danger)]/30 hover:text-[var(--color-danger)] disabled:opacity-50"
+                          aria-label="Apagar item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      }
+                    />
                   ) : null}
                 </div>
               </div>

@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-import { AssignedWishlistPanel } from "./secret-santa/AssignedWishlistPanel";
-import { SecretSantaContent } from "./secret-santa/SecretSantaContent";
-import { WishlistPreviewCard } from "./secret-santa/WishlistPreviewCard";
+import { AssignedWishlistPanel } from "@/lib/domains/secretSanta/components/AssignedWishlistPanel";
+import { SecretSantaContent } from "@/lib/domains/secretSanta/components/SecretSantaContent";
+import { WishlistPreviewCard } from "@/lib/domains/secretSanta/components/WishlistPreviewCard";
 
 function buildDefaultEventCode(eventId?: string | null) {
   if (eventId) return eventId;

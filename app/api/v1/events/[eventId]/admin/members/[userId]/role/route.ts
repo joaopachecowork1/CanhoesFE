@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { AuthorizationError, requireAdmin } from "@/lib/auth/serverAuth";
-import { setAdminRole } from "@/lib/services/admin/members";
+import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
+import { setAdminRole } from "@/lib/domains/admin/services/members";
 
 const roleBodySchema = z.object({
   isAdmin: z.boolean(),

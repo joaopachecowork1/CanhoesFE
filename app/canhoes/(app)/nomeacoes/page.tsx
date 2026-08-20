@@ -1,4 +1,4 @@
-import { CanhoesNominationsModule } from "@/components/modules/canhoes/nomeacoes/CanhoesNominationsModule";
+import { CanhoesNominationsModule } from "@/lib/domains/voting/components/CanhoesNominationsModule";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, AwardCategoryDto, PagedResult } from "@/lib/api/types";
 

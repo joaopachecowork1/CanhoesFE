@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { AuthorizationError, requireAdmin } from "@/lib/auth/serverAuth";
-import { getEventOverview } from "@/lib/services/eventService";
-import { updateEventModules } from "@/lib/services/adminService";
+import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
+import { getEventOverview } from "@/lib/domains/event/services/event";
+import { updateEventModules } from "@/lib/domains/admin/services/state";
 
 export const dynamic = "force-dynamic";
 

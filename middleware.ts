@@ -1,5 +1,5 @@
 import { withAuth } from "next-auth/middleware";
-import { isDevelopmentAuthEnabled } from "@/lib/auth/developmentAuth";
+import { isDevelopmentAuthEnabled } from "@/lib/domains/auth/services/developmentAuth";
 
 export function shouldRedirectUnauthenticated(
   token: unknown,

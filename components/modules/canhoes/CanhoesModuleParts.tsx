@@ -1,11 +1,11 @@
 /**
  * Barrel re-export for backwards compatibility.
- * Individual components live in ./shared/ — prefer direct imports in new code.
+ * Individual components live in @/lib/domains/event/components/ — prefer direct imports in new code.
  */
 
-export { CanhoesModuleHeader } from "./shared/CanhoesModuleHeader";
-export { CanhoesMediaThumb } from "./shared/CanhoesMediaThumb";
-export { CanhoesFileTrigger } from "./shared/CanhoesFileTrigger";
-export { CanhoesFeatureCard } from "./shared/CanhoesFeatureCard";
-export { getNomineeStatusBadgeVariant } from "./shared/nomineeUtils";
+export { CanhoesModuleHeader } from "@/lib/domains/event/components/CanhoesModuleHeader";
+export { CanhoesMediaThumb } from "@/lib/domains/event/components/CanhoesMediaThumb";
+export { CanhoesFileTrigger } from "@/lib/domains/event/components/CanhoesFileTrigger";
+export { CanhoesFeatureCard } from "@/lib/domains/event/components/CanhoesFeatureCard";
+export { getNomineeStatusBadgeVariant } from "@/lib/domains/event/components/nomineeUtils";
 export { getPhaseLabel as formatEventPhaseLabel } from "@/lib/canhoesEvent";

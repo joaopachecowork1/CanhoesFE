@@ -1,0 +1,147 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { VirtualizedList } from "@/components/ui/virtualized-list";
+import { logFrontendError } from "@/lib/errors";
+import { adminRepo } from "@/lib/repositories/adminRepo";
+import { useAuth } from "@/hooks/useAuth";
+
+import { AdminStateMessage } from "./AdminStateMessage";
+import { SecretSantaAdmin } from "./SecretSantaAdmin";
+
+type AdminMembersSectionProps = {
+  eventId: string | null;
+  loading: boolean;
+  onUpdate: () => Promise<void>;
+};
+
+export function AdminMembersSection({
+  eventId,
+  loading,
+  onUpdate,
+}: Readonly<AdminMembersSectionProps>) {
+  const queryClient = useQueryClient();
+  const { user, refreshProfile } = useAuth();
+  const membersQuery = useQuery({
+    enabled: !!eventId,
+    queryFn: () => adminRepo.getMembersPaged(eventId!, 0, 50),
+    queryKey: ["canhoes", "admin", "members", eventId, 0, 50],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+    select: (page) => page.items,
+  });
+
+  const secretSantaQuery = useQuery({
+    enabled: !!eventId,
+    queryFn: () => adminRepo.getSecretSantaState(eventId!),
+    queryKey: ["canhoes", "admin", "secret-santa-state", eventId],
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const members = membersQuery.data ?? [];
+  const roleMutation = useMutation({
+    mutationFn: async (member: { id: string; isAdmin: boolean }) => {
+      const isSelfDemotion = member.id === user?.id && member.isAdmin;
+      if (isSelfDemotion && !window.confirm("Ao remover o teu acesso admin sairás desta área. Continuar?")) {
+        return null;
+      }
+      return adminRepo.setMemberAdmin(eventId!, member.id, {
+        isAdmin: !member.isAdmin,
+        confirmSelfDemotion: isSelfDemotion,
+      });
+    },
+    onSuccess: async (result) => {
+      if (!result) return;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["canhoes", "admin", "members", eventId] }),
+        refreshProfile(),
+      ]);
+      toast.success("Permissões atualizadas.");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Não foi possível atualizar o admin."),
+  });
+
+  if (!eventId) {
+    return <AdminStateMessage>Falta uma edicao ativa para gerir amigos.</AdminStateMessage>;
+  }
+
+  if (loading || membersQuery.isLoading || secretSantaQuery.isLoading) {
+    return <AdminStateMessage>A carregar membros...</AdminStateMessage>;
+  }
+
+  const queryError = membersQuery.error ?? secretSantaQuery.error;
+
+  if (queryError) {
+    logFrontendError("AdminMembersSection.query", queryError, { eventId });
+    return (
+      <AdminStateMessage
+        tone="error"
+        action={
+          <Button onClick={() => void Promise.all([membersQuery.refetch(), secretSantaQuery.refetch()])}>
+            Tentar novamente
+          </Button>
+        }
+      >
+        Nao foi possivel carregar os membros desta edicao.
+      </AdminStateMessage>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {secretSantaQuery.data && (
+        <SecretSantaAdmin
+          eventId={eventId}
+          state={secretSantaQuery.data}
+          onRefresh={onUpdate}
+        />
+      )}
+
+      <Card className="border border-white/[0.08] bg-white/[0.03] shadow-[0_12px_30px_rgba(0,0,0,0.2)] text-[var(--color-text-primary)] text-[var(--color-text-primary)] border border-[rgba(122,173,58,0.12)] bg-[rgba(15,22,10,0.96)] shadow-[0_16px_32px_rgba(0,0,0,0.14)]">
+        <CardHeader className="space-y-1">
+          <p className="editorial-kicker">Roster</p>
+          <CardTitle>{members.length} {members.length === 1 ? "membro" : "membros"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {members.length === 0 ? (
+            <AdminStateMessage>Nenhum membro nesta edição.</AdminStateMessage>
+          ) : (
+            <div className="max-h-[60svh] rounded-[var(--radius-md-token)] border border-[rgba(255,255,255,0.14)] bg-[rgba(16,23,11,0.94)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
+              <VirtualizedList
+                className="px-1 py-1"
+                estimateSize={() => 56}
+                getKey={(member) => member.id}
+                items={members}
+                renderItem={(member) => (
+                  <div className="flex items-center justify-between rounded-[var(--radius-md-token)] border border-[rgba(255,255,255,0.14)] bg-[rgba(22,28,15,0.92)] min-h-11 px-3 py-2 shadow-[0_6px_14px_rgba(0,0,0,0.06)]">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[var(--ink-primary)]">{member.displayName || member.email}</p>
+                      <p className="text-xs text-[var(--ink-muted)]">{member.email}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {member.isAdmin ? <Badge variant="outline">Admin</Badge> : null}
+                      <Switch
+                        aria-label={`Admin: ${member.displayName || member.email}`}
+                        checked={member.isAdmin}
+                        disabled={roleMutation.isPending}
+                        onCheckedChange={() => roleMutation.mutate(member)}
+                        variant="admin"
+                      />
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

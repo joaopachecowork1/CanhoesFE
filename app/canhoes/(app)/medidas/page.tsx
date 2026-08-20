@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
+import { EventModuleGate } from "@/lib/domains/event/components/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, GalaMeasureDto } from "@/lib/api/types";

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { votePoll } from "@/lib/services/feedService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { votePoll } from "@/lib/domains/feed/services/feed";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { VoteFeedPollSchema } from "@/lib/zod/feed";
 

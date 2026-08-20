@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser } from "@/lib/auth/serverAuth";
-import { getFeedPosts, createFeedPost } from "@/lib/services/feedService";
+import { getRequestUser } from "@/lib/domains/auth/services/serverAuth";
+import { getFeedPosts, createFeedPost } from "@/lib/domains/feed/services/feed";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateFeedPostSchema } from "@/lib/zod/feed";
 

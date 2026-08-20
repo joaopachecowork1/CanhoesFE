@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { toggleLike } from "@/lib/services/feedService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { toggleLike } from "@/lib/domains/feed/services/feed";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { apiResponse, unauthorized, apiError } from "@/lib/api/response";
 import { standardRateLimit } from "@/lib/middleware/withRateLimit";

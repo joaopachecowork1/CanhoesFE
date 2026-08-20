@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { getAdminVotesPaged } from "@/lib/services/adminService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { getAdminVotesPaged } from "@/lib/domains/admin/services/votes";
 
 export const dynamic = "force-dynamic";
 

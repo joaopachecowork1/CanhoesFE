@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { getProposals, createProposal } from "@/lib/services/votingService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { getProposals } from "@/lib/domains/voting/services/voting";
+import { createProposal } from "@/lib/domains/voting/services/voting";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateEventProposalSchema } from "@/lib/zod/voting";
 

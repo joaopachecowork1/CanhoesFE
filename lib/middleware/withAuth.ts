@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser, AuthorizationError } from "@/lib/auth/serverAuth";
+import { requireUser, AuthorizationError } from "@/lib/domains/auth/services/serverAuth";
 
 type AuthHandler = (
   req: NextRequest,

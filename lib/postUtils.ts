@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { FeedSortOrder } from "@/components/modules/hub/hooks/useHubFeed";
+import type { FeedSortOrder } from "@/lib/domains/feed/components/hooks/useHubFeed";
 
 /**
  * Parse post text into title and body (Reddit-style).

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AuthorizationError, requireAdmin } from "@/lib/auth/serverAuth";
-import { deleteFeedPost } from "@/lib/services/feedService";
+import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
+import { deleteFeedPost } from "@/lib/domains/feed/services/feed";
 
 export const dynamic = "force-dynamic";
 

@@ -3,13 +3,13 @@ import dynamic from "next/dynamic";
 
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto } from "@/lib/api/types";
-import CanhoesAdminModule from "@/components/modules/canhoes/admin/CanhoesAdminModule";
-import { isAdminSectionId } from "@/components/modules/canhoes/admin/adminSections";
-import { AdminRouteTabs } from "@/components/modules/canhoes/admin/components/AdminRouteTabs";
+import CanhoesAdminModule from "@/lib/domains/admin/components/CanhoesAdminModule";
+import { isAdminSectionId } from "@/lib/domains/admin/components/adminSections";
+import { AdminRouteTabs } from "@/lib/domains/admin/components/AdminRouteTabs";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 
 const AdminGate = dynamic(
-  () => import("@/components/modules/canhoes/admin/components/AdminGate").then((m) => ({ default: m.AdminGate })),
+  () => import("@/lib/domains/admin/components/AdminGate").then((m) => ({ default: m.AdminGate })),
   { loading: () => <FeedSkeleton /> }
 );
 

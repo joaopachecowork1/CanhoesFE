@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { castVote } from "@/lib/services/votingService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { castVote } from "@/lib/domains/voting/services/voting";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateEventVoteSchema } from "@/lib/zod/voting";
 import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";

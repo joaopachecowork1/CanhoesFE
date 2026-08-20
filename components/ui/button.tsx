@@ -14,7 +14,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "border border-[rgba(95,123,56,0.36)] bg-[var(--moss)] text-white shadow-[var(--shadow-elevation-sm)] hover:bg-[var(--moss-light)] hover:border-[rgba(95,123,56,0.48)] hover:shadow-[var(--shadow-elevation-md)]",
-        primary: "button-pill button-pill-primary hover:shadow-lg hover:-translate-y-0.5",
+        primary: "border-0 rounded-full text-white bg-[#4F6336] shadow-[0_2px_8px_rgba(79,99,54,0.25)] hover:bg-[#677f46] hover:shadow-lg hover:-translate-y-0.5",
         destructive: "border border-[rgba(224,90,58,0.22)] bg-[linear-gradient(180deg,var(--color-danger),var(--color-danger-hover))] text-white shadow-[var(--shadow-elevation-sm)] hover:border-[rgba(224,90,58,0.3)] hover:brightness-110",
         outline: "border border-white/10 bg-white/[0.05] text-[var(--color-text-primary)] shadow-none hover:bg-white/[0.08] hover:border-white/15 hover:shadow-sm",
         secondary: "border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.08)] text-[var(--text-primary)] shadow-none hover:bg-[rgba(255,255,255,0.14)] hover:border-[rgba(255,255,255,0.18)]",

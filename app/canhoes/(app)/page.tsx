@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic";
-import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
+import { EventModuleGate } from "@/lib/domains/event/components/EventModuleGate";
 import { FeedSkeleton } from "@/components/ui/FeedSkeleton";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, EventFeedPostFullDto } from "@/lib/api/types";
 
 const HubFeedModule = dynamic(
-  () => import("@/components/modules/hub/HubFeedModule").then((module) => ({ default: module.HubFeedModule })),
+  () => import("@/lib/domains/feed/components/HubFeedModule").then((module) => ({ default: module.HubFeedModule })),
   { loading: () => <FeedSkeleton /> }
 );
 

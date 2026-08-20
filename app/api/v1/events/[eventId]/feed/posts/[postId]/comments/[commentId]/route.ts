@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { deleteComment } from "@/lib/services/feedService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { deleteComment } from "@/lib/domains/feed/services/feed";
 
 export const dynamic = "force-dynamic";
 

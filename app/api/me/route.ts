@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser } from "@/lib/auth/serverAuth";
+import { getRequestUser } from "@/lib/domains/auth/services/serverAuth";
 
 type MeErrorPayload = {
   code: string;

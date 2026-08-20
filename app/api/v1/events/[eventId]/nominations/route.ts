@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+import { authOptions } from "@/lib/domains/auth/services/auth";
 import {
   getMyNominationStatus,
   getApprovedNominees,
   createNomination,
-} from "@/lib/services/memberService";
+} from "@/lib/domains/members/services/members";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateNomineeSchema } from "@/lib/zod/nomination";
 

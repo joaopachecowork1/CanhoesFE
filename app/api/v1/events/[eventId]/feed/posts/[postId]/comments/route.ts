@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { getPostComments, createComment } from "@/lib/services/feedService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { getPostComments } from "@/lib/domains/feed/services/feed";
+import { createComment } from "@/lib/domains/feed/services/feed";
 import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
 import { CreateFeedCommentSchema } from "@/lib/zod/feed";
 

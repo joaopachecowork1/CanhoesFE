@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { updateCategory, deleteCategory } from "@/lib/services/adminService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { updateCategory, deleteCategory } from "@/lib/domains/admin/services/categories";
 
 export const dynamic = "force-dynamic";
 

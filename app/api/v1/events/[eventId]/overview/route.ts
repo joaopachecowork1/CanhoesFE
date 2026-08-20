@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { getEventOverview } from "@/lib/services/eventService";
+import { authOptions } from "@/lib/domains/auth/services/auth";
+import { getEventOverview } from "@/lib/domains/event/services/event";
 import { apiResponse, unauthorized } from "@/lib/api/response";
 
 export const dynamic = "force-dynamic";

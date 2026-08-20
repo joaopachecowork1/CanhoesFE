@@ -1,4 +1,4 @@
-import { CanhoesOfficialVotingModule } from "@/components/modules/canhoes/votacao/CanhoesOfficialVotingModule";
+import { CanhoesOfficialVotingModule } from "@/lib/domains/voting/components/CanhoesOfficialVotingModule";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, EventVotingBoardDto, OfficialVotingBoardDto } from "@/lib/api/types";
 

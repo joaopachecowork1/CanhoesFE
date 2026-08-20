@@ -1,4 +1,4 @@
-import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
+import { EventModuleGate } from "@/lib/domains/event/components/EventModuleGate";
 import { CanhoesCategoriesModule } from "@/components/modules/canhoes/categorias/CanhoesCategoriesModule";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, AwardCategoryDto, PagedResult } from "@/lib/api/types";

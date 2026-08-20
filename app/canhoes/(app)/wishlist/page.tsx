@@ -1,4 +1,4 @@
-import { EventModuleGate } from "@/components/modules/canhoes/shared/EventModuleGate";
+import { EventModuleGate } from "@/lib/domains/event/components/EventModuleGate";
 import { CanhoesWishlistModule } from "@/components/modules/canhoes/wishlist/CanhoesWishlistModule";
 import { canhoesServerFetch } from "@/lib/api/canhoesServerClient";
 import type { EventActiveContextDto, PublicUserDto, EventWishlistItemDto, PagedResult } from "@/lib/api/types";

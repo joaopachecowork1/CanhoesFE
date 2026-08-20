@@ -8,7 +8,7 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "surface-panel-soft text-[var(--color-text-primary)]",
+        default: "border border-white/5 bg-white/[0.025] shadow-none rounded-[1.25rem] text-[var(--color-text-primary)]",
         destructive:
           "border-[rgba(224,90,58,0.22)] bg-[rgba(224,90,58,0.08)] text-[var(--color-danger)] [&>svg]:text-current *:data-[slot=alert-description]:text-[rgba(163,66,43,0.9)]",
       },

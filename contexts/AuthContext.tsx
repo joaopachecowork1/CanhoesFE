@@ -89,10 +89,13 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const isDevLoginAvailable = Boolean(providersQuery.data?.development);
 
   useEffect(() => {
+    const shouldSkipAutoLogin = typeof window !== "undefined" && sessionStorage.getItem("skipDevAutoLogin") === "true";
+    
     if (
       status !== "unauthenticated"
       || !isDevLoginAvailable
       || autoLoginAttempted.current
+      || shouldSkipAutoLogin
     ) {
       return;
     }
@@ -184,10 +187,16 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   }, []);
 
   const loginDevelopment = useCallback(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("skipDevAutoLogin");
+    }
     void signIn("development", { callbackUrl: currentCallbackUrl() });
   }, []);
 
   const logout = useCallback(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("skipDevAutoLogin", "true");
+    }
     void signOut({ callbackUrl: "/canhoes/login", redirect: true });
   }, []);
 

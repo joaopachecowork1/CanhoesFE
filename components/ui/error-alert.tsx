@@ -37,7 +37,7 @@ export function ErrorAlert({
   return (
     <Alert
       className={cn(
-        "surface-panel relative overflow-hidden border text-[rgba(255,236,231,0.94)]",
+        "border border-white/[0.06] bg-white/[0.03] shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-[26px] relative overflow-hidden border text-[rgba(255,236,231,0.94)]",
         tone === "danger" && "border-[rgba(224,90,58,0.24)]",
         tone === "official" &&
           "border-[rgba(0,255,136,0.18)] text-[rgba(255,255,255,0.94)]",
