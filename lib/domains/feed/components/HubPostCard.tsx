@@ -45,6 +45,7 @@ interface HubPostCardProps {
   isAdmin: boolean;
   openComments: boolean;
   commentDraft: string;
+  replyingToId: string | null;
   currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
@@ -58,6 +59,7 @@ interface HubPostCardProps {
   onAdminPin: (postId: string) => void;
   onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
+  setReplyingTo: (postId: string, commentId: string | null) => void;
 }
 
 function HubPostCardComponent({
@@ -67,6 +69,7 @@ function HubPostCardComponent({
   isAdmin,
   openComments,
   commentDraft,
+  replyingToId,
   currentUserId,
   currentUserName,
   currentUserImage,
@@ -80,6 +83,7 @@ function HubPostCardComponent({
   onAdminPin,
   onAdminMovePinned,
   onAdminDelete,
+  setReplyingTo,
 }: Readonly<HubPostCardProps>) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -113,8 +117,8 @@ function HubPostCardComponent({
 
   return (
     <BlurFade delay={index * 50}>
-      <Card className="border border-white/[0.08] bg-white/[0.03] shadow-[0_12px_30px_rgba(0,0,0,0.2)] text-[var(--color-text-primary)] overflow-hidden border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-md">
-        <CardHeader className="p-4 pb-2">
+      <Card className="border-x-0 border-t-0 border-b border-[var(--border-subtle)] bg-transparent shadow-none rounded-none text-[var(--color-text-primary)]">
+        <CardHeader className="px-4 py-4 pb-2">
           <PostHeader
             authorName={post.authorName}
             createdAtUtc={post.createdAtUtc}
@@ -127,7 +131,7 @@ function HubPostCardComponent({
           />
         </CardHeader>
 
-        <CardContent className="p-4 pt-2 space-y-3">
+        <CardContent className="px-4 pt-2 pb-1 space-y-3">
           {parsedText ? (
             parsedText.title ? (
               <div className="space-y-1.5">
@@ -163,7 +167,7 @@ function HubPostCardComponent({
           ) : null}
         </CardContent>
 
-        <CardFooter className="p-3 bg-white/[0.02] border-t border-[var(--border-paper-soft)] flex flex-col items-stretch gap-2">
+        <CardFooter className="px-4 py-3 bg-transparent flex flex-col items-stretch gap-2">
           <div className="flex flex-row items-center justify-between w-full">
             {/* Voting Bar */}
             <div className="flex items-center gap-1.5">
@@ -241,6 +245,7 @@ function HubPostCardComponent({
                 commentCount={commentCount}
                 openComments={openComments}
                 commentDraft={commentDraft}
+                replyingToId={replyingToId}
                 currentUserId={currentUserId}
                 currentUserName={currentUserName}
                 currentUserImage={currentUserImage}
@@ -248,6 +253,7 @@ function HubPostCardComponent({
                 onAddComment={onAddComment}
                 onDeleteComment={onDeleteComment}
                 onCommentDraftChange={onCommentDraftChange}
+                setReplyingTo={setReplyingTo}
               />
             </div>
           </div>

@@ -163,6 +163,7 @@ export function CanhoesStickerSubmitModule({ initialContext, initialStickerCateg
       const createdNominee = await awardsRepo.createNomination(eventId, {
         categoryId: selectedCategoryId || null,
         title: stickerTitle.trim(),
+        kind: "stickers",
       });
 
       if (selectedFile) {
@@ -233,7 +234,7 @@ export function CanhoesStickerSubmitModule({ initialContext, initialStickerCateg
                   <SelectValue placeholder="Escolhe a categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryList.map((category) => (
+                  {categoryList.filter(c => c.kind === 2).map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
                     </SelectItem>
@@ -288,6 +289,8 @@ export function CanhoesStickerSubmitModule({ initialContext, initialStickerCateg
             </p>
 
             <Button
+              type="button"
+              variant="default"
               disabled={!nominationPhase || !canSubmit || isSubmitting}
               onClick={() => void handleSubmit()}
               className="w-full sm:w-auto"

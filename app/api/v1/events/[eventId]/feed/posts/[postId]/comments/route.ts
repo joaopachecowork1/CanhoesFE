@@ -54,6 +54,6 @@ export async function POST(
     return NextResponse.json({ code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." }, { status: 400 });
   }
 
-  const comment = await createComment(eventId, postId, userId, parsed.data.text);
+  const comment = await createComment(eventId, postId, userId, parsed.data.text, parsed.data.replyToId);
   return NextResponse.json(comment, { status: 201 });
 }

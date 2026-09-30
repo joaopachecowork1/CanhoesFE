@@ -68,7 +68,8 @@ function ContainerVirtualizedList<T>({
       ref={parentRef}
       role="list"
       className={cn("overflow-y-auto", className)}
-      style={{ contain: "strict" }}
+      // Using contain: 'paint layout' instead of 'strict' so dynamic sizing (like max-h) works without collapsing to 0 height
+      style={{ contain: "paint layout" }}
     >
       <VirtualizedItems
         getKey={getKey}

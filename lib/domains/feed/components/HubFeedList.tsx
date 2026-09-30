@@ -8,15 +8,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { feedCopy } from "@/lib/canhoesCopy";
 import type { EventFeedPostFullDto } from "@/lib/api/types";
-import type { FeedSortOrder } from "@/lib/domains/feed/components/hooks/useHubFeed";
 
 import { FeedLoadMore } from "./FeedLoadMore";
-import { FeedSortBar } from "./FeedSortBar";
 import { HubPostCard } from "./HubPostCard";
 
 type HubFeedListProps = {
   posts: EventFeedPostFullDto[];
-  sort: FeedSortOrder;
   allPostsCount: number;
   eventId: string;
   isAdmin: boolean;
@@ -27,7 +24,7 @@ type HubFeedListProps = {
   currentUserName: string;
   openComments: Record<string, boolean>;
   commentDrafts: Record<string, string>;
-  onSortChange: (sort: FeedSortOrder) => void;
+  replyingTo: Record<string, string | null>;
   onLoadMore: () => void;
   onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
   onToggleDownvote: (postId: string) => void;
@@ -39,6 +36,7 @@ type HubFeedListProps = {
   onAdminPin: (postId: string) => void;
   onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
+  setReplyingTo: (postId: string, commentId: string | null) => void;
   sentinelRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -46,13 +44,13 @@ const POST_KEY = (post: EventFeedPostFullDto) => post.id;
 const POST_SIZE = () => 220;
 
 const HubFeedListItem = memo(function HubFeedListItem({
-  post, index, eventId, isAdmin, openComments, commentDraft,
+  post, index, eventId, isAdmin, openComments, commentDraft, replyingToId,
   currentUserId, currentUserName, currentUserImage,
   onToggleReaction, onToggleDownvote, onToggleComments, onVotePoll,
-  onAddComment, onDeleteComment, onCommentDraftChange, onAdminPin, onAdminMovePinned, onAdminDelete,
+  onAddComment, onDeleteComment, onCommentDraftChange, onAdminPin, onAdminMovePinned, onAdminDelete, setReplyingTo
 }: {
   post: EventFeedPostFullDto; index: number; eventId: string; isAdmin: boolean;
-  openComments: boolean; commentDraft: string;
+  openComments: boolean; commentDraft: string; replyingToId: string | null;
   currentUserId: string | null; currentUserName: string; currentUserImage: string | null;
   onToggleReaction: (postId: string, emoji: string, e?: React.MouseEvent) => void;
   onToggleDownvote: (postId: string) => void;
@@ -64,6 +62,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
   onAdminPin: (postId: string) => void;
   onAdminMovePinned: (postId: string, direction: "up" | "down") => void;
   onAdminDelete: (postId: string) => void;
+  setReplyingTo: (postId: string, commentId: string | null) => void;
 }) {
   return (
     <div className="mb-3">
@@ -79,6 +78,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
           isAdmin={isAdmin}
           openComments={openComments}
           commentDraft={commentDraft}
+          replyingToId={replyingToId}
           currentUserId={currentUserId}
           currentUserName={currentUserName}
           currentUserImage={currentUserImage}
@@ -92,6 +92,7 @@ const HubFeedListItem = memo(function HubFeedListItem({
           onAdminPin={onAdminPin}
           onAdminMovePinned={onAdminMovePinned}
           onAdminDelete={onAdminDelete}
+          setReplyingTo={setReplyingTo}
         />
       </SectionBoundary>
     </div>
@@ -100,7 +101,6 @@ const HubFeedListItem = memo(function HubFeedListItem({
 
 export const HubFeedList = memo(function HubFeedList({
   posts,
-  sort,
   allPostsCount,
   eventId,
   isAdmin,
@@ -111,7 +111,7 @@ export const HubFeedList = memo(function HubFeedList({
   currentUserName,
   openComments,
   commentDrafts,
-  onSortChange,
+  replyingTo,
   onLoadMore,
   onToggleReaction,
   onToggleDownvote,
@@ -123,17 +123,11 @@ export const HubFeedList = memo(function HubFeedList({
   onAdminPin,
   onAdminMovePinned,
   onAdminDelete,
+  setReplyingTo,
   sentinelRef,
 }: Readonly<HubFeedListProps>) {
   return (
-    <div key={sort} className="animate-fade-in space-y-3">
-        {posts.length > 0 ? (
-          <FeedSortBar
-            allPostsCount={allPostsCount}
-            sort={sort}
-            onSortChange={onSortChange}
-          />
-        ) : null}
+    <div className="animate-fade-in flex flex-col">
 
                 {posts.length > 0 ? (
             <VirtualizedList
@@ -150,6 +144,7 @@ export const HubFeedList = memo(function HubFeedList({
                   isAdmin={isAdmin}
                   openComments={openComments[post.id] ?? false}
                   commentDraft={commentDrafts[post.id] ?? ""}
+                  replyingToId={replyingTo[post.id] ?? null}
                   currentUserId={currentUserId}
                   currentUserName={currentUserName}
                   currentUserImage={currentUserImage}
@@ -163,6 +158,7 @@ export const HubFeedList = memo(function HubFeedList({
                   onAdminPin={onAdminPin}
                   onAdminMovePinned={onAdminMovePinned}
                   onAdminDelete={onAdminDelete}
+                  setReplyingTo={setReplyingTo}
                 />
               )}
             />

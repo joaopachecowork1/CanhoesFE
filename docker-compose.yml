@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-canhoes}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-canhoes_local}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - canhoes_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +16,38 @@ services:
       interval: 3s
       timeout: 3s
       retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: canhoes-web
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Connect to the isolated postgres container specifically created for this project
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-canhoes}:${POSTGRES_PASSWORD:-canhoes_local}@postgres:5432/${POSTGRES_DB:-canhoes}?schema=public"
+      VERCEL: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  tunnel:
+    image: ngrok/ngrok:latest
+    container_name: canhoes-tunnel
+    restart: always
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command:
+      - "http"
+      - "--url=https://peloric-enola-browny.ngrok-free.dev"
+      - "--log=stdout"
+      - "web:3000"
+    depends_on:
+      - web
 
 volumes:
   canhoes_postgres_data:

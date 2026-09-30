@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     if (!body.email || typeof body.email !== "string") {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
+    const eventId = typeof body.eventId === "string" && body.eventId.trim().length > 0 ? body.eventId.trim() : null;
 
     const email = body.email.toLowerCase().trim();
 
@@ -40,12 +41,14 @@ export async function POST(req: Request) {
         expiresAtUtc,
         invitedByUserId: session.user.id,
         usedAtUtc: null,
+        eventId,
       },
       create: {
         email,
         token,
         expiresAtUtc,
         invitedByUserId: session.user.id,
+        eventId,
       },
     });
 

@@ -39,10 +39,15 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeed
   const [commentDraftsMap, setCommentDraftsMap] = useState<Record<string, string>>({});
   const commentDraftsRef = useRef(commentDraftsMap);
   commentDraftsRef.current = commentDraftsMap;
+  
+  const [replyingToMap, setReplyingToMap] = useState<Record<string, string | null>>({});
+  const replyingToRef = useRef(replyingToMap);
+  replyingToRef.current = replyingToMap;
 
   useEffect(() => {
     setOpenComments({});
     setCommentDraftsMap({});
+    setReplyingToMap({});
   }, [eventId]);
 
   const toggleComments = useCallback((postId: string) => {
@@ -54,11 +59,14 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeed
       if (!eventId) return;
       const text = (commentDraftsRef.current[postId] ?? "").trim();
       if (!text) return;
+      
+      const replyToId = replyingToRef.current[postId] || null;
 
       try {
-        const newComment = await feedRepo.createComment(eventId, postId, { text });
+        const newComment = await feedRepo.createComment(eventId, postId, { text, replyToId });
 
         setCommentDraftsMap((prev) => ({ ...prev, [postId]: "" }));
+        setReplyingToMap((prev) => ({ ...prev, [postId]: null }));
         setOpenComments((prev) => ({ ...prev, [postId]: true }));
 
         if (newComment) {
@@ -149,17 +157,23 @@ export function useHubFeedComments({ eventId, queryClient }: Readonly<UseHubFeed
     [eventId, queryClient]
   );
 
-  const setCommentDraft = useCallback((postId: string, text: string) => {
-    setCommentDraftsMap((prev) => ({ ...prev, [postId]: text }));
+  const setCommentDraft = useCallback((postId: string, draft: string) => {
+    setCommentDraftsMap((prev) => ({ ...prev, [postId]: draft }));
+  }, []);
+  
+  const setReplyingTo = useCallback((postId: string, commentId: string | null) => {
+    setReplyingToMap((prev) => ({ ...prev, [postId]: commentId }));
   }, []);
 
   return {
     openComments,
     commentDrafts: commentDraftsMap,
+    replyingTo: replyingToMap,
     toggleComments,
-    addComment,
-    deleteComment,
-    toggleCommentReaction,
     setCommentDraft,
+    setReplyingTo,
+    addComment,
+    toggleCommentReaction,
+    deleteComment,
   };
 }

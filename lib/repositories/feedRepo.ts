@@ -22,7 +22,7 @@ export const feedRepo = {
   getComments: (eventId: string, postId: string) =>
     canhoesFetch<T.HubCommentDto[]>(`/v1/events/${eventId}/feed/posts/${postId}/comments`),
     
-  createComment: (eventId: string, postId: string, payload: { text: string }) =>
+  createComment: (eventId: string, postId: string, payload: { text: string; replyToId?: string | null }) =>
     canhoesFetch<T.HubCommentDto>(`/v1/events/${eventId}/feed/posts/${postId}/comments`, {
       method: "POST",
       body: JSON.stringify(payload),

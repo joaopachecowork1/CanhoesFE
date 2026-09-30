@@ -358,6 +358,7 @@ export async function getPostComments(
       userName: commentUserMap.get(c.userId) ?? "Unknown",
       text: c.text,
       createdAtUtc: c.createdAtUtc.toISOString(),
+      replyToId: c.replyToId,
       reactionCounts,
       myReactions,
     };
@@ -368,10 +369,11 @@ export async function createComment(
   _eventId: string,
   postId: string,
   userId: string,
-  text: string
+  text: string,
+  replyToId?: string | null
 ): Promise<HubCommentDto> {
   const comment = await prisma.hubPostComment.create({
-    data: { postId, userId, text: text.trim() },
+    data: { postId, userId, text: text.trim(), replyToId: replyToId || null },
     include: {
       reactions: { select: { userId: true, emoji: true } },
     },
@@ -389,6 +391,7 @@ export async function createComment(
     userName: commentAuthor?.displayName ?? "Unknown",
     text: comment.text,
     createdAtUtc: comment.createdAtUtc.toISOString(),
+    replyToId: comment.replyToId,
     reactionCounts: {},
     myReactions: [],
   };

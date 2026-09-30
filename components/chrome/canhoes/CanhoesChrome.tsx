@@ -135,7 +135,7 @@ export function CanhoesChrome({
   return (
       <div
         data-theme="canhoes"
-        className="bg-circuit relative isolate flex h-[100svh] min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
+        className="bg-circuit relative isolate flex min-h-[100svh] flex-col overflow-x-clip bg-[var(--bg-void)] text-[var(--text-primary)]"
       >
       <header className="sticky top-0 z-40 border-b border-[rgba(255,255,255,0.08)] bg-[rgba(10,14,8,0.92)] backdrop-blur-[6px] supports-[backdrop-filter]:bg-[rgba(10,14,8,0.88)]">
         <PageShell wide className="pb-2 pt-[env(safe-area-inset-top,0px)]">
@@ -233,7 +233,7 @@ export function CanhoesChrome({
         <div className="h-px flex-1 bg-canhoes-gold/25" />
       </div>
 
-      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] scroll-native">
+      <main className="relative z-10 flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         <PageShell wide={isEventHomePath}>
           <div
                       key={pathname}

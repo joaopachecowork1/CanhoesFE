@@ -479,6 +479,7 @@ export type HubCommentDto = {
   userName: string;
   text: string;
   createdAtUtc: string;
+  replyToId: string | null;
   reactionCounts: Record<string, number>;
   myReactions: string[];
 };

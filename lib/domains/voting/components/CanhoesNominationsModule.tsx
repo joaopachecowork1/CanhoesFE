@@ -9,7 +9,7 @@ import type { AwardCategoryDto, EventActiveContextDto, MyNominationStatusDto, No
 import { useEventOverview } from "@/hooks/useEventOverview";
 import { awardsRepo } from "@/lib/repositories/awardsRepo";
 import { getErrorMessage, logFrontendError } from "@/lib/errors";
-import { cn } from "@/lib/utils";
+
 import { CanhoesFeatureCard, CanhoesModuleHeader } from "@/components/modules/canhoes/CanhoesModuleParts";
 import { CompactSegmentTabs } from "@/lib/domains/event/components/CompactSegmentTabs";
 import { Badge } from "@/components/ui/badge";
@@ -166,12 +166,12 @@ export function CanhoesNominationsModule({ initialCategories, initialContext }: 
         icon={Trophy}
         title="Nomeações oficiais"
         description="Cada membro pode submeter uma nomeação oficial por categoria."
-        badgeLabel={`Categorias: ${categories.length}`}
+        badgeLabel={`Categorias: ${categories.filter(c => c.kind === 1).length}`}
       />
 
       <CompactSegmentTabs
         activeId={selectedCategory?.id ?? ""}
-        items={categories.map((category) => ({
+        items={categories.filter(c => c.kind === 1).map((category) => ({
           id: category.id,
           label: category.name,
           badge: myStatus?.hasNomination && myStatus.nomineeId && myStatus.nomineeId === category.id
@@ -323,12 +323,8 @@ function CategoryNominationCard({
             type="button"
             onClick={() => createNomination.mutate()}
             disabled={!isPhaseOpen || !isValid || createNomination.isPending}
-            className={cn(
-              "min-w-36",
-              isValid && !createNomination.isPending
-                ? "bg-[linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,212,170,0.12))] border border-[var(--border-neon)] text-[var(--neon-green)] shadow-[var(--glow-green-sm)] hover:bg-[rgba(0,255,136,0.22)] hover:shadow-[0_0_18px_rgba(0,255,136,0.18)] active:scale-[0.98]"
-                : "opacity-50"
-            )}
+            className="min-w-36"
+            variant="default"
           >
             {createNomination.isPending ? "A submeter..." : "Submeter"}
           </Button>

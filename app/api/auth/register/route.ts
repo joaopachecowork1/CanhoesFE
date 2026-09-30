@@ -68,6 +68,25 @@ export async function POST(req: Request) {
           },
         });
       }
+
+      // If the invitation was generated within an event context, automatically add them as a member
+      if (invitation.eventId) {
+        await tx.eventMember.upsert({
+          where: {
+            eventId_userId: {
+              eventId: invitation.eventId,
+              userId: user.id,
+            },
+          },
+          update: {},
+          create: {
+            eventId: invitation.eventId,
+            userId: user.id,
+            role: "participant",
+            joinedAtUtc: new Date(),
+          },
+        });
+      }
       
       return user;
     });

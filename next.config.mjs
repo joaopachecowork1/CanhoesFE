@@ -1,6 +1,7 @@
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig = {
+  output: 'standalone',
   devIndicators: false,
   async rewrites() {
     return [

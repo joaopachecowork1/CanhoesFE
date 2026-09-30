@@ -46,12 +46,11 @@ function HubFeedModuleView({
     posts,
     allPostsCount,
     errorMessage,
-    sort,
-    setSort,
     hasMore,
     isFetchingNextPage,
     openComments,
     commentDrafts,
+    replyingTo,
     toggleReaction,
     toggleDownvote,
     votePoll,
@@ -59,6 +58,7 @@ function HubFeedModuleView({
     addComment,
     deleteComment,
     setCommentDraft,
+    setReplyingTo,
     adminPin,
     adminMovePinned,
     adminDelete,
@@ -71,13 +71,11 @@ function HubFeedModuleView({
   } = state;
 
   const handleRetry = useCallback(() => void refresh(), [refresh]);
-  const handleSortChange = useCallback((nextSort: typeof sort) => setSort(nextSort), [setSort]);
   const handleLoadMore = state.loadMore;
 
   const feedList = (
     <HubFeedList
       posts={posts}
-      sort={sort}
       allPostsCount={allPostsCount}
       eventId={state.eventId ?? ""}
       isAdmin={isAdmin}
@@ -88,7 +86,7 @@ function HubFeedModuleView({
       currentUserName={currentUserName}
       openComments={openComments}
       commentDrafts={commentDrafts}
-      onSortChange={handleSortChange}
+      replyingTo={replyingTo}
       onLoadMore={handleLoadMore}
       onToggleReaction={toggleReaction}
       onToggleDownvote={toggleDownvote}
@@ -100,6 +98,7 @@ function HubFeedModuleView({
       onAdminPin={adminPin}
       onAdminMovePinned={adminMovePinned}
       onAdminDelete={adminDelete}
+      setReplyingTo={setReplyingTo}
       sentinelRef={sentinelRef}
     />
   );

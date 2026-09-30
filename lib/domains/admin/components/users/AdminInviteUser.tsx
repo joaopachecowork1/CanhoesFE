@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 
-export function AdminInviteUser() {
+export function AdminInviteUser({ eventId }: { eventId: string }) {
   const [email, setEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function AdminInviteUser() {
       const res = await fetch("/api/admin/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, eventId }),
       });
 
       const data = await res.json();

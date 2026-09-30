@@ -34,6 +34,7 @@ export const CreateFeedPostSchema = z.object({
 
 export const CreateFeedCommentSchema = z.object({
   text: z.string().min(1, "Text is required").max(2000),
+  replyToId: z.string().uuid().nullable().optional(),
 });
 
 export const ToggleFeedReactionSchema = z.object({

@@ -28,6 +28,7 @@ model UserInvitation {
   expiresAtUtc    DateTime  @map("ExpiresAtUtc") @db.Timestamptz(6)
   usedAtUtc       DateTime? @map("UsedAtUtc") @db.Timestamptz(6)
   createdAtUtc    DateTime  @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
+  eventId         String?   @map("EventId")
 
   @@index([token], map: "IX_UserInvitations_TokenIdx")
   @@map("UserInvitations")
@@ -272,14 +273,18 @@ model HubPostComment {
   postId     String                   @map("PostId") @db.VarChar(64)
   userId     String                   @map("UserId") @db.Uuid
   text       String                   @map("Text") @db.VarChar(2000)
+  replyToId  String?                  @map("ReplyToId") @db.VarChar(64)
   createdAtUtc DateTime               @map("CreatedAtUtc") @default(now()) @db.Timestamptz(6)
   reactions  HubPostCommentReaction[]
 
-  post HubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post       HubPost                  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  replyTo    HubPostComment?          @relation("HubPostCommentReplies", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies    HubPostComment[]         @relation("HubPostCommentReplies")
 
   @@index([postId], map: "IX_HubPostComments_PostId")
   @@index([postId, createdAtUtc], map: "IX_HubPostComments_PostId_CreatedAtUtc")
   @@index([userId], map: "IX_HubPostComments_UserId")
+  @@index([replyToId], map: "IX_HubPostComments_ReplyToId")
   @@map("HubPostComments")
 }
 

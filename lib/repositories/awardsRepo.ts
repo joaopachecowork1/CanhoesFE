@@ -49,7 +49,7 @@ export const awardsRepo = {
     canhoesFetch<T.GalaMeasureDto[]>(`/v1/events/${eventId}/measures`),
     
   createMeasureProposal: (eventId: string, payload: { text: string }) =>
-    canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/measures/proposals`, {
+    canhoesFetch<T.MeasureProposalDto>(`/v1/events/${eventId}/measures`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),

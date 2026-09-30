@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { MessageSquare, Trash2 } from "lucide-react";
+import { MessageSquare, Trash2, Reply, X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { COMMENTS_QUERY_KEY } from "./hooks/useHubFeedComments";
 import { feedRepo } from "@/lib/repositories/feedRepo";
 
 import { formatDateTime, initials } from "./hubUtils";
+import type { HubCommentDto } from "@/lib/api/types";
 
 type HubPostCommentsProps = {
   postId: string;
@@ -22,6 +23,7 @@ type HubPostCommentsProps = {
   commentCount: number;
   openComments: boolean;
   commentDraft: string;
+  replyingToId: string | null;
   currentUserId?: string | null;
   currentUserName: string;
   currentUserImage?: string | null;
@@ -29,6 +31,7 @@ type HubPostCommentsProps = {
   onAddComment: (postId: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onCommentDraftChange: (postId: string, text: string) => void;
+  setReplyingTo: (postId: string, commentId: string | null) => void;
 };
 
 export function HubPostComments({
@@ -38,6 +41,7 @@ export function HubPostComments({
   commentCount,
   openComments,
   commentDraft,
+  replyingToId,
   currentUserId,
   currentUserName,
   currentUserImage,
@@ -45,6 +49,7 @@ export function HubPostComments({
   onAddComment,
   onDeleteComment,
   onCommentDraftChange,
+  setReplyingTo,
 }: Readonly<HubPostCommentsProps>) {
 
   const { data: fetchedComments } = useQuery({
@@ -64,26 +69,53 @@ export function HubPostComments({
           String(left.createdAtUtc).localeCompare(String(right.createdAtUtc))
         );
 
+  type CommentNode = HubCommentDto & { children: CommentNode[] };
+  const buildCommentTree = (flatComments: HubCommentDto[]) => {
+    const map = new Map<string, CommentNode>();
+    const roots: CommentNode[] = [];
+    flatComments.forEach(c => map.set(c.id, { ...c, children: [] }));
+    flatComments.forEach(c => {
+      if (c.replyToId && map.has(c.replyToId)) {
+        map.get(c.replyToId)!.children.push(map.get(c.id)!);
+      } else {
+        roots.push(map.get(c.id)!);
+      }
+    });
+    return roots;
+  };
+
+  type FlatCommentNode = HubCommentDto & { indentLevel: number; hasChildren: boolean };
+  const flattenTree = (nodes: CommentNode[], level = 0): FlatCommentNode[] => {
+    return nodes.flatMap(node => [
+      { ...node, indentLevel: Math.min(level, 4), hasChildren: node.children.length > 0 },
+      ...flattenTree(node.children, level + 1)
+    ]);
+  };
+
+  const displayComments = flattenTree(buildCommentTree(sortedComments));
+
   if (!openComments) return null;
+  
+  const replyingToComment = replyingToId ? comments.find(c => c.id === replyingToId) : null;
 
   return (
     <>
-      <section className="border border-white/5 bg-white/[0.02] rounded-xl space-y-3 p-4 sm:p-5">
-        <div className="flex items-center justify-between gap-3">
+      <section className="bg-[var(--bg-paper)] rounded-[1.25rem] p-4 sm:p-5 border border-[var(--border-paper)] shadow-md">
+        <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2 text-sm text-[var(--text-primary)]">
-            <MessageSquare className="h-4 w-4 text-[var(--moss-glow)]" />
+            <MessageSquare className="h-4 w-4 text-[var(--moss)]" />
             <span className="font-medium">
               {commentCount > 0
-                ? `${commentCount} comentario${commentCount === 1 ? "" : "s"}`
+                ? `${commentCount} comentário${commentCount === 1 ? "" : "s"}`
                 : "Sem comentários ainda"}
             </span>
           </div>
 
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="h-8 rounded-full px-3 text-[var(--color-text-primary)]"
+            className="h-8 rounded-full px-3 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/[0.06]"
             onClick={() => onToggleComments(postId)}
             aria-label="Fechar comentários"
           >
@@ -91,59 +123,99 @@ export function HubPostComments({
           </Button>
         </div>
 
-        <div className="space-y-0">
-          {sortedComments.length === 0 ? (
-            <div className="border border-white/5 bg-white/[0.02] rounded-xl px-4 py-3 text-sm text-[var(--text-muted)]">
+        <div className="space-y-0 relative">
+          {displayComments.length === 0 ? (
+            <div className="rounded-xl px-4 py-6 text-center text-sm text-[var(--text-muted)] bg-[var(--bg-deep)] border border-white/[0.04]">
               {feedCopy.comments.empty}
             </div>
           ) : (
-            <VirtualizedList
-              items={sortedComments}
+              <VirtualizedList
+              items={displayComments}
               getKey={(comment) => comment.id}
-              estimateSize={() => 170}
-              className="max-h-[38svh]"
-              renderItem={(comment, commentIndex) => {
+              estimateSize={() => 120}
+              className="max-h-[50svh]"
+              renderItem={(comment) => {
                 const isOwnComment = Boolean(currentUserId) && comment.userId === currentUserId;
+                const marginLeft = comment.indentLevel * 32;
 
                 return (
                   <article
-                    className="group flex gap-3 border-l-2 border-[var(--border-subtle)] px-3 py-2.5 motion-safe-smooth hover:border-[var(--border-neon)]/50"
-                    style={{ marginLeft: commentIndex > 0 ? "0.5rem" : 0 }}
+                    style={{ paddingLeft: `${marginLeft + 12}px` }}
+                    className="group relative flex gap-3 pr-3 py-3 transition-colors hover:bg-white/[0.02]"
                   >
-                    <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
-                      {comment.userName === currentUserName && currentUserImage ? (
-                        <AvatarImage src={currentUserImage} alt={comment.userName} />
-                      ) : null}
-                      <AvatarFallback className="bg-[var(--bg-surface)] text-[10px] font-semibold text-[var(--text-muted)]">
-                        {initials(comment.userName)}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Vertical Thread Line */}
+                    {comment.indentLevel > 0 && (
+                      <div 
+                        className="absolute top-0 bottom-0 w-px bg-[var(--border-subtle)]"
+                        style={{ left: `${marginLeft + 12 - 16}px` }}
+                      />
+                    )}
+                    {comment.indentLevel > 0 && (
+                      <div 
+                        className="absolute top-[28px] h-px bg-[var(--border-subtle)]"
+                        style={{ left: `${marginLeft + 12 - 16}px`, width: '16px' }}
+                      />
+                    )}
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-[var(--text-primary)]">
+                    <div className="relative flex flex-col items-center">
+                      <Avatar className="h-8 w-8 shrink-0 border border-white/[0.08] bg-[var(--bg-deep)]">
+                        {comment.userName === currentUserName && currentUserImage ? (
+                          <AvatarImage src={currentUserImage} alt={comment.userName} />
+                        ) : null}
+                        <AvatarFallback className="bg-[var(--bg-deep)] text-[10px] font-semibold text-[var(--text-muted)]">
+                          {initials(comment.userName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Line connecting to children */}
+                      {comment.hasChildren && (
+                        <div className="absolute top-8 bottom-[-12px] w-px bg-[var(--border-subtle)]" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-sm font-semibold text-[var(--text-primary)]">
                           {comment.userName}
                         </span>
                         {comment.userName === postAuthorName && (
                           <Badge
                             variant="outline"
-                            className="h-4 min-w-4 border-[var(--border-moss)] bg-[rgba(122,173,58,0.1)] text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--moss-glow)]"
+                            className="h-4 min-w-4 border-[var(--moss)]/30 bg-[var(--moss)]/10 px-1 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--moss)]"
                           >
                             OP
                           </Badge>
                         )}
-                        <span className="text-xs text-[var(--ink-secondary)]">
-                          {formatDateTime(comment.createdAtUtc)}
+                        <span className="text-xs text-[var(--text-muted)]">
+                          · {formatDateTime(comment.createdAtUtc)}
                         </span>
                       </div>
 
-                      <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[var(--text-primary)]">
+                      <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-[var(--text-primary)]">
                         {comment.text}
                       </p>
 
 
-                      {isOwnComment && (
-                        <div className="mt-1 flex justify-end">
+                      <div className="mt-2 flex items-center justify-between">
+                        <button
+                          type="button"
+                          className="canhoes-tap flex items-center gap-1.5 rounded px-2 py-1 -ml-2 text-xs font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--moss)] hover:bg-[var(--moss)]/10"
+                          aria-label="Responder"
+                          onClick={() => {
+                            setReplyingTo(postId, comment.id);
+                            setTimeout(() => {
+                              const el = document.getElementById(`comment-input-${postId}`);
+                              if (el) {
+                                el.focus({ preventScroll: false });
+                              }
+                            }, 50);
+                          }}
+                        >
+                          <Reply className="h-3.5 w-3.5" />
+                          Responder
+                        </button>
+                      
+                        {isOwnComment && (
                           <ConfirmDeleteAction
                             onConfirm={() => onDeleteComment(postId, comment.id)}
                             title="Apagar comentário?"
@@ -151,16 +223,16 @@ export function HubPostComments({
                             trigger={
                               <button
                                 type="button"
-                                className="canhoes-tap flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition-colors hover:text-[var(--danger)]"
+                                className="canhoes-tap flex items-center gap-1.5 rounded px-2 py-1 -mr-2 text-xs font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 opacity-0 group-hover:opacity-100 focus:opacity-100"
                                 aria-label="Apagar comentário"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-3.5 w-3.5" />
                                 Apagar
                               </button>
                             }
                           />
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </article>
                 );
@@ -170,8 +242,8 @@ export function HubPostComments({
         </div>
 
         {/* Comment form */}
-        <div className="border border-white/5 bg-white/[0.02] rounded-xl flex gap-2.5 p-3">
-          <Avatar className="mt-0.5 h-7 w-7 shrink-0 bg-[var(--bg-surface)]">
+        <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-deep)]/50 rounded-b-[1.25rem] flex gap-3 p-4 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 mt-2">
+          <Avatar className="mt-1 h-8 w-8 shrink-0 border border-white/[0.08] bg-[var(--bg-surface)]">
             {currentUserImage ? (
               <AvatarImage src={currentUserImage} alt={currentUserName} />
             ) : null}
@@ -181,11 +253,27 @@ export function HubPostComments({
           </Avatar>
 
           <div className="min-w-0 flex-1 space-y-2">
+            {replyingToComment && (
+              <div className="flex items-center justify-between bg-[var(--moss)]/10 border border-[var(--moss)]/20 text-[var(--moss)] text-xs px-3 py-2 rounded-lg mb-2">
+                <span className="truncate">
+                  A responder a <span className="font-semibold">{replyingToComment.userName}</span>
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => setReplyingTo(postId, null)}
+                  className="text-[var(--moss)] hover:text-white p-1 rounded-full hover:bg-[var(--moss)]/20 transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          
             <Textarea
+              id={`comment-input-${postId}`}
               value={commentDraft}
               onChange={(event) => onCommentDraftChange(postId, event.target.value)}
-              placeholder={feedCopy.comments.placeholder}
-              className="min-h-[64px] resize-none text-sm"
+              placeholder={replyingToId ? "Escreve a tua resposta..." : feedCopy.comments.placeholder}
+              className="min-h-[72px] resize-none text-sm border-white/[0.08] bg-[var(--bg-surface)] placeholder:text-[var(--text-muted)] rounded-xl"
             />
 
             <div className="flex justify-end gap-2">
@@ -193,6 +281,7 @@ export function HubPostComments({
                 type="button"
                 variant="outline"
                 size="sm"
+                className="border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-slate-100"
                 onClick={() => onCommentDraftChange(postId, "")}
                 disabled={!commentDraft}
               >
@@ -201,6 +290,7 @@ export function HubPostComments({
               <Button
                 type="button"
                 size="sm"
+                className="bg-jungle-600 hover:bg-jungle-500 text-white"
                 onClick={() => onAddComment(postId)}
                 disabled={!commentDraft.trim()}
               >

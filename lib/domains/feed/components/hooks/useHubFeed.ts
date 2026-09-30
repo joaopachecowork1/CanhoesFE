@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { type InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { EventFeedPostFullDto } from "@/lib/api/types";
@@ -8,7 +8,6 @@ import { feedRepo } from "@/lib/repositories/feedRepo";
 import { useHubFeedComments } from "./useHubFeedComments";
 import { useHubFeedPostActions } from "./useHubFeedPostActions";
 
-export type FeedSortOrder = "hot" | "new" | "top";
 const PAGE_SIZE = 15;
 
 type FeedPageData = {
@@ -26,34 +25,6 @@ type FeedApiResponse = {
 
 type FeedInfiniteData = InfiniteData<FeedPageData>;
 
-function hotScore(post: EventFeedPostFullDto): number {
-  const reactionCount = Object.values(post.reactionCounts ?? {}).reduce((a, b) => a + b, 0);
-  const commentCount = post.commentCount ?? 0;
-  const hoursAgo = Math.max(0, (Date.now() - new Date(post.createdAtUtc).getTime()) / 3600000);
-  return (reactionCount + commentCount * 2) / Math.pow(hoursAgo + 2, 1.5);
-}
-
-function sortPosts(allPosts: EventFeedPostFullDto[], sortOrder: FeedSortOrder): EventFeedPostFullDto[] {
-  const postsToSort = [...allPosts];
-  const pinnedPosts = postsToSort.filter((post) => post.isPinned);
-  const regularPosts = postsToSort.filter((post) => !post.isPinned);
-
-  switch (sortOrder) {
-    case "hot":
-      regularPosts.sort((a, b) => hotScore(b) - hotScore(a));
-      break;
-    case "top":
-      regularPosts.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
-      break;
-    case "new":
-    default:
-      regularPosts.sort((a, b) => String(b.createdAtUtc).localeCompare(String(a.createdAtUtc)));
-      break;
-  }
-
-  return [...pinnedPosts, ...regularPosts];
-}
-
 function sanitizePosts(rawPosts: EventFeedPostFullDto[] | null | undefined) {
   return (Array.isArray(rawPosts) ? rawPosts : []).filter(
     (post): post is EventFeedPostFullDto => Boolean(post?.id)
@@ -62,7 +33,6 @@ function sanitizePosts(rawPosts: EventFeedPostFullDto[] | null | undefined) {
 
 export function useHubFeed(eventId: string | null, _currentUserId: string | null, initialData?: FeedInfiniteData) {
   const queryClient = useQueryClient();
-  const [sortOrder, setSortOrder] = useState<FeedSortOrder>("hot");
 
   const postsInfiniteQuery = useInfiniteQuery({
     queryKey: ["hub-posts", eventId],
@@ -97,10 +67,10 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
     [postsInfiniteQuery.data]
   );
 
-  const sortedDisplayedPosts = useMemo(() => sortPosts(allSanitizedPosts, sortOrder), [allSanitizedPosts, sortOrder]);
+  const sortedDisplayedPosts = allSanitizedPosts;
   const totalPostsInView = sortedDisplayedPosts.length;
 
-  const { openComments, commentDrafts, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft } =
+  const { openComments, commentDrafts, replyingTo, toggleComments, addComment, deleteComment, toggleCommentReaction, setCommentDraft, setReplyingTo } =
     useHubFeedComments({ eventId, queryClient });
 
   const {
@@ -138,13 +108,12 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
     allPostsCount: totalPostsInView,
     errorMessage: postsInfiniteQuery.error ? getErrorMessage(postsInfiniteQuery.error, "Erro ao carregar o feed.") : null,
     loading: postsInfiniteQuery.isLoading,
-    sort: sortOrder,
-    setSort: setSortOrder,
     hasMore: hasMorePosts,
     loadMore: loadMorePosts,
     isFetchingNextPage,
     openComments,
     commentDrafts,
+    replyingTo,
     showParticles,
     setShowParticles,
     refresh: refreshPosts,
@@ -159,5 +128,6 @@ export function useHubFeed(eventId: string | null, _currentUserId: string | null
     adminMovePinned,
     adminDelete,
     setCommentDraft,
+    setReplyingTo,
   };
 }

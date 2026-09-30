@@ -70,10 +70,11 @@ export function PillTabs({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    activeElement.scrollIntoView({
+    const scrollLeft = activeElement.offsetLeft - scroller.offsetWidth / 2 + activeElement.offsetWidth / 2;
+    
+    scroller.scrollTo({
+      left: scrollLeft,
       behavior: prefersReducedMotion ? "auto" : "smooth",
-      inline: "center",
-      block: "nearest",
     });
   }, [activeId]);
 
