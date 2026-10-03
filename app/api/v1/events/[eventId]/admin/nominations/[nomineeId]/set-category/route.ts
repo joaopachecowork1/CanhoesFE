@@ -1,27 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { z } from "zod";
+
+import { notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
 import { setNominationCategory } from "@/lib/domains/admin/services/nominations";
 
-export const dynamic = "force-dynamic";
+const setCategorySchema = z.object({ categoryId: z.string().nullish() });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; nomineeId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId, nomineeId } = await params;
-  const body = await req.json();
-  const nominee = await setNominationCategory(eventId, nomineeId, body.categoryId ?? null);
-  if (!nominee) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Nominee not found." }, { status: 404 });
-  }
-  return NextResponse.json(nominee);
-}
+export const POST = apiRoute<{ eventId: string; nomineeId: string }>(async (request, { eventId, nomineeId }) => {
+  await requireAdmin();
+  const { categoryId } = await readJson(request, setCategorySchema);
+  const nominee = await setNominationCategory(eventId, nomineeId, categoryId ?? null);
+  if (!nominee) throw notFound("Nominee not found.");
+  return json(nominee);
+});

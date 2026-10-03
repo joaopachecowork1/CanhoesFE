@@ -1,6 +1,8 @@
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { HttpError } from "@/lib/api/httpError";
+
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": ".jpg",
@@ -9,7 +11,12 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/webp": ".webp",
 };
 
-export class UploadValidationError extends Error {}
+/** A rejected upload (type, size or path). Becomes a 400 in route handlers. */
+export class UploadValidationError extends HttpError {
+  constructor(message: string) {
+    super(400, "VALIDATION_ERROR", message);
+  }
+}
 
 function storageRoot() {
   return path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), ".data", "uploads"));

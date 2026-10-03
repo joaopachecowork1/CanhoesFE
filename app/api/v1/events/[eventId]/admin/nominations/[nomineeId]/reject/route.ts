@@ -1,26 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json } from "@/lib/api/route";
 import { rejectNomination } from "@/lib/domains/admin/services/nominations";
 
-export const dynamic = "force-dynamic";
-
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; nomineeId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId, nomineeId } = await params;
+export const POST = apiRoute<{ eventId: string; nomineeId: string }>(async (_request, { eventId, nomineeId }) => {
+  await requireAdmin();
   const nominee = await rejectNomination(eventId, nomineeId);
-  if (!nominee) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Nominee not found." }, { status: 404 });
-  }
-  return NextResponse.json(nominee);
-}
+  if (!nominee) throw notFound("Nominee not found.");
+  return json(nominee);
+});

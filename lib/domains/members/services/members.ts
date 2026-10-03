@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { deleteUpload, saveUpload } from "@/lib/storage/localStorage";
 import type {
   PublicUserDto,
   GalaMeasureDto,
@@ -231,24 +232,22 @@ export async function createNomination(
   };
 }
 
-export async function updateNomineeImage(
+/** Stores a new image for a nominee its submitter (or an admin) owns; the previous upload is removed. */
+export async function replaceNomineeImage(
   eventId: string,
   nomineeId: string,
-  userId: string,
-  isAdmin: boolean,
-  imageUrl: string
+  user: { id: string; isAdmin: boolean },
+  file: File
 ): Promise<NomineeDto | null> {
-  const nominee = await prisma.nominee.findFirst({
-    where: { id: nomineeId, eventId },
-  });
+  const nominee = await prisma.nominee.findFirst({ where: { id: nomineeId, eventId } });
+  if (!nominee || (nominee.submittedByUserId !== user.id && !user.isAdmin)) return null;
 
-  if (!nominee) return null;
-  if (nominee.submittedByUserId !== userId && !isAdmin) return null;
-
+  const upload = await saveUpload(file, ["canhoes", "nominees"]);
   const updated = await prisma.nominee.update({
     where: { id: nomineeId },
-    data: { imageUrl },
+    data: { imageUrl: upload.url },
   });
+  if (nominee.imageUrl) await deleteUpload(nominee.imageUrl);
 
   return {
     id: updated.id,
@@ -260,24 +259,22 @@ export async function updateNomineeImage(
   };
 }
 
-export async function updateWishlistImage(
+/** Stores a new image for a wishlist item its owner (or an admin) owns; the previous upload is removed. */
+export async function replaceWishlistImage(
   eventId: string,
   itemId: string,
-  userId: string,
-  isAdmin: boolean,
-  imageUrl: string
+  user: { id: string; isAdmin: boolean },
+  file: File
 ): Promise<EventWishlistItemDto | null> {
-  const item = await prisma.wishlistItem.findFirst({
-    where: { id: itemId, eventId },
-  });
+  const item = await prisma.wishlistItem.findFirst({ where: { id: itemId, eventId } });
+  if (!item || (item.userId !== user.id && !user.isAdmin)) return null;
 
-  if (!item) return null;
-  if (item.userId !== userId && !isAdmin) return null;
-
+  const upload = await saveUpload(file, ["canhoes", "wishlist"]);
   const updated = await prisma.wishlistItem.update({
     where: { id: itemId },
-    data: { imageUrl },
+    data: { imageUrl: upload.url },
   });
+  if (item.imageUrl) await deleteUpload(item.imageUrl);
 
   return {
     id: updated.id,

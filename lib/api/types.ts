@@ -59,16 +59,6 @@ export type PublicUserDto = {
   isAdmin: boolean;
 };
 
-export type EventVotingOverviewDto = {
-  eventId: string;
-  phaseId: string | null;
-  canVote: boolean;
-  endsAtUtc: string | null;
-  categoryCount: number;
-  submittedVoteCount: number;
-  remainingVoteCount: number;
-};
-
 export type EventWishlistItemDto = {
   id: string;
   userId: string;
@@ -144,13 +134,6 @@ export type CreateEventFeedPostRequest = {
 export type EventActiveContextDto = {
   event: EventSummaryDto;
   overview: EventOverviewDto;
-};
-
-export type EventContextDto = {
-  event: EventSummaryDto;
-  users: EventUserDto[];
-  phases: EventPhaseDto[];
-  activePhase: EventPhaseDto | null;
 };
 
 export type EventProposalDto = {
@@ -392,30 +375,6 @@ export type AdminNomineesPagedDto = {
   skip: number;
   take: number;
   hasMore: boolean;
-};
-
-export type AwardCategorySummaryDto = {
-  id: string;
-  name: string;
-  sortOrder: number;
-  isActive: boolean;
-  kind: number;
-};
-
-export type NomineeSummaryDto = {
-  id: string;
-  categoryId: string | null;
-  title: string;
-  status: ProposalStatus;
-};
-
-export type AdminNomineeSummaryDto = {
-  id: string;
-  categoryId: string | null;
-  title: string;
-  status: ProposalStatus;
-  submittedByUserId: string;
-  submittedByName: string;
 };
 
 export type AdminModuleKey = 

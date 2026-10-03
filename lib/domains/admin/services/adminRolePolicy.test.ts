@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { assertAdminRoleChangeAllowed } from "./adminRolePolicy";
+import { AdminRoleChangeError, assertAdminRoleChangeAllowed, type AdminRoleChange } from "./adminRolePolicy";
+
+function rejectionCode(change: AdminRoleChange) {
+  try {
+    assertAdminRoleChangeAllowed(change);
+    return null;
+  } catch (error) {
+    return error instanceof AdminRoleChangeError ? error.code : "UNEXPECTED_ERROR";
+  }
+}
 
 const base = {
   actorUserId: "actor",
@@ -20,15 +29,11 @@ describe("admin role policy", () => {
   });
 
   it("prevents removing the last admin", () => {
-    expect(() => assertAdminRoleChangeAllowed({ ...base, adminCount: 1 }))
-      .toThrow("LAST_ADMIN_REQUIRED");
+    expect(rejectionCode({ ...base, adminCount: 1 })).toBe("LAST_ADMIN_REQUIRED");
   });
 
   it("requires explicit confirmation for self-demotion", () => {
-    expect(() => assertAdminRoleChangeAllowed({
-      ...base,
-      actorUserId: "target",
-    })).toThrow("SELF_DEMOTION_CONFIRMATION_REQUIRED");
+    expect(rejectionCode({ ...base, actorUserId: "target" })).toBe("SELF_DEMOTION_CONFIRMATION_REQUIRED");
   });
 
   it("allows a confirmed self-demotion when another admin remains", () => {

@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import type {
   AdminNomineeDto,
   AdminNomineesPagedDto,
-  NomineeSummaryDto,
-  AdminNomineeSummaryDto,
 } from "@/lib/api/types";
 
 export async function setNominationCategory(
@@ -119,50 +117,4 @@ export async function getAdminNominationsPaged(
     skip, take,
     hasMore: skip + take < total,
   };
-}
-
-export async function getAdminNomineesSummary(eventId: string, status?: string | null): Promise<NomineeSummaryDto[]> {
-  const where: Record<string, unknown> = { eventId };
-  if (status) where.status = status;
-
-  const raw = await prisma.nominee.findMany({
-    where,
-    orderBy: { createdAtUtc: "desc" },
-    select: { id: true, categoryId: true, title: true, status: true },
-  });
-
-  return raw.map((n) => ({
-    id: n.id,
-    categoryId: n.categoryId,
-    title: n.title,
-    status: n.status as NomineeSummaryDto["status"],
-  }));
-}
-
-export async function getAdminNominationsSummary(eventId: string, status?: string | null): Promise<AdminNomineeSummaryDto[]> {
-  const where: Record<string, unknown> = { eventId };
-  if (status) where.status = status;
-
-  const nominees = await prisma.nominee.findMany({
-    where,
-    orderBy: { createdAtUtc: "desc" },
-  });
-
-  const userIds = [...new Set(nominees.map((n) => n.submittedByUserId))];
-  const users = userIds.length > 0
-    ? await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, displayName: true, email: true } })
-    : [];
-  const userMap = new Map(users.map((u) => [u.id, u]));
-
-  return nominees.map((n) => {
-    const u = userMap.get(n.submittedByUserId);
-    return {
-      id: n.id,
-      categoryId: n.categoryId,
-      title: n.title,
-      status: n.status as "pending" | "approved" | "rejected",
-      submittedByUserId: n.submittedByUserId,
-      submittedByName: u?.displayName ?? u?.email ?? "Unknown",
-    };
-  });
 }

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PagedResult, PublicUserDto } from "@/lib/api/types";
-import { assertAdminRoleChangeAllowed } from "./adminRolePolicy";
+import { AdminRoleChangeError, assertAdminRoleChangeAllowed } from "./adminRolePolicy";
 
 export async function getAdminMembersPaged(
   eventId: string,
@@ -52,13 +52,13 @@ export async function setAdminRole(input: {
       where: { eventId_userId: { eventId: input.eventId, userId: input.targetUserId } },
       select: { userId: true },
     });
-    if (!membership) throw new Error("MEMBER_NOT_FOUND");
+    if (!membership) throw new AdminRoleChangeError("MEMBER_NOT_FOUND");
 
     const target = await tx.user.findUnique({
       where: { id: input.targetUserId },
       select: { id: true, isAdmin: true },
     });
-    if (!target) throw new Error("MEMBER_NOT_FOUND");
+    if (!target) throw new AdminRoleChangeError("MEMBER_NOT_FOUND");
 
     const adminCount = target.isAdmin && !input.isAdmin
       ? await tx.user.count({ where: { isAdmin: true } })

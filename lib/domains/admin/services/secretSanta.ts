@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { EventAdminSecretSantaStateDto } from "@/lib/api/types";
+import { HttpError } from "@/lib/api/httpError";
 
 export async function getAdminSecretSantaState(eventId: string): Promise<EventAdminSecretSantaStateDto> {
   const state = await prisma.canhoesEventState.findUnique({ where: { eventId } });
@@ -29,6 +30,14 @@ export async function getAdminSecretSantaState(eventId: string): Promise<EventAd
   };
 }
 
+/** A draw that cannot run with the current members or state. */
+class SecretSantaDrawError extends HttpError {
+  constructor(message: string) {
+    super(400, "DRAW_ERROR", message);
+    this.name = "SecretSantaDrawError";
+  }
+}
+
 export async function executeSecretSantaDraw(eventId: string, createdByUserId: string, eventCode?: string): Promise<EventAdminSecretSantaStateDto> {
   const code = eventCode?.trim() || eventId;
 
@@ -38,7 +47,7 @@ export async function executeSecretSantaDraw(eventId: string, createdByUserId: s
   });
 
   if (existingDraw?.isLocked) {
-    throw new Error("Draw is already locked. Cannot re-run.");
+    throw new SecretSantaDrawError("Draw is already locked. Cannot re-run.");
   }
 
   const members = await prisma.eventMember.findMany({
@@ -57,7 +66,7 @@ export async function executeSecretSantaDraw(eventId: string, createdByUserId: s
   });
 
   if (participants.length < 2) {
-    throw new Error("Need at least 2 participants for Secret Santa.");
+    throw new SecretSantaDrawError("Need at least 2 participants for Secret Santa.");
   }
 
   // Fisher-Yates shuffle
@@ -82,7 +91,7 @@ export async function executeSecretSantaDraw(eventId: string, createdByUserId: s
       if (giver.id !== receiver2.id) {
         assignments.push({ giverUserId: giver.id, receiverUserId: receiver2.id });
       } else {
-        throw new Error("Could not generate valid Secret Santa pairs. Try again.");
+        throw new SecretSantaDrawError("Could not generate valid Secret Santa pairs. Try again.");
       }
     } else {
       assignments.push({ giverUserId: giver.id, receiverUserId: receiver.id });

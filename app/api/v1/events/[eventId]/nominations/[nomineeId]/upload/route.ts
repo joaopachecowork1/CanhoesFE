@@ -1,42 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { updateNomineeImage } from "@/lib/domains/members/services/members";
-import { deleteUpload, saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
+import { notFound } from "@/lib/api/httpError";
+import { requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readFormFile } from "@/lib/api/route";
+import { replaceNomineeImage } from "@/lib/domains/members/services/members";
 
-export const dynamic = "force-dynamic";
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; nomineeId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId, nomineeId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
-  if (!file || file.size <= 0) {
-    return NextResponse.json({ code: "FILE_REQUIRED", message: "File is required." }, { status: 400 });
-  }
-
-  try {
-    const upload = await saveUpload(file, ["canhoes", "nominees"]);
-    const nominee = await updateNomineeImage(eventId, nomineeId, userId, isAdmin, upload.url);
-    if (!nominee) {
-      await deleteUpload(upload.url);
-      return NextResponse.json({ code: "NOT_FOUND", message: "Nominee not found." }, { status: 404 });
-    }
-    return NextResponse.json(nominee);
-  } catch (error) {
-    if (error instanceof UploadValidationError) {
-      return NextResponse.json({ code: "VALIDATION_ERROR", message: error.message }, { status: 400 });
-    }
-    throw error;
-  }
-}
+export const POST = apiRoute<{ eventId: string; nomineeId: string }>(async (request, { eventId, nomineeId }) => {
+  const user = await requireUser();
+  const file = await readFormFile(request);
+  const nominee = await replaceNomineeImage(eventId, nomineeId, user, file);
+  if (!nominee) throw notFound("Nominee not found.");
+  return json(nominee);
+});

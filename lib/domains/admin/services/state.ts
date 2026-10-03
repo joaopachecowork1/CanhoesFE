@@ -9,7 +9,7 @@ import type {
 } from "@/lib/api/types";
 import { toPhaseDto, toEventSummary, KindUserVote } from "./constants";
 
-export async function getAdminState(eventId: string): Promise<EventAdminStateDto> {
+async function getAdminState(eventId: string): Promise<EventAdminStateDto> {
   const [phases, state] = await Promise.all([
     prisma.eventPhase.findMany({ where: { eventId }, orderBy: { startDateUtc: "asc" } }),
     prisma.canhoesEventState.findUnique({ where: { eventId } }),

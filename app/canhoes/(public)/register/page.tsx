@@ -10,6 +10,8 @@ import { CanhoesDecorativeDivider, CanhoesGlowBackdrop } from "@/components/ui/c
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getErrorMessage } from "@/lib/errors";
+import { authRepo } from "@/lib/repositories/authRepo";
 
 function RegisterForm() {
   const router = useRouter();
@@ -36,24 +38,13 @@ function RegisterForm() {
     setError(null);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password, displayName }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erro ao criar conta.");
-      }
-
+      await authRepo.registerWithInvite({ token, password, displayName });
       setSuccess(true);
       setTimeout(() => {
         router.push("/canhoes/login");
       }, 3000);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
+    } catch (error) {
+      setError(getErrorMessage(error, "Erro ao criar conta.", { 400: "Não foi possível criar a conta." }));
       setIsRegistering(false);
     }
   };

@@ -1,38 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { z } from "zod";
+
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
 import { executeSecretSantaDraw } from "@/lib/domains/admin/services/secretSanta";
 
-export const dynamic = "force-dynamic";
+const drawSchema = z.object({ eventCode: z.string().optional() });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-
-  let eventCode: string | undefined;
-  try {
-    const body = await req.json();
-    eventCode = body.eventCode;
-  } catch {
-    // no body, that's fine
-  }
-
-  try {
-    const state = await executeSecretSantaDraw(eventId, userId, eventCode);
-    return NextResponse.json(state);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to execute draw.";
-    return NextResponse.json({ code: "DRAW_ERROR", message }, { status: 400 });
-  }
-}
+export const POST = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  const admin = await requireAdmin();
+  const { eventCode } = await readJson(request, drawSchema);
+  return json(await executeSecretSantaDraw(eventId, admin.id, eventCode));
+});

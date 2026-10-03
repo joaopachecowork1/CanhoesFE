@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
+import { adminRepo } from "@/lib/repositories/adminRepo";
 
 export function AdminInviteUser({ eventId }: { eventId: string }) {
   const [email, setEmail] = useState("");
@@ -23,23 +25,12 @@ export function AdminInviteUser({ eventId }: { eventId: string }) {
     setCopied(false);
 
     try {
-      const res = await fetch("/api/admin/invites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, eventId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erro ao gerar convite.");
-      }
-
-      setInviteUrl(window.location.origin + data.inviteUrl);
+      const { inviteUrl } = await adminRepo.inviteUser({ email, eventId });
+      setInviteUrl(window.location.origin + inviteUrl);
       toast.success("Convite gerado com sucesso.");
       setEmail("");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro desconhecido");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Erro ao gerar convite.", { 400: "Não foi possível gerar o convite." }));
     } finally {
       setIsInviting(false);
     }

@@ -1,59 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { getMeasures } from "@/lib/domains/members/services/members";
-import { createMeasureProposal } from "@/lib/domains/members/services/members";
-import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
+import { requireEventAccess, requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
+import { createMeasureProposal, getMeasures } from "@/lib/domains/members/services/members";
 import { CreateMeasureProposalSchema } from "@/lib/zod/nomination";
 
-export const dynamic = "force-dynamic";
+export const GET = apiRoute<{ eventId: string }>(async (_request, { eventId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  return json(await getMeasures(eventId));
+});
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return NextResponse.json({ code: "MODULE_DISABLED", message: "Module not available." }, { status: 403 });
-  }
-
-  const measures = await getMeasures(eventId);
-  return NextResponse.json(measures);
-}
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return NextResponse.json({ code: "MODULE_DISABLED", message: "Module not available." }, { status: 403 });
-  }
-
-  const body = await req.json();
-  const parsed = CreateMeasureProposalSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." }, { status: 400 });
-  }
-
-  const proposal = await createMeasureProposal(eventId, userId, parsed.data.text);
-  return NextResponse.json(proposal);
-}
+export const POST = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  const { text } = await readJson(request, CreateMeasureProposalSchema);
+  return json(await createMeasureProposal(eventId, user.id, text));
+});

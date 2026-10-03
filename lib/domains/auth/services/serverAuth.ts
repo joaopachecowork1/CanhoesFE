@@ -9,16 +9,7 @@ export type RequestUser = {
   isAdmin: boolean;
 };
 
-export class AuthorizationError extends Error {
-  constructor(
-    public readonly status: 401 | 403,
-    public readonly code: "UNAUTHORIZED" | "FORBIDDEN",
-    message: string
-  ) {
-    super(message);
-  }
-}
-
+/** The signed-in user's profile, or null without a session. For route handlers use `requireUser` from `lib/api/guards`. */
 export async function getRequestUser(): Promise<RequestUser | null> {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
@@ -28,20 +19,4 @@ export async function getRequestUser(): Promise<RequestUser | null> {
     where: { id: userId },
     select: { id: true, email: true, displayName: true, isAdmin: true },
   });
-}
-
-async function requireUser(): Promise<RequestUser> {
-  const user = await getRequestUser();
-  if (!user) {
-    throw new AuthorizationError(401, "UNAUTHORIZED", "Authentication required.");
-  }
-  return user;
-}
-
-export async function requireAdmin(): Promise<RequestUser> {
-  const user = await requireUser();
-  if (!user.isAdmin) {
-    throw new AuthorizationError(403, "FORBIDDEN", "Admin access required.");
-  }
-  return user;
 }

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { deleteUpload } from "@/lib/storage/localStorage";
+import { deleteUpload, saveUpload } from "@/lib/storage/localStorage";
 import type {
   EventFeedPostFullDto,
   EventFeedPollDto,
@@ -535,4 +535,22 @@ export async function deleteFeedPost(
   await prisma.hubPost.delete({ where: { id: postId } });
   await Promise.all(post.media.map((media) => deleteUpload(media.url)));
   return true;
+}
+
+export const MAX_IMAGES_PER_POST = 4;
+
+/** Stores images for a future post and records them, so the post can reference their URLs. */
+export async function saveFeedImages(eventId: string, userId: string, files: File[]) {
+  const uploads = await Promise.all(files.map((file) => saveUpload(file, ["feed", eventId])));
+  await prisma.hubPostMedia.createMany({
+    data: uploads.map((upload) => ({
+      url: upload.url,
+      originalFileName: upload.fileName,
+      fileSizeBytes: BigInt(upload.fileSize),
+      uploadedByUserId: userId,
+      contentType: upload.contentType,
+      uploadedAtUtc: new Date(),
+    })),
+  });
+  return uploads.map(({ url, fileName, fileSize }) => ({ url, fileName, fileSize }));
 }

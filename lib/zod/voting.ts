@@ -10,7 +10,3 @@ export const CreateEventProposalSchema = z.object({
   description: z.string().max(1000).nullable().optional(),
   kind: z.number().int().optional().default(0),
 });
-
-export const UpdateEventProposalSchema = z.object({
-  status: z.enum(["pending", "approved", "rejected"]),
-});

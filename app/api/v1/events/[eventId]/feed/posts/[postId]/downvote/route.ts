@@ -1,29 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { requireEventAccess, requireUser } from "@/lib/api/guards";
+import { apiRoute, json } from "@/lib/api/route";
 import { toggleDownvote } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 
-export const dynamic = "force-dynamic";
-
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; postId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId, postId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return NextResponse.json({ code: "MODULE_DISABLED", message: "Module not available." }, { status: 403 });
-  }
-
-  await toggleDownvote(eventId, postId, userId);
-  return NextResponse.json({ success: true });
-}
+export const POST = apiRoute<{ eventId: string; postId: string }>(async (_request, { eventId, postId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  await toggleDownvote(eventId, postId, user.id);
+  return json({ success: true });
+});

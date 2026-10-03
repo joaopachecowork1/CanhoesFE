@@ -1,41 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
+
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
 import { setAdminRole } from "@/lib/domains/admin/services/members";
 
-const roleBodySchema = z.object({
+const roleSchema = z.object({
   isAdmin: z.boolean(),
   confirmSelfDemotion: z.boolean().optional().default(false),
 });
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ eventId: string; userId: string }> }
-) {
-  try {
-    const actor = await requireAdmin();
-    const { eventId, userId } = await params;
-    const parsed = roleBodySchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { code: "VALIDATION_ERROR", message: "Invalid admin role payload.", details: parsed.error.flatten() },
-        { status: 400 }
-      );
-    }
-
-    const user = await setAdminRole({
-      actorUserId: actor.id,
-      eventId,
-      targetUserId: userId,
-      ...parsed.data,
-    });
-    return NextResponse.json({ user });
-  } catch (error) {
-    if (error instanceof AuthorizationError) {
-      return NextResponse.json({ code: error.code, message: error.message }, { status: error.status });
-    }
-    const code = error instanceof Error ? error.message : "ROLE_UPDATE_FAILED";
-    const status = code === "MEMBER_NOT_FOUND" ? 404 : code === "ROLE_UPDATE_FAILED" ? 500 : 409;
-    return NextResponse.json({ code, message: code.replaceAll("_", " ").toLowerCase() }, { status });
-  }
-}
+export const PATCH = apiRoute<{ eventId: string; userId: string }>(async (request, { eventId, userId }) => {
+  const admin = await requireAdmin();
+  const change = await readJson(request, roleSchema);
+  const user = await setAdminRole({ actorUserId: admin.id, eventId, targetUserId: userId, ...change });
+  return json({ user });
+});

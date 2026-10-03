@@ -1,59 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { getPostComments } from "@/lib/domains/feed/services/feed";
-import { createComment } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
+import { requireEventAccess, requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
+import { createComment, getPostComments } from "@/lib/domains/feed/services/feed";
 import { CreateFeedCommentSchema } from "@/lib/zod/feed";
 
-export const dynamic = "force-dynamic";
+type PostParams = { eventId: string; postId: string };
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; postId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
+export const GET = apiRoute<PostParams>(async (_request, { eventId, postId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  return json(await getPostComments(eventId, postId, user.id));
+});
 
-  const { eventId, postId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return NextResponse.json({ code: "MODULE_DISABLED", message: "Module not available." }, { status: 403 });
-  }
-
-  const comments = await getPostComments(eventId, postId, userId);
-  return NextResponse.json(comments);
-}
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; postId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId, postId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return NextResponse.json({ code: "MODULE_DISABLED", message: "Module not available." }, { status: 403 });
-  }
-
-  const body = await req.json();
-  const parsed = CreateFeedCommentSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." }, { status: 400 });
-  }
-
-  const comment = await createComment(eventId, postId, userId, parsed.data.text, parsed.data.replyToId);
-  return NextResponse.json(comment, { status: 201 });
-}
+export const POST = apiRoute<PostParams>(async (request, { eventId, postId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  const { text, replyToId } = await readJson(request, CreateFeedCommentSchema);
+  return json(await createComment(eventId, postId, user.id, text, replyToId), 201);
+});

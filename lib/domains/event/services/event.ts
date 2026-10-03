@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type {
   EventSummaryDto,
-  EventContextDto,
   EventOverviewDto,
   EventPhaseDto,
   EventPermissionsDto,
@@ -22,50 +21,6 @@ function toPhaseDto(phase: {
     startDateUtc: phase.startDateUtc.toISOString(),
     endDateUtc: phase.endDateUtc.toISOString(),
     isActive: phase.isActive,
-  };
-}
-
-export async function getEventSummaries(): Promise<EventSummaryDto[]> {
-  const events = await prisma.event.findMany({
-    orderBy: [{ isActive: "desc" }, { name: "asc" }],
-  });
-  return events.map(toEventSummary);
-}
-
-export async function getEventContext(
-  eventId: string,
-  _userId: string,
-  _isAdmin: boolean
-): Promise<EventContextDto | null> {
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) return null;
-
-  const [phases, members] = await Promise.all([
-    prisma.eventPhase.findMany({ where: { eventId }, orderBy: { startDateUtc: "asc" } }),
-    prisma.eventMember.findMany({ where: { eventId } }),
-  ]);
-  const memberUserIds = [...new Set(members.map((member) => member.userId))];
-  const memberUsers = memberUserIds.length
-    ? await prisma.user.findMany({
-        where: { id: { in: memberUserIds } },
-        select: { id: true, displayName: true, email: true },
-      })
-    : [];
-  const usersById = new Map(memberUsers.map((user) => [user.id, user]));
-  const activePhase = phases.find((phase) => phase.isActive) ?? null;
-
-  return {
-    event: toEventSummary(event),
-    users: members.map((member) => {
-      const user = usersById.get(member.userId);
-      return {
-        id: member.userId,
-        name: user?.displayName ?? user?.email ?? "Unknown",
-        role: member.role,
-      };
-    }),
-    phases: phases.map(toPhaseDto),
-    activePhase: activePhase ? toPhaseDto(activePhase) : null,
   };
 }
 

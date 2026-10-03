@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { HttpError } from "@/lib/api/httpError";
 
+// In-memory, per-IP fixed window. Good enough for a single instance; it resets on restart.
 type RateLimitPolicy = "strict" | "standard";
 
 const POLICY_LIMITS: Record<RateLimitPolicy, { requests: number; windowMs: number }> = {
@@ -7,40 +8,28 @@ const POLICY_LIMITS: Record<RateLimitPolicy, { requests: number; windowMs: numbe
   standard: { requests: 20, windowMs: 10_000 },
 };
 
-const ipRequestCounts = new Map<string, { count: number; resetAt: number }>();
+const requestCountsByIp = new Map<string, { count: number; resetAt: number }>();
 
-function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
+function getClientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
-  return req.headers.get("x-real-ip") || "unknown";
+  return request.headers.get("x-real-ip") || "unknown";
 }
 
-function checkRateLimit(policy: RateLimitPolicy, req: Request): NextResponse | null {
+/** Throws a 429 when the caller's IP went over the policy's limit in the current window. */
+export function enforceRateLimit(request: Request, policy: RateLimitPolicy) {
   const { requests, windowMs } = POLICY_LIMITS[policy];
-  const ip = getClientIp(req);
+  const ip = getClientIp(request);
   const now = Date.now();
 
-  const record = ipRequestCounts.get(ip);
+  const record = requestCountsByIp.get(ip);
   if (!record || record.resetAt < now) {
-    ipRequestCounts.set(ip, { count: 1, resetAt: now + windowMs });
-    return null;
+    requestCountsByIp.set(ip, { count: 1, resetAt: now + windowMs });
+    return;
   }
 
   if (record.count >= requests) {
-    return NextResponse.json(
-      { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests. Please slow down." },
-      { status: 429 }
-    );
+    throw new HttpError(429, "RATE_LIMIT_EXCEEDED", "Too many requests. Please slow down.");
   }
-
   record.count++;
-  return null;
-}
-
-export function strictRateLimit(req: Request) {
-  return checkRateLimit("strict", req);
-}
-
-export function standardRateLimit(req: Request) {
-  return checkRateLimit("standard", req);
 }

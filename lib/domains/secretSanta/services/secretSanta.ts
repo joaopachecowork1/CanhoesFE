@@ -61,49 +61,6 @@ export async function getOverview(
   };
 }
 
-export async function getMyDraw(
-  eventId: string,
-  userId: string
-): Promise<{
-  id: string;
-  eventCode: string;
-  createdAtUtc: string;
-  assignedUser: EventUserDto;
-} | null> {
-  const eventCode = await getEventCode(eventId);
-
-  const latestDraw = await prisma.secretSantaDraw.findFirst({
-    where: { eventCode },
-    orderBy: { createdAtUtc: "desc" },
-  });
-
-  if (!latestDraw) return null;
-
-  const assignment = await prisma.secretSantaAssignment.findFirst({
-    where: { drawId: latestDraw.id, giverUserId: userId },
-  });
-
-  if (!assignment) return null;
-
-  const targetUser = await prisma.user.findUnique({
-    where: { id: assignment.receiverUserId },
-    select: { id: true, displayName: true, email: true },
-  });
-
-  if (!targetUser) return null;
-
-  return {
-    id: latestDraw.id,
-    eventCode: latestDraw.eventCode,
-    createdAtUtc: latestDraw.createdAtUtc.toISOString(),
-    assignedUser: {
-      id: targetUser.id,
-      name: targetUser.displayName ?? targetUser.email,
-      role: "user",
-    },
-  };
-}
-
 async function getEventCode(eventId: string): Promise<string> {
   const state = await prisma.canhoesEventState.findUnique({
     where: { eventId },

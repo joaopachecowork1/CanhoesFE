@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
-import { getEventOverview } from "@/lib/domains/event/services/event";
+
+import { notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
 import { updateEventModules } from "@/lib/domains/admin/services/state";
+import { getEventOverview } from "@/lib/domains/event/services/event";
 
-export const dynamic = "force-dynamic";
-
-const modulesSchema = z.object({
+const moduleVisibilitySchema = z.object({
   feed: z.boolean().optional(),
   secretSanta: z.boolean().optional(),
   wishlist: z.boolean().optional(),
@@ -20,36 +20,14 @@ const modulesSchema = z.object({
   message: "At least one module is required.",
 });
 
-const bodySchema = z.object({ modules: modulesSchema }).strict();
+const updateModulesSchema = z.object({ modules: moduleVisibilitySchema }).strict();
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  try {
-    const actor = await requireAdmin();
-    const { eventId } = await params;
-    const parsed = bodySchema.safeParse(await req.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { code: "VALIDATION_ERROR", message: "Invalid modules payload.", details: parsed.error.flatten() },
-        { status: 400 }
-      );
-    }
+export const PATCH = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  const admin = await requireAdmin();
+  const { modules } = await readJson(request, updateModulesSchema);
+  await updateEventModules(eventId, modules);
 
-    await updateEventModules(eventId, parsed.data.modules);
-    const overview = await getEventOverview(eventId, actor.id, actor.isAdmin);
-    if (!overview) {
-      return NextResponse.json({ code: "NOT_FOUND", message: "Event not found." }, { status: 404 });
-    }
-    return NextResponse.json(overview);
-  } catch (error) {
-    if (error instanceof AuthorizationError) {
-      return NextResponse.json({ code: error.code, message: error.message }, { status: error.status });
-    }
-    return NextResponse.json(
-      { code: "MODULE_UPDATE_FAILED", message: "Unable to update event modules." },
-      { status: 500 }
-    );
-  }
-}
+  const overview = await getEventOverview(eventId, admin.id, admin.isAdmin);
+  if (!overview) throw notFound("Event not found.");
+  return json(overview);
+});

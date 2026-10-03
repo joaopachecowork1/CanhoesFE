@@ -15,11 +15,8 @@ const DEFAULT_STATUS_MESSAGES: Partial<Record<number, string>> = {
 };
 
 const CODE_MESSAGES: Record<string, string> = {
-  PROXY_PATH_MISSING: "Pedido invalido no proxy da API.",
-  MOCK_REQUEST_FAILED: "O modo mock nao conseguiu processar o pedido.",
-  PROXY_BACKEND_UNREACHABLE: "Nao foi possivel contactar o backend.",
-  PROXY_UNHANDLED_ERROR: "O proxy da API falhou ao processar o pedido.",
   UNHANDLED_SERVER_ERROR: "O servidor encontrou um erro inesperado.",
+  RATE_LIMIT_EXCEEDED: "Demasiados pedidos seguidos. Espera um pouco e tenta outra vez.",
 };
 
 function readErrorDetail(details: unknown) {

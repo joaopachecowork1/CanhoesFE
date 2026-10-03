@@ -2,8 +2,38 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
   AwardCategoryDto,
-  AwardCategorySummaryDto,
+  EventCategoryDto,
+  PagedResult,
 } from "@/lib/api/types";
+
+/** Active categories of an event, in display order (the member-facing list). */
+export async function getActiveCategories(
+  eventId: string,
+  skip: number,
+  take: number
+): Promise<PagedResult<EventCategoryDto>> {
+  const where = { eventId, isActive: true };
+  const [categories, total] = await Promise.all([
+    prisma.awardCategory.findMany({ where, orderBy: { sortOrder: "asc" }, skip, take }),
+    prisma.awardCategory.count({ where }),
+  ]);
+
+  return {
+    items: categories.map((category) => ({
+      id: category.id,
+      eventId: category.eventId,
+      name: category.name,
+      kind: category.kind,
+      isActive: category.isActive,
+      description: category.description,
+    })),
+    total,
+    skip,
+    take,
+    hasMore: skip + take < total,
+  };
+}
+
 export async function getAdminCategories(eventId: string): Promise<AwardCategoryDto[]> {
   const categories = await prisma.awardCategory.findMany({
     where: { eventId },
@@ -104,13 +134,4 @@ export async function deleteCategory(eventId: string, categoryId: string): Promi
 
   await prisma.awardCategory.delete({ where: { id: categoryId } });
   return true;
-}
-
-export async function getAdminCategoriesSummary(eventId: string): Promise<AwardCategorySummaryDto[]> {
-  const categories = await prisma.awardCategory.findMany({
-    where: { eventId },
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    select: { id: true, name: true, sortOrder: true, isActive: true, kind: true },
-  });
-  return categories;
 }

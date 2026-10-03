@@ -1,24 +1,11 @@
-import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { notFound } from "@/lib/api/httpError";
+import { requireUser } from "@/lib/api/guards";
+import { apiRoute, json } from "@/lib/api/route";
 import { getEventOverview } from "@/lib/domains/event/services/event";
-import { apiResponse, unauthorized } from "@/lib/api/response";
 
-export const dynamic = "force-dynamic";
-
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return unauthorized();
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const overview = await getEventOverview(eventId, userId, isAdmin);
-  if (!overview) return apiResponse(null, 404);
-
-  return apiResponse(overview);
-}
+export const GET = apiRoute<{ eventId: string }>(async (_request, { eventId }) => {
+  const user = await requireUser();
+  const overview = await getEventOverview(eventId, user.id, user.isAdmin);
+  if (!overview) throw notFound("Event not found.");
+  return json(overview);
+});

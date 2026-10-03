@@ -3,7 +3,6 @@ import type {
   PagedResult,
   CategoryProposalDto,
   MeasureProposalDto,
-  GalaMeasureDto,
 } from "@/lib/api/types";
 import { createCategory } from "./categories";
 
@@ -146,40 +145,4 @@ export async function deleteMeasureProposal(eventId: string, proposalId: string)
   if (!proposal) return false;
   await prisma.measureProposal.delete({ where: { id: proposalId } });
   return true;
-}
-
-export async function approveMeasureProposal(eventId: string, proposalId: string): Promise<GalaMeasureDto | null> {
-  const proposal = await prisma.measureProposal.findFirst({ where: { id: proposalId, eventId } });
-  if (!proposal) return null;
-
-  const [, measure] = await prisma.$transaction([
-    prisma.measureProposal.update({ where: { id: proposalId }, data: { status: "approved" } }),
-    prisma.galaMeasure.create({
-      data: { eventId, text: proposal.text, isActive: true },
-    }),
-  ]);
-
-  return {
-    id: measure.id,
-    text: measure.text,
-    isActive: measure.isActive,
-    createdAtUtc: measure.createdAtUtc.toISOString(),
-  };
-}
-
-export async function rejectMeasureProposal(eventId: string, proposalId: string): Promise<MeasureProposalDto | null> {
-  const proposal = await prisma.measureProposal.findFirst({ where: { id: proposalId, eventId } });
-  if (!proposal) return null;
-
-  const updated = await prisma.measureProposal.update({
-    where: { id: proposalId },
-    data: { status: "rejected" },
-  });
-
-  return {
-    id: updated.id,
-    text: updated.text,
-    status: updated.status as "pending" | "approved" | "rejected",
-    createdAtUtc: updated.createdAtUtc.toISOString(),
-  };
 }

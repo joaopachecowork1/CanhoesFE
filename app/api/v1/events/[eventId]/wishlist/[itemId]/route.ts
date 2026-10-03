@@ -1,27 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { notFound } from "@/lib/api/httpError";
+import { requireUser } from "@/lib/api/guards";
+import { apiRoute, noContent } from "@/lib/api/route";
 import { deleteWishlistItem } from "@/lib/domains/members/services/members";
 
-export const dynamic = "force-dynamic";
-
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; itemId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId, itemId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const success = await deleteWishlistItem(eventId, itemId, userId, isAdmin);
-  if (!success) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Item not found." }, { status: 404 });
-  }
-
-  return new NextResponse(null, { status: 204 });
-}
+export const DELETE = apiRoute<{ eventId: string; itemId: string }>(async (_request, { eventId, itemId }) => {
+  const user = await requireUser();
+  const deleted = await deleteWishlistItem(eventId, itemId, user.id, user.isAdmin);
+  if (!deleted) throw notFound("Item not found.");
+  return noContent();
+});

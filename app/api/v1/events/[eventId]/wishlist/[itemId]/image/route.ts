@@ -1,42 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { updateWishlistImage } from "@/lib/domains/members/services/members";
-import { deleteUpload, saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
+import { notFound } from "@/lib/api/httpError";
+import { requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readFormFile } from "@/lib/api/route";
+import { replaceWishlistImage } from "@/lib/domains/members/services/members";
 
-export const dynamic = "force-dynamic";
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; itemId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-
-  const { eventId, itemId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
-  if (!file || file.size <= 0) {
-    return NextResponse.json({ code: "FILE_REQUIRED", message: "File is required." }, { status: 400 });
-  }
-
-  try {
-    const upload = await saveUpload(file, ["canhoes", "wishlist"]);
-    const item = await updateWishlistImage(eventId, itemId, userId, isAdmin, upload.url);
-    if (!item) {
-      await deleteUpload(upload.url);
-      return NextResponse.json({ code: "NOT_FOUND", message: "Item not found." }, { status: 404 });
-    }
-    return NextResponse.json(item);
-  } catch (error) {
-    if (error instanceof UploadValidationError) {
-      return NextResponse.json({ code: "VALIDATION_ERROR", message: error.message }, { status: 400 });
-    }
-    throw error;
-  }
-}
+export const POST = apiRoute<{ eventId: string; itemId: string }>(async (request, { eventId, itemId }) => {
+  const user = await requireUser();
+  const file = await readFormFile(request);
+  const item = await replaceWishlistImage(eventId, itemId, user, file);
+  if (!item) throw notFound("Item not found.");
+  return json(item);
+});

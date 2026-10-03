@@ -1,29 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { HttpError } from "@/lib/api/httpError";
+import { requireUser } from "@/lib/api/guards";
+import { apiRoute, json } from "@/lib/api/route";
 import { getActiveEventContext } from "@/lib/domains/event/services/event";
 
-export const dynamic = "force-dynamic";
-
-export async function GET(_req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json(
-      { code: "UNAUTHORIZED", message: "Authentication required." },
-      { status: 401 }
-    );
-  }
-
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const context = await getActiveEventContext(userId, isAdmin);
-  if (!context) {
-    return NextResponse.json(
-      { code: "NO_ACTIVE_EVENT", message: "No active event found." },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json(context);
-}
+export const GET = apiRoute(async () => {
+  const user = await requireUser();
+  const context = await getActiveEventContext(user.id, user.isAdmin);
+  if (!context) throw new HttpError(404, "NO_ACTIVE_EVENT", "No active event found.");
+  return json(context);
+});

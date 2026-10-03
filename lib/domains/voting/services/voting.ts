@@ -1,54 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import type {
-  EventVotingOverviewDto,
   EventVotingBoardDto,
   EventVotingCategoryDto,
   EventVoteOptionDto,
   EventProposalDto,
-  PagedResult,
 } from "@/lib/api/types";
 
 type EventVoteDto = {
   categoryId: string;
   selectionId: string;
 };
-
-export async function getVotingOverview(
-  eventId: string,
-  userId: string
-): Promise<EventVotingOverviewDto> {
-  const votingPhase = await prisma.eventPhase.findFirst({
-    where: { eventId, type: "VOTING", isActive: true },
-  });
-
-  const categories = await prisma.awardCategory.findMany({
-    where: { eventId, isActive: true },
-  });
-
-  const categoryIds = categories.map((c) => c.id);
-  const [nomineeVotesCount, userVotesCount] = await Promise.all([
-    categoryIds.length > 0
-      ? prisma.vote.count({ where: { eventId, userId, categoryId: { in: categoryIds } } })
-      : Promise.resolve(0),
-    categoryIds.length > 0
-      ? prisma.userVote.count({ where: { eventId, voterUserId: userId, categoryId: { in: categoryIds } } })
-      : Promise.resolve(0),
-  ]);
-
-  const submittedVoteCount = nomineeVotesCount + userVotesCount;
-  const now = new Date();
-  const isOpen = votingPhase ? now >= votingPhase.startDateUtc && now <= votingPhase.endDateUtc : false;
-
-  return {
-    eventId,
-    phaseId: votingPhase?.id ?? null,
-    canVote: isOpen,
-    endsAtUtc: votingPhase?.endDateUtc.toISOString() ?? null,
-    categoryCount: categories.length,
-    submittedVoteCount,
-    remainingVoteCount: Math.max(0, categories.length - submittedVoteCount),
-  };
-}
 
 export async function getVotingBoard(
   eventId: string,
@@ -204,41 +165,6 @@ export async function castVote(
   }
 
   return { categoryId, selectionId };
-}
-
-export async function getProposals(
-  eventId: string,
-  skip: number,
-  take: number
-): Promise<PagedResult<EventProposalDto>> {
-  const where = { eventId };
-
-  const [items, total] = await Promise.all([
-    prisma.categoryProposal.findMany({
-      where,
-      orderBy: { createdAtUtc: "desc" },
-      skip,
-      take,
-    }),
-    prisma.categoryProposal.count({ where }),
-  ]);
-
-  return {
-    items: items.map((p) => ({
-      id: p.id,
-      eventId: p.eventId,
-      userId: p.proposedByUserId,
-      name: p.name,
-      description: p.description,
-      kind: p.kind,
-      status: p.status,
-      createdAt: p.createdAtUtc.toISOString(),
-    })),
-    total,
-    skip,
-    take,
-    hasMore: skip + take < total,
-  };
 }
 
 export async function createProposal(

@@ -1,25 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AuthorizationError, requireAdmin } from "@/lib/domains/auth/services/serverAuth";
+import { notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, noContent } from "@/lib/api/route";
 import { deleteFeedPost } from "@/lib/domains/feed/services/feed";
 
-export const dynamic = "force-dynamic";
-
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; postId: string }> }
-) {
-  try {
-    await requireAdmin();
-    const { eventId, postId } = await params;
-    const deleted = await deleteFeedPost(eventId, postId);
-    if (!deleted) {
-      return NextResponse.json({ code: "NOT_FOUND", message: "Post not found." }, { status: 404 });
-    }
-    return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    if (error instanceof AuthorizationError) {
-      return NextResponse.json({ code: error.code, message: error.message }, { status: error.status });
-    }
-    return NextResponse.json({ code: "POST_DELETE_FAILED", message: "Unable to delete post." }, { status: 500 });
-  }
-}
+export const DELETE = apiRoute<{ eventId: string; postId: string }>(async (_request, { eventId, postId }) => {
+  await requireAdmin();
+  const deleted = await deleteFeedPost(eventId, postId);
+  if (!deleted) throw notFound("Post not found.");
+  return noContent();
+});

@@ -1,37 +1,17 @@
-import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { HttpError } from "@/lib/api/httpError";
+import { requireEventAccess, requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
 import { castVote } from "@/lib/domains/voting/services/voting";
-import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
+import { enforceRateLimit } from "@/lib/middleware/rateLimit";
 import { CreateEventVoteSchema } from "@/lib/zod/voting";
-import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";
-import { strictRateLimit } from "@/lib/middleware/rateLimit";
 
-export const dynamic = "force-dynamic";
+export const POST = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  enforceRateLimit(request, "strict");
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  const { categoryId, selectionId } = await readJson(request, CreateEventVoteSchema);
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const rl = strictRateLimit(req);
-  if (rl) return rl;
-
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return unauthorized();
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) return apiError("MODULE_DISABLED", "Module not available.", 403);
-
-  const body = await req.json();
-  const parsed = CreateEventVoteSchema.safeParse(body);
-  if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid input.");
-
-  const vote = await castVote(eventId, userId, parsed.data.categoryId, parsed.data.selectionId);
-  if (!vote) return apiError("VOTE_FAILED", "Could not cast vote.", 400);
-
-  return apiResponse(vote);
-}
+  const vote = await castVote(eventId, user.id, categoryId, selectionId);
+  if (!vote) throw new HttpError(400, "VOTE_FAILED", "Could not cast vote.");
+  return json(vote);
+});

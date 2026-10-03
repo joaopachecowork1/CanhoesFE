@@ -1,63 +1,18 @@
-import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { getWishlistItems } from "@/lib/domains/members/services/members";
-import { createWishlistItem } from "@/lib/domains/members/services/members";
-import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
+import { requireEventAccess, requireUser } from "@/lib/api/guards";
+import { apiRoute, json, readJson, readPaging } from "@/lib/api/route";
+import { createWishlistItem, getWishlistItems } from "@/lib/domains/members/services/members";
 import { CreateWishlistItemSchema } from "@/lib/zod/wishlist";
-import { PagedParamsSchema } from "@/lib/zod/common";
-import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";
 
-export const dynamic = "force-dynamic";
+export const GET = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  const { skip, take } = readPaging(request, { maxTake: 1000 });
+  return json(await getWishlistItems(eventId, skip, take));
+});
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return unauthorized();
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return apiError("MODULE_DISABLED", "Wishlist module not available.", 403);
-  }
-
-  const parsedQuery = PagedParamsSchema.safeParse({
-    skip: req.nextUrl.searchParams.get("skip") ?? undefined,
-    take: req.nextUrl.searchParams.get("take") ?? undefined,
-  });
-  if (!parsedQuery.success) return badRequest("Invalid pagination parameters.");
-
-  const result = await getWishlistItems(eventId, parsedQuery.data.skip, parsedQuery.data.take);
-  return apiResponse(result);
-}
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return unauthorized();
-
-  const { eventId } = await params;
-  const userId = (session.user as Record<string, unknown>).id as string;
-  const isAdmin = Boolean((session.user as Record<string, unknown>).isAdmin);
-
-  const { isEnabled } = await evaluateModuleAccess(eventId, userId, isAdmin);
-  if (!isEnabled) {
-    return apiError("MODULE_DISABLED", "Wishlist module not available.", 403);
-  }
-
-  const body = await req.json();
-  const parsed = CreateWishlistItemSchema.safeParse(body);
-  if (!parsed.success) {
-    return badRequest(parsed.error.issues[0]?.message ?? "Invalid input.");
-  }
-
-  const item = await createWishlistItem(eventId, userId, parsed.data);
-  return apiResponse(item, 201);
-}
+export const POST = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  const user = await requireUser();
+  await requireEventAccess(eventId, user);
+  const item = await readJson(request, CreateWishlistItemSchema);
+  return json(await createWishlistItem(eventId, user.id, item), 201);
+});

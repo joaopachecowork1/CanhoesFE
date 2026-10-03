@@ -7,8 +7,9 @@ type LogLevel = "debug" | "info" | "warn" | "error";
 
 const IS_PROD = process.env.NODE_ENV === "production";
 
+// Browser errors are forwarded to /api/telemetry/log; on the server, stdout already is the log.
 async function sendToTelemetry(level: LogLevel, message: string, data?: unknown) {
-  if (!IS_PROD) return;
+  if (!IS_PROD || typeof window === "undefined") return;
 
   try {
     await fetch("/api/telemetry/log", {
@@ -18,7 +19,7 @@ async function sendToTelemetry(level: LogLevel, message: string, data?: unknown)
         level,
         message,
         data,
-        url: typeof window !== "undefined" ? window.location.href : "server",
+        url: window.location.href,
         timestamp: new Date().toISOString(),
       }),
     }).catch(() => {

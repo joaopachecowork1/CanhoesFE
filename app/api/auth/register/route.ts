@@ -1,103 +1,15 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { z } from "zod";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { token, password, displayName } = body;
+import { apiRoute, json, readJson } from "@/lib/api/route";
+import { registerWithInvitation } from "@/lib/domains/auth/services/invitations";
 
-    if (!token || !password || !displayName) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+const registerSchema = z.object({
+  token: z.string().min(1, "O link de convite está incompleto."),
+  password: z.string().min(8, "A password tem de ter pelo menos 8 caracteres."),
+  displayName: z.string().trim().min(1, "Indica o teu nome."),
+});
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters long" }, { status: 400 });
-    }
-
-    // Find valid invitation
-    const invitation = await prisma.userInvitation.findUnique({
-      where: { token },
-    });
-
-    if (!invitation) {
-      return NextResponse.json({ error: "Invalid invitation token" }, { status: 400 });
-    }
-
-    if (invitation.usedAtUtc) {
-      return NextResponse.json({ error: "Invitation has already been used" }, { status: 400 });
-    }
-
-    if (invitation.expiresAtUtc < new Date()) {
-      return NextResponse.json({ error: "Invitation has expired" }, { status: 400 });
-    }
-
-    // Hash the password
-    const passwordHash = await bcrypt.hash(password, 10);
-    const email = invitation.email;
-
-    // We use a transaction to ensure both user creation and invite invalidation happen together
-    const result = await prisma.$transaction(async (tx) => {
-      // Mark invitation as used
-      await tx.userInvitation.update({
-        where: { id: invitation.id },
-        data: { usedAtUtc: new Date() },
-      });
-
-      // Create or update the user
-      // If the user somehow exists (e.g., they logged in via Google but now want a password), we just update them.
-      const existingUser = await tx.user.findUnique({ where: { email } });
-      
-      let user;
-      if (existingUser) {
-        user = await tx.user.update({
-          where: { email },
-          data: {
-            passwordHash,
-            displayName: existingUser.displayName || displayName,
-          },
-        });
-      } else {
-        user = await tx.user.create({
-          data: {
-            email,
-            externalId: `credentials:${email}`,
-            displayName,
-            passwordHash,
-            isAdmin: false,
-          },
-        });
-      }
-
-      // If the invitation was generated within an event context, automatically add them as a member
-      if (invitation.eventId) {
-        await tx.eventMember.upsert({
-          where: {
-            eventId_userId: {
-              eventId: invitation.eventId,
-              userId: user.id,
-            },
-          },
-          update: {},
-          create: {
-            eventId: invitation.eventId,
-            userId: user.id,
-            role: "participant",
-            joinedAtUtc: new Date(),
-          },
-        });
-      }
-      
-      return user;
-    });
-
-    return NextResponse.json({ 
-      success: true, 
-      message: "Account created successfully. You can now login.",
-      user: { email: result.email, name: result.displayName }
-    });
-  } catch (error) {
-    console.error("Error during registration:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
-}
+export const POST = apiRoute(async (request) => {
+  const registration = await readJson(request, registerSchema);
+  return json(await registerWithInvitation(registration), 201);
+});

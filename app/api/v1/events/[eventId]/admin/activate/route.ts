@@ -1,26 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
+import { notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json } from "@/lib/api/route";
 import { activateEvent } from "@/lib/domains/admin/services/state";
 
-export const dynamic = "force-dynamic";
-
-export async function PUT(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId } = await params;
+export const PUT = apiRoute<{ eventId: string }>(async (_request, { eventId }) => {
+  await requireAdmin();
   const event = await activateEvent(eventId);
-  if (!event) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Event not found." }, { status: 404 });
-  }
-  return NextResponse.json(event);
-}
+  if (!event) throw notFound("Event not found.");
+  return json(event);
+});

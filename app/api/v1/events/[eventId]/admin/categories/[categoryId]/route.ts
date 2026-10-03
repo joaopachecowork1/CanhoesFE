@@ -1,56 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { updateCategory, deleteCategory } from "@/lib/domains/admin/services/categories";
+import { z } from "zod";
 
-export const dynamic = "force-dynamic";
+import { HttpError, notFound } from "@/lib/api/httpError";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, noContent, readJson } from "@/lib/api/route";
+import { deleteCategory, updateCategory } from "@/lib/domains/admin/services/categories";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; categoryId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
+const updateCategorySchema = z.object({
+  name: z.string().optional(),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+  kind: z.coerce.number().int().optional(),
+  description: z.string().nullable().optional(),
+  voteQuestion: z.string().nullable().optional(),
+  voteRules: z.string().nullable().optional(),
+});
 
-  const { eventId, categoryId } = await params;
-  const body = await req.json();
-  const updated = await updateCategory(eventId, categoryId, {
-    name: body.name,
-    sortOrder: body.sortOrder,
-    isActive: body.isActive,
-    kind: body.kind !== undefined ? Number(body.kind) : undefined,
-    description: body.description,
-    voteQuestion: body.voteQuestion,
-    voteRules: body.voteRules,
-  });
+type CategoryParams = { eventId: string; categoryId: string };
 
-  if (!updated) {
-    return NextResponse.json({ code: "NOT_FOUND", message: "Category not found." }, { status: 404 });
-  }
-  return NextResponse.json(updated);
-}
+export const PUT = apiRoute<CategoryParams>(async (request, { eventId, categoryId }) => {
+  await requireAdmin();
+  const changes = await readJson(request, updateCategorySchema);
+  const updated = await updateCategory(eventId, categoryId, changes);
+  if (!updated) throw notFound("Category not found.");
+  return json(updated);
+});
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string; categoryId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId, categoryId } = await params;
+export const DELETE = apiRoute<CategoryParams>(async (_request, { eventId, categoryId }) => {
+  await requireAdmin();
   const deleted = await deleteCategory(eventId, categoryId);
   if (!deleted) {
-    return NextResponse.json({ code: "CONFLICT", message: "Category has dependent nominees or votes and cannot be deleted." }, { status: 409 });
+    throw new HttpError(409, "CONFLICT", "Category has dependent nominees or votes and cannot be deleted.");
   }
-  return new NextResponse(null, { status: 204 });
-}
+  return noContent();
+});

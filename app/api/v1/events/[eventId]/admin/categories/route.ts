@@ -1,53 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/domains/auth/services/auth";
-import { getAdminCategories, createCategory } from "@/lib/domains/admin/services/categories";
+import { z } from "zod";
 
-export const dynamic = "force-dynamic";
+import { requireAdmin } from "@/lib/api/guards";
+import { apiRoute, json, readJson } from "@/lib/api/route";
+import { createCategory, getAdminCategories } from "@/lib/domains/admin/services/categories";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
+const createCategorySchema = z.object({
+  name: z.string({ error: "Name is required." }).trim().min(1, "Name is required."),
+  sortOrder: z.number().int().nullish(),
+  kind: z.coerce.number().int().default(0),
+  description: z.string().nullish(),
+  voteQuestion: z.string().nullish(),
+  voteRules: z.string().nullish(),
+});
 
-  const { eventId } = await params;
-  const categories = await getAdminCategories(eventId);
-  return NextResponse.json(categories);
-}
+export const GET = apiRoute<{ eventId: string }>(async (_request, { eventId }) => {
+  await requireAdmin();
+  return json(await getAdminCategories(eventId));
+});
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ eventId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ code: "UNAUTHORIZED", message: "Authentication required." }, { status: 401 });
-  }
-  if (!(session.user as Record<string, unknown>).isAdmin) {
-    return NextResponse.json({ code: "FORBIDDEN", message: "Admin access required." }, { status: 403 });
-  }
-
-  const { eventId } = await params;
-  const body = await req.json();
-  if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
-    return NextResponse.json({ code: "VALIDATION_ERROR", message: "Name is required." }, { status: 400 });
-  }
-
-  const kind = body.kind !== undefined ? Number(body.kind) : 0;
-  const category = await createCategory(eventId, {
-    name: body.name,
-    sortOrder: body.sortOrder ?? null,
-    kind,
-    description: body.description ?? null,
-    voteQuestion: body.voteQuestion ?? null,
-    voteRules: body.voteRules ?? null,
+export const POST = apiRoute<{ eventId: string }>(async (request, { eventId }) => {
+  await requireAdmin();
+  const category = await readJson(request, createCategorySchema);
+  const created = await createCategory(eventId, {
+    name: category.name,
+    kind: category.kind,
+    sortOrder: category.sortOrder ?? null,
+    description: category.description ?? null,
+    voteQuestion: category.voteQuestion ?? null,
+    voteRules: category.voteRules ?? null,
   });
-  return NextResponse.json(category, { status: 201 });
-}
+  return json(created, 201);
+});
