@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveAdminStatus } from "@/lib/auth/adminStatus";
+import { resolveAdminStatus } from "@/lib/domains/auth/services/adminStatus";
 
 describe("resolveAdminStatus", () => {
   it("accepts a database-backed admin profile without further waiting", () => {

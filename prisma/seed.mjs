@@ -35,7 +35,7 @@ async function main() {
 
   // 2. Event & State
   const eventId = "canhoes-local";
-  const event = await prisma.event.upsert({
+  await prisma.event.upsert({
     where: { id: eventId },
     update: {},
     create: {
