@@ -2,10 +2,10 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { castVote } from "@/lib/domains/voting/services/voting";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateEventVoteSchema } from "@/lib/zod/voting";
 import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";
-import { strictRateLimit } from "@/lib/middleware/withRateLimit";
+import { strictRateLimit } from "@/lib/middleware/rateLimit";
 
 export const dynamic = "force-dynamic";
 

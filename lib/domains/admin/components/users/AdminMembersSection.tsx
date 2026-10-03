@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { logFrontendError } from "@/lib/errors";
 import { adminRepo } from "@/lib/repositories/adminRepo";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { AdminStateMessage } from "../layout/AdminStateMessage";
 import { SecretSantaAdmin } from "./SecretSantaAdmin";

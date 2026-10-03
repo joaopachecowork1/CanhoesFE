@@ -1,9 +1,3 @@
-export type CanhoesStateDto = {
-  phase: string;
-  nominationsVisible: boolean;
-  resultsVisible: boolean;
-};
-
 export type EventSummaryDto = {
   id: string;
   name: string;
@@ -157,17 +151,6 @@ export type EventContextDto = {
   users: EventUserDto[];
   phases: EventPhaseDto[];
   activePhase: EventPhaseDto | null;
-};
-
-export type EventFeedPostDto = {
-  id: string;
-  eventId: string;
-  userId: string;
-  userName: string;
-  content: string;
-  imageUrl: string | null;
-  mediaUrls: string[];
-  createdAt: string;
 };
 
 export type EventProposalDto = {
@@ -433,32 +416,6 @@ export type AdminNomineeSummaryDto = {
   status: ProposalStatus;
   submittedByUserId: string;
   submittedByName: string;
-};
-
-export type AdminNomineeVoteTallyDto = {
-  nomineeId: string;
-  nomineeTitle: string;
-  imageUrl: string | null;
-  voteCount: number;
-  voterUserIds: string[];
-};
-
-export type AdminOfficialResultsDto = {
-  eventId: string;
-  generatedAt: string;
-  totalMembers: number;
-  categories: Array<{
-    categoryId: string;
-    categoryName: string;
-    totalVotes: number;
-    participationRate: number;
-    nominees: Array<{
-      nomineeId: string;
-      nomineeTitle: string;
-      voteCount: number;
-      voterUserIds: string[];
-    }>;
-  }>;
 };
 
 export type AdminModuleKey = 

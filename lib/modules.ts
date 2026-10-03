@@ -18,7 +18,7 @@ export type CanhoesMemberModuleDefinition = {
 // Source of truth for member-facing modules. Admin UI, visibility toggles and
 // shell navigation should read from this registry instead of spreading labels
 // and descriptions across unrelated files.
-export const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = [
+const CANHOES_MEMBER_MODULES: readonly CanhoesMemberModuleDefinition[] = [
   {
     key: "feed",
     label: "Feed",
@@ -111,17 +111,6 @@ export const CANHOES_MEMBER_MODULE_MAP = Object.fromEntries(
     moduleDefinition,
   ])
 ) as Record<CanhoesMemberModuleKey, CanhoesMemberModuleDefinition>;
-
-export function buildModuleVisibilityState(
-  enabled: boolean
-): EventAdminModuleVisibilityDto {
-  return Object.fromEntries(
-    CANHOES_MEMBER_MODULES.map((moduleDefinition) => [
-      moduleDefinition.key,
-      enabled,
-    ])
-  ) as EventAdminModuleVisibilityDto;
-}
 
 export function countVisibleModules(
   visibility: EventAdminModuleVisibilityDto | EventModulesDto | null | undefined

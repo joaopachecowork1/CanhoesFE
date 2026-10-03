@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { getWishlistItems } from "@/lib/domains/members/services/members";
 import { createWishlistItem } from "@/lib/domains/members/services/members";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateWishlistItemSchema } from "@/lib/zod/wishlist";
 import { PagedParamsSchema } from "@/lib/zod/common";
 import { apiResponse, unauthorized, apiError, badRequest } from "@/lib/api/response";

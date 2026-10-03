@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 export const ADMIN_CONTENT_CARD_CLASS =
   "border border-white/[0.08] bg-white/[0.03] shadow-[0_12px_30px_rgba(0,0,0,0.2)] text-[var(--color-text-primary)] text-[var(--color-text-primary)] border border-[var(--border-paper)] bg-[var(--bg-paper)] shadow-[var(--shadow-paper)]";
 
-export const ADMIN_SECTION_PANEL_CLASS =
+const ADMIN_SECTION_PANEL_CLASS =
   "text-[var(--color-text-primary)] rounded-[var(--radius-lg-token)] border border-[var(--border-paper)] bg-[var(--bg-paper)] px-4 py-4 text-[var(--ink-primary)] shadow-[var(--shadow-paper)] sm:px-5";
 
 /**

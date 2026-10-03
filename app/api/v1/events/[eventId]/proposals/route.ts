@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { getProposals } from "@/lib/domains/voting/services/voting";
 import { createProposal } from "@/lib/domains/voting/services/voting";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateEventProposalSchema } from "@/lib/zod/voting";
 
 export const dynamic = "force-dynamic";

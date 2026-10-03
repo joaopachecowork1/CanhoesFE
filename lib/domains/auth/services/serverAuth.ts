@@ -30,7 +30,7 @@ export async function getRequestUser(): Promise<RequestUser | null> {
   });
 }
 
-export async function requireUser(): Promise<RequestUser> {
+async function requireUser(): Promise<RequestUser> {
   const user = await getRequestUser();
   if (!user) {
     throw new AuthorizationError(401, "UNAUTHORIZED", "Authentication required.");

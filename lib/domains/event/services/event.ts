@@ -32,10 +32,6 @@ export async function getEventSummaries(): Promise<EventSummaryDto[]> {
   return events.map(toEventSummary);
 }
 
-export async function getEventById(eventId: string) {
-  return prisma.event.findUnique({ where: { id: eventId } });
-}
-
 export async function getEventContext(
   eventId: string,
   _userId: string,

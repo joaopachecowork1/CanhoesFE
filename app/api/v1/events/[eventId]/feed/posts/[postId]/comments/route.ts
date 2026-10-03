@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { getPostComments } from "@/lib/domains/feed/services/feed";
 import { createComment } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateFeedCommentSchema } from "@/lib/zod/feed";
 
 export const dynamic = "force-dynamic";

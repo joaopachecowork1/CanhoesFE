@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { getMeasures } from "@/lib/domains/members/services/members";
 import { createMeasureProposal } from "@/lib/domains/members/services/members";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateMeasureProposalSchema } from "@/lib/zod/nomination";
 
 export const dynamic = "force-dynamic";

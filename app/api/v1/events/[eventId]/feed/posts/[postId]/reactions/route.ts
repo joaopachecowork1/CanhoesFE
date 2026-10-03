@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { toggleReaction } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { ToggleFeedReactionSchema } from "@/lib/zod/feed";
 
 export const dynamic = "force-dynamic";

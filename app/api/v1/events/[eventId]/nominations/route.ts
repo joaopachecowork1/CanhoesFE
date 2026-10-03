@@ -6,7 +6,7 @@ import {
   getApprovedNominees,
   createNomination,
 } from "@/lib/domains/members/services/members";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateNomineeSchema } from "@/lib/zod/nomination";
 
 export const dynamic = "force-dynamic";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser } from "@/lib/domains/auth/services/serverAuth";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { prisma } from "@/lib/prisma";
 import { saveUpload, UploadValidationError } from "@/lib/storage/localStorage";
 

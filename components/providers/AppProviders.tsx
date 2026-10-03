@@ -2,8 +2,7 @@
 
 import React from "react";
 import { SessionProvider } from "next-auth/react";
-import { AuthProvider } from "@/components/providers/AuthProvider";
-import { ThemeProvider } from "@/components/ui/themeprovider";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -27,18 +26,16 @@ const client = new QueryClient({
 export default function AppProviders({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <SessionProvider basePath="/api/auth">
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-        <QueryClientProvider client={client}>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-          {process.env.NODE_ENV === "development" &&
-          process.env.NEXT_PUBLIC_QUERY_DEVTOOLS === "true" ? (
-            <ReactQueryDevtools initialIsOpen={false} />
-          ) : null}
-        </QueryClientProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={client}>
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
+        {process.env.NODE_ENV === "development" &&
+        process.env.NEXT_PUBLIC_QUERY_DEVTOOLS === "true" ? (
+          <ReactQueryDevtools initialIsOpen={false} />
+        ) : null}
+      </QueryClientProvider>
     </SessionProvider>
   );
 }

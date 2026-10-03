@@ -12,7 +12,7 @@ export default function ForbiddenPage() {
           <CardTitle>Acesso reservado</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">A tua conta não tem permissões para abrir esta área.</p>
+          <p className="text-sm">A tua conta não tem permissões para abrir esta área.</p>
           <Button asChild><Link href="/canhoes">Voltar aos Canhões</Link></Button>
         </CardContent>
       </Card>

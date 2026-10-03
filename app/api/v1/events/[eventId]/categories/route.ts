@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { prisma } from "@/lib/prisma";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { apiResponse, unauthorized, apiError } from "@/lib/api/response";
 import type { EventCategoryDto, PagedResult } from "@/lib/api/types";
 import { PagedParamsSchema } from "@/lib/zod/common";

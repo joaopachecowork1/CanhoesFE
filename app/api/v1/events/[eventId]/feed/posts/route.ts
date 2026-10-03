@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser } from "@/lib/domains/auth/services/serverAuth";
 import { getFeedPosts, createFeedPost } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { CreateFeedPostSchema } from "@/lib/zod/feed";
 
 export const dynamic = "force-dynamic";

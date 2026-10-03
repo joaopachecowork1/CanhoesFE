@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { CanhoesChrome } from "@/components/chrome/canhoes/CanhoesChrome";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 function AuthLoadingState({ label }: Readonly<{ label: string }>) {
   return (

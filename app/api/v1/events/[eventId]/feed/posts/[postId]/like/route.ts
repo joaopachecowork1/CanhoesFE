@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/domains/auth/services/auth";
 import { toggleLike } from "@/lib/domains/feed/services/feed";
-import { evaluateModuleAccess } from "@/lib/middleware/withModuleAccess";
+import { evaluateModuleAccess } from "@/lib/middleware/moduleAccess";
 import { apiResponse, unauthorized, apiError } from "@/lib/api/response";
-import { standardRateLimit } from "@/lib/middleware/withRateLimit";
+import { standardRateLimit } from "@/lib/middleware/rateLimit";
 
 export const dynamic = "force-dynamic";
 

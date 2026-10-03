@@ -17,9 +17,9 @@ import { useAdminControlCenter, PHASE_LABELS } from "../hooks/useAdminControlCen
 import { getPhaseLabel } from "@/lib/canhoesEvent";
 import { AdminSettingsMainPanel, AdminSettingsAdvancedSheet } from "./AdminControlCenterPanels";
 
-export const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
+const PHASE_OPTIONS = Object.keys(PHASE_LABELS) as EventPhaseDto["type"][];
 
-export function selectModuleItems(
+function selectModuleItems(
   order: readonly AdminModuleKey[],
   itemsByKey: Partial<Record<AdminModuleKey, ModuleVisibilityItem>>
 ) {

@@ -1,35 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export type EventModuleKey =
-  | "Feed"
-  | "SecretSanta"
-  | "Wishlist"
-  | "Categories"
-  | "Voting"
-  | "Gala"
-  | "Stickers"
-  | "Measures"
-  | "Nominees"
-  | "Admin";
-
-export function withModuleAccess(
-  _moduleKey: EventModuleKey,
-  handler: (
-    req: NextRequest,
-    ctx: {
-      params: Promise<Record<string, string | string[]>>;
-      session?: { userId: string; isAdmin: boolean };
-    }
-  ) => Promise<NextResponse> | NextResponse
-) {
-  return async (
-    req: NextRequest,
-    ctx: { params: Promise<Record<string, string | string[]>> }
-  ) => {
-    return handler(req, ctx as Parameters<typeof handler>[1]);
-  };
-}
 
 export async function evaluateModuleAccess(
   eventId: string,

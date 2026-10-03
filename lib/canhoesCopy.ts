@@ -165,20 +165,6 @@ export const adminCopy = {
   },
 } as const;
 
-export const homeCopy = {
-  loading: "A afinar a edicao",
-  errorTitle: "Nao foi possivel abrir esta edicao.",
-  errorDescription:
-    "Falta contexto para perceber a fase ativa e o que ja esta aberto para o grupo.",
-  heroTitle: "O que esta em jogo nesta fase",
-  alertsTitle: "Antes da proxima fase",
-  emptyFeed: "O mural desta edicao ainda espera pelo primeiro post.",
-  secretSantaTitle: "O teu Amigo Secreto",
-  checklistTitle: "Antes da proxima fase",
-  manageLabel: "Tens acesso ao admin operacional desta edicao.",
-  memberLabel: "Vista de membro entre mural social e participacao oficial.",
-} as const;
-
 export const feedCopy = {
   hero: {
     kicker: "Mural social",
