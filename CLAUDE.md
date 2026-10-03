@@ -1,0 +1,49 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Canhões do Ano
+
+App full-stack em Next.js 15 (App Router, React 18, TypeScript, Tailwind 3), com Prisma + PostgreSQL e NextAuth v4. Não há backend separado: a API vive em `app/api`. Setup local: ver `README.md`.
+
+## Idioma
+
+- Respostas e texto de UI em português de Portugal; código, nomes e commits em inglês.
+
+## Comandos
+
+```bash
+npm run dev            # http://localhost:3000/canhoes
+npm run lint
+npx tsc --noEmit
+npm test               # vitest (testes unitários de lógica pura)
+npm run build
+```
+
+Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`.
+
+## Prioridades
+
+1. **Simplifica** — menos código, sem abstrações prematuras, sem código morto, sem dependências novas sem justificação.
+2. **Mobile-first** — estilos base para 375px, breakpoints só para expandir (`flex-col md:flex-row`); touch targets ≥ 44px; texto de conteúdo ≥ 16px; bottom sheets em vez de modais centrados.
+3. **Nomes honestos** — `handle<Ação>`, booleans `is/has/can/should`, hooks `use<Recurso>`; nada de `data`, `temp`, `item` genéricos. O nome de um ficheiro diz o que ele exporta.
+4. **Refactoring não muda comportamento.** Se tiver de mudar, avisa.
+
+## Arquitetura — o que não é óbvio
+
+- **Camadas:** UI (`components/`, `lib/domains/*/components`) → repositórios de cliente (`lib/repositories/*`, via `canhoesFetch` em `lib/api/canhoesClient.ts`, que chama `/api/...`) → route handlers (`app/api/v1/events/[eventId]/…`) → serviços de servidor com Prisma (`lib/domains/*/services`). Tipos partilhados em `lib/api/types.ts`; validação de input com Zod em `lib/zod/`.
+- **Estado no cliente:** TanStack Query. Depois de uma escrita, invalida as queries em vez de copiar estado à mão.
+- **Auth:** NextAuth com Google, credenciais (email + password com bcrypt, para contas criadas por convite em `/api/admin/invites` → `/canhoes/register`) e, só fora de produção, o provider `development` (`DEV_AUTH_BYPASS_ENABLED=true`). O callback `jwt` resolve sempre um `User` da BD; o admin é só `User.isAdmin`. Nos handlers usa `requireUser`/`requireAdmin` (`lib/domains/auth/services/serverAuth.ts`) e `evaluateModuleAccess` (`lib/middleware/withModuleAccess.ts`) para respeitar a fase e a visibilidade dos módulos.
+- **Schema:** alterações ao `prisma/schema.prisma` precisam de uma migration em `prisma/migrations` (`npx prisma migrate dev --name <nome>`). Atenção: a imagem Docker arranca com `prisma db push --accept-data-loss`, não com `migrate deploy`.
+- **Uploads:** em disco, em `UPLOADS_DIR` (por defeito `.data/uploads`), servidos por `app/api/uploads/[...path]`; `/uploads/*` é reescrito para lá em `next.config.mjs`.
+- **Design system:** tema escuro único (fundo verde-oliva quase preto, texto pergaminho, acentos musgo e amarelo). Os tokens vivem em `app/globals.css` (variáveis `--color-*`, `--bg-*`, `--text-*`, `--border-*`, `--shadow-*`). Usa-os; não metas cores hardcoded.
+
+## Código
+
+- Estado derivado em vez de `useEffect` a sincronizar estado; um estado `status` em vez de vários booleans.
+- Sem `any`; narrowing em vez de `as`.
+- Animações só com `transform`/`opacity`, ≤ 200 ms em interações, e respeitando `prefers-reduced-motion`.
+
+## Skills do projeto
+
+Geridas com `npx skills` (`skills-lock.json`; ficheiros em `.agents/skills`, ligados por symlink em `.claude/skills`). Atualizar: `npx skills update -p`.
