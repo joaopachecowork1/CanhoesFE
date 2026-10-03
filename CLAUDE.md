@@ -44,6 +44,6 @@ Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`
 - Sem `any`; narrowing em vez de `as`.
 - Animações só com `transform`/`opacity`, ≤ 200 ms em interações, e respeitando `prefers-reduced-motion`.
 
-## Skills do projeto
+## Skills
 
-Geridas com `npx skills` (`skills-lock.json`; ficheiros em `.agents/skills`, ligados por symlink em `.claude/skills`). Atualizar: `npx skills update -p`.
+As skills (`npx skills`) são locais e não vão para o Git: `.agents/`, `.claude/` e `skills-lock.json` estão no `.gitignore`.

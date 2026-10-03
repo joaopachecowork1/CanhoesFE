@@ -81,8 +81,9 @@ Thumbs.db
 .vscode/
 
 # Local agent / automation config
-.claude/*
-!.claude/skills/
+.claude/
+.agents/
+skills-lock.json
 .github/
 
 # Qwen Code local files
@@ -90,7 +91,7 @@ Thumbs.db
 AGENTS.md
 BOOT.md
 TOOLS.md
-/skills/
+skills/
 
 # Documents / pessoal
 *.docx
