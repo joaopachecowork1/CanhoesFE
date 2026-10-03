@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM docker.io/library/node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -17,13 +17,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Generate Prisma Client
-RUN npx prisma generate
+# Disable Next.js anonymous telemetry (https://nextjs.org/telemetry).
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
@@ -31,18 +26,21 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Prisma CLI for `db push` at startup, installed at build time so the container starts offline.
+# Keep the version in sync with package-lock.json.
+ARG PRISMA_VERSION=6.19.3
+RUN npm install -g prisma@${PRISMA_VERSION} && npm cache clean --force
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Writable folders for the prerender cache and uploaded images (UPLOADS_DIR defaults to .data/uploads)
+RUN mkdir -p .next .data/uploads && chown -R nextjs:nodejs .next .data
 
 # Copy prisma folder for migrations
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
@@ -60,8 +58,7 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-CMD ["sh", "-c", "npx prisma@6.19.3 db push --accept-data-loss && node prisma/seed.mjs && node server.js"]
+CMD ["sh", "-c", "prisma db push --accept-data-loss --skip-generate && node prisma/seed.mjs && node server.js"]

@@ -10,13 +10,13 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:up": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-up.ps1",
-    "db:down": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-down.ps1",
+    "db:up": "node scripts/db.mjs up",
+    "db:down": "node scripts/db.mjs down",
     "db:migrate": "prisma migrate deploy",
-    "db:baseline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-baseline.ps1",
+    "db:baseline": "node scripts/db.mjs baseline",
     "db:seed": "prisma db seed",
-    "db:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-backup.ps1",
-    "db:restore": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-restore.ps1",
+    "db:backup": "node scripts/db.mjs backup",
+    "db:restore": "node scripts/db.mjs restore",
     "db:studio": "prisma studio"
   },
   "dependencies": {

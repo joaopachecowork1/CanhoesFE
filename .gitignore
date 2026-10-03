@@ -120,3 +120,6 @@ HEARTBEAT.md
 IDENTITY.md
 SOUL.md
 USER.md
+
+# Committed template for .env
+!.env.example

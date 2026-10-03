@@ -11,6 +11,7 @@ export function shouldRedirectUnauthenticated(
 export default withAuth(
   function middleware() {},
   {
+    pages: { signIn: "/canhoes/login" },
     callbacks: {
       authorized: ({ req, token }) => {
         if (req.nextUrl.pathname === "/canhoes/login") {

@@ -13,11 +13,14 @@ App full-stack em Next.js 15 (App Router, React 18, TypeScript, Tailwind 3), com
 ## Comandos
 
 ```bash
-npm run dev            # http://localhost:3000/canhoes
+npm run db:up          # PostgreSQL (Docker ou Podman) em localhost:5433
+npm run db:migrate && npm run db:seed
+npm run dev            # http://localhost:3000/canhoes (login de dev automático)
 npm run lint
 npx tsc --noEmit
 npm test               # vitest (testes unitários de lógica pura)
 npm run build
+docker compose up -d --build   # stack completa; com Podman: podman compose up -d --build --force-recreate
 ```
 
 Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`.
