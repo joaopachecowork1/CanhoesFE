@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Canhões do Ano
 
-App full-stack em Next.js 15 (App Router, React 18, TypeScript, Tailwind 3), com Prisma + PostgreSQL e NextAuth v4. Não há backend separado: a API vive em `app/api`. Setup local: ver `README.md`.
+App full-stack em Next.js 16 (App Router, React 18, TypeScript, Tailwind 4), com Prisma + PostgreSQL e NextAuth v4. ESLint em flat config (`eslint-config-next`) e Vitest. Não há backend separado: a API vive em `app/api`. Setup local: ver `README.md`.
 
 ## Idioma
 
@@ -40,6 +40,7 @@ Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`
 - **Auth:** NextAuth com Google, credenciais (email + password com bcrypt, para contas criadas por convite em `/api/admin/invites` → `/canhoes/register`) e, só fora de produção, o provider `development` (`DEV_AUTH_BYPASS_ENABLED=true`). O callback `jwt` relê o `User` da BD em cada pedido; o admin é só `User.isAdmin`. `requireEventAccess` só exige que o evento tenha `CanhoesEventState` (admins passam sempre): a visibilidade por módulo vem do overview e é aplicada na UI.
 - **Schema:** alterações ao `prisma/schema.prisma` precisam de uma migration em `prisma/migrations` (`npx prisma migrate dev --name <nome>`). Atenção: a imagem Docker arranca com `prisma db push --accept-data-loss`, não com `migrate deploy`.
 - **Uploads:** em disco, em `UPLOADS_DIR` (por defeito `.data/uploads`), servidos por `app/api/uploads/[...path]`; `/uploads/*` é reescrito para lá em `next.config.mjs`.
+- **Tailwind 4:** configurado em CSS (`@import "tailwindcss"` no `app/globals.css`, via `@tailwindcss/postcss`); o `tailwind.config.js` ainda é carregado com `@config`.
 - **Design system:** tema escuro único (fundo verde-oliva quase preto, texto pergaminho, acentos musgo e amarelo). Os tokens vivem em `app/globals.css` (variáveis `--color-*`, `--bg-*`, `--text-*`, `--border-*`, `--shadow-*`). Usa-os; não metas cores hardcoded.
 
 ## Código
