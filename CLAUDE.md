@@ -27,10 +27,12 @@ Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`
 
 ## Prioridades
 
-1. **Simplifica** — menos código, sem abstrações prematuras, sem código morto, sem dependências novas sem justificação.
-2. **Mobile-first** — estilos base para 375px, breakpoints só para expandir (`flex-col md:flex-row`); touch targets ≥ 44px; texto de conteúdo ≥ 16px; bottom sheets em vez de modais centrados.
-3. **Nomes honestos** — `handle<Ação>`, booleans `is/has/can/should`, hooks `use<Recurso>`; nada de `data`, `temp`, `item` genéricos. O nome de um ficheiro diz o que ele exporta.
-4. **Refactoring não muda comportamento.** Se tiver de mudar, avisa.
+1. **Sem commits automáticos** — nunca faças `git commit` sem indicação explícita. Apresenta o plano, propõe o código e aguarda sempre a minha aprovação.
+2. **Legibilidade e escalabilidade** — escreve código limpo, modular e de fácil leitura. Evita aninhamento profundo e ficheiros gigantes; separa responsabilidades em funções ou componentes pequenos e bem definidos para que o projeto cresça de forma sustentável.
+3. **Simplifica** — menos código, sem abstrações prematuras, sem código morto, sem dependências novas sem justificação.
+4. **Mobile-first** — estilos base para 375px, breakpoints só para expandir (`flex-col md:flex-row`); touch targets ≥ 44px; texto de conteúdo ≥ 16px; bottom sheets em vez de modais centrados.
+5. **Nomes honestos** — `handle<Ação>`, booleans `is/has/can/should`, hooks `use<Recurso>`; nada de `data`, `temp`, `item` genéricos. O nome de um ficheiro diz o que ele exporta.
+6. **Refactoring não muda comportamento.** Se tiver de mudar, avisa.
 
 ## Arquitetura — o que não é óbvio
 
@@ -52,3 +54,13 @@ Antes de dar algo por terminado: `npm run lint`, `npx tsc --noEmit` e `npm test`
 ## Skills
 
 As skills (`npx skills`) são locais e não vão para o Git: `.agents/`, `.claude/` e `skills-lock.json` estão no `.gitignore`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
