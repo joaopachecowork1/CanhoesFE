@@ -26,16 +26,14 @@ export async function requireAdmin(): Promise<SessionUser> {
   return user;
 }
 
-/**
- * Admins always pass; members need the event to be set up (to have a `CanhoesEventState`).
- * Which modules a member can see comes from the event overview and is applied by the UI;
- * it is not enforced per endpoint.
- */
 export async function requireEventAccess(eventId: string, user: SessionUser): Promise<void> {
   if (user.isAdmin) return;
 
-  const state = await prisma.canhoesEventState.findUnique({ where: { eventId }, select: { id: true } });
-  if (!state) {
+  const membership = await prisma.eventMember.findUnique({
+    where: { eventId_userId: { eventId, userId: user.id } },
+    select: { id: true },
+  });
+  if (!membership) {
     throw new HttpError(403, "MODULE_DISABLED", "Module not available.");
   }
 }
